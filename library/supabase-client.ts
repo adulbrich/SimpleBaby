@@ -84,9 +84,12 @@ export const getEncryptionKey = async (): Promise<string | null> => {
   return key;
 };
 
-const PUBLIC_ANON =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
-const SUPABASE_URL = "http://76.138.134.66:44321";
+const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_KEY;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+
+if (!PUBLIC_ANON || !SUPABASE_URL) {
+  throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY')
+}
 
 const secureStoreAdapter = {
   async getItem(key: string) {
