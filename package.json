@@ -54,10 +54,10 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/aes-js": "^3.1.4",
-    "@types/react": "^19.2.2",
+    "@types/react": "^19.1.10",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~9.2.0",
-    "typescript": "~5.8.3"
+    "eslint-config-expo": "^10.0.0",
+    "typescript": "^5.9.2"
   },
   "private": true
 }
