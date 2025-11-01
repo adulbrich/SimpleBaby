@@ -36,5 +36,5 @@ yarn-error.*
 
 .vscode/
 
-# supabase
-supabase/
+# android studio
+.idea

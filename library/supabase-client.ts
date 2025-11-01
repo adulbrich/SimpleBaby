@@ -4,6 +4,7 @@ import * as aesjs from "aes-js";
 import * as SecureStore from "expo-secure-store";
 import "react-native-get-random-values";
 import "react-native-url-polyfill/auto";
+import { Platform } from "react-native";
 
 // https://stackoverflow.com/questions/76389249/provided-value-to-securestore-is-larger-than-2048-bytes-while-trying-to-store
 
@@ -84,8 +85,8 @@ export const getEncryptionKey = async (): Promise<string | null> => {
   return key;
 };
 
-const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_KEY;
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_URL = Platform.OS === "ios" ? process.env.EXPO_PUBLIC_SUPABASE_URL_IOS : process.env.EXPO_PUBLIC_SUPABASE_URL_ANDROID;
 
 if (!PUBLIC_ANON || !SUPABASE_URL) {
   throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY')
