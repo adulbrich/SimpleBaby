@@ -63,6 +63,7 @@ export default function RootIndex() {
             placeholder={{}}
             contentFit="contain"
             transition={1000}
+            testID="simple-baby-logo"
           />
         </View>
          {/* App welcome text */}
@@ -80,18 +81,21 @@ export default function RootIndex() {
             action={handleSignIn}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="sign-in-button"
           />
           <Button
             text="Sign Up"
             action={handleSignUp}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="sign-up-button"
           />
           <Button
             text="Try as Guest"
             action={handleGuest}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="guest-button"
           />
         </View>
       </SafeAreaView>
