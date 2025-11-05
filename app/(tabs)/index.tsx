@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ExternalPathString, router } from 'expo-router'
+import { ExternalPathString } from 'expo-router'
 import {
     Modal,
     View,
@@ -68,7 +68,7 @@ export default function MainTab() {
             let child = childName.charAt(0).toUpperCase() + childName.slice(1)
 
             // Insert child into the database
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('children')
                 .insert([{ user_id: userId, name: child }])
                 .select('id')
@@ -131,8 +131,7 @@ export default function MainTab() {
                                         Welcome to SimpleBaby
                                     </Text>
                                     <Text className='subtitle'>
-                                        Please add your first child's name
-                                        below:
+                                        {"Please add your first child's name below:"}
                                     </Text>
                                 </View>
                                 <View className='grow justify-between'>

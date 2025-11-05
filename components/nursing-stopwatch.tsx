@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 /**
@@ -18,6 +18,14 @@ export default function NursingStopwatch({
     const [activeSide, setActiveSide] = useState('left')
     const leftIntervalRef = useRef<any>(null)
     const rightIntervalRef = useRef<any>(null)
+
+    const formatTime = (t: number) => t.toString().padStart(2, '0')
+    const formatElapsedTime = useCallback((t: number) => {
+        const h = Math.floor(t / 3600)
+        const m = Math.floor((t % 3600) / 60)
+        const s = t % 60
+        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`
+    }, [])
 
      // Start/stop the left timer
     useEffect(() => {
@@ -45,11 +53,11 @@ export default function NursingStopwatch({
 
     useEffect(() => {
         onTimeUpdateLeft?.(formatElapsedTime(leftTime))
-    }, [leftTime, onTimeUpdateLeft])
+    }, [leftTime, onTimeUpdateLeft, formatElapsedTime])
 
     useEffect(() => {
         onTimeUpdateRight?.(formatElapsedTime(rightTime))
-    }, [rightTime, onTimeUpdateRight])
+    }, [rightTime, onTimeUpdateRight, formatElapsedTime])
 
     // Resets the currently active side
     const reset = () => {
@@ -62,14 +70,6 @@ export default function NursingStopwatch({
             setRightRunning(false)
             onTimeUpdateRight?.('00:00:00')
         }
-    }
-
-    const formatTime = (t: number) => t.toString().padStart(2, '0')
-    const formatElapsedTime = (t: number) => {
-        const h = Math.floor(t / 3600)
-        const m = Math.floor((t % 3600) / 60)
-        const s = t % 60
-        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`
     }
 
     const toggleRunning = (start: boolean) => {

@@ -13,7 +13,7 @@ import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native'
  * item name, or amount updates.
  */
 
-type FeedingCategory = 'Liquid' | 'Soft' | 'Solid'
+type FeedingCategoryList = 'Liquid' | 'Soft' | 'Solid'
 
 export default function FeedingCategory({
     onTimeUpdate,
@@ -22,14 +22,14 @@ export default function FeedingCategory({
     onAmountUpdate,
 }: {
     onTimeUpdate?: (time: Date) => void
-    onCategoryUpdate?: (category: FeedingCategory) => void
+    onCategoryUpdate?: (category: FeedingCategoryList) => void
     onItemNameUpdate?: (itemName: string) => void
     onAmountUpdate?: (amount: string) => void
 }) {
     const [feedingTime, setFeedingTime] = useState(new Date())
     const [showIOSPicker, setShowIOSPicker] = useState(false)
     const [selectedCategory, setSelectedCategory] =
-        useState<FeedingCategory>('Liquid')
+        useState<FeedingCategoryList>('Liquid')
     const [itemName, setItemName] = useState('')
     const [amount, setAmount] = useState('')
 
@@ -86,7 +86,7 @@ export default function FeedingCategory({
         })
     }
 
-    const handleCategoryPress = (category: FeedingCategory) => {
+    const handleCategoryPress = (category: FeedingCategoryList) => {
         setSelectedCategory(category)
     }
 

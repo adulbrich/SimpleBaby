@@ -17,7 +17,7 @@ export default function RootIndex() {
     if (!loading && session) {
       router.replace("/(tabs)");
     }
-  }, [session, loading, router]);
+  }, [session, loading]);
 
   // Loading state with spinner
   if (loading) {
@@ -71,7 +71,7 @@ export default function RootIndex() {
           <Text className="subheading">Welcome to</Text>
           <Text className="heading">SimpleBaby</Text>
           <Text className="subtitle">
-            A secure baby tracker that's easy to use.
+            {"A secure baby tracker that's easy to use."}
           </Text>
         </View>
         {/* Auth action buttons */}

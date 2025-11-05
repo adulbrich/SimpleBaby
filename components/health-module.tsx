@@ -45,13 +45,6 @@ export interface MedsData {
   timeTaken: Date;
 }
 
-interface InputFieldProps {
-  label: string;
-  placeholder: string;
-  value: string;
-  onChangeText: (text: string) => void;
-}
-
 export default function HealthModule({
   onDateUpdate,
   onCategoryUpdate,
@@ -94,7 +87,7 @@ export default function HealthModule({
   };
 
   const showDatePickerModal = () => {
-    if (showDatePicker == true) {
+    if (showDatePicker === true) {
       setShowDatePicker(false);
       return;
     }
@@ -152,31 +145,31 @@ export default function HealthModule({
     if (onDateUpdate) {
       onDateUpdate(selectedDate);
     }
-  }, [selectedDate]);
+  }, [selectedDate, onDateUpdate]);
 
   useEffect(() => {
     if (onCategoryUpdate) {
       onCategoryUpdate(selectedCategory);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, onCategoryUpdate]);
 
   useEffect(() => {
     if (onGrowthUpdate && selectedCategory === "Growth") {
       onGrowthUpdate(growth);
     }
-  }, [growth, selectedCategory]);
+  }, [growth, selectedCategory, onGrowthUpdate]);
 
   useEffect(() => {
     if (onActivityUpdate && selectedCategory === "Activity") {
       onActivityUpdate(activity);
     }
-  }, [activity, selectedCategory]);
+  }, [activity, selectedCategory, onActivityUpdate]);
 
   useEffect(() => {
     if (onMedsUpdate && selectedCategory === "Meds") {
       onMedsUpdate(meds);
     }
-  }, [meds, selectedCategory]);
+  }, [meds, selectedCategory, onMedsUpdate]);
 
   return (
     <View className="flex-col gap-6">

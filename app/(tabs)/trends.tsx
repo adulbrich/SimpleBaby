@@ -1,5 +1,5 @@
-import { ExternalPathString, Href, Link, router, Stack } from 'expo-router'
-import { View, Text, Platform, TouchableOpacity } from 'react-native'
+import { Href, router } from 'expo-router'
+import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 
 type Button = {

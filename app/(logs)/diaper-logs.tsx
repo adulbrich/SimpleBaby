@@ -60,7 +60,7 @@ const DiaperLogsView: React.FC = () => {
                     return await decryptData(value)
                 } catch (err) {
                     console.warn('⚠️ Decryption failed for:', value)
-                    return '[Decryption Failed]'
+                    return `[Decryption Failed]: ${err}`
                 }
             }
 
