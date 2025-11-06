@@ -4,15 +4,13 @@ import {
     ScrollView,
     View,
     TouchableOpacity,
-    Alert,
-    Platform,
+    Alert
 } from 'react-native'
 import { router } from 'expo-router'
 import { useAuth } from '@/library/auth-provider'
 import { signOut } from '@/library/auth'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Button from '@/components/button'
-import { StatusBar } from 'expo-status-bar'
 
 /**
  * Profile Screen

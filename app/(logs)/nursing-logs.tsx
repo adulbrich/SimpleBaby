@@ -38,7 +38,7 @@ const NursingLogsView: React.FC = () => {
 
     useEffect(() => {
         fetchNursingLogs()
-    }, [])
+    })
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
         if (!value || !value.includes('U2FsdGVkX1')) return value || ''
@@ -107,7 +107,7 @@ const NursingLogsView: React.FC = () => {
             await fetchNursingLogs()
             setEditModalVisible(false)
         } catch (err) {
-            Alert.alert('Encryption or update error')
+            Alert.alert(`Encryption or update error: ${err}`)
         }
     }
 

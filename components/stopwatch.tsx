@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 /**
@@ -10,6 +10,15 @@ export default function Stopwatch({ onTimeUpdate }: any) {
     const [time, setTime] = useState(0)
     const [running, setRunning] = useState(false)
     const intervalRef = useRef<any>(null)
+
+    // Convert elapsed seconds to hh:mm:ss format
+    const formatTime = (t: number) => t.toString().padStart(2, '0')
+    const formatElapsedTime = useCallback((t: number) => {
+        const h = Math.floor(t / 3600)
+        const m = Math.floor((t % 3600) / 60)
+        const s = t % 60
+        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`
+    }, [])
 
     // Start or stop the timer based on `running` state
     useEffect(() => {
@@ -25,22 +34,13 @@ export default function Stopwatch({ onTimeUpdate }: any) {
 
     useEffect(() => {
         onTimeUpdate?.(formatElapsedTime(time))
-    }, [time, onTimeUpdate])
+    }, [time, onTimeUpdate, formatElapsedTime])
 
      // Reset timer and stop running
     const reset = () => {
         setTime(0)
         setRunning(false)
         onTimeUpdate?.('00:00:00')
-    }
-
-    // Convert elapsed seconds to hh:mm:ss format
-    const formatTime = (t: number) => t.toString().padStart(2, '0')
-    const formatElapsedTime = (t: number) => {
-        const h = Math.floor(t / 3600)
-        const m = Math.floor((t % 3600) / 60)
-        const s = t % 60
-        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`
     }
 
     return (

@@ -5,7 +5,7 @@ import { Platform } from 'react-native'
 export default function ModalsLayout() {
     return (
         <>
-            <StatusBar style={Platform.OS == 'android' ? 'dark' : 'auto'} />
+            <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
             <Stack screenOptions={{ presentation: 'modal' }}>
                 <Stack.Screen
                     name='calendar'

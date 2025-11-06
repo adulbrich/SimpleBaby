@@ -1,8 +1,6 @@
 import { router, Stack } from 'expo-router'
 import {
     Text,
-    Button,
-    TouchableWithoutFeedback,
     TouchableOpacity,
 } from 'react-native'
 

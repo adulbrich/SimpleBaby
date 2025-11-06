@@ -17,7 +17,7 @@ export default function RootIndex() {
     if (!loading && session) {
       router.replace("/(tabs)");
     }
-  }, [session, loading, router]);
+  }, [session, loading]);
 
   // Loading state with spinner
   if (loading) {
@@ -63,6 +63,7 @@ export default function RootIndex() {
             placeholder={{}}
             contentFit="contain"
             transition={1000}
+            testID="simple-baby-logo"
           />
         </View>
          {/* App welcome text */}
@@ -70,7 +71,7 @@ export default function RootIndex() {
           <Text className="subheading">Welcome to</Text>
           <Text className="heading">SimpleBaby</Text>
           <Text className="subtitle">
-            A secure baby tracker that's easy to use.
+            {"A secure baby tracker that's easy to use."}
           </Text>
         </View>
         {/* Auth action buttons */}
@@ -80,18 +81,21 @@ export default function RootIndex() {
             action={handleSignIn}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="sign-in-button"
           />
           <Button
             text="Sign Up"
             action={handleSignUp}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="sign-up-button"
           />
           <Button
             text="Try as Guest"
             action={handleGuest}
             textClass={buttonTextClass}
             buttonClass="button-normal"
+            testID="guest-button"
           />
         </View>
       </SafeAreaView>

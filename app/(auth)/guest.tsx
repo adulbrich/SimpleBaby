@@ -1,6 +1,6 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
-import { router, useRouter } from 'expo-router'
+import { View, Text, Alert } from 'react-native'
+import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Button from '@/components/button'
 

@@ -1,7 +1,6 @@
 import {
     Text,
     View,
-    TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Keyboard,
@@ -12,17 +11,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import supabase from '@/library/supabase-client'
 import { router } from 'expo-router'
 import { getActiveChildId } from '@/library/utils'
-import FeedingCategory from '@/components/feeding-category'
 
 
 export default function Feeding() {
     const insets = useSafeAreaInsets()
-    const [isTyping, setIsTyping] = useState(false)
-    const [category, setCategory] = useState('')
-    const [itemName, setItemName] = useState('')
-    const [amount, setAmount] = useState('')
-    const [feedingTime, setFeedingTime] = useState(new Date())
-    const [note, setNote] = useState('')
+    const [isTyping] = useState(false)
+    const [category] = useState('')
+    const [itemName] = useState('')
+    const [amount] = useState('')
+    const [feedingTime] = useState(new Date())
+    const [note] = useState('')
      /**
      * Inserts a new feeding log into the 'feeding_logs' table on Supabase.
      * Converts feedingTime to ISO string before sending.

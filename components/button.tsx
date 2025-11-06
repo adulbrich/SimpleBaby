@@ -5,14 +5,16 @@ export default function Button({
     action,
     buttonClass,
     textClass,
+    testID
 }: {
     text: string
     action: () => void
     buttonClass?: string | undefined
     textClass?: string | undefined
+    testID?: string | undefined
 }) {
     return (
-        <TouchableOpacity onPress={action} className={`button ${buttonClass}`}>
+        <TouchableOpacity onPress={action} className={`button ${buttonClass}`} testID={testID}>
             <Text className={`button-text ${textClass}`}>{text}</Text>
         </TouchableOpacity>
     )
