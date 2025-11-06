@@ -31,6 +31,7 @@ Currently, the application is configured for local development and testing via E
 *   Follow consistent coding standards and comment complex logic.
 *   Regularly refactor code to improve readability, maintainability, and performance, using Prettier or similar to autoformat files in the entire codebase is recommended.
 *   Address items in the "Known Issues and Future Enhancements" list, marked as `todo.md` in the repo.
+*   Ensure that all future PRs pass the current test suite.
 
 **Backend (Supabase):**
 *   Monitor Supabase project usage and performance.
@@ -51,6 +52,13 @@ Currently, the application is configured for local development and testing via E
 
 **Specific Issues from "Known Issues" List:**
 *   Refer to the "Known Issues and Future Enhancements" section for specific bugs like the "back button fix on android" or "time picker label" issue. These may require targeted debugging.
+
+## Unit Testing
+This project uses Jest as the backbone of its testing suite. Tests are created to ensure that all components and logic match the expected behavior, and that future changes to the code do not unknowingly alter the anticipated outputs. All test files and mocks are placed in the `/test` folder. To run the test suite, use the following command:
+```
+npx jest
+```
+This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in `jest.config.js` and `/test/setup.ts`.
 
 ## Technical Documentation (Developer-Focused)
 This section focuses on the technical aspects relevant to developers working on the project.
