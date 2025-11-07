@@ -4,6 +4,7 @@ module.exports = {
 
   roots: ['<rootDir>/test', '<rootDir>/app'],
   testMatch: ['**/?(*.)+(test).[tj]s?(x)'],
+  setupFiles: ['<rootDir>/test/polyfills.ts'],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
 
   transform: {
