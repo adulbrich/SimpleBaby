@@ -113,6 +113,7 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setFirstName}
                                 autoCapitalize='none'
                                 keyboardType='default'
+                                testID="sign-up-first"
                             />
                         </View>
                         <View className='grow'>
@@ -124,6 +125,7 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setLastName}
                                 autoCapitalize='none'
                                 keyboardType='default'
+                                testID="sign-up-last"
                             />
                         </View>
                     </View>
@@ -136,6 +138,7 @@ const SignUpScreen: React.FC = () => {
                             onChangeText={setEmail}
                             autoCapitalize='none'
                             keyboardType='email-address'
+                            testID="sign-up-email"
                         />
                     </View>
                     <View className=''>
@@ -146,6 +149,7 @@ const SignUpScreen: React.FC = () => {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={passwordHidden}
+                            testID="sign-up-password1"
                         />
                     </View>
                     <View>
@@ -157,9 +161,13 @@ const SignUpScreen: React.FC = () => {
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={passwordHidden}
+                            testID="sign-up-password2"
                         />
                         {!passwordsMatch && confirmPassword ? (
-                            <Text className='text-base text-red-600'>
+                            <Text
+                                className='text-base text-red-600'
+                                testID="password-error"
+                            >
                                 Passwords do not match
                             </Text>
                         ) : null}
@@ -168,6 +176,7 @@ const SignUpScreen: React.FC = () => {
                         <TouchableOpacity
                             onPress={() => setPasswordHidden(!passwordHidden)}
                             className=''
+                            testID="sign-up-password-visibility"
                         >
                             <Text className='dark:text-white'>
                                 {passwordHidden
@@ -177,6 +186,7 @@ const SignUpScreen: React.FC = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => Alert.alert('Not yet implemented.')}
+                            testID="sign-up-forgot-password"
                         >
                             <Text className='dark:text-white'>
                                 Forgot your password?
@@ -190,18 +200,21 @@ const SignUpScreen: React.FC = () => {
                         action={handleSignUp}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID="sign-up"
                     />
                     <Button
                         text='Sign In Instead'
                         action={handleSignIn}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID="sign-in"
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID="guest-button"
                     />
                 </View>
             </SafeAreaView>
