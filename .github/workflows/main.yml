@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Set up Supabase
+        uses: supabase/setup-cli@v1
+        with:
+           version: latest
+           run: supabase db start
+
       - name: Install dependencies
         run: npm install
 
