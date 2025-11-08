@@ -58,7 +58,7 @@ This project uses Jest as the backbone of its testing suite. Tests are created t
 ```
 npx jest
 ```
-This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in `jest.config.js` and `/test/setup.ts`.
+This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in `jest.config.js` and `/test/setup.ts`. All pull requests to the repository must pass these tests before they can be merged into the `main` branch.
 
 ## Technical Documentation (Developer-Focused)
 This section focuses on the technical aspects relevant to developers working on the project.

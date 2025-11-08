@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'jest-expo',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
 
   roots: ['<rootDir>/test', '<rootDir>/app'],
   testMatch: ['**/?(*.)+(test).[tj]s?(x)'],
