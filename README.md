@@ -225,7 +225,7 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 ## Basic Architecture
 
 ```
-![Simple Baby Deployment Diagram](/Deployment Diagram.png)
+![Simple Baby Deployment Diagram](/Deployment-Diagram.png)
 
 ```
 
