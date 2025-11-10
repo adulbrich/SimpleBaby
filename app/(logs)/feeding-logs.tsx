@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,11 +12,11 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-} from 'react-native'
-import { format } from 'date-fns'
-import { getActiveChildId } from '@/library/utils'
-import supabase from '@/library/supabase-client'
-import { encryptData, decryptData } from '@/library/crypto'
+} from 'react-native';
+import { format } from 'date-fns';
+import { getActiveChildId } from '@/library/utils';
+import supabase from '@/library/supabase-client';
+import { encryptData, decryptData } from '@/library/crypto';
 
 interface FeedingLog {
     id: string
@@ -29,15 +29,15 @@ interface FeedingLog {
 }
 
 const FeedingLogsView: React.FC = () => {
-    const [feedingLogs, setFeedingLogs] = useState<FeedingLog[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [editingLog, setEditingLog] = useState<FeedingLog | null>(null)
-    const [editModalVisible, setEditModalVisible] = useState(false)
+    const [feedingLogs, setFeedingLogs] = useState<FeedingLog[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
 
     useEffect(() => {
-        fetchFeedingLogs()
-    }, [])
+        fetchFeedingLogs();
+    }, []);
 
      /**
      * Fetches feeding logs from Supabase for the active child.
@@ -45,32 +45,32 @@ const FeedingLogsView: React.FC = () => {
      */
     const fetchFeedingLogs = async () => {
         try {
-            const { success, childId, error: childError } = await getActiveChildId()
+            const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
                     typeof childError === 'string'
                         ? childError
                         : childError?.message || 'Failed to get active child ID'
-                )
+                );
             }
             // Query diaper logs from Supabase and sort by most recent change time
             const { data, error } = await supabase
                 .from('feeding_logs')
                 .select('*')
                 .eq('child_id', childId)
-                .order('feeding_time', { ascending: false })
+                .order('feeding_time', { ascending: false });
 
-            if (error) throw error
+            if (error) throw error;
 
             const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return ''
+                if (!value || !value.includes('U2FsdGVkX1')) return '';
                 try {
-                    return await decryptData(value)
+                    return await decryptData(value);
                 } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value)
-                    return `[Decryption Failed]: ${err}`
+                    console.warn('⚠️ Decryption failed for:', value);
+                    return `[Decryption Failed]: ${err}`;
                 }
-            }
+            };
 
             const decryptedLogs = await Promise.all(
                 (data || []).map(async (entry) => ({
@@ -80,16 +80,16 @@ const FeedingLogsView: React.FC = () => {
                     amount: await safeDecrypt(entry.amount),
                     note: entry.note ? await safeDecrypt(entry.note) : '',
                 }))
-            )
+            );
 
-            setFeedingLogs(decryptedLogs)
+            setFeedingLogs(decryptedLogs);
         } catch (err) {
-            console.error('❌ Fetch or decryption error:', err)
-            setError(err instanceof Error ? err.message : 'An unknown error occurred')
+            console.error('❌ Fetch or decryption error:', err);
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -98,27 +98,27 @@ const FeedingLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
-                    const { error } = await supabase.from('feeding_logs').delete().eq('id', id)
+                    const { error } = await supabase.from('feeding_logs').delete().eq('id', id);
                     if (error) {
-                        Alert.alert('Error deleting log')
-                        return
+                        Alert.alert('Error deleting log');
+                        return;
                     }
-                    setFeedingLogs((prev) => prev.filter((log) => log.id !== id))
+                    setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
                 },
             },
-        ])
-    }
+        ]);
+    };
 
     const handleSaveEdit = async () => {
-        if (!editingLog) return
+        if (!editingLog) return;
 
         try {
-            const { id, category, item_name, amount, note } = editingLog
+            const { id, category, item_name, amount, note } = editingLog;
 
-            const encryptedCategory = await encryptData(category)
-            const encryptedItemName = await encryptData(item_name)
-            const encryptedAmount = await encryptData(amount)
-            const encryptedNote = note ? await encryptData(note) : null
+            const encryptedCategory = await encryptData(category);
+            const encryptedItemName = await encryptData(item_name);
+            const encryptedAmount = await encryptData(amount);
+            const encryptedNote = note ? await encryptData(note) : null;
 
             const { error } = await supabase
                 .from('feeding_logs')
@@ -128,20 +128,20 @@ const FeedingLogsView: React.FC = () => {
                     amount: encryptedAmount,
                     note: encryptedNote,
                 })
-                .eq('id', id)
+                .eq('id', id);
 
             if (error) {
-                Alert.alert('Failed to update log')
-                return
+                Alert.alert('Failed to update log');
+                return;
             }
 
-            await fetchFeedingLogs()
-            setEditModalVisible(false)
+            await fetchFeedingLogs();
+            setEditModalVisible(false);
         } catch (err) {
-            console.error('❌ Encryption or update error:', err)
-            Alert.alert('Something went wrong during save.')
+            console.error('❌ Encryption or update error:', err);
+            Alert.alert('Something went wrong during save.');
         }
-    }
+    };
 
     /**
      * Renders a single feeding log entry in the list.
@@ -170,7 +170,7 @@ const FeedingLogsView: React.FC = () => {
                 </Pressable>
             </View>
         </View>
-    )
+    );
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
@@ -222,7 +222,7 @@ const FeedingLogsView: React.FC = () => {
                 </KeyboardAvoidingView>
             </Modal>
         </View>
-    )
-}
+    );
+};
 
 export default FeedingLogsView;

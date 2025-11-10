@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker'
-import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native'
+} from '@react-native-community/datetimepicker';
+import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
 
 /**
  * FeedingCategory component allows users to select a feeding category,
@@ -26,41 +26,41 @@ export default function FeedingCategory({
     onItemNameUpdate?: (itemName: string) => void
     onAmountUpdate?: (amount: string) => void
 }) {
-    const [feedingTime, setFeedingTime] = useState(new Date())
-    const [showIOSPicker, setShowIOSPicker] = useState(false)
+    const [feedingTime, setFeedingTime] = useState(new Date());
+    const [showIOSPicker, setShowIOSPicker] = useState(false);
     const [selectedCategory, setSelectedCategory] =
-        useState<FeedingCategoryList>('Liquid')
-    const [itemName, setItemName] = useState('')
-    const [amount, setAmount] = useState('')
+        useState<FeedingCategoryList>('Liquid');
+    const [itemName, setItemName] = useState('');
+    const [amount, setAmount] = useState('');
 
     useEffect(() => {
-        onTimeUpdate?.(feedingTime)
-    }, [feedingTime, onTimeUpdate])
+        onTimeUpdate?.(feedingTime);
+    }, [feedingTime, onTimeUpdate]);
 
     useEffect(() => {
-        onCategoryUpdate?.(selectedCategory)
-    }, [selectedCategory, onCategoryUpdate])
+        onCategoryUpdate?.(selectedCategory);
+    }, [selectedCategory, onCategoryUpdate]);
 
     useEffect(() => {
-        onItemNameUpdate?.(itemName)
-    }, [itemName, onItemNameUpdate])
+        onItemNameUpdate?.(itemName);
+    }, [itemName, onItemNameUpdate]);
 
     useEffect(() => {
-        onAmountUpdate?.(amount)
-    }, [amount, onAmountUpdate])
+        onAmountUpdate?.(amount);
+    }, [amount, onAmountUpdate]);
 
     // Handles time picker change event, updates feedingTime
     const onChangeTime = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
-            setFeedingTime(selectedDate)
+            setFeedingTime(selectedDate);
         }
         // setShowIOSPicker(false)
-    }
+    };
 
      // Shows or hides time picker, supports Android native dialog or iOS inline spinner
     const showTimePicker = () => {
         if (showIOSPicker) {
-            return setShowIOSPicker(false)
+            return setShowIOSPicker(false);
         }
 
         if (Platform.OS === 'android') {
@@ -68,27 +68,27 @@ export default function FeedingCategory({
                 value: feedingTime,
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
-                        setFeedingTime(selectedDate)
+                        setFeedingTime(selectedDate);
                     }
                 },
                 mode: 'time',
                 is24Hour: false,
-            })
+            });
         } else {
-            setShowIOSPicker(true)
+            setShowIOSPicker(true);
         }
-    }
+    };
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
-        })
-    }
+        });
+    };
 
     const handleCategoryPress = (category: FeedingCategoryList) => {
-        setSelectedCategory(category)
-    }
+        setSelectedCategory(category);
+    };
 
     return (
         <View className='flex-col gap-6'>
@@ -194,5 +194,5 @@ export default function FeedingCategory({
                 </View>
             </View>
         </View>
-    )
+    );
 }

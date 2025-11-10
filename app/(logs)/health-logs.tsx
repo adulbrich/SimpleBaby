@@ -58,7 +58,7 @@ const HealthLogsView: React.FC = () => {
     try {
       const { success, childId, error: childError } = await getActiveChildId();
       if (!success || !childId) {
-        throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID')
+        throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
       }
 
       const { data, error } = await supabase

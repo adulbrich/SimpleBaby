@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 /**
  * A double side nursing stopwatch that tracks elapsed time separately for the left and right sides. 
@@ -11,77 +11,77 @@ export default function NursingStopwatch({
     onTimeUpdateLeft,
     onTimeUpdateRight,
 }: any) {
-    const [leftTime, setLeftTime] = useState(0)
-    const [rightTime, setRightTime] = useState(0)
-    const [leftRunning, setLeftRunning] = useState(false)
-    const [rightRunning, setRightRunning] = useState(false)
-    const [activeSide, setActiveSide] = useState('left')
-    const leftIntervalRef = useRef<any>(null)
-    const rightIntervalRef = useRef<any>(null)
+    const [leftTime, setLeftTime] = useState(0);
+    const [rightTime, setRightTime] = useState(0);
+    const [leftRunning, setLeftRunning] = useState(false);
+    const [rightRunning, setRightRunning] = useState(false);
+    const [activeSide, setActiveSide] = useState('left');
+    const leftIntervalRef = useRef<any>(null);
+    const rightIntervalRef = useRef<any>(null);
 
-    const formatTime = (t: number) => t.toString().padStart(2, '0')
+    const formatTime = (t: number) => t.toString().padStart(2, '0');
     const formatElapsedTime = useCallback((t: number) => {
-        const h = Math.floor(t / 3600)
-        const m = Math.floor((t % 3600) / 60)
-        const s = t % 60
-        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`
-    }, [])
+        const h = Math.floor(t / 3600);
+        const m = Math.floor((t % 3600) / 60);
+        const s = t % 60;
+        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
+    }, []);
 
      // Start/stop the left timer
     useEffect(() => {
         if (leftRunning) {
             leftIntervalRef.current = setInterval(() => {
-                setLeftTime((prevTime) => prevTime + 1)
-            }, 1000)
+                setLeftTime((prevTime) => prevTime + 1);
+            }, 1000);
         } else {
-            clearInterval(leftIntervalRef.current)
+            clearInterval(leftIntervalRef.current);
         }
-        return () => clearInterval(leftIntervalRef.current)
-    }, [leftRunning])
+        return () => clearInterval(leftIntervalRef.current);
+    }, [leftRunning]);
 
     // Start/stop the right timer
     useEffect(() => {
         if (rightRunning) {
             rightIntervalRef.current = setInterval(() => {
-                setRightTime((prevTime) => prevTime + 1)
-            }, 1000)
+                setRightTime((prevTime) => prevTime + 1);
+            }, 1000);
         } else {
-            clearInterval(rightIntervalRef.current)
+            clearInterval(rightIntervalRef.current);
         }
-        return () => clearInterval(rightIntervalRef.current)
-    }, [rightRunning])
+        return () => clearInterval(rightIntervalRef.current);
+    }, [rightRunning]);
 
     useEffect(() => {
-        onTimeUpdateLeft?.(formatElapsedTime(leftTime))
-    }, [leftTime, onTimeUpdateLeft, formatElapsedTime])
+        onTimeUpdateLeft?.(formatElapsedTime(leftTime));
+    }, [leftTime, onTimeUpdateLeft, formatElapsedTime]);
 
     useEffect(() => {
-        onTimeUpdateRight?.(formatElapsedTime(rightTime))
-    }, [rightTime, onTimeUpdateRight, formatElapsedTime])
+        onTimeUpdateRight?.(formatElapsedTime(rightTime));
+    }, [rightTime, onTimeUpdateRight, formatElapsedTime]);
 
     // Resets the currently active side
     const reset = () => {
         if (activeSide === 'left') {
-            setLeftTime(0)
-            setLeftRunning(false)
-            onTimeUpdateLeft?.('00:00:00')
+            setLeftTime(0);
+            setLeftRunning(false);
+            onTimeUpdateLeft?.('00:00:00');
         } else {
-            setRightTime(0)
-            setRightRunning(false)
-            onTimeUpdateRight?.('00:00:00')
+            setRightTime(0);
+            setRightRunning(false);
+            onTimeUpdateRight?.('00:00:00');
         }
-    }
+    };
 
     const toggleRunning = (start: boolean) => {
         if (activeSide === 'left') {
-            setLeftRunning(start)
+            setLeftRunning(start);
         } else {
-            setRightRunning(start)
+            setRightRunning(start);
         }
-    }
+    };
 
      // Render the elapsed time for the active side
-    const activeTime = activeSide === 'left' ? leftTime : rightTime
+    const activeTime = activeSide === 'left' ? leftTime : rightTime;
 
     return (
         <View className='stopwatch-primary'>
@@ -164,5 +164,5 @@ export default function NursingStopwatch({
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }

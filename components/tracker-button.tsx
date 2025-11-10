@@ -1,5 +1,5 @@
-import { ExternalPathString, router } from 'expo-router'
-import { TouchableOpacity, Text } from 'react-native'
+import { ExternalPathString, router } from 'expo-router';
+import { TouchableOpacity, Text } from 'react-native';
 
 /**
  * TrackerButton component renders a stylized button with an icon and label.
@@ -22,5 +22,5 @@ export default function TrackerButton({ button }: { button: Button }) {
             <Text className='tracker-icon'>{button.icon}</Text>
             <Text className='tracker-label'>{button.label}</Text>
         </TouchableOpacity>
-    )
+    );
 }

@@ -7,4 +7,10 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    rules: {
+      'eol-last': ['error', 'always'],
+      semi: ['error', 'always'],
+    },
+  },
 ]);
