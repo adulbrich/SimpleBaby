@@ -107,14 +107,14 @@ export default function MainTab() {
         <View className='main-container flex-col'>
             <View className='flex-row justify-center gap-4 items-center flex-grow'>
                 <View className='flex-col gap-4'>
-                    <TrackerButton button={buttons[0]} />
-                    <TrackerButton button={buttons[1]} />
-                    <TrackerButton button={buttons[2]} />
+                    <TrackerButton button={buttons[0]} testID="sleep-button" />
+                    <TrackerButton button={buttons[1]} testID="nursing-button" />
+                    <TrackerButton button={buttons[2]} testID="milestone-button" />
                 </View>
                 <View className='flex-col gap-4'>
-                    <TrackerButton button={buttons[3]} />
-                    <TrackerButton button={buttons[4]} />
-                    <TrackerButton button={buttons[5]} />
+                    <TrackerButton button={buttons[3]} testID="feeding-button" />
+                    <TrackerButton button={buttons[4]} testID="diaper-button" />
+                    <TrackerButton button={buttons[5]} testID="health-button" />
                 </View>
                 <Modal visible={newChildState} transparent>
                     <TouchableWithoutFeedback

@@ -54,7 +54,7 @@ describe("Create Account screen", () => {
         expect(screen.getByTestId("guest-button")).toBeTruthy();
     });
 
-    test("Catch invalid passwords", async () => {
+    test("Catch mismatched passwords", async () => {
         render(<SignUpScreen/>);
       
         //fill in both password entries, but with different passwords
