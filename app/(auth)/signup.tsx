@@ -113,7 +113,7 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setFirstName}
                                 autoCapitalize='none'
                                 keyboardType='default'
-                                testID="sign-up-first"
+                                testID="sign-up-first-name"
                             />
                         </View>
                         <View className='grow'>
@@ -125,7 +125,7 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setLastName}
                                 autoCapitalize='none'
                                 keyboardType='default'
-                                testID="sign-up-last"
+                                testID="sign-up-last-name"
                             />
                         </View>
                     </View>
@@ -149,7 +149,7 @@ const SignUpScreen: React.FC = () => {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={passwordHidden}
-                            testID="sign-up-password1"
+                            testID="sign-up-password-initial"
                         />
                     </View>
                     <View>
@@ -161,7 +161,7 @@ const SignUpScreen: React.FC = () => {
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={passwordHidden}
-                            testID="sign-up-password2"
+                            testID="sign-up-password-confirm"
                         />
                         {!passwordsMatch && confirmPassword ? (
                             <Text
