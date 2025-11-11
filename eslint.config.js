@@ -11,6 +11,7 @@ module.exports = defineConfig([
     rules: {
       'eol-last': ['error', 'always'],
       semi: ['error', 'always'],
+      "@typescript-eslint/no-require-imports": "off"
     },
   },
 ]);
