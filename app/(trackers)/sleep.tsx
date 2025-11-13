@@ -6,31 +6,31 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Stopwatch from '@/components/stopwatch'
-import ManualEntry from '@/components/manual-entry-sleep'
-import supabase from '@/library/supabase-client'
-import { router } from 'expo-router'
-import { getActiveChildId } from '@/library/utils'
-import { encryptData } from '@/library/crypto'
+} from 'react-native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Stopwatch from '@/components/stopwatch';
+import ManualEntry from '@/components/manual-entry-sleep';
+import supabase from '@/library/supabase-client';
+import { router } from 'expo-router';
+import { getActiveChildId } from '@/library/utils';
+import { encryptData } from '@/library/crypto';
 
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
 export default function Sleep() {
-    const insets = useSafeAreaInsets()
-    const [isTyping, setIsTyping] = useState(false)
-    const [startTime, setStartTime] = useState<Date | null>(null)
-    const [endTime, setEndTime] = useState<Date | null>(null)
-    const [stopwatchTime, setStopwatchTime] = useState('00:00:00')
-    const [note, setNote] = useState('')
+    const insets = useSafeAreaInsets();
+    const [isTyping, setIsTyping] = useState(false);
+    const [startTime, setStartTime] = useState<Date | null>(null);
+    const [endTime, setEndTime] = useState<Date | null>(null);
+    const [stopwatchTime, setStopwatchTime] = useState('00:00:00');
+    const [note, setNote] = useState('');
 
     // Update manual entry times
     const handleDatesUpdate = (start: Date, end: Date) => {
-        setStartTime(start)
-        setEndTime(end)
-    }
+        setStartTime(start);
+        setEndTime(end);
+    };
 
      // Create a sleep log entry for Supabase
     const createSleepLog = async (
@@ -39,18 +39,18 @@ export default function Sleep() {
         endTime: Date,
         note = '',
     ) => {
-        const durationMs = endTime.getTime() - startTime.getTime()
-        const durationSec = Math.floor(durationMs / 1000)
+        const durationMs = endTime.getTime() - startTime.getTime();
+        const durationSec = Math.floor(durationMs / 1000);
 
-        const hours = Math.floor(durationSec / 3600)
-        const minutes = Math.floor((durationSec % 3600) / 60)
-        const seconds = durationSec % 60
+        const hours = Math.floor(durationSec / 3600);
+        const minutes = Math.floor((durationSec % 3600) / 60);
+        const seconds = durationSec % 60;
 
         const duration = `${hours.toString().padStart(2, '0')}:${minutes
             .toString()
-            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        const encryptedNote = note ? await encryptData(note) : null
+        const encryptedNote = note ? await encryptData(note) : null;
 
         const { data, error } = await supabase.from('sleep_logs').insert([
             {
@@ -60,15 +60,15 @@ export default function Sleep() {
                 duration: duration,
                 note: encryptedNote,
             },
-        ])
+        ]);
 
         if (error) {
-            console.error('Error creating sleep log:', error)
-            return { success: false, error }
+            console.error('Error creating sleep log:', error);
+            return { success: false, error };
         }
 
-        return { success: true, data }
-    }
+        return { success: true, data };
+    };
 
     // Prepare and validate sleep log data before saving
     const saveSleepLog = async (
@@ -77,60 +77,60 @@ export default function Sleep() {
         endTime: Date | null = null,
         note = '',
     ) => {
-        const { success, childId, error } = await getActiveChildId()
+        const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
-            Alert.alert(`Error: ${error}`)
-            return { success: false, error }
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
-        let finalStartTime, finalEndTime
+        let finalStartTime, finalEndTime;
 
         if (stopwatchTime) {
             const [hours, minutes, seconds] = stopwatchTime
                 .split(':')
-                .map(Number)
-            const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000
+                .map(Number);
+            const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
-            finalEndTime = new Date()
-            finalStartTime = new Date(finalEndTime.getTime() - durationMs)
+            finalEndTime = new Date();
+            finalStartTime = new Date(finalEndTime.getTime() - durationMs);
         } else if (startTime && endTime) {
-            finalStartTime = startTime
-            finalEndTime = endTime
+            finalStartTime = startTime;
+            finalEndTime = endTime;
         } else {
             Alert.alert(
                 'Error: Either stopwatch time or start/end times must be provided',
-            )
-            return { success: false, error: 'Missing time data' }
+            );
+            return { success: false, error: 'Missing time data' };
         }
 
-        return await createSleepLog(childId, finalStartTime, finalEndTime, note)
-    }
+        return await createSleepLog(childId, finalStartTime, finalEndTime, note);
+    };
 
     // Handle UI logic for saving a sleep entry depending on method
     const handleSaveSleepLog = async () => {
         if (stopwatchTime && stopwatchTime !== '00:00:00') {
-            const result = await saveSleepLog(stopwatchTime, null, null, note)
+            const result = await saveSleepLog(stopwatchTime, null, null, note);
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Sleep log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Sleep log saved successfully!');
             } else {
-                Alert.alert(`Failed to save sleep log: ${result.error}`)
+                Alert.alert(`Failed to save sleep log: ${result.error}`);
             }
         } else if (startTime && endTime) {
-            const result = await saveSleepLog(null, startTime, endTime, note)
+            const result = await saveSleepLog(null, startTime, endTime, note);
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Sleep log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Sleep log saved successfully!');
             } else {
-                Alert.alert(`Failed to save sleep log: ${result.error}`)
+                Alert.alert(`Failed to save sleep log: ${result.error}`);
             }
         } else {
             Alert.alert(
                 'Please provide either stopwatch time or start/end times',
-            )
+            );
         }
-    }
+    };
 
     return (
         // Dismiss keyboard when touching outside inputs
@@ -190,5 +190,5 @@ export default function Sleep() {
                 </View>
             </View>
         </TouchableWithoutFeedback>
-    )
+    );
 }

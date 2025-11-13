@@ -1,8 +1,8 @@
-import { router, Stack } from 'expo-router'
+import { router, Stack } from 'expo-router';
 import {
     Text,
     TouchableOpacity,
-} from 'react-native'
+} from 'react-native';
 
 export default function LogsLayout() {
     return (
@@ -11,7 +11,7 @@ export default function LogsLayout() {
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
-                            router.dismissTo('/(tabs)/trends')
+                            router.dismissTo('/(tabs)/trends');
                         }}
                         className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
                     >
@@ -29,5 +29,5 @@ export default function LogsLayout() {
                 }}
             />
         </Stack>
-    )
+    );
 }

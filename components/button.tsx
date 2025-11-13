@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text } from 'react-native'
+import { TouchableOpacity, Text } from 'react-native';
 
 export default function Button({
     text,
@@ -17,5 +17,5 @@ export default function Button({
         <TouchableOpacity onPress={action} className={`button ${buttonClass}`} testID={testID}>
             <Text className={`button-text ${textClass}`}>{text}</Text>
         </TouchableOpacity>
-    )
+    );
 }

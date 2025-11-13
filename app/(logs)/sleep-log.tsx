@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,11 +12,11 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView
-} from 'react-native'
-import { format } from 'date-fns'
-import { getActiveChildId } from '@/library/utils'
-import supabase from '@/library/supabase-client'
-import { decryptData, encryptData } from '@/library/crypto'
+} from 'react-native';
+import { format } from 'date-fns';
+import { getActiveChildId } from '@/library/utils';
+import supabase from '@/library/supabase-client';
+import { decryptData, encryptData } from '@/library/crypto';
 
 interface SleepLog {
     id: string
@@ -27,60 +27,60 @@ interface SleepLog {
 }
 
 const SleepLogsView: React.FC = () => {
-    const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [editingLog, setEditingLog] = useState<SleepLog | null>(null)
-    const [editModalVisible, setEditModalVisible] = useState(false)
+    const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [editingLog, setEditingLog] = useState<SleepLog | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
 
     useEffect(() => {
-        fetchSleepLogs()
-    }, [])
+        fetchSleepLogs();
+    }, []);
 
     const fetchSleepLogs = async () => {
         try {
-            const { success, childId, error: childError } = await getActiveChildId()
+            const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
                     typeof childError === 'string'
                         ? childError
                         : childError?.message || 'Failed to get active child ID'
-                )
+                );
             }
 
             const { data, error } = await supabase
                 .from('sleep_logs')
                 .select('*')
                 .eq('child_id', childId)
-                .order('start_time', { ascending: false })
+                .order('start_time', { ascending: false });
 
-            if (error) throw error
+            if (error) throw error;
 
             const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return value || ''
+                if (!value || !value.includes('U2FsdGVkX1')) return value || '';
                 try {
-                    return await decryptData(value)
+                    return await decryptData(value);
                 } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value)
-                    return `[Decryption Failed]: ${err}`
+                    console.warn('⚠️ Decryption failed for:', value);
+                    return `[Decryption Failed]: ${err}`;
                 }
-            }
+            };
 
             const decrypted = await Promise.all(
                 (data || []).map(async (entry) => ({
                     ...entry,
                     note: await safeDecrypt(entry.note),
                 }))
-            )
+            );
 
-            setSleepLogs(decrypted)
+            setSleepLogs(decrypted);
         } catch (err) {
-            console.error('❌ Fetch or decryption error:', err)
-            setError(err instanceof Error ? err.message : 'An unknown error occurred')
+            console.error('❌ Fetch or decryption error:', err);
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -92,22 +92,22 @@ const SleepLogsView: React.FC = () => {
                     const { error } = await supabase
                         .from('sleep_logs')
                         .delete()
-                        .eq('id', id)
+                        .eq('id', id);
                     if (error) {
-                        Alert.alert('Error deleting log')
-                        return
+                        Alert.alert('Error deleting log');
+                        return;
                     }
-                    setSleepLogs((prev) => prev.filter((log) => log.id !== id))
+                    setSleepLogs((prev) => prev.filter((log) => log.id !== id));
                 },
             },
-        ])
-    }
+        ]);
+    };
 
     const handleSaveEdit = async () => {
-        if (!editingLog) return
+        if (!editingLog) return;
 
         try {
-            const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null
+            const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
 
             const { error } = await supabase
                 .from('sleep_logs')
@@ -117,20 +117,20 @@ const SleepLogsView: React.FC = () => {
                     duration: editingLog.duration,
                     note: encryptedNote,
                 })
-                .eq('id', editingLog.id)
+                .eq('id', editingLog.id);
 
             if (error) {
-                Alert.alert('Failed to update log')
-                return
+                Alert.alert('Failed to update log');
+                return;
             }
 
-            await fetchSleepLogs()
-            setEditModalVisible(false)
+            await fetchSleepLogs();
+            setEditModalVisible(false);
         } catch (err) {
-            console.error('❌ Encryption or update error:', err)
-            Alert.alert('Something went wrong during save.')
+            console.error('❌ Encryption or update error:', err);
+            Alert.alert('Something went wrong during save.');
         }
-    }
+    };
 
     const renderSleepLogItem = ({ item }: { item: SleepLog }) => (
         <View className="bg-white rounded-xl p-4 mb-4 shadow">
@@ -153,8 +153,8 @@ const SleepLogsView: React.FC = () => {
                 <Pressable
                     className="px-3 py-2 rounded-full bg-blue-100"
                     onPress={() => {
-                        setEditingLog(item)
-                        setEditModalVisible(true)
+                        setEditingLog(item);
+                        setEditModalVisible(true);
                     }}
                 >
                     <Text className="text-blue-700">✏️ Edit</Text>
@@ -167,7 +167,7 @@ const SleepLogsView: React.FC = () => {
                 </Pressable>
             </View>
         </View>
-    )
+    );
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
@@ -249,7 +249,7 @@ const SleepLogsView: React.FC = () => {
                 </KeyboardAvoidingView>
             </Modal>
         </View>
-    )
-}
+    );
+};
 
 export default SleepLogsView;

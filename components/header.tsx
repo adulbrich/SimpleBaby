@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, DimensionValue } from 'react-native'
-import React from 'react'
-import { Href, router } from 'expo-router'
+import { View, Text, TouchableOpacity, DimensionValue } from 'react-native';
+import React from 'react';
+import { Href, router } from 'expo-router';
 
 /**
  * Header component displays a title and an optional navigation link with an icon.
@@ -42,5 +42,5 @@ export default function Header(
                 </View>
             </TouchableOpacity>
         </View>
-    )
+    );
 }

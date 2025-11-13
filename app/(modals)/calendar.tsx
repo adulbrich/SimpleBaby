@@ -1,6 +1,6 @@
-import { Text, Platform } from 'react-native'
-import React from 'react'
-import { Stack } from 'expo-router'
+import { Text, Platform } from 'react-native';
+import React from 'react';
+import { Stack } from 'expo-router';
 
 export default function Calendar() {
     return (
@@ -18,5 +18,5 @@ export default function Calendar() {
             />
             <Text>Calendar</Text>
         </>
-    )
+    );
 }

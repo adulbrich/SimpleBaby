@@ -1,5 +1,5 @@
-import React from 'react'
-import { router } from 'expo-router'
+import React from 'react';
+import { router } from 'expo-router';
 import {
     View,
     Text,
@@ -9,10 +9,10 @@ import {
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     Keyboard,
-} from 'react-native'
-import Button from '@/components/button'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { useAuth } from '@/library/auth-provider'
+} from 'react-native';
+import Button from '@/components/button';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '@/library/auth-provider';
 
 /**
  * SignInScreen.tsx
@@ -22,36 +22,36 @@ import { useAuth } from '@/library/auth-provider'
 
 
 export default function SignInScreen() {
-    const [email, setEmail] = React.useState('')
-    const [password, setPassword] = React.useState('')
-    const [passwordHidden, setPasswordHidden] = React.useState(true)
-    const [loading, setLoading] = React.useState(false)
-    const { signIn } = useAuth()
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [passwordHidden, setPasswordHidden] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
+    const { signIn } = useAuth();
 
     const handleSignUp = () => {
-        router.replace('/(auth)/signup')
-    }
+        router.replace('/(auth)/signup');
+    };
 
     const handleGuest = () => {
-        router.push('/(auth)/guest')
-    }
+        router.push('/(auth)/guest');
+    };
 
       // Attempt to sign in the user using provided credentials
     const handleSignIn = async () => {
-        setLoading(true)
-        const response = await signIn(email, password)
-        setLoading(false)
+        setLoading(true);
+        const response = await signIn(email, password);
+        setLoading(false);
         if (response.error) {
             Alert.alert(
                 'Sign In Error',
                 response.error.message || 'An error occurred while signing in.',
-            )
+            );
         } else {
-            router.replace('/(tabs)')
+            router.replace('/(tabs)');
         }
-    }
+    };
 
-    const buttonTextClass = 'font-semibold'
+    const buttonTextClass = 'font-semibold';
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -132,5 +132,5 @@ export default function SignInScreen() {
                 </View>
             </SafeAreaView>
         </TouchableWithoutFeedback>
-    )
+    );
 }

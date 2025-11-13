@@ -7,4 +7,11 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    rules: {
+      'eol-last': ['error', 'always'],
+      semi: ['error', 'always'],
+      "@typescript-eslint/no-require-imports": "off"
+    },
+  },
 ]);

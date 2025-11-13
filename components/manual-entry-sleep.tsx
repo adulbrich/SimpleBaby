@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker'
-import { View, Text, TouchableOpacity, Platform } from 'react-native'
+} from '@react-native-community/datetimepicker';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 
 
 /**
@@ -16,32 +16,32 @@ export default function ManualEntry({
 }: {
     onDatesUpdate?: (startDate: Date, endDate: Date) => void
 }) {
-    const [startDate, setStartDate] = useState(new Date())
-    const [endDate, setEndDate] = useState(new Date())
-    const [showIOSPicker, setShowIOSPicker] = useState(false)
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
+    const [showIOSPicker, setShowIOSPicker] = useState(false);
     const [currentPickerMode, setCurrentPickerMode] = useState<'start' | 'end'>(
         'start',
-    )
+    );
 
     useEffect(() => {
-        onDatesUpdate?.(startDate, endDate)
-    }, [startDate, endDate, onDatesUpdate])
+        onDatesUpdate?.(startDate, endDate);
+    }, [startDate, endDate, onDatesUpdate]);
 
     // Handles date change from picker, updates corresponding time, hides iOS picker
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
             if (currentPickerMode === 'start') {
-                setStartDate(selectedDate)
+                setStartDate(selectedDate);
             } else {
-                setEndDate(selectedDate)
+                setEndDate(selectedDate);
             }
         }
-        setShowIOSPicker(false)
-    }
+        setShowIOSPicker(false);
+    };
 
     // Opens Android time picker dialog for selected mode (start or end)
     const showTimePicker = (mode: 'start' | 'end') => {
-        setCurrentPickerMode(mode)
+        setCurrentPickerMode(mode);
 
         if (Platform.OS === 'android') {
             DateTimePickerAndroid.open({
@@ -49,27 +49,27 @@ export default function ManualEntry({
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
                         if (mode === 'start') {
-                            setStartDate(selectedDate)
+                            setStartDate(selectedDate);
                         } else {
-                            setEndDate(selectedDate)
+                            setEndDate(selectedDate);
                         }
                     }
                 },
                 mode: 'time',
                 is24Hour: false,
-            })
+            });
         } else {
-            setShowIOSPicker(true)
+            setShowIOSPicker(true);
         }
-    }
+    };
 
     // Format Date object to hh:mm AM/PM string
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
-        })
-    }
+        });
+    };
 
     return (
         <View className='manual-primary'>
@@ -89,12 +89,12 @@ export default function ManualEntry({
                                     showIOSPicker &&
                                     currentPickerMode === 'start'
                                 ) {
-                                    setShowIOSPicker(false)
+                                    setShowIOSPicker(false);
                                 } else {
-                                    setCurrentPickerMode('start')
-                                    setShowIOSPicker(true)
+                                    setCurrentPickerMode('start');
+                                    setShowIOSPicker(true);
                                     if (Platform.OS === 'android') {
-                                        showTimePicker('start')
+                                        showTimePicker('start');
                                     }
                                 }
                             }}
@@ -119,12 +119,12 @@ export default function ManualEntry({
                                     showIOSPicker &&
                                     currentPickerMode === 'end'
                                 ) {
-                                    setShowIOSPicker(false)
+                                    setShowIOSPicker(false);
                                 } else {
-                                    setCurrentPickerMode('end')
-                                    setShowIOSPicker(true)
+                                    setCurrentPickerMode('end');
+                                    setShowIOSPicker(true);
                                     if (Platform.OS === 'android') {
-                                        showTimePicker('end')
+                                        showTimePicker('end');
                                     }
                                 }
                             }}
@@ -158,5 +158,5 @@ export default function ManualEntry({
                 )}
             </View>
         </View>
-    )
+    );
 }
