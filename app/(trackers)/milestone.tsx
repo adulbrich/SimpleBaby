@@ -5,22 +5,22 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { useEffect, useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import supabase from '@/library/supabase-client'
-import { router } from 'expo-router'
-import { getActiveChildId } from '@/library/utils'
+} from 'react-native';
+import { useEffect, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import supabase from '@/library/supabase-client';
+import { router } from 'expo-router';
+import { getActiveChildId } from '@/library/utils';
 
 
 export default function Feeding() {
-    const insets = useSafeAreaInsets()
-    const [isTyping] = useState(false)
-    const [category] = useState('')
-    const [itemName] = useState('')
-    const [amount] = useState('')
-    const [feedingTime] = useState(new Date())
-    const [note] = useState('')
+    const insets = useSafeAreaInsets();
+    const [isTyping] = useState(false);
+    const [category] = useState('');
+    const [itemName] = useState('');
+    const [amount] = useState('');
+    const [feedingTime] = useState(new Date());
+    const [note] = useState('');
      /**
      * Inserts a new feeding log into the 'feeding_logs' table on Supabase.
      * Converts feedingTime to ISO string before sending.
@@ -42,26 +42,26 @@ export default function Feeding() {
                 feeding_time: feedingTime.toISOString(),
                 note,
             },
-        ])
+        ]);
 
         if (error) {
-            console.error('Error creating feeding log:', error)
-            return { success: false, error }
+            console.error('Error creating feeding log:', error);
+            return { success: false, error };
         }
 
-        return { success: true, data }
-    }
+        return { success: true, data };
+    };
 
     /**
     * Gets the currently active child ID and attempts to save the feeding log.
     * Returns success/error object for handling in UI.
     */
     const saveFeedingLog = async () => {
-        const { success, childId, error } = await getActiveChildId()
+        const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
-            Alert.alert(`Error: ${error}`)
-            return { success: false, error }
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
         return await createFeedingLog(
@@ -71,8 +71,8 @@ export default function Feeding() {
             amount,
             feedingTime,
             note,
-        )
-    }
+        );
+    };
 
      /**
      * Validates inputs and attempts to save the feeding log.
@@ -80,23 +80,23 @@ export default function Feeding() {
      */
     const handleSaveFeedingLog = async () => {
         if (category && itemName && amount) {
-            const result = await saveFeedingLog()
+            const result = await saveFeedingLog();
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Feeding log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Feeding log saved successfully!');
             } else {
-                Alert.alert(`Failed to save feeding log: ${result.error}`)
+                Alert.alert(`Failed to save feeding log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide category, item name, and amount')
+            Alert.alert('Please provide category, item name, and amount');
         }
-    }
+    };
      // Temporary useEffect to block this screen while it's still in development
     useEffect(() => {
         Alert.alert('Hey!', 'Feature coming soon', [
             { text: 'OK', onPress: () => router.replace('/(tabs)') },
-        ])
-    }, [])
+        ]);
+    }, []);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -125,5 +125,5 @@ export default function Feeding() {
                 </View>
             </View>
         </TouchableWithoutFeedback>
-    )
+    );
 }

@@ -20,7 +20,7 @@ describe("Login screen", () => {
       render(<RootIndex/>);
 
       expect(screen.getByTestId("simple-baby-logo")).toBeTruthy();
-    })
+    });
   
     test("Renders login buttons", () => {
         render(<RootIndex/>);
@@ -28,5 +28,5 @@ describe("Login screen", () => {
         expect(screen.getByTestId("sign-in-button")).toBeTruthy();
         expect(screen.getByTestId("sign-up-button")).toBeTruthy();
         expect(screen.getByTestId("guest-button")).toBeTruthy();
-    })
-})
+    });
+});

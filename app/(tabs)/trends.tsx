@@ -1,6 +1,6 @@
-import { Href, router } from 'expo-router'
-import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { Href, router } from 'expo-router';
+import { View, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
 
 type Button = {
     label: string
@@ -16,7 +16,7 @@ export default function Tab() {
         { label: 'Diaper', icon: '🧷', link: '/(logs)/diaper-logs' },
         { label: 'Milestone', icon: '🌟', link: '/(trackers)/milestone' },
         { label: 'Health', icon: '💚', link: '/(logs)/health-logs' },
-    ]
+    ];
 
     return (
         <View className='main-container flex-col justify-center gap-4'>
@@ -42,5 +42,5 @@ export default function Tab() {
                 </TouchableOpacity>
             ))}
         </View>
-    )
+    );
 }

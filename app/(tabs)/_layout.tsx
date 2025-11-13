@@ -1,33 +1,33 @@
-import { Tabs } from 'expo-router'
-import { Text, useColorScheme } from 'react-native'
-import Header, { HeaderLink } from '@/components/header'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Tabs } from 'expo-router';
+import { Text, useColorScheme } from 'react-native';
+import Header, { HeaderLink } from '@/components/header';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Icon = (color: string, text: string) => {
-    return <Text style={{ color }}>{text}</Text>
-}
+    return <Text style={{ color }}>{text}</Text>;
+};
 
 const Profile: HeaderLink = {
     link: '/(modals)/profile',
     title: 'Profile',
     icon: '👩',
-}
+};
 
 const Calendar: HeaderLink = {
     link: '/(modals)/calendar',
     title: 'Calendar',
     icon: '📅',
-}
+};
 
 export default function TabLayout() {
-    const scheme = useColorScheme()
-    const insets = useSafeAreaInsets().top
+    const scheme = useColorScheme();
+    const insets = useSafeAreaInsets().top;
     const tabBarStyle =
         scheme === 'light'
             ? { backgroundColor: '#f0dfcf', borderColor: '#bbb' }
-            : { backgroundColor: '#08150e', borderColor: '#000' }
+            : { backgroundColor: '#08150e', borderColor: '#000' };
 
-    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866'
+    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866';
 
     return (
         <Tabs
@@ -54,5 +54,5 @@ export default function TabLayout() {
                 }}
             />
         </Tabs>
-    )
+    );
 }

@@ -6,26 +6,26 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import supabase from '@/library/supabase-client'
-import { router } from 'expo-router'
-import { getActiveChildId } from '@/library/utils'
-import FeedingCategory from '@/components/feeding-category'
-import { encryptData } from '@/library/crypto'  // ✅ Added
+} from 'react-native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import supabase from '@/library/supabase-client';
+import { router } from 'expo-router';
+import { getActiveChildId } from '@/library/utils';
+import FeedingCategory from '@/components/feeding-category';
+import { encryptData } from '@/library/crypto';  // ✅ Added
 
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
 
 export default function Feeding() {
-    const insets = useSafeAreaInsets()
-    const [isTyping, setIsTyping] = useState(false)
-    const [category, setCategory] = useState('')
-    const [itemName, setItemName] = useState('')
-    const [amount, setAmount] = useState('')
-    const [feedingTime, setFeedingTime] = useState(new Date())
-    const [note, setNote] = useState('')
+    const insets = useSafeAreaInsets();
+    const [isTyping, setIsTyping] = useState(false);
+    const [category, setCategory] = useState('');
+    const [itemName, setItemName] = useState('');
+    const [amount, setAmount] = useState('');
+    const [feedingTime, setFeedingTime] = useState(new Date());
+    const [note, setNote] = useState('');
 
     // Function to create a new feeding log record into Supabase
     const createFeedingLog = async (
@@ -38,10 +38,10 @@ export default function Feeding() {
     ) => {
         try {
             // ✅ Encrypt before inserting
-            const encryptedCategory = await encryptData(category)
-            const encryptedItemName = await encryptData(itemName)
-            const encryptedAmount = await encryptData(amount)
-            const encryptedNote = note ? await encryptData(note) : null
+            const encryptedCategory = await encryptData(category);
+            const encryptedItemName = await encryptData(itemName);
+            const encryptedAmount = await encryptData(amount);
+            const encryptedNote = note ? await encryptData(note) : null;
 
             const { data, error } = await supabase.from('feeding_logs').insert([
                 {
@@ -52,27 +52,27 @@ export default function Feeding() {
                     feeding_time: feedingTime.toISOString(),
                     note: encryptedNote,
                 },
-            ])
+            ]);
 
             if (error) {
-                console.error('Error creating feeding log:', error)
-                return { success: false, error }
+                console.error('Error creating feeding log:', error);
+                return { success: false, error };
             }
 
-            return { success: true, data }
+            return { success: true, data };
         } catch (err) {
-            console.error('❌ Encryption or insert failed:', err)
-            return { success: false, error: 'Encryption or database error' }
+            console.error('❌ Encryption or insert failed:', err);
+            return { success: false, error: 'Encryption or database error' };
         }
-    }
+    };
 
     // Fetch active child ID and save feeding log for that child
     const saveFeedingLog = async () => {
-        const { success, childId, error } = await getActiveChildId()
+        const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
-            Alert.alert(`Error: ${error}`)
-            return { success: false, error }
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
         return await createFeedingLog(
@@ -82,23 +82,23 @@ export default function Feeding() {
             amount,
             feedingTime,
             note,
-        )
-    }
+        );
+    };
 
     // Validate input fields and trigger save action
     const handleSaveFeedingLog = async () => {
         if (category && itemName && amount) {
-            const result = await saveFeedingLog()
+            const result = await saveFeedingLog();
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Feeding log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Feeding log saved successfully!');
             } else {
-                Alert.alert(`Failed to save feeding log: ${result.error}`)
+                Alert.alert(`Failed to save feeding log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide category, item name, and amount')
+            Alert.alert('Please provide category, item name, and amount');
         }
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -156,5 +156,5 @@ export default function Feeding() {
                 </View>
             </View>
         </TouchableWithoutFeedback>
-    )
+    );
 }
