@@ -13,7 +13,7 @@ type Button = {
     link: ExternalPathString
 }
 
-export default function TrackerButton({ button, testID }: { button: Button, testID?: string | undefined }) {
+export default function TrackerButton({ button, testID }: { button: Button, testID?: string }) {
     return (
         <TouchableOpacity
             className='tracker-button'

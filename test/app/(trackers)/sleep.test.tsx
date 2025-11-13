@@ -19,7 +19,6 @@ jest.mock("@/library/crypto", () =>({
     encryptData: async () => ""
 }));
 
-//console.log(...jest.requireActual("react-native"))
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");
     module.Alert.alert = jest.fn();

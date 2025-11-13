@@ -16,7 +16,7 @@ export default function ManualEntry({
     testID
 }: {
     onDatesUpdate?: (startDate: Date, endDate: Date) => void,
-    testID: string | undefined
+    testID?: string
 }) {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
