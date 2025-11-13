@@ -43,12 +43,12 @@ describe("Create Account screen", () => {
         await userEvent.type(
           screen.getByTestId("sign-up-password-initial"),
           "pass1"
-        )
+        );
         await userEvent.type(
           screen.getByTestId("sign-up-password-confirm"),
           "pass2"
-        )
+        );
       
         expect(screen.getByTestId("password-error")).toBeTruthy();
     });
-})
+});
