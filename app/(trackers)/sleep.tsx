@@ -146,13 +146,13 @@ export default function Sleep() {
                     }`}
                 >
                     {/* Stopwatch component for tracking session duration */}
-                    <Stopwatch onTimeUpdate={setStopwatchTime} />
+                    <Stopwatch onTimeUpdate={setStopwatchTime} testID='sleep-stopwatch' />
 
                     {/* Manual start/end time picker */}
-                    <ManualEntry onDatesUpdate={handleDatesUpdate} />
+                    <ManualEntry onDatesUpdate={handleDatesUpdate} testID='sleep-manual-time-entry' />
 
                     {/* Note input section */}
-                    <View className='bottom-5'>
+                    <View className='bottom-5' testID='sleep-note-entry'>
                         <View className='items-start top-5 left-3 z-10'>
                             <Text className='bg-gray-200 p-3 rounded-xl font'>
                                 Add a note
@@ -178,12 +178,14 @@ export default function Sleep() {
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveSleepLog}
+                        testID='sleep-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
                         onPress={() => router.replace('./')}
+                        testID='sleep-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>

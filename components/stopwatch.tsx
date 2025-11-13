@@ -6,7 +6,7 @@ import { View, Text, TouchableOpacity } from 'react-native'
  * Users can start, stop, and reset the timer.
  * Elapsed time is formatted as hh:mm:ss and reported to parent via callback.
  */
-export default function Stopwatch({ onTimeUpdate }: any) {
+export default function Stopwatch({ onTimeUpdate, testID }: {onTimeUpdate: any, testID?: string | undefined}) {
     const [time, setTime] = useState(0)
     const [running, setRunning] = useState(false)
     const intervalRef = useRef<any>(null)
@@ -44,7 +44,7 @@ export default function Stopwatch({ onTimeUpdate }: any) {
     }
 
     return (
-        <View className='stopwatch-primary'>
+        <View className='stopwatch-primary' testID={testID}>
             <View className='items-start relative bottom-5 left-3'>
                 <Text className='bg-gray-200 p-3 rounded-xl font'>
                     ⏱️ Stopwatch
