@@ -89,20 +89,23 @@ const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const SUPABASE_URL = Platform.OS === "ios" ? process.env.EXPO_PUBLIC_SUPABASE_URL_IOS : process.env.EXPO_PUBLIC_SUPABASE_URL_ANDROID;
 
 if (!PUBLIC_ANON || !SUPABASE_URL) {
-  throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY')
+  throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY');
 }
 
-const secureStoreAdapter = {
-  async getItem(key: string) {
-    return await SecureStore.getItemAsync(key);
-  },
-  async setItem(key: string, value: string) {
-    await SecureStore.setItemAsync(key, value);
-  },
-  async removeItem(key: string) {
-    await SecureStore.deleteItemAsync(key);
-  },
-};
+// NOTE: This code has been commented out for causing linting warnings.
+// We should keep it in the file for the time being in case it is needed in future use.
+// ***************************************************
+// const secureStoreAdapter = {
+//   async getItem(key: string) {
+//     return await SecureStore.getItemAsync(key);
+//   },
+//   async setItem(key: string, value: string) {
+//     await SecureStore.setItemAsync(key, value);
+//   },
+//   async removeItem(key: string) {
+//     await SecureStore.deleteItemAsync(key);
+//   },
+// };
 
 const supabase = createClient(SUPABASE_URL, PUBLIC_ANON, {
   auth: {

@@ -1,16 +1,16 @@
-import React from 'react'
+import React from 'react';
 import {
     Text,
     ScrollView,
     View,
     TouchableOpacity,
     Alert
-} from 'react-native'
-import { router } from 'expo-router'
-import { useAuth } from '@/library/auth-provider'
-import { signOut } from '@/library/auth'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/button'
+} from 'react-native';
+import { router } from 'expo-router';
+import { useAuth } from '@/library/auth-provider';
+import { signOut } from '@/library/auth';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '@/components/button';
 
 /**
  * Profile Screen
@@ -21,19 +21,19 @@ import Button from '@/components/button'
 
 
 export default function Profile() {
-    const { session } = useAuth()
+    const { session } = useAuth();
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
-        const { error } = await signOut()
+        const { error } = await signOut();
         if (error) {
-            console.error('Error signing out:', error)
+            console.error('Error signing out:', error);
         } else {
-            console.log('Signed out successfully')
-            router.dismissAll()
-            router.replace('/')
+            console.log('Signed out successfully');
+            router.dismissAll();
+            router.replace('/');
         }
-    }
+    };
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -137,5 +137,5 @@ export default function Profile() {
                 )}
             </View>
         </SafeAreaView>
-    )
+    );
 }

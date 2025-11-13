@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,11 +12,11 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-} from 'react-native'
-import { format } from 'date-fns'
-import { getActiveChildId } from '@/library/utils'
-import supabase from '@/library/supabase-client'
-import { encryptData, decryptData } from '@/library/crypto'
+} from 'react-native';
+import { format } from 'date-fns';
+import { getActiveChildId } from '@/library/utils';
+import supabase from '@/library/supabase-client';
+import { encryptData, decryptData } from '@/library/crypto';
 
 interface DiaperLog {
     id: string
@@ -28,41 +28,41 @@ interface DiaperLog {
 }
 
 const DiaperLogsView: React.FC = () => {
-    const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const [editingLog, setEditingLog] = useState<DiaperLog | null>(null)
-    const [editModalVisible, setEditModalVisible] = useState(false)
+    const [editingLog, setEditingLog] = useState<DiaperLog | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
 
     useEffect(() => {
-        fetchDiaperLogs()
-    }, [])
+        fetchDiaperLogs();
+    }, []);
 
     const fetchDiaperLogs = async () => {
         try {
-            const { success, childId, error: childError } = await getActiveChildId()
+            const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
-                throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get active child ID')
+                throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get active child ID');
             }
 
             const { data, error } = await supabase
                 .from('diaper_logs')
                 .select('*')
                 .eq('child_id', childId)
-                .order('logged_at', { ascending: false })
+                .order('logged_at', { ascending: false });
 
-            if (error) throw error
+            if (error) throw error;
 
             const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return ''
+                if (!value || !value.includes('U2FsdGVkX1')) return '';
                 try {
-                    return await decryptData(value)
+                    return await decryptData(value);
                 } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value)
-                    return `[Decryption Failed]: ${err}`
+                    console.warn('⚠️ Decryption failed for:', value);
+                    return `[Decryption Failed]: ${err}`;
                 }
-            }
+            };
 
             const decryptedLogs = await Promise.all(
                 (data || []).map(async (entry) => ({
@@ -71,16 +71,16 @@ const DiaperLogsView: React.FC = () => {
                     amount: await safeDecrypt(entry.amount),
                     note: entry.note ? await safeDecrypt(entry.note) : '',
                 }))
-            )
+            );
 
-            setDiaperLogs(decryptedLogs)
+            setDiaperLogs(decryptedLogs);
         } catch (err) {
-            console.error('❌ Fetch or decryption error:', err)
-            setError(err instanceof Error ? err.message : 'An unknown error occurred')
+            console.error('❌ Fetch or decryption error:', err);
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -89,26 +89,26 @@ const DiaperLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
-                    const { error } = await supabase.from('diaper_logs').delete().eq('id', id)
+                    const { error } = await supabase.from('diaper_logs').delete().eq('id', id);
                     if (error) {
-                        Alert.alert('Error deleting log')
-                        return
+                        Alert.alert('Error deleting log');
+                        return;
                     }
-                    setDiaperLogs((prev) => prev.filter((log) => log.id !== id))
+                    setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
                 },
             },
-        ])
-    }
+        ]);
+    };
 
     const handleSaveEdit = async () => {
-        if (!editingLog) return
+        if (!editingLog) return;
 
         try {
-            const { id, consistency, amount, note } = editingLog
+            const { id, consistency, amount, note } = editingLog;
 
-            const encryptedConsistency = await encryptData(consistency)
-            const encryptedAmount = await encryptData(amount)
-            const encryptedNote = note ? await encryptData(note) : null
+            const encryptedConsistency = await encryptData(consistency);
+            const encryptedAmount = await encryptData(amount);
+            const encryptedNote = note ? await encryptData(note) : null;
 
             const { error } = await supabase
                 .from('diaper_logs')
@@ -117,20 +117,20 @@ const DiaperLogsView: React.FC = () => {
                     amount: encryptedAmount,
                     note: encryptedNote,
                 })
-                .eq('id', id)
+                .eq('id', id);
 
             if (error) {
-                Alert.alert('Failed to update log')
-                return
+                Alert.alert('Failed to update log');
+                return;
             }
 
-            await fetchDiaperLogs()
-            setEditModalVisible(false)
+            await fetchDiaperLogs();
+            setEditModalVisible(false);
         } catch (err) {
-            console.error('❌ Encryption or update error:', err)
-            Alert.alert('Something went wrong during save.')
+            console.error('❌ Encryption or update error:', err);
+            Alert.alert('Something went wrong during save.');
         }
-    }
+    };
 
     const renderDiaperLogItem = ({ item }: { item: DiaperLog }) => (
         <View className="bg-white rounded-xl p-4 mb-4 shadow">
@@ -154,7 +154,7 @@ const DiaperLogsView: React.FC = () => {
                 </Pressable>
             </View>
         </View>
-    )
+    );
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
@@ -235,7 +235,7 @@ const DiaperLogsView: React.FC = () => {
                 </KeyboardAvoidingView>
             </Modal>
         </View>
-    )
-}
+    );
+};
 
 export default DiaperLogsView;

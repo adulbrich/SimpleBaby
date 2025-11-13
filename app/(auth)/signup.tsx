@@ -1,5 +1,5 @@
-import { router } from 'expo-router'
-import React from 'react'
+import { router } from 'expo-router';
+import React from 'react';
 import {
     View,
     Text,
@@ -10,22 +10,22 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/button'
-import { useAuth } from '@/library/auth-provider'
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '@/components/button';
+import { useAuth } from '@/library/auth-provider';
 
 const SignUpScreen: React.FC = () => {
-    const [email, setEmail] = React.useState('')
-    const [firstName, setFirstName] = React.useState('')
-    const [lastName, setLastName] = React.useState('')
-    const [password, setPassword] = React.useState('')
-    const [confirmPassword, setConfirmPassword] = React.useState('')
-    const [passwordHidden, setPasswordHidden] = React.useState(true)
-    const [loading, setLoading] = React.useState(false)
-    const { signUp, signIn } = useAuth()
+    const [email, setEmail] = React.useState('');
+    const [firstName, setFirstName] = React.useState('');
+    const [lastName, setLastName] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [confirmPassword, setConfirmPassword] = React.useState('');
+    const [passwordHidden, setPasswordHidden] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
+    const { signUp, signIn } = useAuth();
 
-    const passwordsMatch = password === confirmPassword
+    const passwordsMatch = password === confirmPassword;
 
     const handleSignUp = async () => {
         // Validate that all fields are filled in
@@ -36,61 +36,61 @@ const SignUpScreen: React.FC = () => {
             !password ||
             !confirmPassword
         ) {
-            Alert.alert('All fields are required.')
-            return
+            Alert.alert('All fields are required.');
+            return;
         }
 
         // Validate that passwords match
         if (password !== confirmPassword) {
-            Alert.alert('Passwords do not match.')
-            return
+            Alert.alert('Passwords do not match.');
+            return;
         }
 
-        setLoading(true)
+        setLoading(true);
         try {
             // Call the signUp function from your auth provider
-            const { error } = await signUp(email, password, firstName, lastName)
+            const { error } = await signUp(email, password, firstName, lastName);
             if (error) {
                 Alert.alert(
                     'Sign Up Error',
                     error.message || 'An error occurred during sign up.',
-                )
+                );
             } else {
                 // if successful, sign in automatically
-                setLoading(true)
-                const response = await signIn(email, password)
-                setLoading(false)
+                setLoading(true);
+                const response = await signIn(email, password);
+                setLoading(false);
                 if (response.error) {
                     Alert.alert(
                         'Sign In Error',
                         response.error.message ||
                             'An error occurred while signing in.',
-                    )
+                    );
                 } else {
-                    router.replace('/(tabs)')
+                    router.replace('/(tabs)');
                 }
             }
         } catch (err) {
-            console.error(err)
-            Alert.alert('An unexpected error occurred')
+            console.error(err);
+            Alert.alert('An unexpected error occurred');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleSignIn = () => {
-        router.replace('/signin')
-    }
+        router.replace('/signin');
+    };
 
     const handleGuest = () => {
-        router.push('/guest')
-    }
+        router.push('/guest');
+    };
 
     const getPasswordInputStyle = () => [
         !passwordsMatch && confirmPassword ? styles.errorInput : {},
-    ]
+    ];
 
-    const buttonTextClass = 'font-semibold'
+    const buttonTextClass = 'font-semibold';
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -219,13 +219,13 @@ const SignUpScreen: React.FC = () => {
                 </View>
             </SafeAreaView>
         </TouchableWithoutFeedback>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     errorInput: {
         borderColor: 'red',
     },
-})
+});
 
-export default SignUpScreen
+export default SignUpScreen;

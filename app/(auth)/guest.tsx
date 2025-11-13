@@ -1,8 +1,8 @@
-import React from 'react'
-import { View, Text, Alert } from 'react-native'
-import { router } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/button'
+import React from 'react';
+import { View, Text, Alert } from 'react-native';
+import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '@/components/button';
 
 export default function GuestScreen() {
     const handleGuest = () => {
@@ -13,15 +13,15 @@ export default function GuestScreen() {
                 {
                     text: 'OK',
                     onPress: () => {
-                        router.dismiss()
+                        router.dismiss();
                     },
                 },
             ],
             { cancelable: false },
-        )
-    }
+        );
+    };
 
-    const buttonTextClass = 'font-semibold'
+    const buttonTextClass = 'font-semibold';
 
     return (
         <SafeAreaView className='main-container flex-col justify-end'>
@@ -78,5 +78,5 @@ export default function GuestScreen() {
                 />
             </View>
         </SafeAreaView>
-    )
+    );
 }
