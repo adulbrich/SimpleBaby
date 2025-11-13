@@ -13,11 +13,12 @@ type Button = {
     link: ExternalPathString
 }
 
-export default function TrackerButton({ button }: { button: Button }) {
+export default function TrackerButton({ button, testID }: { button: Button, testID?: string }) {
     return (
         <TouchableOpacity
             className='tracker-button'
             onPress={() => router.push(button.link)}
+            testID={testID}
         >
             <Text className='tracker-icon'>{button.icon}</Text>
             <Text className='tracker-label'>{button.label}</Text>

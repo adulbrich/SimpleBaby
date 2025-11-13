@@ -13,8 +13,10 @@ import { View, Text, TouchableOpacity, Platform } from 'react-native';
  */
 export default function ManualEntry({
     onDatesUpdate,
+    testID
 }: {
-    onDatesUpdate?: (startDate: Date, endDate: Date) => void
+    onDatesUpdate?: (startDate: Date, endDate: Date) => void,
+    testID?: string
 }) {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
@@ -72,7 +74,7 @@ export default function ManualEntry({
     };
 
     return (
-        <View className='manual-primary'>
+        <View className='manual-primary' testID={testID}>
             <View className='items-start relative bottom-5 left-3'>
                 <Text className='bg-gray-200 p-3 rounded-xl font'>
                     Manual Entry

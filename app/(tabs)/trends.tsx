@@ -25,6 +25,7 @@ export default function Tab() {
                     onPress={() => router.push(bars.link)}
                     className='group'
                     key={key}
+                    testID={`trends-${bars.label}-button`}
                 >
                     <View className='tracker-bar'>
                         <View className='flex-row justify-center items-center gap-4'>
