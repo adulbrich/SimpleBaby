@@ -54,7 +54,7 @@
 }
 
 .feeding-category-button-active {
-    @apply flex-col items-center justify-center w-[7rem] rounded-full dark:bg-[#568a7b] p-4 gap-1 aspect-square scale-100;
+    @apply bg-[#ffffff] border border-[#000000] shadow-sm scale-105 dark:bg-[#568a7b] dark:border-transparent;
 }
 
 .feeding-category-text {
