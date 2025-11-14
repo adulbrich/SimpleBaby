@@ -225,41 +225,7 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 ## Basic Architecture
 
 ```
-
-+----------------------+      +---------------------------------+
-|                      |      |                                 |
-|   User's Device      |      |   Supabase (Local Instance)     |
-|  (iOS / Android)     |      |   http://76.138.134.66          |
-|                      |      |                                 |
-| +------------------+ |      | +-----------------------------+ |
-| |                  | |      | | PostgreSQL DB (Port 44322)  | |
-| |  Baby Tracker    | |----->| | - Data Storage              | |
-| |  (Expo App)      | |      | +-----------------------------+ |
-| |                  | |      |                                 |
-| | - UI (React Nat.)| |      | +-----------------------------+ |
-| | - Logic          | |      | | GoTrue Auth (Port 44321)    | |
-| | - Supabase Client| |<---->| | - User Management           | |
-| |                  | |      | +-----------------------------+ |
-| +------------------+ |      |                                 |
-|                      |      | +-----------------------------+ |
-+----------------------+      | | Realtime (Port 44321)       | |
-| | - Websockets (used for multi-user access (not implemented)) |
-| +-----------------------------+ |
-|                                 |
-| +-----------------------------+ |
-| | Storage (S3) (Port 44321)   | |
-| | - File Uploads (Images/Vid) | |
-| +-----------------------------+ |
-|                                 |
-| +-----------------------------+ |
-| | Inbucket (Email) (Port 44324)| |
-| +-----------------------------+ |
-|                                 |
-| +-----------------------------+ |
-| | Studio (UI for DB)          | |
-| +-----------------------------+ |
-|                                 |
-+---------------------------------+
+![Simple Baby Deployment Diagram](/Deployment-Diagram.png)
 
 ```
 
