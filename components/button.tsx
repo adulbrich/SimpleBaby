@@ -9,9 +9,9 @@ export default function Button({
 }: {
     text: string
     action: () => void
-    buttonClass?: string | undefined
-    textClass?: string | undefined
-    testID?: string | undefined
+    buttonClass?: string
+    textClass?: string
+    testID?: string
 }) {
     return (
         <TouchableOpacity onPress={action} className={`button ${buttonClass}`} testID={testID}>
