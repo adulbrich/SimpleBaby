@@ -106,6 +106,15 @@ export default function Nursing() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setLeftDuration("00:00:00");
+        setRightDuration("00:00:00");
+        setLeftAmount("");
+        setRightAmount("");
+        setNote("");
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View
@@ -196,7 +205,7 @@ export default function Nursing() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>

@@ -132,6 +132,13 @@ export default function Sleep() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setStartTime(null);
+        setEndTime(null);
+        setNote("");
+    }
+
     return (
         // Dismiss keyboard when touching outside inputs
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -184,7 +191,7 @@ export default function Sleep() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                         testID='sleep-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>

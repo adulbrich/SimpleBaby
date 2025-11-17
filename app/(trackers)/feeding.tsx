@@ -100,6 +100,15 @@ export default function Feeding() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setCategory("");
+        setItemName("");
+        setAmount("");
+        setFeedingTime(new Date());
+        setNote("");
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View
@@ -149,7 +158,7 @@ export default function Feeding() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>

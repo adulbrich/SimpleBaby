@@ -94,6 +94,14 @@ export default function Diaper() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setConsistency("");
+        setAmount("");
+        setChangeTime(new Date());
+        setNote("");
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View
@@ -143,7 +151,7 @@ export default function Diaper() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
