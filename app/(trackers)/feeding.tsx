@@ -117,10 +117,11 @@ export default function Feeding() {
                         onItemNameUpdate={setItemName}
                         onAmountUpdate={setAmount}
                         onTimeUpdate={setFeedingTime}
+                        testID='feeding-data-entry'
                     />
                     {/* Note input section */}
                     <View className='bottom-5'>
-                        <View className='items-start top-5 left-3 z-10'>
+                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
                             <Text className='bg-gray-200 p-3 rounded-xl font'>
                                 Add a note
                             </Text>
@@ -144,12 +145,14 @@ export default function Feeding() {
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveFeedingLog}
+                        testID='feeding-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
                         onPress={() => router.replace('./')}
+                        testID='feeding-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>

@@ -20,11 +20,13 @@ export default function FeedingCategory({
     onCategoryUpdate,
     onItemNameUpdate,
     onAmountUpdate,
+    testID,
 }: {
     onTimeUpdate?: (time: Date) => void
     onCategoryUpdate?: (category: FeedingCategoryList) => void
     onItemNameUpdate?: (itemName: string) => void
     onAmountUpdate?: (amount: string) => void
+    testID?: string
 }) {
     const [feedingTime, setFeedingTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
@@ -91,7 +93,7 @@ export default function FeedingCategory({
     };
 
     return (
-        <View className='flex-col gap-6'>
+        <View className='flex-col gap-6' testID={testID}>
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
                     <Text className='bg-gray-200 p-3 rounded-xl font'>
