@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import Feeding from "@/app/(trackers)/feeding";
 
 
@@ -12,7 +12,7 @@ jest.mock("@/library/supabase-client", () => ({
     from: () => null
 }));
 
-jest.mock("@/library/crypto", () =>({
+jest.mock("@/library/crypto", () => ({
     encryptData: async () => ""
 }));
 

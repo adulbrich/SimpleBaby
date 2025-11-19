@@ -12,7 +12,7 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@/library/supabase-client", () => {
     const single = jest.fn();
-    const insert = jest.fn()
+    const insert = jest.fn();
     return ({
         auth: {
             getUser: jest.fn(async () => ({ data: { user: null } }))
@@ -25,7 +25,7 @@ jest.mock("@/library/supabase-client", () => {
             }),
             insert: insert
         })
-        })
+        });
 });
 
 jest.mock("@/library/crypto", () =>({
