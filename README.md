@@ -224,10 +224,8 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 
 ## Basic Architecture
 
-```
-![Simple Baby Deployment Diagram](/Deployment-Diagram.png)
 
-```
+![Simple Baby Deployment Diagram](/Deployment-Diagram.png)
 
 **Flow:**
 1.  The Expo app on the user's device makes API calls (REST, GraphQL, Auth, Storage) to the Supabase instance.
