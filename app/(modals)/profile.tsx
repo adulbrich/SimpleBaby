@@ -124,6 +124,23 @@ export default function Profile() {
                             </Text>
                         </TouchableOpacity>
                     </View>
+                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                            🤖 Settings Version
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() =>
+                                Alert.alert(
+                                    "Can't do this yet.",
+                                    'Please wait for an update.',
+                                )
+                            }
+                        >
+                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
+                                v0.1a
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
             <View className='pt-4'>
