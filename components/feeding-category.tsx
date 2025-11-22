@@ -108,6 +108,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Liquid')}
+                        testID='feeding-category-liquid'
                     >
                         <Text className='scale-100 text-2xl'>🍼</Text>
                         <Text className='feeding-category-text'>Liquid</Text>
@@ -119,6 +120,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Soft')}
+                        testID='feeding-category-soft'
                     >
                         <Text className='scale-100 text-2xl'>🥣</Text>
                         <Text className='feeding-category-text'>Soft</Text>
@@ -130,6 +132,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Solid')}
+                        testID='feeding-category-solid'
                     >
                         <Text className='scale-100 text-2xl'>🥕</Text>
                         <Text className='feeding-category-text'>Solid</Text>
@@ -152,6 +155,7 @@ export default function FeedingCategory({
                             keyboardType='default'
                             value={itemName}
                             onChangeText={setItemName}
+                            testID='feeding-item-name'
                         />
                     </View>
                     <View className='ml-4 mr-4'>
@@ -163,6 +167,7 @@ export default function FeedingCategory({
                             keyboardType='default'
                             value={amount}
                             onChangeText={setAmount}
+                            testID='feeding-amount'
                         />
                     </View>
                     <View className='ml-4 mr-4 flex-row items-center justify-between'>
