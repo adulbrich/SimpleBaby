@@ -1,5 +1,6 @@
 import { ExternalPathString, router } from 'expo-router';
 import { TouchableOpacity, Text } from 'react-native';
+import { useAudioPlayer } from 'expo-audio';
 
 /**
  * TrackerButton component renders a stylized button with an icon and label.
@@ -13,11 +14,24 @@ type Button = {
     link: ExternalPathString
 }
 
+function setSounds()
+{
+    const buttonSound = require('../assets/sounds/ui-pop.mp3');
+    const player = useAudioPlayer(buttonSound);
+    player.seekTo(0);
+    player.play();
+}
+
+
 export default function TrackerButton({ button, testID }: { button: Button, testID?: string }) {
     return (
+
         <TouchableOpacity
             className='tracker-button'
-            onPress={() => router.push(button.link)}
+            onPress={() => {
+                router.push(button.link);
+                setSounds();
+            }}
             testID={testID}
         >
             <Text className='tracker-icon'>{button.icon}</Text>
