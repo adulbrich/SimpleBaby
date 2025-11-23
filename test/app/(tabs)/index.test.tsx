@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
 import MainTab from "@/app/(tabs)";
-import { useAudioPlayer } from "expo-audio";
 
 jest.mock("expo-router", () => ({
     router: {
