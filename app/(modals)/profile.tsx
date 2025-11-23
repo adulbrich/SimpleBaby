@@ -20,7 +20,7 @@ import { useAudioPlayer } from 'expo-audio';
  * Some options like changing email or password and managing caretakers are shown as placeholders with alerts.
  */
 
-const alertSound = require('../../assets/sounds/ui-pop.mp3')
+const alertSound = require('../../assets/sounds/ui-pop.mp3');
 
 export default function Profile() {
 

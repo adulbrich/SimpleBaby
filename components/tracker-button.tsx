@@ -14,14 +14,6 @@ type Button = {
     link: ExternalPathString
 }
 
-function setSounds()
-{
-    const buttonSound = require('../assets/sounds/ui-pop.mp3');
-    const player = useAudioPlayer(buttonSound);
-    player.seekTo(0);
-    player.play();
-}
-
 
 export default function TrackerButton({ button, testID }: { button: Button, testID?: string }) {
     return (
@@ -29,8 +21,16 @@ export default function TrackerButton({ button, testID }: { button: Button, test
         <TouchableOpacity
             className='tracker-button'
             onPress={() => {
+                //These const variables get the sound file and an AudioPlayer isntance to play it
+                const buttonSound = require('../assets/sounds/ui-pop.mp3');
+                const player = useAudioPlayer(buttonSound);
+
+                //Resets the position of the sound effect to the beginning of the audio file and plays
+                player.seekTo(0);
+                player.play();
+
+                //Navigates to the page using router
                 router.push(button.link);
-                setSounds();
             }}
             testID={testID}
         >

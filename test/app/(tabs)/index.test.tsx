@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 import MainTab from "@/app/(tabs)";
+import { useAudioPlayer } from "expo-audio";
 
 jest.mock("expo-router", () => ({
     router: {
@@ -33,6 +34,9 @@ jest.mock("expo-blur", () => ({
     BlurView: () => <></>
 }));
 
+jest.mock("expo-audio", () => ({
+    useAudioPlayer: () => <></>
+}));
 
 describe("Tracker screen", () => {
     test("Loads tracker option buttons", () => {
