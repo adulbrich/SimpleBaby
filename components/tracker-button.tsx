@@ -21,15 +21,15 @@ export default function TrackerButton({ button, testID }: { button: Button, test
     const buttonSound = require('../assets/sounds/ui-pop.mp3');
     const player = useAudioPlayer(buttonSound);
 
-    //Resets the position of the sound effect to the beginning of the audio file and plays
-    player.seekTo(0);
-    player.play();
-
     return (
 
         <TouchableOpacity
             className='tracker-button'
             onPress={() => {
+
+                //Resets the position of the sound effect to the beginning of the audio file and plays
+                player.seekTo(0);
+                player.play();
 
                 //Navigates to the page using router
                 router.push(button.link);
