@@ -2,7 +2,7 @@ import HealthModule, { HealthCategory } from "@/components/health-module";
 import supabase from "@/library/supabase-client";
 import { getActiveChildId } from "@/library/utils";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -149,15 +149,15 @@ export default function Health() {
   };
 
     // Update date in state when changed
-  const handleDateUpdate = (date: Date) => {
+  const handleDateUpdate = useCallback((date: Date) => {
     setHealthLog((prev) => ({
       ...prev,
       date,
     }));
-  };
+  }, []);
 
    // Update category and reset nested fields based on selected category
-  const handleCategoryUpdate = (category: HealthCategory) => {
+  const handleCategoryUpdate = useCallback((category: HealthCategory) => {
     setHealthLog((prev) => ({
       ...prev,
       category,
@@ -172,10 +172,10 @@ export default function Health() {
           ? { name: "", amount: "", timeTaken: new Date() }
           : undefined,
     }));
-  };
+  }, []);
 
 // Update growth-related fields in state with partial updates
-  const handleGrowthUpdate = (growth: {
+  const handleGrowthUpdate = useCallback((growth: {
     length?: string;
     weight?: string;
     head?: string;
@@ -203,9 +203,10 @@ export default function Health() {
             : "",
       },
     }));
-  };
+  }, []);
+
  // Update activity-related fields in state with partial updates
-  const handleActivityUpdate = (activity: {
+  const handleActivityUpdate = useCallback((activity: {
     type?: string;
     duration?: string;
   }) => {
@@ -226,10 +227,10 @@ export default function Health() {
             : "",
       },
     }));
-  };
+  }, []);
 
   // Update medication-related fields in state with partial updates
-  const handleMedsUpdate = (meds: {
+  const handleMedsUpdate = useCallback((meds: {
     name?: string;
     amount?: string;
     timeTaken?: Date;
@@ -243,7 +244,7 @@ export default function Health() {
         ...meds,
       },
     }));
-  };
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
