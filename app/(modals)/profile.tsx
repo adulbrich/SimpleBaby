@@ -11,6 +11,7 @@ import { useAuth } from '@/library/auth-provider';
 import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
+import { useAudioPlayer } from 'expo-audio';
 
 /**
  * Profile Screen
@@ -19,8 +20,12 @@ import Button from '@/components/button';
  * Some options like changing email or password and managing caretakers are shown as placeholders with alerts.
  */
 
+const alertSound = require('../../assets/sounds/ui-pop.mp3');
 
 export default function Profile() {
+
+    const player = useAudioPlayer(alertSound);
+
     const { session } = useAuth();
     
     // Handles user sign-out and route reset
@@ -79,10 +84,14 @@ export default function Profile() {
                         </Text>
                         <TouchableOpacity
                             onPress={() =>
-                                Alert.alert(
+                                {
+                                    Alert.alert(
                                     "Can't do this yet.",
                                     'Please wait for an update.',
-                                )
+                                    );
+                                    player.seekTo(0);
+                                    player.play();
+                                }
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
