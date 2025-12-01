@@ -13,48 +13,35 @@ import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native'
  * item name, or amount updates.
  */
 
-type FeedingCategoryList = 'Liquid' | 'Soft' | 'Solid'
+export type FeedingCategoryList = 'Liquid' | 'Soft' | 'Solid'
 
 export default function FeedingCategory({
+    category,
+    itemName,
+    amount,
+    feedingTime,
     onTimeUpdate,
     onCategoryUpdate,
     onItemNameUpdate,
     onAmountUpdate,
     testID,
 }: {
+    category: FeedingCategoryList;
+    itemName: string;
+    amount: string;
+    feedingTime: Date;
     onTimeUpdate?: (time: Date) => void
     onCategoryUpdate?: (category: FeedingCategoryList) => void
     onItemNameUpdate?: (itemName: string) => void
     onAmountUpdate?: (amount: string) => void
     testID?: string
 }) {
-    const [feedingTime, setFeedingTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
-    const [selectedCategory, setSelectedCategory] =
-        useState<FeedingCategoryList>('Liquid');
-    const [itemName, setItemName] = useState('');
-    const [amount, setAmount] = useState('');
-
-    useEffect(() => {
-        onTimeUpdate?.(feedingTime);
-    }, [feedingTime, onTimeUpdate]);
-
-    useEffect(() => {
-        onCategoryUpdate?.(selectedCategory);
-    }, [selectedCategory, onCategoryUpdate]);
-
-    useEffect(() => {
-        onItemNameUpdate?.(itemName);
-    }, [itemName, onItemNameUpdate]);
-
-    useEffect(() => {
-        onAmountUpdate?.(amount);
-    }, [amount, onAmountUpdate]);
 
     // Handles time picker change event, updates feedingTime
     const onChangeTime = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
-            setFeedingTime(selectedDate);
+            onTimeUpdate?.(selectedDate);
         }
         // setShowIOSPicker(false)
     };
@@ -70,7 +57,7 @@ export default function FeedingCategory({
                 value: feedingTime,
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
-                        setFeedingTime(selectedDate);
+                        onTimeUpdate?.(selectedDate);
                     }
                 },
                 mode: 'time',
@@ -88,8 +75,8 @@ export default function FeedingCategory({
         });
     };
 
-    const handleCategoryPress = (category: FeedingCategoryList) => {
-        setSelectedCategory(category);
+    const handleCategoryPress = (categoryValue: FeedingCategoryList) => {
+        onCategoryUpdate?.(categoryValue);
     };
 
     return (
@@ -103,7 +90,7 @@ export default function FeedingCategory({
                 <View className='flex-row gap-4 justify-center mb-6'>
                     <TouchableOpacity
                         className={`feeding-category-button ${
-                            selectedCategory === 'Liquid'
+                            category === 'Liquid'
                                 ? 'feeding-category-button-active'
                                 : ''
                         }`}
@@ -113,9 +100,10 @@ export default function FeedingCategory({
                         <Text className='scale-100 text-2xl'>🍼</Text>
                         <Text className='feeding-category-text'>Liquid</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                         className={`feeding-category-button ${
-                            selectedCategory === 'Soft'
+                            category === 'Soft'
                                 ? 'feeding-category-button-active'
                                 : ''
                         }`}
@@ -125,9 +113,10 @@ export default function FeedingCategory({
                         <Text className='scale-100 text-2xl'>🥣</Text>
                         <Text className='feeding-category-text'>Soft</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                         className={`feeding-category-button ${
-                            selectedCategory === 'Solid'
+                            category === 'Solid'
                                 ? 'feeding-category-button-active'
                                 : ''
                         }`}
@@ -139,6 +128,7 @@ export default function FeedingCategory({
                     </TouchableOpacity>
                 </View>
             </View>
+
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
                     <Text className='bg-gray-200 p-3 rounded-xl font'>
@@ -154,10 +144,11 @@ export default function FeedingCategory({
                             autoCapitalize='none'
                             keyboardType='default'
                             value={itemName}
-                            onChangeText={setItemName}
+                            onChangeText={text => onItemNameUpdate?.(text)}
                             testID='feeding-item-name'
                         />
                     </View>
+
                     <View className='ml-4 mr-4'>
                         <Text className='feeding-module-label'>Amount</Text>
                         <TextInput
@@ -166,10 +157,11 @@ export default function FeedingCategory({
                             autoCapitalize='none'
                             keyboardType='default'
                             value={amount}
-                            onChangeText={setAmount}
+                            onChangeText={text => onAmountUpdate?.(text)}
                             testID='feeding-amount'
                         />
                     </View>
+
                     <View className='ml-4 mr-4 flex-row items-center justify-between'>
                         <Text className='feeding-module-label'>Meal Time</Text>
                         <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
@@ -186,6 +178,7 @@ export default function FeedingCategory({
                             </Text>
                         </View>
                     </View>
+
                     {showIOSPicker && Platform.OS === 'ios' && (
                         <View className='items-center'>
                             <DateTimePicker

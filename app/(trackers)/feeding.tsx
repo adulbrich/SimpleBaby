@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
-import FeedingCategory from '@/components/feeding-category';
+import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
 import { encryptData } from '@/library/crypto';  // ✅ Added
 
 // Feeding.tsx
@@ -21,7 +21,7 @@ import { encryptData } from '@/library/crypto';  // ✅ Added
 export default function Feeding() {
     const insets = useSafeAreaInsets();
     const [isTyping, setIsTyping] = useState(false);
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState<FeedingCategoryList>('Liquid');
     const [itemName, setItemName] = useState('');
     const [amount, setAmount] = useState('');
     const [feedingTime, setFeedingTime] = useState(new Date());
@@ -102,7 +102,7 @@ export default function Feeding() {
 
     // Handle the UI logic when resetting fields
     const handleResetFields = () => {
-        setCategory("");
+        setCategory("Liquid");
         setItemName("");
         setAmount("");
         setFeedingTime(new Date());
@@ -122,6 +122,10 @@ export default function Feeding() {
                 >
                     {/* FeedingCategory component handles category/item/amount/time inputs */}
                     <FeedingCategory
+                        category={category}
+                        itemName={itemName}
+                        amount={amount}
+                        feedingTime={feedingTime}
                         onCategoryUpdate={setCategory}
                         onItemNameUpdate={setItemName}
                         onAmountUpdate={setAmount}
