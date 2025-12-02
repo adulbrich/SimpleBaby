@@ -25,6 +25,7 @@ export default function Diaper() {
     const [amount, setAmount] = useState('');
     const [changeTime, setChangeTime] = useState(new Date());
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Create a new diaper log into the database
     const createDiaperLog = async (
@@ -100,6 +101,7 @@ export default function Diaper() {
         setAmount("");
         setChangeTime(new Date());
         setNote("");
+        setReset(prev => prev + 1);
     }
 
     return (
@@ -115,6 +117,7 @@ export default function Diaper() {
                     }`}
                 >
                     <DiaperModule
+                        key={`diaper-module-${reset}`}
                         onConsistencyUpdate={setConsistency}
                         onAmountUpdate={setAmount}
                         onTimeUpdate={setChangeTime}
