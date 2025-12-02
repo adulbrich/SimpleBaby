@@ -10,12 +10,12 @@ type Button = {
 
 export default function Tab() {
     const bars: Button[] = [
-        { label: 'Sleep', icon: '🌙', link: '/(logs)/sleep-log' },
-        { label: 'Feeding', icon: '🍽️', link: '/(logs)/feeding-logs' },
-        { label: 'Nursing', icon: '🍼', link: '/(logs)/nursing-logs' },
-        { label: 'Diaper', icon: '🧷', link: '/(logs)/diaper-logs' },
-        { label: 'Milestone', icon: '🌟', link: '/(trackers)/milestone' },
-        { label: 'Health', icon: '💚', link: '/(logs)/health-logs' },
+        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-log' },
+        { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs' },
+        { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs' },
+        { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs' },
+        { label: 'Milestone Logs', icon: '🌟', link: '/(trackers)/milestone' },
+        { label: 'Health Logs', icon: '💚', link: '/(logs)/health-logs' },
     ];
 
     return (
@@ -35,9 +35,6 @@ export default function Tab() {
                             <Text className='tracker-bar-label'>
                                 {bars.label}
                             </Text>
-                        </View>
-                        <View>
-                            <Text>num logs, graph</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
