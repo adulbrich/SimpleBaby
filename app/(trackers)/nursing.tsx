@@ -26,6 +26,7 @@ export default function Nursing() {
     const [leftAmount, setLeftAmount] = useState('');
     const [rightAmount, setRightAmount] = useState('');
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Insert a new nursing log entry into Supabase
     const createNursingLog = async (
@@ -113,6 +114,7 @@ export default function Nursing() {
         setLeftAmount("");
         setRightAmount("");
         setNote("");
+        setReset(prev => prev + 1);
     }
 
     return (
@@ -128,6 +130,7 @@ export default function Nursing() {
                 >
                     {/* Stopwatch component controls left/right timer states */}
                     <NursingStopwatch
+                        key={`nursing-stopwatch-${reset}`}
                         onTimeUpdateLeft={setLeftDuration}
                         onTimeUpdateRight={setRightDuration}
                     />
