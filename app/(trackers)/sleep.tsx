@@ -25,6 +25,7 @@ export default function Sleep() {
     const [endTime, setEndTime] = useState<Date | null>(null);
     const [stopwatchTime, setStopwatchTime] = useState('00:00:00');
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Update manual entry times
     const handleDatesUpdate = (start: Date, end: Date) => {
@@ -136,7 +137,9 @@ export default function Sleep() {
     const handleResetFields = () => {
         setStartTime(null);
         setEndTime(null);
-        setNote("");
+        setStopwatchTime('00:00:00');
+        setNote('');
+        setReset((prev) => prev + 1);
     }
 
     return (
@@ -153,10 +156,18 @@ export default function Sleep() {
                     }`}
                 >
                     {/* Stopwatch component for tracking session duration */}
-                    <Stopwatch onTimeUpdate={setStopwatchTime} testID='sleep-stopwatch' />
+                    <Stopwatch 
+                        onTimeUpdate={setStopwatchTime}
+                        resetSignal={reset} 
+                        testID='sleep-stopwatch' 
+                    />
 
                     {/* Manual start/end time picker */}
-                    <ManualEntry onDatesUpdate={handleDatesUpdate} testID='sleep-manual-time-entry' />
+                    <ManualEntry 
+                        onDatesUpdate={handleDatesUpdate}
+                        resetSignal={reset}
+                        testID='sleep-manual-time-entry'
+                    />
 
                     {/* Note input section */}
                     <View className='bottom-5' testID='sleep-note-entry'>
