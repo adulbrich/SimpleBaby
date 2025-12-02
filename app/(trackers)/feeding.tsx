@@ -107,7 +107,7 @@ export default function Feeding() {
         setAmount("");
         setFeedingTime(new Date());
         setNote("");
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

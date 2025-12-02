@@ -115,7 +115,7 @@ export default function Nursing() {
         setRightAmount("");
         setNote("");
         setReset(prev => prev + 1);
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

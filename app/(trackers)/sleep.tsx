@@ -140,7 +140,7 @@ export default function Sleep() {
         setStopwatchTime('00:00:00');
         setNote('');
         setReset((prev) => prev + 1);
-    }
+    };
 
     return (
         // Dismiss keyboard when touching outside inputs

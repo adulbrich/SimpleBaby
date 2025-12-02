@@ -102,7 +102,7 @@ export default function Diaper() {
         setChangeTime(new Date());
         setNote("");
         setReset(prev => prev + 1);
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

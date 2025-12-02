@@ -259,7 +259,7 @@ export default function Health() {
       note: "",
     });
     setReset(prev => prev + 1);
-  }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
