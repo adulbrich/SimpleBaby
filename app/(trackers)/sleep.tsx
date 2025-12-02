@@ -156,16 +156,16 @@ export default function Sleep() {
                     }`}
                 >
                     {/* Stopwatch component for tracking session duration */}
-                    <Stopwatch 
+                    <Stopwatch
+                        key={`stopwatch-${reset}`} 
                         onTimeUpdate={setStopwatchTime}
-                        resetSignal={reset} 
                         testID='sleep-stopwatch' 
                     />
 
                     {/* Manual start/end time picker */}
-                    <ManualEntry 
+                    <ManualEntry
+                        key={`manual-entry-${reset}`} 
                         onDatesUpdate={handleDatesUpdate}
-                        resetSignal={reset}
                         testID='sleep-manual-time-entry'
                     />
 

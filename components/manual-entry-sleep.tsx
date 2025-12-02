@@ -31,6 +31,7 @@ export default function ManualEntry({
         onDatesUpdate?.(startDate, endDate);
     }, [startDate, endDate, onDatesUpdate]);
 
+    // reset the date when the reset button is pressed
     useEffect(() => {
         if (resetSignal === undefined) {
             return;
@@ -41,7 +42,7 @@ export default function ManualEntry({
         setEndDate(now);
 
         onDatesUpdate?.(now, now);
-    }, [resetSignal]);
+    }, [onDatesUpdate, resetSignal]);
 
     // Handles date change from picker, updates corresponding time, hides iOS picker
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
