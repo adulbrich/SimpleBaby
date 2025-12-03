@@ -63,13 +63,32 @@ describe("Track sleep screen", () => {
     
     test("Refreshes on reset", async () => {
         render(<Feeding/>);
-        await userEvent.press(
-            screen.getByTestId("feeding-reset-form-button")
+
+        const itemNameInput = screen.getByTestId("feeding-item-name");
+        const amountInput = screen.getByTestId("feeding-amount");
+        const resetButton = screen.getByTestId("feeding-reset-form-button");
+
+        // the note input doesn't have a testID, so grab it by placeholder
+        const noteInput = screen.getByPlaceholderText(
+            "i.e. does not like pureed\n carrots"
         );
 
-        // confirm that the expo-router was called to send the same page, refreshed
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
-        expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("./");
+        // type into the fields so we have something to clear
+        await userEvent.type(itemNameInput, "Applesauce");
+        await userEvent.type(amountInput, "4 oz");
+        await userEvent.type(noteInput, "Baby disliked this");
+
+        // check values are there before we reset
+        expect(screen.getByDisplayValue("Applesauce")).toBeTruthy();
+        expect(screen.getByDisplayValue("4 oz")).toBeTruthy();
+        expect(screen.getByDisplayValue("Baby disliked this")).toBeTruthy();
+
+        await userEvent.press(resetButton);
+
+        // after reset, those values should no longer be in any input
+        expect(screen.queryByDisplayValue("Applesauce")).toBeNull();
+        expect(screen.queryByDisplayValue("4 oz")).toBeNull();
+        expect(screen.queryByDisplayValue("Baby disliked this")).toBeNull();
     });
     
     test("Catch unfilled category/name/amount", async () => {

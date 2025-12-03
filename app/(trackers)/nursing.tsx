@@ -26,6 +26,7 @@ export default function Nursing() {
     const [leftAmount, setLeftAmount] = useState('');
     const [rightAmount, setRightAmount] = useState('');
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Insert a new nursing log entry into Supabase
     const createNursingLog = async (
@@ -106,6 +107,16 @@ export default function Nursing() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setLeftDuration("00:00:00");
+        setRightDuration("00:00:00");
+        setLeftAmount("");
+        setRightAmount("");
+        setNote("");
+        setReset(prev => prev + 1);
+    };
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View
@@ -119,6 +130,7 @@ export default function Nursing() {
                 >
                     {/* Stopwatch component controls left/right timer states */}
                     <NursingStopwatch
+                        key={`nursing-stopwatch-${reset}`}
                         onTimeUpdateLeft={setLeftDuration}
                         onTimeUpdateRight={setRightDuration}
                     />
@@ -196,7 +208,7 @@ export default function Nursing() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>

@@ -25,6 +25,7 @@ export default function Sleep() {
     const [endTime, setEndTime] = useState<Date | null>(null);
     const [stopwatchTime, setStopwatchTime] = useState('00:00:00');
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Update manual entry times
     const handleDatesUpdate = (start: Date, end: Date) => {
@@ -132,6 +133,15 @@ export default function Sleep() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setStartTime(null);
+        setEndTime(null);
+        setStopwatchTime('00:00:00');
+        setNote('');
+        setReset((prev) => prev + 1);
+    };
+
     return (
         // Dismiss keyboard when touching outside inputs
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -146,10 +156,18 @@ export default function Sleep() {
                     }`}
                 >
                     {/* Stopwatch component for tracking session duration */}
-                    <Stopwatch onTimeUpdate={setStopwatchTime} testID='sleep-stopwatch' />
+                    <Stopwatch
+                        key={`stopwatch-${reset}`} 
+                        onTimeUpdate={setStopwatchTime}
+                        testID='sleep-stopwatch' 
+                    />
 
                     {/* Manual start/end time picker */}
-                    <ManualEntry onDatesUpdate={handleDatesUpdate} testID='sleep-manual-time-entry' />
+                    <ManualEntry
+                        key={`manual-entry-${reset}`} 
+                        onDatesUpdate={handleDatesUpdate}
+                        testID='sleep-manual-time-entry'
+                    />
 
                     {/* Note input section */}
                     <View className='bottom-5' testID='sleep-note-entry'>
@@ -184,7 +202,7 @@ export default function Sleep() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                         testID='sleep-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
