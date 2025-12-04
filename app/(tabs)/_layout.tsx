@@ -20,17 +20,17 @@ const Calendar: HeaderLink = {
 };
 
 export default function TabLayout() {
-    const scheme = useColorScheme()
-    const insets = useSafeAreaInsets().top
+    const colorScheme = useColorScheme(); // renamed to avoid duplicate-var warning
+    const insets = useSafeAreaInsets().top;
 
     const scheme = useColorScheme();
     const insets = useSafeAreaInsets().top;
     const tabBarStyle =
-        scheme === 'light'
+        colorScheme === 'light'
             ? { backgroundColor: '#f0dfcf', borderColor: '#bbb' }
             : { backgroundColor: '#08150e', borderColor: '#000' };
 
-    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866';
+    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866'
 
     return (
         <Tabs
@@ -41,7 +41,7 @@ export default function TabLayout() {
             }}
         >
             <Tabs.Screen
-                name='index'
+                name="index"
                 options={{
                     tabBarLabel: 'Trackers',
                     tabBarIcon: ({ color }) => Icon(color, '👶'),
@@ -50,15 +50,16 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
-                name='trends'
+                name="trends"
                 options={{
                     title: 'Logs',
                     tabBarIcon: ({ color }) => Icon(color, '📈'),
                     header: () => Header('📈 Logs', Calendar, insets),
                 }}
             />
+
             <Tabs.Screen
-                name='about'
+                name="about"
                 options={{
                     title: 'About',
                     tabBarIcon: ({ color }) => Icon(color, '❓'),
