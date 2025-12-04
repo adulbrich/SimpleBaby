@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,11 +12,11 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-} from 'react-native'
-import { format } from 'date-fns'
-import { getActiveChildId } from '@/library/utils'
-import supabase from '@/library/supabase-client'
-import { decryptData, encryptData } from '@/library/crypto'
+} from 'react-native';
+import { format } from 'date-fns';
+import { getActiveChildId } from '@/library/utils';
+import supabase from '@/library/supabase-client';
+import { decryptData, encryptData } from '@/library/crypto';
 
 interface NursingLog {
     id: string
@@ -30,39 +30,39 @@ interface NursingLog {
 }
 
 const NursingLogsView: React.FC = () => {
-    const [nursingLogs, setNursingLogs] = useState<NursingLog[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [editingLog, setEditingLog] = useState<NursingLog | null>(null)
-    const [editModalVisible, setEditModalVisible] = useState(false)
+    const [nursingLogs, setNursingLogs] = useState<NursingLog[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [editingLog, setEditingLog] = useState<NursingLog | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
 
     useEffect(() => {
-        fetchNursingLogs()
-    })
+        fetchNursingLogs();
+    });
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
-        if (!value || !value.includes('U2FsdGVkX1')) return value || ''
+        if (!value || !value.includes('U2FsdGVkX1')) return value || '';
         try {
-            return await decryptData(value)
+            return await decryptData(value);
         } catch {
-            return '[Decryption Failed]'
+            return '[Decryption Failed]';
         }
-    }
+    };
 
     const fetchNursingLogs = async () => {
         try {
-            const { success, childId, error: childError } = await getActiveChildId()
+            const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
-                throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID')
+                throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
             }
 
             const { data, error } = await supabase
                 .from('nursing_logs')
                 .select('*')
                 .eq('child_id', childId)
-                .order('logged_at', { ascending: false })
+                .order('logged_at', { ascending: false });
 
-            if (error) throw error
+            if (error) throw error;
 
             const decrypted = await Promise.all(
                 (data || []).map(async (entry) => ({
@@ -73,18 +73,18 @@ const NursingLogsView: React.FC = () => {
                     right_amount: await safeDecrypt(entry.right_amount),
                     note: await safeDecrypt(entry.note),
                 }))
-            )
+            );
 
-            setNursingLogs(decrypted)
+            setNursingLogs(decrypted);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred')
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleSaveEdit = async () => {
-        if (!editingLog) return
+        if (!editingLog) return;
         try {
             const updated = {
                 left_duration: editingLog.left_duration ? await encryptData(editingLog.left_duration) : null,
@@ -92,24 +92,24 @@ const NursingLogsView: React.FC = () => {
                 left_amount: editingLog.left_amount ? await encryptData(editingLog.left_amount) : null,
                 right_amount: editingLog.right_amount ? await encryptData(editingLog.right_amount) : null,
                 note: editingLog.note ? await encryptData(editingLog.note) : null,
-            }
+            };
 
             const { error } = await supabase
                 .from('nursing_logs')
                 .update(updated)
-                .eq('id', editingLog.id)
+                .eq('id', editingLog.id);
 
             if (error) {
-                Alert.alert('Error updating log')
-                return
+                Alert.alert('Error updating log');
+                return;
             }
 
-            await fetchNursingLogs()
-            setEditModalVisible(false)
+            await fetchNursingLogs();
+            setEditModalVisible(false);
         } catch (err) {
-            Alert.alert(`Encryption or update error: ${err}`)
+            Alert.alert(`Encryption or update error: ${err}`);
         }
-    }
+    };
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -118,16 +118,16 @@ const NursingLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
-                    const { error } = await supabase.from('nursing_logs').delete().eq('id', id)
+                    const { error } = await supabase.from('nursing_logs').delete().eq('id', id);
                     if (error) {
-                        Alert.alert('Error deleting log')
-                        return
+                        Alert.alert('Error deleting log');
+                        return;
                     }
-                    setNursingLogs((prev) => prev.filter((log) => log.id !== id))
+                    setNursingLogs((prev) => prev.filter((log) => log.id !== id));
                 },
             },
-        ])
-    }
+        ]);
+    };
 
     const renderNursingLogItem = ({ item }: { item: NursingLog }) => (
         <View className="bg-white rounded-xl p-4 mb-4 shadow">
@@ -142,8 +142,8 @@ const NursingLogsView: React.FC = () => {
                 <Pressable
                     className="px-3 py-2 rounded-full bg-blue-100"
                     onPress={() => {
-                        setEditingLog(item)
-                        setEditModalVisible(true)
+                        setEditingLog(item);
+                        setEditModalVisible(true);
                     }}
                 >
                     <Text className="text-blue-700">✏️ Edit</Text>
@@ -156,7 +156,7 @@ const NursingLogsView: React.FC = () => {
                 </Pressable>
             </View>
         </View>
-    )
+    );
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
@@ -217,7 +217,7 @@ const NursingLogsView: React.FC = () => {
                 </KeyboardAvoidingView>
             </Modal>
         </View>
-    )
-}
+    );
+};
 
 export default NursingLogsView;

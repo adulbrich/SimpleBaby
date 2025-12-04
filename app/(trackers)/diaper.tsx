@@ -6,25 +6,26 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import supabase from '@/library/supabase-client'
-import { router } from 'expo-router'
-import { getActiveChildId } from '@/library/utils'
-import DiaperModule from '@/components/diaper-module'
-import { encryptData } from '@/library/crypto'
+} from 'react-native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import supabase from '@/library/supabase-client';
+import { router } from 'expo-router';
+import { getActiveChildId } from '@/library/utils';
+import DiaperModule from '@/components/diaper-module';
+import { encryptData } from '@/library/crypto';
 
 // Diaper.tsx
 // Screen for logging diaper changes — includes selecting consistency, amount, change time, notes, and save logic
 
 export default function Diaper() {
-    const insets = useSafeAreaInsets()
-    const [isTyping, setIsTyping] = useState(false)
-    const [consistency, setConsistency] = useState('')
-    const [amount, setAmount] = useState('')
-    const [changeTime, setChangeTime] = useState(new Date())
-    const [note, setNote] = useState('')
+    const insets = useSafeAreaInsets();
+    const [isTyping, setIsTyping] = useState(false);
+    const [consistency, setConsistency] = useState('');
+    const [amount, setAmount] = useState('');
+    const [changeTime, setChangeTime] = useState(new Date());
+    const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Create a new diaper log into the database
     const createDiaperLog = async (
@@ -35,9 +36,9 @@ export default function Diaper() {
         note = '',
     ) => {
         try {
-            const encryptedConsistency = await encryptData(consistency)
-            const encryptedAmount = await encryptData(amount)
-            const encryptedNote = note ? await encryptData(note) : null
+            const encryptedConsistency = await encryptData(consistency);
+            const encryptedAmount = await encryptData(amount);
+            const encryptedNote = note ? await encryptData(note) : null;
 
             const { data, error } = await supabase.from('diaper_logs').insert([
                 {
@@ -47,27 +48,27 @@ export default function Diaper() {
                     change_time: changeTime.toISOString(),
                     note: encryptedNote,
                 },
-            ])
+            ]);
 
             if (error) {
-                console.error('Error creating diaper log:', error)
-                return { success: false, error }
+                console.error('Error creating diaper log:', error);
+                return { success: false, error };
             }
 
-            return { success: true, data }
+            return { success: true, data };
         } catch (err) {
-            console.error('❌ Encryption or insert failed:', err)
-            return { success: false, error: 'Encryption or database error' }
+            console.error('❌ Encryption or insert failed:', err);
+            return { success: false, error: 'Encryption or database error' };
         }
-    }
+    };
 
     // Get active child ID and save diaper log
     const saveDiaperLog = async () => {
-        const { success, childId, error } = await getActiveChildId()
+        const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
-            Alert.alert(`Error: ${error}`)
-            return { success: false, error }
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
         return await createDiaperLog(
@@ -76,23 +77,32 @@ export default function Diaper() {
             amount,
             changeTime,
             note,
-        )
-    }
+        );
+    };
 
     // Validate and handle save action with alerts
     const handleSaveDiaperLog = async () => {
         if (consistency && amount) {
-            const result = await saveDiaperLog()
+            const result = await saveDiaperLog();
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Diaper log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Diaper log saved successfully!');
             } else {
-                Alert.alert(`Failed to save diaper log: ${result.error}`)
+                Alert.alert(`Failed to save diaper log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide consistency and amount')
+            Alert.alert('Please provide consistency and amount');
         }
-    }
+    };
+
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setConsistency("");
+        setAmount("");
+        setChangeTime(new Date());
+        setNote("");
+        setReset(prev => prev + 1);
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -107,6 +117,7 @@ export default function Diaper() {
                     }`}
                 >
                     <DiaperModule
+                        key={`diaper-module-${reset}`}
                         onConsistencyUpdate={setConsistency}
                         onAmountUpdate={setAmount}
                         onTimeUpdate={setChangeTime}
@@ -143,12 +154,12 @@ export default function Diaper() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </TouchableWithoutFeedback>
-    )
+    );
 }

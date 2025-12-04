@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker'
-import { View, Text, TouchableOpacity, Platform } from 'react-native'
+} from '@react-native-community/datetimepicker';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 
 /**
  * DiaperModule component allows users to select diaper consistency and amount,
@@ -25,34 +25,34 @@ export default function DiaperModule({
     onConsistencyUpdate?: (consistency: DiaperConsistency) => void
     onAmountUpdate?: (amount: DiaperAmount) => void
 }) {
-    const [changeTime, setChangeTime] = useState(new Date())
-    const [showIOSPicker, setShowIOSPicker] = useState(false)
+    const [changeTime, setChangeTime] = useState(new Date());
+    const [showIOSPicker, setShowIOSPicker] = useState(false);
     const [selectedConsistency, setSelectedConsistency] =
-        useState<DiaperConsistency>('Wet')
-    const [selectedAmount, setSelectedAmount] = useState<DiaperAmount>('SM')
+        useState<DiaperConsistency>('Wet');
+    const [selectedAmount, setSelectedAmount] = useState<DiaperAmount>('SM');
 
     useEffect(() => {
-        onTimeUpdate?.(changeTime)
-    }, [changeTime, onTimeUpdate])
+        onTimeUpdate?.(changeTime);
+    }, [changeTime, onTimeUpdate]);
 
     useEffect(() => {
-        onConsistencyUpdate?.(selectedConsistency)
-    }, [selectedConsistency, onConsistencyUpdate])
+        onConsistencyUpdate?.(selectedConsistency);
+    }, [selectedConsistency, onConsistencyUpdate]);
 
     useEffect(() => {
-        onAmountUpdate?.(selectedAmount)
-    }, [selectedAmount, onAmountUpdate])
+        onAmountUpdate?.(selectedAmount);
+    }, [selectedAmount, onAmountUpdate]);
 
     const onChangeTime = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
-            setChangeTime(selectedDate)
+            setChangeTime(selectedDate);
         }
-    }
+    };
 
      // Show the time picker: inline spinner for iOS or native dialog for Android
     const showTimePicker = () => {
         if (showIOSPicker) {
-            return setShowIOSPicker(false)
+            return setShowIOSPicker(false);
         }
 
         if (Platform.OS === 'android') {
@@ -60,31 +60,31 @@ export default function DiaperModule({
                 value: changeTime,
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
-                        setChangeTime(selectedDate)
+                        setChangeTime(selectedDate);
                     }
                 },
                 mode: 'time',
                 is24Hour: false,
-            })
+            });
         } else {
-            setShowIOSPicker(true)
+            setShowIOSPicker(true);
         }
-    }
+    };
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
-        })
-    }
+        });
+    };
 
     const handleConsistencyPress = (consistency: DiaperConsistency) => {
-        setSelectedConsistency(consistency)
-    }
+        setSelectedConsistency(consistency);
+    };
 
     const handleAmountPress = (amount: DiaperAmount) => {
-        setSelectedAmount(amount)
-    }
+        setSelectedAmount(amount);
+    };
 
     return (
         <View className='flex-col gap-6'>
@@ -209,5 +209,5 @@ export default function DiaperModule({
                 </View>
             </View>
         </View>
-    )
+    );
 }

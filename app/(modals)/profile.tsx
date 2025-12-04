@@ -1,16 +1,17 @@
-import React from 'react'
+import React from 'react';
 import {
     Text,
     ScrollView,
     View,
     TouchableOpacity,
     Alert
-} from 'react-native'
-import { router } from 'expo-router'
-import { useAuth } from '@/library/auth-provider'
-import { signOut } from '@/library/auth'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/button'
+} from 'react-native';
+import { router } from 'expo-router';
+import { useAuth } from '@/library/auth-provider';
+import { signOut } from '@/library/auth';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '@/components/button';
+import { useAudioPlayer } from 'expo-audio';
 
 /**
  * Profile Screen
@@ -19,21 +20,25 @@ import Button from '@/components/button'
  * Some options like changing email or password and managing caretakers are shown as placeholders with alerts.
  */
 
+const alertSound = require('../../assets/sounds/ui-pop.mp3');
 
 export default function Profile() {
-    const { session } = useAuth()
+
+    const player = useAudioPlayer(alertSound);
+
+    const { session } = useAuth();
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
-        const { error } = await signOut()
+        const { error } = await signOut();
         if (error) {
-            console.error('Error signing out:', error)
+            console.error('Error signing out:', error);
         } else {
-            console.log('Signed out successfully')
-            router.dismissAll()
-            router.replace('/')
+            console.log('Signed out successfully');
+            router.dismissAll();
+            router.replace('/');
         }
-    }
+    };
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -79,10 +84,14 @@ export default function Profile() {
                         </Text>
                         <TouchableOpacity
                             onPress={() =>
-                                Alert.alert(
+                                {
+                                    Alert.alert(
                                     "Can't do this yet.",
                                     'Please wait for an update.',
-                                )
+                                    );
+                                    player.seekTo(0);
+                                    player.play();
+                                }
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
@@ -137,5 +146,5 @@ export default function Profile() {
                 )}
             </View>
         </SafeAreaView>
-    )
+    );
 }

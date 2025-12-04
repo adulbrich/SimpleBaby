@@ -2,7 +2,7 @@ import HealthModule, { HealthCategory } from "@/components/health-module";
 import supabase from "@/library/supabase-client";
 import { getActiveChildId } from "@/library/utils";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -47,6 +47,7 @@ export default function Health() {
     date: new Date(),
     note: "",
   });
+  const [reset, setReset] = useState(0);
 
     // Create a new health log entry into the database using Supabase client
   const createHealthLog = async (log: any) => {
@@ -149,15 +150,15 @@ export default function Health() {
   };
 
     // Update date in state when changed
-  const handleDateUpdate = (date: Date) => {
+  const handleDateUpdate = useCallback((date: Date) => {
     setHealthLog((prev) => ({
       ...prev,
       date,
     }));
-  };
+  }, []);
 
    // Update category and reset nested fields based on selected category
-  const handleCategoryUpdate = (category: HealthCategory) => {
+  const handleCategoryUpdate = useCallback((category: HealthCategory) => {
     setHealthLog((prev) => ({
       ...prev,
       category,
@@ -172,10 +173,10 @@ export default function Health() {
           ? { name: "", amount: "", timeTaken: new Date() }
           : undefined,
     }));
-  };
+  }, []);
 
 // Update growth-related fields in state with partial updates
-  const handleGrowthUpdate = (growth: {
+  const handleGrowthUpdate = useCallback((growth: {
     length?: string;
     weight?: string;
     head?: string;
@@ -203,9 +204,10 @@ export default function Health() {
             : "",
       },
     }));
-  };
+  }, []);
+
  // Update activity-related fields in state with partial updates
-  const handleActivityUpdate = (activity: {
+  const handleActivityUpdate = useCallback((activity: {
     type?: string;
     duration?: string;
   }) => {
@@ -226,10 +228,10 @@ export default function Health() {
             : "",
       },
     }));
-  };
+  }, []);
 
   // Update medication-related fields in state with partial updates
-  const handleMedsUpdate = (meds: {
+  const handleMedsUpdate = useCallback((meds: {
     name?: string;
     amount?: string;
     timeTaken?: Date;
@@ -243,6 +245,20 @@ export default function Health() {
         ...meds,
       },
     }));
+  }, []);
+
+  // handle the reset logic for the health screen UI
+  const handleResetFields = () => {
+    setHealthLog({
+      child_id: "",
+      category: "Growth",      
+      date: new Date(),
+      growth: { length: "", weight: "", head: "" },
+      activity: undefined,
+      meds: undefined,
+      note: "",
+    });
+    setReset(prev => prev + 1);
   };
 
   return (
@@ -256,6 +272,7 @@ export default function Health() {
         <ScrollView>
           {/* Render the health input form module with update handlers */}
           <HealthModule
+            key={`health-module-${reset}`}
             onDateUpdate={handleDateUpdate}
             onCategoryUpdate={handleCategoryUpdate}
             onGrowthUpdate={handleGrowthUpdate}
@@ -305,7 +322,7 @@ export default function Health() {
           </TouchableOpacity>
           <TouchableOpacity
             className="rounded-full p-4 bg-red-100 items-center"
-            onPress={() => router.replace("./")}
+            onPress={() => handleResetFields()}
           >
             <Text>🗑️ Reset fields</Text>
           </TouchableOpacity>

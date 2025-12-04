@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { ExternalPathString } from 'expo-router'
+import React, { useEffect, useState } from 'react';
+import { ExternalPathString } from 'expo-router';
 import {
     Modal,
     View,
@@ -8,12 +8,12 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import TrackerButton from '@/components/tracker-button'
-import { useAuth } from '@/library/auth-provider'
-import { BlurView } from 'expo-blur'
-import Button from '@/components/button'
-import supabase from '@/library/supabase-client'
+} from 'react-native';
+import TrackerButton from '@/components/tracker-button';
+import { useAuth } from '@/library/auth-provider';
+import { BlurView } from 'expo-blur';
+import Button from '@/components/button';
+import supabase from '@/library/supabase-client';
 
 export default function MainTab() {
     type Button = {
@@ -45,76 +45,76 @@ export default function MainTab() {
         },
         { label: 'Diaper', icon: '🧷', link: '/diaper' as ExternalPathString },
         { label: 'Health', icon: '💚', link: '/health' as ExternalPathString },
-    ]
+    ];
 
-    const { session } = useAuth()
-    const [newChildState, setChildState] = useState(false)
-    const [childName, setChildName] = useState('')
+    const { session } = useAuth();
+    const [newChildState, setChildState] = useState(false);
+    const [childName, setChildName] = useState('');
 
     const handleSaveChild = async () => {
         if (!childName) {
-            Alert.alert('Please enter a name!')
-            return
+            Alert.alert('Please enter a name!');
+            return;
         }
 
         try {
-            const user = await supabase.auth.getUser()
-            const userId = user.data?.user?.id
+            const user = await supabase.auth.getUser();
+            const userId = user.data?.user?.id;
 
             if (!userId) {
-                throw new Error('User not found.')
+                throw new Error('User not found.');
             }
 
-            let child = childName.charAt(0).toUpperCase() + childName.slice(1)
+            let child = childName.charAt(0).toUpperCase() + childName.slice(1);
 
             // Insert child into the database
             const { error } = await supabase
                 .from('children')
                 .insert([{ user_id: userId, name: child }])
                 .select('id')
-                .single()
+                .single();
 
             if (error) {
-                throw error
+                throw error;
             }
 
             // Update user session metadata with the active child
             await supabase.auth.updateUser({
                 data: { activeChild: child },
-            })
+            });
 
-            setChildState(false) // Close modal
+            setChildState(false); // Close modal
         } catch (error: any) {
             Alert.alert(
                 'Error',
                 error.message || 'An error occurred while saving child data.',
-            )
+            );
         }
-    }
+    };
 
     useEffect(() => {
         if (session) {
             // Check if activeChild exists in user_metadata
-            const activeChild = session.user.user_metadata?.activeChild
+            const activeChild = session.user.user_metadata?.activeChild;
             if (!activeChild) {
                 // If no active child, prompt the user to add a child
-                setChildState(true)
+                setChildState(true);
             }
         }
-    }, [session])
+    }, [session]);
 
     return (
         <View className='main-container flex-col'>
             <View className='flex-row justify-center gap-4 items-center flex-grow'>
                 <View className='flex-col gap-4'>
-                    <TrackerButton button={buttons[0]} />
-                    <TrackerButton button={buttons[1]} />
-                    <TrackerButton button={buttons[2]} />
+                    <TrackerButton button={buttons[0]} testID="sleep-button" />
+                    <TrackerButton button={buttons[1]} testID="nursing-button" />
+                    <TrackerButton button={buttons[2]} testID="milestone-button" />
                 </View>
                 <View className='flex-col gap-4'>
-                    <TrackerButton button={buttons[3]} />
-                    <TrackerButton button={buttons[4]} />
-                    <TrackerButton button={buttons[5]} />
+                    <TrackerButton button={buttons[3]} testID="feeding-button" />
+                    <TrackerButton button={buttons[4]} testID="diaper-button" />
+                    <TrackerButton button={buttons[5]} testID="health-button" />
                 </View>
                 <Modal visible={newChildState} transparent>
                     <TouchableWithoutFeedback
@@ -163,5 +163,5 @@ export default function MainTab() {
                 </Modal>
             </View>
         </View>
-    )
+    );
 }

@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text } from 'react-native'
+import { TouchableOpacity, Text } from 'react-native';
 
 export default function Button({
     text,
@@ -9,13 +9,13 @@ export default function Button({
 }: {
     text: string
     action: () => void
-    buttonClass?: string | undefined
-    textClass?: string | undefined
-    testID?: string | undefined
+    buttonClass?: string
+    textClass?: string
+    testID?: string
 }) {
     return (
         <TouchableOpacity onPress={action} className={`button ${buttonClass}`} testID={testID}>
             <Text className={`button-text ${textClass}`}>{text}</Text>
         </TouchableOpacity>
-    )
+    );
 }

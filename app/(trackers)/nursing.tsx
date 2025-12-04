@@ -6,26 +6,27 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-} from 'react-native'
-import { useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import supabase from '@/library/supabase-client'
-import { router } from 'expo-router'
-import { getActiveChildId } from '@/library/utils'
-import NursingStopwatch from '@/components/nursing-stopwatch'
-import { encryptData } from '@/library/crypto'
+} from 'react-native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import supabase from '@/library/supabase-client';
+import { router } from 'expo-router';
+import { getActiveChildId } from '@/library/utils';
+import NursingStopwatch from '@/components/nursing-stopwatch';
+import { encryptData } from '@/library/crypto';
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
 
 export default function Nursing() {
-    const insets = useSafeAreaInsets()
-    const [isTyping, setIsTyping] = useState(false)
-    const [leftDuration, setLeftDuration] = useState('00:00:00')
-    const [rightDuration, setRightDuration] = useState('00:00:00')
-    const [leftAmount, setLeftAmount] = useState('')
-    const [rightAmount, setRightAmount] = useState('')
-    const [note, setNote] = useState('')
+    const insets = useSafeAreaInsets();
+    const [isTyping, setIsTyping] = useState(false);
+    const [leftDuration, setLeftDuration] = useState('00:00:00');
+    const [rightDuration, setRightDuration] = useState('00:00:00');
+    const [leftAmount, setLeftAmount] = useState('');
+    const [rightAmount, setRightAmount] = useState('');
+    const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Insert a new nursing log entry into Supabase
     const createNursingLog = async (
@@ -37,11 +38,11 @@ export default function Nursing() {
         note = '',
     ) => {
         try {
-            const encryptedLeftDuration = await encryptData(leftDuration)
-            const encryptedRightDuration = await encryptData(rightDuration)
-            const encryptedLeftAmount = await encryptData(leftAmount)
-            const encryptedRightAmount = await encryptData(rightAmount)
-            const encryptedNote = note ? await encryptData(note) : null
+            const encryptedLeftDuration = await encryptData(leftDuration);
+            const encryptedRightDuration = await encryptData(rightDuration);
+            const encryptedLeftAmount = await encryptData(leftAmount);
+            const encryptedRightAmount = await encryptData(rightAmount);
+            const encryptedNote = note ? await encryptData(note) : null;
 
             const { data, error } = await supabase.from('nursing_logs').insert([
                 {
@@ -52,27 +53,27 @@ export default function Nursing() {
                     right_amount: encryptedRightAmount,
                     note: encryptedNote,
                 },
-            ])
+            ]);
 
             if (error) {
-                console.error('Error creating nursing log:', error)
-                return { success: false, error }
+                console.error('Error creating nursing log:', error);
+                return { success: false, error };
             }
 
-            return { success: true, data }
+            return { success: true, data };
         } catch (err) {
-            console.error('❌ Encryption failed:', err)
-            return { success: false, error: 'Encryption error' }
+            console.error('❌ Encryption failed:', err);
+            return { success: false, error: 'Encryption error' };
         }
-    }
+    };
     
     // Retrieve the current active child, then save log to Supabase
     const saveNursingLog = async () => {
-        const { success, childId, error } = await getActiveChildId()
+        const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
-            Alert.alert(`Error: ${error}`)
-            return { success: false, error }
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
         return await createNursingLog(
@@ -82,8 +83,8 @@ export default function Nursing() {
             leftAmount.trim(),
             rightAmount.trim(),
             note,
-        )
-    }
+        );
+    };
 
      // Validate input, then call save
     const handleSaveNursingLog = async () => {
@@ -94,17 +95,27 @@ export default function Nursing() {
             leftAmount.trim() !== '' ||
             rightAmount.trim() !== ''
         ) {
-            const result = await saveNursingLog()
+            const result = await saveNursingLog();
             if (result.success) {
-                router.replace('/(tabs)')
-                Alert.alert('Nursing log saved successfully!')
+                router.replace('/(tabs)');
+                Alert.alert('Nursing log saved successfully!');
             } else {
-                Alert.alert(`Failed to save nursing log: ${result.error}`)
+                Alert.alert(`Failed to save nursing log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide at least one side duration or amount')
+            Alert.alert('Please provide at least one side duration or amount');
         }
-    }
+    };
+
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setLeftDuration("00:00:00");
+        setRightDuration("00:00:00");
+        setLeftAmount("");
+        setRightAmount("");
+        setNote("");
+        setReset(prev => prev + 1);
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -119,6 +130,7 @@ export default function Nursing() {
                 >
                     {/* Stopwatch component controls left/right timer states */}
                     <NursingStopwatch
+                        key={`nursing-stopwatch-${reset}`}
                         onTimeUpdateLeft={setLeftDuration}
                         onTimeUpdateRight={setRightDuration}
                     />
@@ -196,12 +208,12 @@ export default function Nursing() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </TouchableWithoutFeedback>
-    )
+    );
 }

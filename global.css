@@ -54,7 +54,7 @@
 }
 
 .feeding-category-button-active {
-    @apply flex-col items-center justify-center w-[7rem] rounded-full dark:bg-[#568a7b] p-4 gap-1 aspect-square scale-100;
+    @apply bg-[#ffffff] border border-[#000000] shadow-sm scale-105 dark:bg-[#568a7b] dark:border-transparent;
 }
 
 .feeding-category-text {
@@ -70,11 +70,11 @@
 }
 
 .nursing-side-button-active {
-    @apply dark:bg-[#699d8e] p-4 w-[7rem] scale-100 items-center;
+    @apply bg-[#DCC2A0] dark:bg-[#699d8e] p-4 w-[7rem] scale-100 items-center;
 }
 
 .nursing-side-button {
-    @apply dark:bg-[#243925] p-4 w-[7rem] scale-100 items-center;
+    @apply bg-[#FFF9EF] dark:bg-[#243925] p-4 w-[7rem] scale-100 items-center;
 }
 
 .subtitle {
