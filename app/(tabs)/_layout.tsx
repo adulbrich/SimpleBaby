@@ -22,6 +22,7 @@ const Calendar: HeaderLink = {
 export default function TabLayout() {
     const scheme = useColorScheme()
     const insets = useSafeAreaInsets().top
+
     const tabBarStyle =
         scheme === 'light'
             ? { backgroundColor: '#f0dfcf', borderColor: '#bbb' }
@@ -45,12 +46,23 @@ export default function TabLayout() {
                     header: () => Header('👶 SimpleBaby', Profile, insets),
                 }}
             />
+
             <Tabs.Screen
                 name='trends'
                 options={{
                     title: 'Logs',
                     tabBarIcon: ({ color }) => Icon(color, '📈'),
                     header: () => Header('📈 Logs', Calendar, insets),
+                }}
+            />
+
+            {/* ✅ NEW ABOUT TAB — Fix for PR review */}
+            <Tabs.Screen
+                name='about'
+                options={{
+                    title: 'About',
+                    tabBarIcon: ({ color }) => Icon(color, '❓'),
+                    header: () => Header('❓ About', Calendar, insets),
                 }}
             />
         </Tabs>
