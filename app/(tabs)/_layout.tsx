@@ -57,8 +57,6 @@ export default function TabLayout() {
                     header: () => Header('📈 Logs', Calendar, insets),
                 }}
             />
-
-            {/* ✅ NEW ABOUT TAB — Fix for PR review */}
             <Tabs.Screen
                 name='about'
                 options={{
