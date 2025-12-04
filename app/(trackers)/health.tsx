@@ -263,71 +263,74 @@ export default function Health() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View
-        className={`main-container justify-between transition-all ${
-          isTyping ? "-translate-y-[40%]" : "translate-y-0"
-        }`}
-        style={{ paddingBottom: insets.bottom }}
-      >
-        <ScrollView>
-          {/* Render the health input form module with update handlers */}
-          <HealthModule
-            key={`health-module-${reset}`}
-            onDateUpdate={handleDateUpdate}
-            onCategoryUpdate={handleCategoryUpdate}
-            onGrowthUpdate={handleGrowthUpdate}
-            onActivityUpdate={handleActivityUpdate}
-            onMedsUpdate={handleMedsUpdate}
-          />
-           {/* Multiline input for additional notes */}
-          <View className="bottom-5 pt-5">
-            <View className="items-start top-5 left-3 z-10">
-              <Text className="bg-gray-200 p-3 rounded-xl font">
-                Add a note
-              </Text>
+      {/*ScrollView Prevents items from flowing off page on small devices*/}
+      <ScrollView>
+        <View
+          className={`main-container justify-between transition-all ${
+            isTyping ? "-translate-y-[40%]" : "translate-y-0"
+          }`}
+          style={{ paddingBottom: insets.bottom }}
+        >
+          
+            {/* Render the health input form module with update handlers */}
+            <HealthModule
+              key={`health-module-${reset}`}
+              onDateUpdate={handleDateUpdate}
+              onCategoryUpdate={handleCategoryUpdate}
+              onGrowthUpdate={handleGrowthUpdate}
+              onActivityUpdate={handleActivityUpdate}
+              onMedsUpdate={handleMedsUpdate}
+            />
+            {/* Multiline input for additional notes */}
+            <View className="bottom-5 pt-5">
+              <View className="items-start top-5 left-3 z-10">
+                <Text className="bg-gray-200 p-3 rounded-xl font">
+                  Add a note
+                </Text>
+              </View>
+              <View className="p-4 pt-9 bg-white rounded-xl z-0">
+                <TextInput
+                  className=""
+                  placeholderTextColor={"#aaa"}
+                  placeholder={`i.e. ${
+                    healthLog.category === "Growth"
+                      ? "growth is steady"
+                      : healthLog.category === "Activity"
+                      ? "enjoyed tummy time"
+                      : "took medicine without fuss"
+                  }`}
+                  multiline={true}
+                  maxLength={200}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
+                  value={healthLog.note}
+                  onChangeText={(note) =>
+                    setHealthLog((prev) => ({
+                      ...prev,
+                      note,
+                    }))
+                  }
+                />
+              </View>
             </View>
-            <View className="p-4 pt-9 bg-white rounded-xl z-0">
-              <TextInput
-                className=""
-                placeholderTextColor={"#aaa"}
-                placeholder={`i.e. ${
-                  healthLog.category === "Growth"
-                    ? "growth is steady"
-                    : healthLog.category === "Activity"
-                    ? "enjoyed tummy time"
-                    : "took medicine without fuss"
-                }`}
-                multiline={true}
-                maxLength={200}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
-                value={healthLog.note}
-                onChangeText={(note) =>
-                  setHealthLog((prev) => ({
-                    ...prev,
-                    note,
-                  }))
-                }
-              />
-            </View>
+          
+          {/* Action buttons to save or reset form */}
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              className="rounded-full p-4 bg-red-100 grow"
+              onPress={handleSaveHealthLog}
+            >
+              <Text>➕ Add to log</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="rounded-full p-4 bg-red-100 items-center"
+              onPress={() => handleResetFields()}
+            >
+              <Text>🗑️ Reset fields</Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
-        {/* Action buttons to save or reset form */}
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 grow"
-            onPress={handleSaveHealthLog}
-          >
-            <Text>➕ Add to log</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 items-center"
-            onPress={() => handleResetFields()}
-          >
-            <Text>🗑️ Reset fields</Text>
-          </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }

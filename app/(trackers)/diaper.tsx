@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -106,60 +107,63 @@ export default function Diaper() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View
-                className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
-            >
-                {/* Main form stack with diaper inputs and note */}
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
+            <ScrollView>
                 <View
-                    className={`gap-6 transition-all duration-300 ${
-                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                    }`}
+                    className='main-container justify-between'
+                    style={{ paddingBottom: insets.bottom }}
                 >
-                    <DiaperModule
-                        key={`diaper-module-${reset}`}
-                        onConsistencyUpdate={setConsistency}
-                        onAmountUpdate={setAmount}
-                        onTimeUpdate={setChangeTime}
-                    />
-                    {/* Note input section */}
-                    <View className='bottom-5'>
-                        <View className='items-start top-5 left-3 z-10'>
-                            <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                Add a note
-                            </Text>
-                        </View>
-                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                            <TextInput
-                                className=''
-                                placeholderTextColor={'#aaa'}
-                                placeholder='i.e. really messy'
-                                multiline={true}
-                                maxLength={200}
-                                onFocus={() => setIsTyping(true)}
-                                onBlur={() => setIsTyping(false)}
-                                value={note}
-                                onChangeText={setNote}
-                            />
+                    {/* Main form stack with diaper inputs and note */}
+                    <View
+                        className={`gap-6 transition-all duration-300 ${
+                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                        }`}
+                    >
+                        <DiaperModule
+                            key={`diaper-module-${reset}`}
+                            onConsistencyUpdate={setConsistency}
+                            onAmountUpdate={setAmount}
+                            onTimeUpdate={setChangeTime}
+                        />
+                        {/* Note input section */}
+                        <View className='bottom-5'>
+                            <View className='items-start top-5 left-3 z-10'>
+                                <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                    Add a note
+                                </Text>
+                            </View>
+                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                                <TextInput
+                                    className=''
+                                    placeholderTextColor={'#aaa'}
+                                    placeholder='i.e. really messy'
+                                    multiline={true}
+                                    maxLength={200}
+                                    onFocus={() => setIsTyping(true)}
+                                    onBlur={() => setIsTyping(false)}
+                                    value={note}
+                                    onChangeText={setNote}
+                                />
+                            </View>
                         </View>
                     </View>
+                    {/* Action buttons row */}
+                    <View className='flex-row gap-2'>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 grow'
+                            onPress={handleSaveDiaperLog}
+                        >
+                            <Text>➕ Add to log</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 items-center'
+                            onPress={() => handleResetFields()}
+                        >
+                            <Text>🗑️ Reset fields</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                {/* Action buttons row */}
-                <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 grow'
-                        onPress={handleSaveDiaperLog}
-                    >
-                        <Text>➕ Add to log</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => handleResetFields()}
-                    >
-                        <Text>🗑️ Reset fields</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     );
 }

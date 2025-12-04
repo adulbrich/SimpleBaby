@@ -112,67 +112,68 @@ export default function Feeding() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
             <ScrollView>
-            <View
-                className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
-            >
                 <View
-                    className={`gap-6 transition-all duration-300 ${
-                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                    }`}
+                    className='main-container justify-between'
+                    style={{ paddingBottom: insets.bottom }}
                 >
-                    {/* FeedingCategory component handles category/item/amount/time inputs */}
-                    <FeedingCategory
-                        category={category}
-                        itemName={itemName}
-                        amount={amount}
-                        feedingTime={feedingTime}
-                        onCategoryUpdate={setCategory}
-                        onItemNameUpdate={setItemName}
-                        onAmountUpdate={setAmount}
-                        onTimeUpdate={setFeedingTime}
-                        testID='feeding-data-entry'
-                    />
-                    {/* Note input section */}
-                    <View className='bottom-5'>
-                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
-                            <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                Add a note
-                            </Text>
-                        </View>
-                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                            <TextInput
-                                placeholderTextColor={'#aaa'}
-                                placeholder='i.e. does not like pureed carrots'
-                                multiline={true}
-                                maxLength={200}
-                                onFocus={() => setIsTyping(true)}
-                                onBlur={() => setIsTyping(false)}
-                                value={note}
-                                onChangeText={setNote}
-                            />
+                    <View
+                        className={`gap-6 transition-all duration-300 ${
+                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                        }`}
+                    >
+                        {/* FeedingCategory component handles category/item/amount/time inputs */}
+                        <FeedingCategory
+                            category={category}
+                            itemName={itemName}
+                            amount={amount}
+                            feedingTime={feedingTime}
+                            onCategoryUpdate={setCategory}
+                            onItemNameUpdate={setItemName}
+                            onAmountUpdate={setAmount}
+                            onTimeUpdate={setFeedingTime}
+                            testID='feeding-data-entry'
+                        />
+                        {/* Note input section */}
+                        <View className='bottom-5'>
+                            <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                                <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                    Add a note
+                                </Text>
+                            </View>
+                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                                <TextInput
+                                    placeholderTextColor={'#aaa'}
+                                    placeholder='i.e. does not like pureed carrots'
+                                    multiline={true}
+                                    maxLength={200}
+                                    onFocus={() => setIsTyping(true)}
+                                    onBlur={() => setIsTyping(false)}
+                                    value={note}
+                                    onChangeText={setNote}
+                                />
+                            </View>
                         </View>
                     </View>
+                    {/* Action buttons for saving and resetting form */}
+                    <View className='flex-row gap-2'>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 grow'
+                            onPress={handleSaveFeedingLog}
+                            testID='feeding-save-log-button'
+                        >
+                            <Text>➕ Add to log</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 items-center'
+                            onPress={() => handleResetFields()}
+                            testID='feeding-reset-form-button'
+                        >
+                            <Text>🗑️ Reset fields</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                {/* Action buttons for saving and resetting form */}
-                <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 grow'
-                        onPress={handleSaveFeedingLog}
-                        testID='feeding-save-log-button'
-                    >
-                        <Text>➕ Add to log</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => handleResetFields()}
-                        testID='feeding-reset-form-button'
-                    >
-                        <Text>🗑️ Reset fields</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
             </ScrollView>
         </TouchableWithoutFeedback>
     );

@@ -5,6 +5,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -100,30 +101,33 @@ export default function Feeding() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View
-                className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
-            >
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
+            <ScrollView>
                 <View
-                    className={`gap-6 transition-all duration-300 ${
-                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                    }`}
-                ></View>
-                <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 grow'
-                        onPress={handleSaveFeedingLog}
-                    >
-                        <Text>➕ Add to log</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
-                    >
-                        <Text>🗑️ Reset fields</Text>
-                    </TouchableOpacity>
+                    className='main-container justify-between'
+                    style={{ paddingBottom: insets.bottom }}
+                >
+                    <View
+                        className={`gap-6 transition-all duration-300 ${
+                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                        }`}
+                    ></View>
+                    <View className='flex-row gap-2'>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 grow'
+                            onPress={handleSaveFeedingLog}
+                        >
+                            <Text>➕ Add to log</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 items-center'
+                            onPress={() => router.replace('./')}
+                        >
+                            <Text>🗑️ Reset fields</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     );
 }

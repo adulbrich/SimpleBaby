@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -145,70 +146,73 @@ export default function Sleep() {
     return (
         // Dismiss keyboard when touching outside inputs
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View
-                className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
-            >
-                {/* Main form stack with stopwatch and manual entry */}
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
+            <ScrollView>
                 <View
-                    className={`gap-6 transition-all duration-300 ${
-                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                    }`}
+                    className='main-container justify-between'
+                    style={{ paddingBottom: insets.bottom }}
                 >
-                    {/* Stopwatch component for tracking session duration */}
-                    <Stopwatch
-                        key={`stopwatch-${reset}`} 
-                        onTimeUpdate={setStopwatchTime}
-                        testID='sleep-stopwatch' 
-                    />
+                    {/* Main form stack with stopwatch and manual entry */}
+                    <View
+                        className={`gap-6 transition-all duration-300 ${
+                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                        }`}
+                    >
+                        {/* Stopwatch component for tracking session duration */}
+                        <Stopwatch
+                            key={`stopwatch-${reset}`} 
+                            onTimeUpdate={setStopwatchTime}
+                            testID='sleep-stopwatch' 
+                        />
 
-                    {/* Manual start/end time picker */}
-                    <ManualEntry
-                        key={`manual-entry-${reset}`} 
-                        onDatesUpdate={handleDatesUpdate}
-                        testID='sleep-manual-time-entry'
-                    />
+                        {/* Manual start/end time picker */}
+                        <ManualEntry
+                            key={`manual-entry-${reset}`} 
+                            onDatesUpdate={handleDatesUpdate}
+                            testID='sleep-manual-time-entry'
+                        />
 
-                    {/* Note input section */}
-                    <View className='bottom-5' testID='sleep-note-entry'>
-                        <View className='items-start top-5 left-3 z-10'>
-                            <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                Add a note
-                            </Text>
-                        </View>
-                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                            <TextInput
-                                className=''
-                                placeholderTextColor={'#aaa'}
-                                placeholder='i.e. baby was squirming often'
-                                multiline={true}
-                                maxLength={200}
-                                onFocus={() => setIsTyping(true)}
-                                onBlur={() => setIsTyping(false)}
-                                value={note}
-                                onChangeText={setNote}
-                            />
+                        {/* Note input section */}
+                        <View className='bottom-5' testID='sleep-note-entry'>
+                            <View className='items-start top-5 left-3 z-10'>
+                                <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                    Add a note
+                                </Text>
+                            </View>
+                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                                <TextInput
+                                    className=''
+                                    placeholderTextColor={'#aaa'}
+                                    placeholder='i.e. baby was squirming often'
+                                    multiline={true}
+                                    maxLength={200}
+                                    onFocus={() => setIsTyping(true)}
+                                    onBlur={() => setIsTyping(false)}
+                                    value={note}
+                                    onChangeText={setNote}
+                                />
+                            </View>
                         </View>
                     </View>
+                    {/* Action buttons */}
+                    <View className='flex-row gap-2'>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 grow'
+                            onPress={handleSaveSleepLog}
+                            testID='sleep-save-log-button'
+                        >
+                            <Text>➕ Add to log</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className='rounded-full p-4 bg-red-100 items-center'
+                            onPress={() => handleResetFields()}
+                            testID='sleep-reset-form-button'
+                        >
+                            <Text>🗑️ Reset fields</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                {/* Action buttons */}
-                <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 grow'
-                        onPress={handleSaveSleepLog}
-                        testID='sleep-save-log-button'
-                    >
-                        <Text>➕ Add to log</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => handleResetFields()}
-                        testID='sleep-reset-form-button'
-                    >
-                        <Text>🗑️ Reset fields</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     );
 }
