@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -111,6 +112,7 @@ export default function Feeding() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <ScrollView>
             <View
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
@@ -171,6 +173,7 @@ export default function Feeding() {
                     </TouchableOpacity>
                 </View>
             </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     );
 }
