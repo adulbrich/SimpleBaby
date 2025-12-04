@@ -20,24 +20,22 @@ const Calendar: HeaderLink = {
 };
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme(); // renamed to avoid duplicate-var warning
-    const insets = useSafeAreaInsets().top;
-
     const scheme = useColorScheme();
-    const insets = useSafeAreaInsets().top;
+    const insets = useSafeAreaInsets(); // <-- FIX: no redeclaration; keep object not .top
+
     const tabBarStyle =
-        colorScheme === 'light'
+        scheme === 'light'
             ? { backgroundColor: '#f0dfcf', borderColor: '#bbb' }
             : { backgroundColor: '#08150e', borderColor: '#000' };
 
-    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866'
+    const tabBarActiveTintColor = scheme === 'light' ? '#bc8877' : '#118866';
 
     return (
         <Tabs
             screenOptions={{
                 tabBarStyle,
                 tabBarActiveTintColor,
-                tabBarLabelStyle: { fontWeight: 'bold' },
+                tabBarLabelStyle: { fontWeight: 'bold' }
             }}
         >
             <Tabs.Screen
@@ -45,7 +43,7 @@ export default function TabLayout() {
                 options={{
                     tabBarLabel: 'Trackers',
                     tabBarIcon: ({ color }) => Icon(color, '👶'),
-                    header: () => Header('👶 SimpleBaby', Profile, insets),
+                    header: () => Header('👶 SimpleBaby', Profile, insets.top)
                 }}
             />
 
@@ -54,7 +52,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Logs',
                     tabBarIcon: ({ color }) => Icon(color, '📈'),
-                    header: () => Header('📈 Logs', Calendar, insets),
+                    header: () => Header('📈 Logs', Calendar, insets.top)
                 }}
             />
 
@@ -63,7 +61,7 @@ export default function TabLayout() {
                 options={{
                     title: 'About',
                     tabBarIcon: ({ color }) => Icon(color, '❓'),
-                    header: () => Header('❓ About', Calendar, insets),
+                    header: () => Header('❓ About', Calendar, insets.top)
                 }}
             />
         </Tabs>
