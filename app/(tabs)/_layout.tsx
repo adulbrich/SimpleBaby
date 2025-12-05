@@ -21,7 +21,7 @@ const Calendar: HeaderLink = {
 
 export default function TabLayout() {
     const scheme = useColorScheme();
-    const insets = useSafeAreaInsets(); // <-- FIX: no redeclaration; keep object not .top
+    const insets = useSafeAreaInsets(); 
 
     const tabBarStyle =
         scheme === 'light'
