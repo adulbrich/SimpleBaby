@@ -133,6 +133,7 @@ export default function Nursing() {
                         key={`nursing-stopwatch-${reset}`}
                         onTimeUpdateLeft={setLeftDuration}
                         onTimeUpdateRight={setRightDuration}
+                        testID={"nursing-stopwatch"}
                     />
                     {/* Volume Input Section */}
                     <View className='stopwatch-primary'>
@@ -156,6 +157,7 @@ export default function Nursing() {
                                     onChangeText={setLeftAmount}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
+                                    testID='nursing-left-amount'
                                 />
                             </View>
                             {/* Right Amount Input */}
@@ -172,6 +174,7 @@ export default function Nursing() {
                                     onChangeText={setRightAmount}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
+                                    testID='nursing-right-amount'
                                 />
                             </View>
                         </View>
@@ -194,6 +197,7 @@ export default function Nursing() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='nursing-note'
                             />
                         </View>
                     </View>
@@ -203,12 +207,14 @@ export default function Nursing() {
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveNursingLog}
+                        testID='nursing-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
                         onPress={() => handleResetFields()}
+                        testID='nursing-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
