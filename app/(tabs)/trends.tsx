@@ -1,5 +1,5 @@
 import { Href, router } from 'expo-router';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity,} from 'react-native';
 import React from 'react';
 
 type Button = {
