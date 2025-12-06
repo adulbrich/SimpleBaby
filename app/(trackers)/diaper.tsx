@@ -108,11 +108,11 @@ export default function Diaper() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             {/*ScrollView Prevents items from flowing off page on small devices*/}
-            <ScrollView>
-                <View
-                    className='main-container justify-between'
-                    style={{ paddingBottom: insets.bottom }}
-                >
+            <View
+                className='main-container justify-between'
+                style={{ paddingBottom: insets.bottom }}
+            >
+                <ScrollView>
                     {/* Main form stack with diaper inputs and note */}
                     <View
                         className={`gap-6 transition-all duration-300 ${
@@ -162,8 +162,8 @@ export default function Diaper() {
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </View>
         </TouchableWithoutFeedback>
     );
 }

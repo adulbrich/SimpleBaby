@@ -20,7 +20,6 @@ export default function Tab() {
     ];
 
     return (
-        <ScrollView>
         <View className='main-container flex-col justify-center gap-4'>
             {bars.map((bars, key) => (
                 <TouchableOpacity
@@ -40,8 +39,7 @@ export default function Tab() {
                         </View>
                     </View>
                 </TouchableOpacity>
-            ))}
+            ))} 
         </View>
-        </ScrollView>
     );
 }

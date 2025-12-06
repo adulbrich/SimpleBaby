@@ -121,11 +121,11 @@ export default function Nursing() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             {/*ScrollView Prevents items from flowing off page on small devices*/}
-            <ScrollView>
-                <View
-                    className='main-container justify-between'
-                    style={{ paddingBottom: insets.bottom }}
-                >
+            <View
+                className='main-container justify-between'
+                style={{ paddingBottom: insets.bottom }}
+            >
+                <ScrollView>
                     <View
                         className={`gap-6 transition-all duration-300 ${
                             isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -216,8 +216,8 @@ export default function Nursing() {
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </View>
         </TouchableWithoutFeedback>
     );
 }

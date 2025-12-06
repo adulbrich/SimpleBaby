@@ -264,15 +264,15 @@ export default function Health() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       {/*ScrollView Prevents items from flowing off page on small devices*/}
-      <ScrollView>
-        <View
-          className={`main-container justify-between transition-all ${
-            isTyping ? "-translate-y-[40%]" : "translate-y-0"
-          }`}
-          style={{ paddingBottom: insets.bottom }}
-        >
-          
-            {/* Render the health input form module with update handlers */}
+
+      <View
+        className={`main-container justify-between transition-all ${
+          isTyping ? "-translate-y-[40%]" : "translate-y-0"
+        }`}
+        style={{ paddingBottom: insets.bottom }}
+      >
+        <ScrollView>
+          {/* Render the health input form module with update handlers */}
             <HealthModule
               key={`health-module-${reset}`}
               onDateUpdate={handleDateUpdate}
@@ -329,8 +329,8 @@ export default function Health() {
               <Text>🗑️ Reset fields</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }

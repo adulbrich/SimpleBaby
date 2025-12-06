@@ -147,12 +147,12 @@ export default function Sleep() {
         // Dismiss keyboard when touching outside inputs
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             {/*ScrollView Prevents items from flowing off page on small devices*/}
-            <ScrollView>
-                <View
-                    className='main-container justify-between'
-                    style={{ paddingBottom: insets.bottom }}
-                >
-                    {/* Main form stack with stopwatch and manual entry */}
+            <View
+                className='main-container justify-between'
+                style={{ paddingBottom: insets.bottom }}
+            >
+                {/* Main form stack with stopwatch and manual entry */}
+                <ScrollView>
                     <View
                         className={`gap-6 transition-all duration-300 ${
                             isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -211,8 +211,8 @@ export default function Sleep() {
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </View>
         </TouchableWithoutFeedback>
     );
 }
