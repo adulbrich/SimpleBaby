@@ -121,6 +121,7 @@ export default function Diaper() {
                         onConsistencyUpdate={setConsistency}
                         onAmountUpdate={setAmount}
                         onTimeUpdate={setChangeTime}
+                        testID={"diaper-main-inputs"}
                     />
                     {/* Note input section */}
                     <View className='bottom-5'>
@@ -140,6 +141,7 @@ export default function Diaper() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='diaper-note'
                             />
                         </View>
                     </View>
@@ -149,12 +151,14 @@ export default function Diaper() {
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveDiaperLog}
+                        testID='diaper-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
                         onPress={() => handleResetFields()}
+                        testID='diaper-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
