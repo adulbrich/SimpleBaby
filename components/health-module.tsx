@@ -20,12 +20,13 @@ import {
 
 export type HealthCategory = "Growth" | "Activity" | "Meds";
 
-interface HealthModuleProps {
+export interface HealthModuleProps {
   onDateUpdate?: (date: Date) => void;
   onCategoryUpdate?: (category: HealthCategory) => void;
   onGrowthUpdate?: (growth: GrowthData) => void;
   onActivityUpdate?: (activity: ActivityData) => void;
   onMedsUpdate?: (meds: MedsData) => void;
+  testID?: string;
 }
 
 export interface GrowthData {
@@ -51,6 +52,7 @@ export default function HealthModule({
   onGrowthUpdate,
   onActivityUpdate,
   onMedsUpdate,
+  testID,
 }: HealthModuleProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -172,7 +174,7 @@ export default function HealthModule({
   }, [meds, selectedCategory, onMedsUpdate]);
 
   return (
-    <View className="flex-col gap-6">
+    <View className="flex-col gap-6" testID={testID}>
       <View className="stopwatch-primary">
         <View className="items-start bottom-5 left-3">
           <Text className="bg-gray-200 p-3 rounded-xl font">
