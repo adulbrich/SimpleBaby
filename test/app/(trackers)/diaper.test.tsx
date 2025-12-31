@@ -1,10 +1,11 @@
 import Diaper from "@/app/(trackers)/diaper";
-import { render, screen, userEvent } from "@testing-library/react-native";
+import { render, screen, userEvent, act } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import { getActiveChildId } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
 import { encryptData } from "@/library/crypto";
+import DiaperModule from "@/components/diaper-module";
 
 jest.mock("@/library/supabase-client", () => {
     const insert = jest.fn(async () => ({ error: false }));
@@ -41,6 +42,44 @@ jest.mock("@/library/utils", () => {
     };
 });
 
+jest.mock("@/components/diaper-module.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const DiaperModuleMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    return DiaperModuleMock;
+});
+
+/*
+ *  setDiaperInputs:
+ *      Reads update handlers from first call to DiaperModule mock
+ *      Calls update handlers with provided inputs
+*/
+async function setDiaperInputs({
+    consistency,
+    amount,
+    time,
+} : {
+    consistency?: any;
+    amount?: any;
+    time?: Date;
+}) {
+    // read parameters to first call of DiaperModule
+    const {
+        onConsistencyUpdate,
+        onAmountUpdate,
+        onTimeUpdate,
+    } = (DiaperModule as jest.Mock).mock.calls[0][0];
+
+    if (consistency) {
+        await act(() => onConsistencyUpdate?.(consistency));
+    }
+    if (amount) {
+        await act(() => onAmountUpdate?.(amount));
+    }
+    if (time) {
+        await act(() => onTimeUpdate?.(time));
+    }
+}
+
 
 describe("Track diaper screen", () => {
 
@@ -48,6 +87,8 @@ describe("Track diaper screen", () => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
+        (DiaperModule as jest.Mock).mockClear();
+        (supabase.from("").insert as jest.Mock).mockClear();
     });
 
     test("Renders diaper tracking inputs", () => {
@@ -69,12 +110,13 @@ describe("Track diaper screen", () => {
 
         // library/utils.ts -> getActiveChildId() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
-        // This should cause error handling in app/(trackers)/nursing.tsx -> saveNursingLog()
+        // This should cause error handling in app/(trackers)/diaper.tsx -> saveDiaperLog()
         (getActiveChildId as jest.Mock).mockImplementationOnce(
             async () => ({ success: false, error: testErrorMessage })
         );
     
         render(<Diaper/>);
+        setDiaperInputs({ consistency: "wet", amount: "SM"});  // fill in minimum required inputs
 
         await userEvent.press(
             screen.getByTestId("diaper-save-log-button")
@@ -101,6 +143,7 @@ describe("Track diaper screen", () => {
         jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
     
         render(<Diaper/>);
+        setDiaperInputs({ consistency: "wet", amount: "SM"});  // fill in minimum required inputs
 
         await userEvent.press(
             screen.getByTestId("diaper-save-log-button")
@@ -121,7 +164,7 @@ describe("Track diaper screen", () => {
 
         // supabase.from().insert() should be mocked to return:
         // { error: /* truthy value */ }
-        // This should cause error handling in app/(trackers)/nursing.tsx -> createNursingLog()
+        // This should cause error handling in app/(trackers)/diaper.tsx -> createDiaperLog()
         (supabase.from("").insert as jest.Mock).mockReturnValueOnce(
             { error: testErrorMessage }
         );
@@ -129,6 +172,7 @@ describe("Track diaper screen", () => {
         jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
 
         render(<Diaper/>);
+        setDiaperInputs({ consistency: "wet", amount: "SM"});  // fill in minimum required inputs
         await userEvent.press(
             screen.getByTestId("diaper-save-log-button")
         );
@@ -145,6 +189,7 @@ describe("Track diaper screen", () => {
 
     test("Redirects user on successful submit", async () => {
         render(<Diaper/>);
+        setDiaperInputs({ consistency: "wet", amount: "SM"});  // fill in minimum required inputs
 
         await userEvent.press(
             screen.getByTestId("diaper-save-log-button")
@@ -157,4 +202,41 @@ describe("Track diaper screen", () => {
         // Alert.alert() called by app/(trackers)/diaper.tsx -> handleSaveDiaperLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Diaper log saved successfully!`);
     });
+        
+    test("Saves correct values", async () => {
+        const testNote = "test note";
+        const testTime = new Date;
+        const testID = "test ID";
+
+        // mock library/utils.ts -> getActiveChildId() to return the test child ID
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childId: testID })
+        );
+
+        render(<Diaper/>);
+        setDiaperInputs({ consistency: "mixed", amount: "LG", time: testTime });  // fill in minimum required inputs
+
+        // write a note
+        await userEvent.type(
+            screen.getByTestId("diaper-note-entry"),
+            testNote
+        );
+
+        // submit log
+        await userEvent.press(
+            screen.getByTestId("diaper-save-log-button")
+        );
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+
+        // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
+        expect(insertedObject.child_id).toBe(testID);
+        expect(insertedObject.change_time).toBe(testTime.toISOString());
+        expect(insertedObject.note).toBe(await encryptData(testNote));
+
+        // Ensure that log was saved successfully
+        // Alert.alert() called by app/(trackers)/diaper.tsx -> handleSaveDiaperLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Diaper log saved successfully!`);
+    });
+
 });

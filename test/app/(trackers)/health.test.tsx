@@ -381,7 +381,7 @@ describe("Track health screen", () => {
 
         const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
 
-        // Ensure Supabase.insert was called with the correct values; the note should now be encrypted
+        // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
         expect(insertedObject.child_id).toBe(testID);
         expect(insertedObject.date).toBe(testDate);
         expect(insertedObject.note).toBe(await encryptData(testNote));
