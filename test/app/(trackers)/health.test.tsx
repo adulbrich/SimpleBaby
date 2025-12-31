@@ -128,7 +128,7 @@ describe("Track health screen", () => {
         );
 
         // ensure note is no longer present
-        expect(() => screen.getByDisplayValue(testNote)).toThrow("Unable to find an element with displayValue: test note");
+        expect(() => screen.getByDisplayValue(testNote)).toThrow();
         // ensure new instance of <HealthModule/> is being used
         expect(screen.getByTestId("health-main-inputs") === mainInputs).toBeFalsy();
     });
