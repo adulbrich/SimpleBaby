@@ -105,6 +105,29 @@ describe("Track diaper screen", () => {
         expect(screen.getByTestId("diaper-reset-form-button")).toBeTruthy();
     });
     
+    test("Refreshes on reset", async () => {
+        const testNote = "test note";
+        render(<Diaper/>);
+
+        // write something in the note entry...
+        await userEvent.type(
+            screen.getByTestId("diaper-note-entry"),
+            testNote
+        );
+        expect(screen.getByDisplayValue(testNote)).toBeTruthy();  // ensure the typed note can be found
+
+        const mainInputs = screen.getByTestId("diaper-main-inputs");  // get the displayed <DiaperModule/>
+
+        await userEvent.press(
+            screen.getByTestId("diaper-reset-form-button")
+        );
+
+        // ensure note is no longer present
+        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        // ensure new instance of <DiaperModule/> is being used
+        expect(screen.getByTestId("diaper-main-inputs") === mainInputs).toBeFalsy();
+    });
+    
     test("Catch getActiveChildId error", async () => {
         const testErrorMessage = "testErrorGetID";
 
