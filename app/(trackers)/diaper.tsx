@@ -141,7 +141,7 @@ export default function Diaper() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
-                                testID='diaper-note'
+                                testID='diaper-note-entry'
                             />
                         </View>
                     </View>
