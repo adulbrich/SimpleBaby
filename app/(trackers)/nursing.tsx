@@ -197,7 +197,7 @@ export default function Nursing() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
-                                testID='nursing-note'
+                                testID='nursing-note-entry'
                             />
                         </View>
                     </View>
