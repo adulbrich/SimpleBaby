@@ -110,6 +110,7 @@ describe("Track nursing screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (supabase.from("").insert as jest.Mock).mockClear();
         (NursingStopwatch as jest.Mock).mockClear();
+        jest.spyOn(console, "error").mockClear();
     });
 
     test("Renders nursing tracking inputs", () => {
