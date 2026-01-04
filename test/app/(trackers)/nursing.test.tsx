@@ -68,7 +68,7 @@ async function setNursingInputs({
     rightDuration?: string;
     note?: string;
 }) {
-    // read parameters to first call of DiaperModule
+    // read parameters to first call of NursingStopwatch
     const {
         onTimeUpdateLeft,
         onTimeUpdateRight,

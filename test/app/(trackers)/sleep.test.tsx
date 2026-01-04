@@ -1,9 +1,12 @@
-import { render, screen, userEvent } from "@testing-library/react-native";
+import { render, screen, userEvent, act } from "@testing-library/react-native";
 import Sleep from "@/app/(trackers)/sleep";
 import { Alert } from "react-native";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
 import { getActiveChildId } from "@/library/utils";
+import Stopwatch from "@/components/stopwatch";
+import ManualEntry from "@/components/manual-entry-sleep";
+import { encryptData } from "@/library/crypto";
 
 jest.mock("expo-router", () => ({
     router: {
@@ -37,12 +40,71 @@ jest.mock("@/library/utils", () => {
     };
 });
 
+jest.mock("@/components/stopwatch.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const SleepStopwatchMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    return SleepStopwatchMock;
+});
+
+jest.mock("@/components/manual-entry-sleep.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const ManualInputsMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    return ManualInputsMock;
+});
+
+/*
+ *  setSleepInputs:
+ *      Reads update handlers from first call to <Stopwatch/> and <ManualEntry/> mocks
+ *      Calls update handlers with provided inputs for times
+ *      Calls userEvent.type for note
+*/
+async function setSleepInputs({
+    stopwatchTime,
+    startDate,
+    endDate,
+    note,
+} : {
+    stopwatchTime?: string;
+    startDate?: Date;
+    endDate?: Date;
+    note?: string;
+}) {
+    // read parameters to first call of Stopwatch
+    const {
+        onTimeUpdate,
+    } = (Stopwatch as jest.Mock).mock.calls[0][0];
+
+    // read parameters to first call of ManualEntry
+    const {
+        onDatesUpdate,
+    } = (ManualEntry as jest.Mock).mock.calls[0][0];
+
+    // call update handlers for times
+    if (stopwatchTime) {
+        await act(() => onTimeUpdate?.(stopwatchTime));
+    }
+    if (startDate && endDate) {
+        await act(() => onDatesUpdate?.(startDate, endDate));
+    }
+
+    // type into <TextInput/> component for note
+    if (note) {
+        await userEvent.type(
+            screen.getByTestId("sleep-note-entry"),
+            note
+        );
+    }
+}
+
 
 describe("Track sleep screen", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
+        (Stopwatch as jest.Mock).mockClear();
+        (ManualEntry as jest.Mock).mockClear();
+        (supabase.from("").insert as jest.Mock).mockClear();
     });
 
     test("Renders sleep tracking inputs", () => {
@@ -71,6 +133,7 @@ describe("Track sleep screen", () => {
         );
 
         render(<Sleep/>);
+        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -97,6 +160,7 @@ describe("Track sleep screen", () => {
         jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
 
         render(<Sleep/>);
+        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -113,6 +177,7 @@ describe("Track sleep screen", () => {
 
     test("Successfully saved sleep log", async () => {
         render(<Sleep/>);
+        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -123,5 +188,84 @@ describe("Track sleep screen", () => {
         // confirm that the expo-router was called to send the user back to the tracker page
         expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
         expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
+    });
+
+    test("Saves correct values (stopwatch)", async () => {
+        const testID = "test ID";
+        const testNote = "test note";
+        const testDurationMS = 1.111 * (60 * 60 * 1000);  // convert test duration (1.111 hours) to milliseconds
+        const testDuration = (new Date(testDurationMS)).toISOString().substring(11, 19);  // convert ms to "hh:mm:ss"
+
+        // mock library/utils.ts -> getActiveChildId() to return the test child ID
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childId: testID })
+        );
+
+        render(<Sleep/>);
+        // set both stopwatch time and manual start/end times. Stopwatch time should take priority for saving
+        await setSleepInputs({
+            stopwatchTime: testDuration,
+            startDate: new Date(),
+            endDate: new Date(),
+            note: testNote,
+        });
+        await userEvent.press(
+            screen.getByTestId("sleep-save-log-button")
+        );
+
+        // get approximate time that the test was executed
+        const executionTime = new Date();
+
+        // Ensure that log was saved successfully
+        // Alert.alert() called by app/(trackers)/sleep.tsx -> handleSaveSleepLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Sleep log saved successfully!");
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+        const savedEndMS = (new Date(insertedObject.end_time)).getTime();  // should be the time at which the log was saved
+        const savedStartMS = (new Date(insertedObject.start_time)).getTime();  // should be the log save time minus the duration
+        
+        // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
+        expect(insertedObject.child_id).toBe(testID);
+        expect(insertedObject.duration).toBe(testDuration);
+        expect(savedStartMS).toBeCloseTo(executionTime.getTime() - testDurationMS, -3.3);  // times are within ~1000 ms of each other
+        expect(savedEndMS).toBeCloseTo(executionTime.getTime(), -3.3);  // times are within ~1000 ms of each other
+        expect(insertedObject.note).toBe(await encryptData(testNote));
+    });
+
+    test("Saves correct values (manual time)", async () => {
+        const testID = "test ID";
+        const testNote = "test note";
+        const testManualDuration = 1.111 * (60 * 60 * 1000);  // convert test duration (1.111 hours) to milliseconds
+        const testDurationStr = (new Date(testManualDuration)).toISOString().substring(11, 19);  // convert ms to hh:mm:ss
+        const testStart = new Date();
+        const testEnd = new Date(testStart.getTime() + testManualDuration);
+
+        // mock library/utils.ts -> getActiveChildId() to return the test child ID
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childId: testID })
+        );
+
+        render(<Sleep/>);
+        await setSleepInputs({
+            startDate: testStart,
+            endDate: testEnd,
+            note: testNote,
+        });
+        await userEvent.press(
+            screen.getByTestId("sleep-save-log-button")
+        );
+
+        // Ensure that log was saved successfully
+        // Alert.alert() called by app/(trackers)/sleep.tsx -> handleSaveSleepLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Sleep log saved successfully!");
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+        
+        // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
+        expect(insertedObject.child_id).toBe(testID);
+        expect(insertedObject.start_time).toBe(testStart.toISOString());
+        expect(insertedObject.end_time).toBe(testEnd.toISOString());
+        expect(insertedObject.duration).toBe(testDurationStr);
+        expect(insertedObject.note).toBe(await encryptData(testNote));
     });
 });
