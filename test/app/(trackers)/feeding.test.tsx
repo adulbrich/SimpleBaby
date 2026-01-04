@@ -1,9 +1,11 @@
-import { render, screen, userEvent } from "@testing-library/react-native";
+import { render, screen, userEvent, act } from "@testing-library/react-native";
 import Feeding from "@/app/(trackers)/feeding";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 import { getActiveChildId } from '@/library/utils';
 import supabase from "@/library/supabase-client";
+import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
+import { encryptData } from "@/library/crypto";
 
 
 jest.mock("expo-router", () => {
@@ -25,7 +27,7 @@ jest.mock("@/library/supabase-client", () => {
 });
 
 jest.mock("@/library/crypto", () => ({
-    encryptData: async () => ""
+    encryptData: async (string: string) => `Encrypted: ${string}`
 }));
 
 jest.mock("react-native", () => {
@@ -38,6 +40,62 @@ jest.mock("@/library/utils", () => ({
     getActiveChildId: jest.fn(async () => ({ success: true }))
 }));
 
+jest.mock("@/components/feeding-category.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const FeedingCategoryMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    return FeedingCategoryMock;
+});
+
+/*
+ *  setFeedingInputs:
+ *      Reads update handlers from first call to FeedingCategory mock
+ *      Calls update handlers with provided inputs
+ *      Calls userEvent.type for note
+*/
+async function setFeedingInputs({
+    category,
+    itemName,
+    amount,
+    time,
+    note,
+} : {
+    category?: FeedingCategoryList;
+    itemName?: string;
+    amount?: string;
+    time?: Date;
+    note?: string;
+}) {
+    // read parameters to first call of DiaperModule
+    const {
+        onCategoryUpdate,
+        onItemNameUpdate,
+        onAmountUpdate,
+        onTimeUpdate,
+    } = (FeedingCategory as jest.Mock).mock.calls[0][0];
+
+    // call update handlers for feeding info
+    if (category) {
+        await act(() => onCategoryUpdate?.(category));
+    }
+    if (itemName) {
+        await act(() => onItemNameUpdate?.(itemName));
+    }
+    if (amount) {
+        await act(() => onAmountUpdate?.(amount));
+    }
+    if (time) {
+        await act(() => onTimeUpdate?.(time));
+    }
+
+    // type into <TextInput/> components for note
+    if (note) {
+        await userEvent.type(
+            screen.getByTestId("feeding-note-entry"),
+            note
+        );
+    }
+}
+
 
 describe("Track feeding screen", () => {
 
@@ -46,6 +104,8 @@ describe("Track feeding screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (router.replace as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
+        (FeedingCategory as jest.Mock).mockClear();
+        (supabase.from("").insert as jest.Mock).mockClear();
     });
 
     test("Renders feeding tracking inputs", () => {
@@ -63,12 +123,19 @@ describe("Track feeding screen", () => {
     });
     
     test("Refreshes on reset", async () => {
+        // store mock implementation of <FeedingCategory/>
+        const feedingCategoryMock = (FeedingCategory as jest.Mock).getMockImplementation();
+        // revert <FeedingCategory/> to original implementation
+        (FeedingCategory as jest.Mock).mockImplementation(
+            jest.requireActual('@/components/feeding-category').default
+        );
+
         render(<Feeding/>);
 
         const itemNameInput = screen.getByTestId("feeding-item-name");
         const amountInput = screen.getByTestId("feeding-amount");
         const resetButton = screen.getByTestId("feeding-reset-form-button");
-        const noteInput = screen.getByTestId("feeding-note-entry")
+        const noteInput = screen.getByTestId("feeding-note-entry");
 
         // type into the fields so we have something to clear
         await userEvent.type(itemNameInput, "Applesauce");
@@ -86,6 +153,9 @@ describe("Track feeding screen", () => {
         expect(screen.queryByDisplayValue("Applesauce")).toBeNull();
         expect(screen.queryByDisplayValue("4 oz")).toBeNull();
         expect(screen.queryByDisplayValue("Baby disliked this")).toBeNull();
+
+        // restore mock implementation of <FeedingCategory/>
+        (FeedingCategory as jest.Mock).mockImplementation(feedingCategoryMock);
     });
     
     test("Catch unfilled category/name/amount", async () => {
@@ -111,18 +181,12 @@ describe("Track feeding screen", () => {
 
         render(<Feeding/>);
 
-        // simulate user input
-        await userEvent.press(
-            screen.getByTestId("feeding-category-soft")
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-item-name"),
-            "test food"
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-amount"),
-            "test amount"
-        );
+        // simulate minimum required user input
+        await setFeedingInputs({
+            category: "Soft",
+            itemName: "test food",
+            amount: "test amount",
+        });
         await userEvent.press(
             screen.getByTestId("feeding-save-log-button")
         );
@@ -150,18 +214,12 @@ describe("Track feeding screen", () => {
 
         render(<Feeding/>);
 
-        // simulate user input
-        await userEvent.press(
-            screen.getByTestId("feeding-category-soft")
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-item-name"),
-            "test food"
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-amount"),
-            "test amount"
-        );
+        // simulate minimum required user input
+        await setFeedingInputs({
+            category: "Soft",
+            itemName: "test food",
+            amount: "test amount",
+        });
         await userEvent.press(
             screen.getByTestId("feeding-save-log-button")
         );
@@ -190,18 +248,12 @@ describe("Track feeding screen", () => {
 
         render(<Feeding/>);
 
-        // simulate user input
-        await userEvent.press(
-            screen.getByTestId("feeding-category-soft")
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-item-name"),
-            "test food"
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-amount"),
-            "test amount"
-        );
+        // simulate minimum required user input
+        await setFeedingInputs({
+            category: "Soft",
+            itemName: "test food",
+            amount: "test amount",
+        });
         await userEvent.press(
             screen.getByTestId("feeding-save-log-button")
         );
@@ -219,18 +271,12 @@ describe("Track feeding screen", () => {
     test("Redirects user on successful submit", async () => {
         render(<Feeding/>);
 
-        // simulate user input
-        await userEvent.press(
-            screen.getByTestId("feeding-category-soft")
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-item-name"),
-            "test food"
-        );
-        await userEvent.type(
-            screen.getByTestId("feeding-amount"),
-            "test amount"
-        );
+        // simulate minimum required user input
+        await setFeedingInputs({
+            category: "Soft",
+            itemName: "test food",
+            amount: "test amount",
+        });
         await userEvent.press(
             screen.getByTestId("feeding-save-log-button")
         );
@@ -239,6 +285,50 @@ describe("Track feeding screen", () => {
         expect((router.replace as jest.Mock).mock.calls[0][0]).toBe(`/(tabs)`);
         expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
 
+        // Alert.alert() called by app/(trackers)/feeding.tsx -> handleSaveFeedingLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Feeding log saved successfully!`);
+    });
+        
+    test("Saves correct values", async () => {
+        const testID = "test ID";
+        const testNote = "test note";
+        const testName = "test food";
+        const testAmount = "test amount";
+        const testCategory = "Solid";
+        const testTime = new Date();
+
+        // mock library/utils.ts -> getActiveChildId() to return the test child ID
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childId: testID })
+        );
+
+        render(<Feeding/>);
+
+        // simulate user input
+        await setFeedingInputs({
+            category: testCategory,
+            itemName: testName,
+            amount: testAmount,
+            note: testNote,
+            time: testTime,
+        });
+
+        // submit log
+        await userEvent.press(
+            screen.getByTestId("feeding-save-log-button")
+        );
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+
+        // Ensure supabase.from().insert() was called with the correct values; they should now be encrypted
+        expect(insertedObject.child_id).toBe(testID);
+        expect(insertedObject.item_name).toBe(await encryptData(testName));
+        expect(insertedObject.category).toBe(await encryptData(testCategory));
+        expect(insertedObject.amount).toBe(await encryptData(testAmount));
+        expect(insertedObject.note).toBe(await encryptData(testNote));
+        expect(insertedObject.feeding_time).toBe(testTime.toISOString());
+
+        // Ensure that log was saved successfully
         // Alert.alert() called by app/(trackers)/feeding.tsx -> handleSaveFeedingLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Feeding log saved successfully!`);
     });
