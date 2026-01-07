@@ -20,10 +20,12 @@ export default function DiaperModule({
     onTimeUpdate,
     onConsistencyUpdate,
     onAmountUpdate,
+    testID,
 }: {
     onTimeUpdate?: (time: Date) => void
     onConsistencyUpdate?: (consistency: DiaperConsistency) => void
     onAmountUpdate?: (amount: DiaperAmount) => void
+    testID: string
 }) {
     const [changeTime, setChangeTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
@@ -87,7 +89,7 @@ export default function DiaperModule({
     };
 
     return (
-        <View className='flex-col gap-6'>
+        <View className='flex-col gap-6' testID={testID}>
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
                     <Text className='bg-gray-200 p-3 rounded-xl font'>
