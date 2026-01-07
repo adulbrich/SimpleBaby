@@ -85,8 +85,8 @@ export const getEncryptionKey = async (): Promise<string | null> => {
   return key;
 };
 
-const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-const SUPABASE_URL = Platform.OS === "ios" ? process.env.EXPO_PUBLIC_SUPABASE_URL_IOS : process.env.EXPO_PUBLIC_SUPABASE_URL_ANDROID;
+const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_KEY;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 
 if (!PUBLIC_ANON || !SUPABASE_URL) {
   throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY');
