@@ -278,6 +278,7 @@ export default function Health() {
             onGrowthUpdate={handleGrowthUpdate}
             onActivityUpdate={handleActivityUpdate}
             onMedsUpdate={handleMedsUpdate}
+            testID="health-main-inputs"
           />
            {/* Multiline input for additional notes */}
           <View className="bottom-5 pt-5">
@@ -308,6 +309,7 @@ export default function Health() {
                     note,
                   }))
                 }
+                testID="health-note-entry"
               />
             </View>
           </View>
@@ -317,12 +319,14 @@ export default function Health() {
           <TouchableOpacity
             className="rounded-full p-4 bg-red-100 grow"
             onPress={handleSaveHealthLog}
+            testID="health-save-log-button"
           >
             <Text>➕ Add to log</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className="rounded-full p-4 bg-red-100 items-center"
             onPress={() => handleResetFields()}
+            testID="health-reset-form-button"
           >
             <Text>🗑️ Reset fields</Text>
           </TouchableOpacity>

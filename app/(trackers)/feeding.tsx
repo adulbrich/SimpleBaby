@@ -134,7 +134,7 @@ export default function Feeding() {
                     />
                     {/* Note input section */}
                     <View className='bottom-5'>
-                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                        <View className='items-start top-5 left-3 z-10'>
                             <Text className='bg-gray-200 p-3 rounded-xl font'>
                                 Add a note
                             </Text>
@@ -149,6 +149,7 @@ export default function Feeding() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='feeding-note-entry'
                             />
                         </View>
                     </View>
