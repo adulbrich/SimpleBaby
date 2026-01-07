@@ -170,7 +170,7 @@ export default function Sleep() {
                     />
 
                     {/* Note input section */}
-                    <View className='bottom-5' testID='sleep-note-entry'>
+                    <View className='bottom-5'>
                         <View className='items-start top-5 left-3 z-10'>
                             <Text className='bg-gray-200 p-3 rounded-xl font'>
                                 Add a note
@@ -187,6 +187,7 @@ export default function Sleep() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='sleep-note-entry'
                             />
                         </View>
                     </View>
