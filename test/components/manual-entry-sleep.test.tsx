@@ -21,7 +21,7 @@ describe("Sleep Component <ManualEntry/>", () => {
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
 
-    test("renders inputs", () => {
+    test("Renders inputs", () => {
         Platform.OS = "ios";
         render(<ManualEntry/>);
 
