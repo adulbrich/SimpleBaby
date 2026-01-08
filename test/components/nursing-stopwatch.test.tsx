@@ -1,22 +1,17 @@
 import NursingStopwatch from "@/components/nursing-stopwatch";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { Platform } from "react-native";
 
 
-describe("Nursing componentsn <ManualEntry/>", () => {
+describe("Nursing component <NursingStopwatch/>", () => {
 
     beforeEach(() => {
         // mock timers inside tests
         jest.useFakeTimers({advanceTimers: true});  // advanceTimers: to sync userEvents with jest fake timers
-        // to clear the .mock.calls array
-        //(DateTimePicker as jest.Mock).mockClear();
-        //(DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
     
     afterEach(() => {
         // reset timers for test clean-up
-        jest.useRealTimers()
+        jest.useRealTimers();
     });
 
     test("Renders stopwatch buttons", () => {
