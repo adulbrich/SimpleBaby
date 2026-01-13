@@ -163,49 +163,11 @@ export default function Nursing() {
                                     testID='nursing-left-amount'
                                 />
                             </View>
-                            <View className='flex-row mb-6'>
-                                {/* Left Amount Input */}
-                                <View className='ml-4 mr-2 grow'>
-                                    <Text className='feeding-module-label'>
-                                        Left Amount
-                                    </Text>
-                                    <TextInput
-                                        className='text-input-internal'
-                                        placeholder='i.e. 6 oz'
-                                        autoCapitalize='none'
-                                        keyboardType='default'
-                                        value={leftAmount}
-                                        onChangeText={setLeftAmount}
-                                        onFocus={() => setIsTyping(true)}
-                                        onBlur={() => setIsTyping(false)}
-                                    />
-                                </View>
-                                {/* Right Amount Input */}
-                                <View className='ml-2 mr-4 grow'>
-                                    <Text className='feeding-module-label'>
-                                        Right Amount
-                                    </Text>
-                                    <TextInput
-                                        className='text-input-internal'
-                                        placeholder='i.e. 12 oz'
-                                        autoCapitalize='none'
-                                        keyboardType='default'
-                                        value={rightAmount}
-                                        onChangeText={setRightAmount}
-                                        onFocus={() => setIsTyping(true)}
-                                        onBlur={() => setIsTyping(false)}
-                                    />
-                                </View>
-                            </View>
-                        </View>
-                        {/* Note Input Section */}
-                        <View className='bottom-5'>
-                            <View className='items-start top-5 left-3 z-10'>
-                                <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                    Add a note
+                            {/* Right Amount Input */}
+                            <View className='ml-2 mr-4 grow'>
+                                <Text className='feeding-module-label'>
+                                    Right Amount
                                 </Text>
-                            </View>
-                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
                                 <TextInput
                                     className=''
                                     placeholderTextColor={'#aaa'}
