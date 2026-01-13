@@ -120,12 +120,11 @@ export default function Nursing() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            {/*ScrollView Prevents items from flowing off page on small devices*/}
             <View
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
-            <ScrollView>
+	    <ScrollView>
                 <View
                     className={`gap-6 transition-all duration-300 ${
                         isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -169,11 +168,12 @@ export default function Nursing() {
                                     Right Amount
                                 </Text>
                                 <TextInput
-                                    className=''
-                                    placeholderTextColor={'#aaa'}
-                                    placeholder='i.e. difficulties with latching or signs of poor latching'
-                                    multiline={true}
-                                    maxLength={200}
+                                    className='text-input-internal'
+                                    placeholder='i.e. 12 oz'
+                                    autoCapitalize='none'
+                                    keyboardType='default'
+                                    value={rightAmount}
+                                    onChangeText={setRightAmount}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
                                     testID='nursing-right-amount'
@@ -221,7 +221,7 @@ export default function Nursing() {
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
-              </ScrollView>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );
