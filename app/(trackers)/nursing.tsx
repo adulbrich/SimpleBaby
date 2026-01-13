@@ -125,24 +125,43 @@ export default function Nursing() {
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
-                <ScrollView>
-                    <View
-                        className={`gap-6 transition-all duration-300 ${
-                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                        }`}
-                    >
-                        {/* Stopwatch component controls left/right timer states */}
-                        <NursingStopwatch
-                            key={`nursing-stopwatch-${reset}`}
-                            onTimeUpdateLeft={setLeftDuration}
-                            onTimeUpdateRight={setRightDuration}
-                        />
-                        {/* Volume Input Section */}
-                        <View className='stopwatch-primary'>
-                            <View className='items-start bottom-5 left-3'>
-                                <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                    ⚖️ Add Volume
+            <ScrollView>
+                <View
+                    className={`gap-6 transition-all duration-300 ${
+                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                    }`}
+                >
+                    {/* Stopwatch component controls left/right timer states */}
+                    <NursingStopwatch
+                        key={`nursing-stopwatch-${reset}`}
+                        onTimeUpdateLeft={setLeftDuration}
+                        onTimeUpdateRight={setRightDuration}
+                        testID={"nursing-stopwatch"}
+                    />
+                    {/* Volume Input Section */}
+                    <View className='stopwatch-primary'>
+                        <View className='items-start bottom-5 left-3'>
+                            <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                ⚖️ Add Volume
+                            </Text>
+                        </View>
+                        <View className='flex-row mb-6'>
+                            {/* Left Amount Input */}
+                            <View className='ml-4 mr-2 grow'>
+                                <Text className='feeding-module-label'>
+                                    Left Amount
                                 </Text>
+                                <TextInput
+                                    className='text-input-internal'
+                                    placeholder='i.e. 6 oz'
+                                    autoCapitalize='none'
+                                    keyboardType='default'
+                                    value={leftAmount}
+                                    onChangeText={setLeftAmount}
+                                    onFocus={() => setIsTyping(true)}
+                                    onBlur={() => setIsTyping(false)}
+                                    testID='nursing-left-amount'
+                                />
                             </View>
                             <View className='flex-row mb-6'>
                                 {/* Left Amount Input */}
@@ -195,28 +214,52 @@ export default function Nursing() {
                                     maxLength={200}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
-                                    value={note}
-                                    onChangeText={setNote}
+                                    testID='nursing-right-amount'
                                 />
                             </View>
                         </View>
                     </View>
-                    {/* Bottom Buttons */}
-                    <View className='flex-row gap-2'>
-                        <TouchableOpacity
-                            className='rounded-full p-4 bg-red-100 grow'
-                            onPress={handleSaveNursingLog}
-                        >
-                            <Text>➕ Add to log</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            className='rounded-full p-4 bg-red-100 items-center'
-                            onPress={() => handleResetFields()}
-                        >
-                            <Text>🗑️ Reset fields</Text>
-                        </TouchableOpacity>
+                    {/* Note Input Section */}
+                    <View className='bottom-5'>
+                        <View className='items-start top-5 left-3 z-10'>
+                            <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                Add a note
+                            </Text>
+                        </View>
+                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                            <TextInput
+                                className=''
+                                placeholderTextColor={'#aaa'}
+                                placeholder='i.e. difficulties with latching or signs of poor latching'
+                                multiline={true}
+                                maxLength={200}
+                                onFocus={() => setIsTyping(true)}
+                                onBlur={() => setIsTyping(false)}
+                                value={note}
+                                onChangeText={setNote}
+                                testID='nursing-note-entry'
+                            />
+                        </View>
                     </View>
-                </ScrollView>
+                </View>
+                {/* Bottom Buttons */}
+                <View className='flex-row gap-2'>
+                    <TouchableOpacity
+                        className='rounded-full p-4 bg-red-100 grow'
+                        onPress={handleSaveNursingLog}
+                        testID='nursing-save-log-button'
+                    >
+                        <Text>➕ Add to log</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        className='rounded-full p-4 bg-red-100 items-center'
+                        onPress={() => handleResetFields()}
+                        testID='nursing-reset-form-button'
+                    >
+                        <Text>🗑️ Reset fields</Text>
+                    </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );

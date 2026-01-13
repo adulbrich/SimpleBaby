@@ -10,7 +10,12 @@ import { View, Text, TouchableOpacity } from 'react-native';
 export default function NursingStopwatch({
     onTimeUpdateLeft,
     onTimeUpdateRight,
-}: any) {
+    testID,
+}: {
+    onTimeUpdateLeft: any,
+    onTimeUpdateRight: any,
+    testID: string,
+}) {
     const [leftTime, setLeftTime] = useState(0);
     const [rightTime, setRightTime] = useState(0);
     const [leftRunning, setLeftRunning] = useState(false);
@@ -84,7 +89,7 @@ export default function NursingStopwatch({
     const activeTime = activeSide === 'left' ? leftTime : rightTime;
 
     return (
-        <View className='stopwatch-primary'>
+        <View className='stopwatch-primary' testID={testID} >
             <View className='items-start bottom-5 left-3'>
                 <Text className='bg-gray-200 p-3 rounded-xl font'>
                     ⏱️ Nursing Stopwatch

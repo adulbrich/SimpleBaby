@@ -117,43 +117,43 @@ export default function Feeding() {
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
-                <ScrollView>
-                    <View
-                        className={`gap-6 transition-all duration-300 ${
-                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                        }`}
-                    >
-                        {/* FeedingCategory component handles category/item/amount/time inputs */}
-                        <FeedingCategory
-                            category={category}
-                            itemName={itemName}
-                            amount={amount}
-                            feedingTime={feedingTime}
-                            onCategoryUpdate={setCategory}
-                            onItemNameUpdate={setItemName}
-                            onAmountUpdate={setAmount}
-                            onTimeUpdate={setFeedingTime}
-                            testID='feeding-data-entry'
-                        />
-                        {/* Note input section */}
-                        <View className='bottom-5'>
-                            <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
-                                <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                    Add a note
-                                </Text>
-                            </View>
-                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                                <TextInput
-                                    placeholderTextColor={'#aaa'}
-                                    placeholder='i.e. does not like pureed carrots'
-                                    multiline={true}
-                                    maxLength={200}
-                                    onFocus={() => setIsTyping(true)}
-                                    onBlur={() => setIsTyping(false)}
-                                    value={note}
-                                    onChangeText={setNote}
-                                />
-                            </View>
+             <ScrollView>         
+                <View
+                    className={`gap-6 transition-all duration-300 ${
+                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                    }`}
+                >
+                    {/* FeedingCategory component handles category/item/amount/time inputs */}
+                    <FeedingCategory
+                        category={category}
+                        itemName={itemName}
+                        amount={amount}
+                        feedingTime={feedingTime}
+                        onCategoryUpdate={setCategory}
+                        onItemNameUpdate={setItemName}
+                        onAmountUpdate={setAmount}
+                        onTimeUpdate={setFeedingTime}
+                        testID='feeding-data-entry'
+                    />
+                    {/* Note input section */}
+                    <View className='bottom-5'>
+                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                            <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                Add a note
+                            </Text>
+                        </View>
+                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                            <TextInput
+                                placeholderTextColor={'#aaa'}
+                                placeholder='i.e. does not like pureed carrots'
+                                multiline={true}
+                                maxLength={200}
+                                onFocus={() => setIsTyping(true)}
+                                onBlur={() => setIsTyping(false)}
+                                value={note}
+                                onChangeText={setNote}
+                                testID='feeding-note-entry'
+                            />
                         </View>
                     </View>
                     {/* Action buttons for saving and resetting form */}

@@ -152,46 +152,46 @@ export default function Sleep() {
                 style={{ paddingBottom: insets.bottom }}
             >
                 {/* Main form stack with stopwatch and manual entry */}
-                <ScrollView>
-                    <View
-                        className={`gap-6 transition-all duration-300 ${
-                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                        }`}
-                    >
-                        {/* Stopwatch component for tracking session duration */}
-                        <Stopwatch
-                            key={`stopwatch-${reset}`} 
-                            onTimeUpdate={setStopwatchTime}
-                            testID='sleep-stopwatch' 
-                        />
+            <ScrollView>
+                <View
+                    className={`gap-6 transition-all duration-300 ${
+                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                    }`}
+                >
+                    {/* Stopwatch component for tracking session duration */}
+                    <Stopwatch
+                        key={`stopwatch-${reset}`} 
+                        onTimeUpdate={setStopwatchTime}
+                        testID='sleep-stopwatch' 
+                    />
 
-                        {/* Manual start/end time picker */}
-                        <ManualEntry
-                            key={`manual-entry-${reset}`} 
-                            onDatesUpdate={handleDatesUpdate}
-                            testID='sleep-manual-time-entry'
-                        />
+                    {/* Manual start/end time picker */}
+                    <ManualEntry
+                        key={`manual-entry-${reset}`} 
+                        onDatesUpdate={handleDatesUpdate}
+                        testID='sleep-manual-time-entry'
+                    />
 
-                        {/* Note input section */}
-                        <View className='bottom-5' testID='sleep-note-entry'>
-                            <View className='items-start top-5 left-3 z-10'>
-                                <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                    Add a note
-                                </Text>
-                            </View>
-                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                                <TextInput
-                                    className=''
-                                    placeholderTextColor={'#aaa'}
-                                    placeholder='i.e. baby was squirming often'
-                                    multiline={true}
-                                    maxLength={200}
-                                    onFocus={() => setIsTyping(true)}
-                                    onBlur={() => setIsTyping(false)}
-                                    value={note}
-                                    onChangeText={setNote}
-                                />
-                            </View>
+                    {/* Note input section */}
+                    <View className='bottom-5'>
+                        <View className='items-start top-5 left-3 z-10'>
+                            <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                Add a note
+                            </Text>
+                        </View>
+                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                            <TextInput
+                                className=''
+                                placeholderTextColor={'#aaa'}
+                                placeholder='i.e. baby was squirming often'
+                                multiline={true}
+                                maxLength={200}
+                                onFocus={() => setIsTyping(true)}
+                                onBlur={() => setIsTyping(false)}
+                                value={note}
+                                onChangeText={setNote}
+                                testID='sleep-note-entry'
+                            />
                         </View>
                     </View>
                     {/* Action buttons */}

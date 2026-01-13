@@ -21,7 +21,8 @@ const Calendar: HeaderLink = {
 
 export default function TabLayout() {
     const scheme = useColorScheme();
-    const insets = useSafeAreaInsets().top;
+    const insets = useSafeAreaInsets(); 
+
     const tabBarStyle =
         scheme === 'light'
             ? { backgroundColor: '#f0dfcf', borderColor: '#bbb' }
@@ -34,23 +35,33 @@ export default function TabLayout() {
             screenOptions={{
                 tabBarStyle,
                 tabBarActiveTintColor,
-                tabBarLabelStyle: { fontWeight: 'bold' },
+                tabBarLabelStyle: { fontWeight: 'bold' }
             }}
         >
             <Tabs.Screen
-                name='index'
+                name="index"
                 options={{
                     tabBarLabel: 'Trackers',
                     tabBarIcon: ({ color }) => Icon(color, '👶'),
-                    header: () => Header('👶 SimpleBaby', Profile, insets),
+                    header: () => Header('👶 SimpleBaby', Profile, insets.top)
                 }}
             />
+
             <Tabs.Screen
-                name='trends'
+                name="trends"
                 options={{
                     title: 'Logs',
                     tabBarIcon: ({ color }) => Icon(color, '📈'),
-                    header: () => Header('📈 Logs', Calendar, insets),
+                    header: () => Header('📈 Logs', Calendar, insets.top)
+                }}
+            />
+
+            <Tabs.Screen
+                name="about"
+                options={{
+                    title: 'About',
+                    tabBarIcon: ({ color }) => Icon(color, '❓'),
+                    header: () => Header('❓ About', Calendar, insets.top)
                 }}
             />
         </Tabs>
