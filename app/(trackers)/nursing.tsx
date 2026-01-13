@@ -194,7 +194,6 @@ export default function Nursing() {
                                         onChangeText={setRightAmount}
                                         onFocus={() => setIsTyping(true)}
                                         onBlur={() => setIsTyping(false)}
-                                        testID='nursing-right-amount'
                                     />
                                 </View>
                             </View>
