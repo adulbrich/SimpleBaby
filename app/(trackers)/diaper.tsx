@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -106,10 +107,12 @@ export default function Diaper() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
             <View
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
+        <ScrollView>
                 {/* Main form stack with diaper inputs and note */}
                 <View
                     className={`gap-6 transition-all duration-300 ${
@@ -163,6 +166,7 @@ export default function Diaper() {
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
+        </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );
