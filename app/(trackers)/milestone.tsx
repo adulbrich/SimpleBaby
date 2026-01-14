@@ -1,45 +1,82 @@
 import {
     Text,
     View,
+    TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-    ScrollView
+    ScrollView,
+    Platform
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
+import DateTimePicker, {
+  DateTimePickerAndroid,
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 
 export default function Milestone() {
     const insets = useSafeAreaInsets();
-    const [isTyping] = useState(false);
-    const [category] = useState('');
-    const [itemName] = useState('');
-    const [amount] = useState('');
-    const [milestoneTime] = useState(new Date());
-    const [note] = useState('');
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [milestoneDate, setMilestoneDate] = useState(new Date());
+    const [note, setNote] = useState('');
+
+    const showDatePickerModal = () => {
+        if (showDatePicker === true) {
+          setShowDatePicker(false);
+          return;
+        }
+    
+        if (Platform.OS === "android") {
+          DateTimePickerAndroid.open({
+            value: milestoneDate,
+            onChange: (event, selectedDate) => {
+              if (selectedDate) {
+                setMilestoneDate(selectedDate);
+              }
+            },
+            mode: "date",
+          });
+        } else {
+          setShowDatePicker(true);
+        }
+      };
+
+    const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
+        if (event.type === "set" && selectedDate) {
+        setMilestoneDate(selectedDate);
+        }
+        setShowDatePicker(false);
+    };
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString();
+    };
+
      /**
      * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
      * Converts milestoneTime to ISO string before sending.
      */
     const createMilestoneLog = async (
         childId: string,
-        category: string,
-        itemName: string,
-        amount: string,
+        name: string,
+        description: string,
         milestoneTime: Date,
         note = '',
     ) => {
         const { data, error } = await supabase.from('milestone_logs').insert([
             {
                 child_id: childId,
-                category,
-                item_name: itemName,
-                amount,
+                name,
+                description,
                 milestone_time: milestoneTime.toISOString(),
                 note,
             },
@@ -67,10 +104,9 @@ export default function Milestone() {
 
         return await createMilestoneLog(
             childId,
-            category,
-            itemName,
-            amount,
-            milestoneTime,
+            name,
+            description,
+            milestoneDate,
             note,
         );
     };
@@ -80,7 +116,7 @@ export default function Milestone() {
      * Navigates back to the main tab screen on success.
      */
     const handleSaveMilestoneLog = async () => {
-        if (category && itemName && amount) {
+        if (name && description && milestoneDate) {
             const result = await saveMilestoneLog();
             if (result.success) {
                 router.replace('/(tabs)');
@@ -89,8 +125,16 @@ export default function Milestone() {
                 Alert.alert(`Failed to save milestone log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide category, item name, and amount');
+            Alert.alert('Please provide a milestone name, description, and date');
         }
+    };
+
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setName("");
+        setDescription("");
+        setMilestoneDate(new Date());
+        setNote("");
     };
 
     return (
@@ -106,16 +150,99 @@ export default function Milestone() {
                             isTyping ? '-translate-y-[40%]' : 'translate-y-0'
                         }`}
                     ></View>
+
+                    {/* Name and Description inputs */}
+                    <View className="stopwatch-primary">
+                    <View className="items-start bottom-5 left-3">
+                        <Text className="bg-gray-200 p-3 rounded-xl font">⚖️ Add Details</Text>
+                    </View>
+
+                    <View className="flex-col gap-4 mb-6">
+                        <View className="ml-4 mr-4">
+                        <Text className="feeding-module-label">Milestone Name</Text>
+                        <TextInput
+                            className="text-input-internal"
+                            placeholder="e.g., First Steps"
+                            autoCapitalize="none"
+                            keyboardType="default"
+                            value={name}
+                            onChangeText={setName}
+                            testID="milestone-item-name"
+                        />
+                        </View>
+
+                        <View className="ml-4 mr-4">
+                        <Text className="feeding-module-label">Milestone Description</Text>
+                        <TextInput
+                            className="text-input-internal"
+                            placeholder="e.g., Billy crawled for the first time today, and he..."
+                            autoCapitalize="none"
+                            keyboardType="default"
+                            value={description}
+                            onChangeText={setDescription}
+                            testID="milestone-item-desc"
+                        />
+                        </View>
+
+                        <View className="ml-4 mr-4 flex-row items-center justify-between">
+                        <Text className="feeding-module-label">Date</Text>
+                        <View className="flex-row items-center bg-red-100 rounded-full gap-2">
+                            <TouchableOpacity
+                            className="rounded-full bg-red-50 p-4"
+                            onPress={showDatePickerModal}
+                            >
+                            <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
+                            </TouchableOpacity>
+                            <Text className="mr-4">{formatDate(milestoneDate)}</Text>
+                        </View>
+                        </View>
+
+                        {showDatePicker && Platform.OS === "ios" && (
+                        <View className="items-center">
+                            <DateTimePicker
+                            testID="dateTimePicker"
+                            value={milestoneDate}
+                            mode="date"
+                            onChange={onChangeDate}
+                            display="spinner"
+                            />
+                        </View>
+                        )}
+                    </View>
+                    </View>
+
+                    {/* Note input section */}
+                    <View className='bottom-5 pt-4'>
+                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                            <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                Add a note
+                            </Text>
+                        </View>
+                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                            <TextInput
+                                placeholderTextColor={'#aaa'}
+                                placeholder='e.g., took first steps from the table'
+                                multiline={true}
+                                maxLength={200}
+                                onFocus={() => setIsTyping(true)}
+                                onBlur={() => setIsTyping(false)}
+                                value={note}
+                                onChangeText={setNote}
+                                testID='feeding-note-entry'
+                            />
+                        </View>
+                    </View>
+
                     <View className='flex-row gap-2'>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 grow'
                             onPress={handleSaveMilestoneLog}
                         >
-                            <Text>➕ Add to log</Text>
+                        <Text>➕ Add to log</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 items-center'
-                            onPress={() => router.replace('./')}
+                            onPress={handleResetFields}
                         >
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>
