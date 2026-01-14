@@ -320,12 +320,14 @@ export default function Health() {
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 grow"
                 onPress={handleSaveHealthLog}
+                testID="health-save-log-button"
               >
                 <Text>➕ Add to log</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 items-center"
                 onPress={() => handleResetFields()}
+                testID="health-reset-form-button"
               >
                 <Text>🗑️ Reset fields</Text>
               </TouchableOpacity>
