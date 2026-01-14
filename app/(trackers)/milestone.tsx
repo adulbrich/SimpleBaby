@@ -116,12 +116,14 @@ export default function Feeding() {
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 grow'
                             onPress={handleSaveFeedingLog}
+                            testID="health-save-log-button"
                         >
                             <Text>➕ Add to log</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 items-center'
                             onPress={() => router.replace('./')}
+                            testID="health-reset-form-button"
                         >
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>
