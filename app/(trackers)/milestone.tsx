@@ -7,46 +7,46 @@ import {
     Alert,
     ScrollView
 } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 
 
-export default function Feeding() {
+export default function Milestone() {
     const insets = useSafeAreaInsets();
     const [isTyping] = useState(false);
     const [category] = useState('');
     const [itemName] = useState('');
     const [amount] = useState('');
-    const [feedingTime] = useState(new Date());
+    const [milestoneTime] = useState(new Date());
     const [note] = useState('');
      /**
-     * Inserts a new feeding log into the 'feeding_logs' table on Supabase.
-     * Converts feedingTime to ISO string before sending.
+     * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
+     * Converts milestoneTime to ISO string before sending.
      */
-    const createFeedingLog = async (
+    const createMilestoneLog = async (
         childId: string,
         category: string,
         itemName: string,
         amount: string,
-        feedingTime: Date,
+        milestoneTime: Date,
         note = '',
     ) => {
-        const { data, error } = await supabase.from('feeding_logs').insert([
+        const { data, error } = await supabase.from('milestone_logs').insert([
             {
                 child_id: childId,
                 category,
                 item_name: itemName,
                 amount,
-                feeding_time: feedingTime.toISOString(),
+                milestone_time: milestoneTime.toISOString(),
                 note,
             },
         ]);
 
         if (error) {
-            console.error('Error creating feeding log:', error);
+            console.error('Error creating milestone log:', error);
             return { success: false, error };
         }
 
@@ -54,10 +54,10 @@ export default function Feeding() {
     };
 
     /**
-    * Gets the currently active child ID and attempts to save the feeding log.
+    * Gets the currently active child ID and attempts to save the milestone log.
     * Returns success/error object for handling in UI.
     */
-    const saveFeedingLog = async () => {
+    const saveMilestoneLog = async () => {
         const { success, childId, error } = await getActiveChildId();
 
         if (!success) {
@@ -65,39 +65,33 @@ export default function Feeding() {
             return { success: false, error };
         }
 
-        return await createFeedingLog(
+        return await createMilestoneLog(
             childId,
             category,
             itemName,
             amount,
-            feedingTime,
+            milestoneTime,
             note,
         );
     };
 
      /**
-     * Validates inputs and attempts to save the feeding log.
+     * Validates inputs and attempts to save the milestone log.
      * Navigates back to the main tab screen on success.
      */
-    const handleSaveFeedingLog = async () => {
+    const handleSaveMilestoneLog = async () => {
         if (category && itemName && amount) {
-            const result = await saveFeedingLog();
+            const result = await saveMilestoneLog();
             if (result.success) {
                 router.replace('/(tabs)');
-                Alert.alert('Feeding log saved successfully!');
+                Alert.alert('Milestone log saved successfully!');
             } else {
-                Alert.alert(`Failed to save feeding log: ${result.error}`);
+                Alert.alert(`Failed to save milestone log: ${result.error}`);
             }
         } else {
             Alert.alert('Please provide category, item name, and amount');
         }
     };
-     // Temporary useEffect to block this screen while it's still in development
-    useEffect(() => {
-        Alert.alert('Hey!', 'Feature coming soon', [
-            { text: 'OK', onPress: () => router.replace('/(tabs)') },
-        ]);
-    }, []);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -115,7 +109,7 @@ export default function Feeding() {
                     <View className='flex-row gap-2'>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 grow'
-                            onPress={handleSaveFeedingLog}
+                            onPress={handleSaveMilestoneLog}
                         >
                             <Text>➕ Add to log</Text>
                         </TouchableOpacity>
