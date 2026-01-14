@@ -213,7 +213,7 @@ export default function Milestone() {
 
                     {/* Note input section */}
                     <View className='bottom-5 pt-4'>
-                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                        <View className='items-start top-5 left-3 z-10' testID='milestone-note'>
                             <Text className='bg-gray-200 p-3 rounded-xl font'>
                                 Add a note
                             </Text>
@@ -228,7 +228,7 @@ export default function Milestone() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
-                                testID='feeding-note-entry'
+                                testID='milestone-note-entry'
                             />
                         </View>
                     </View>
