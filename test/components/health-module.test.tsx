@@ -17,6 +17,7 @@ jest.mock("@react-native-community/datetimepicker", () => {
 describe("Health component <HealthModule/>", () => {
 
     beforeEach(() => {
+        // to clear the .mock.calls array
         (DateTimePicker as jest.Mock).mockClear();
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
