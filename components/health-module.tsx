@@ -191,6 +191,7 @@ export default function HealthModule({
                   : ""
               }`}
               onPress={() => handleCategoryPress(category as HealthCategory)}
+              testID={`health-category-${category}-button`}
             >
               <Text className="scale-100 text-2xl">
                 {category === "Growth"
@@ -199,7 +200,7 @@ export default function HealthModule({
                   ? "🏃‍♂️"
                   : "💊"}
               </Text>
-              <Text className="feeding-category-text">{category}</Text>
+              <Text className="feeding-category-text">{category.toLowerCase()}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -227,6 +228,7 @@ export default function HealthModule({
                       length: text,
                     }))
                   }
+                  testID="health-growth-length"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -243,6 +245,7 @@ export default function HealthModule({
                       weight: text,
                     }))
                   }
+                  testID="health-growth-weight"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -259,6 +262,7 @@ export default function HealthModule({
                       head: text,
                     }))
                   }
+                  testID="health-growth-head"
                 />
               </View>
             </>
@@ -279,6 +283,7 @@ export default function HealthModule({
                       type: text,
                     }))
                   }
+                  testID="health-activity-type"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -295,6 +300,7 @@ export default function HealthModule({
                       duration: text,
                     }))
                   }
+                  testID="health-activity-duration"
                 />
               </View>
             </>
@@ -315,6 +321,7 @@ export default function HealthModule({
                       name: text,
                     }))
                   }
+                  testID="health-meds-name"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -331,6 +338,7 @@ export default function HealthModule({
                       amount: text,
                     }))
                   }
+                  testID="health-meds-amount"
                 />
               </View>
               <View className="ml-4 mr-4 flex-row items-center justify-between">
@@ -339,6 +347,7 @@ export default function HealthModule({
                   <TouchableOpacity
                     className="rounded-full bg-red-50 p-4"
                     onPress={showTimePickerModal}
+                    testID="health-meds-time"
                   >
                     <Text>Choose ⏰</Text>
                   </TouchableOpacity>
@@ -365,6 +374,7 @@ export default function HealthModule({
               <TouchableOpacity
                 className="rounded-full bg-red-50 p-4"
                 onPress={showDatePickerModal}
+                testID="health-date-button"
               >
                 <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
               </TouchableOpacity>
