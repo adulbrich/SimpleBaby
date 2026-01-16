@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -123,6 +124,7 @@ export default function Nursing() {
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
+	    <ScrollView>
                 <View
                     className={`gap-6 transition-all duration-300 ${
                         isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -219,6 +221,7 @@ export default function Nursing() {
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );

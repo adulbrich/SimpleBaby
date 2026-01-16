@@ -2,9 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import * as aesjs from "aes-js";
 import * as SecureStore from "expo-secure-store";
+import * as ExpoCrypto from "expo-crypto";
 import "react-native-get-random-values";
 import "react-native-url-polyfill/auto";
-import { Platform } from "react-native";
+import { Buffer } from "buffer";
 
 // https://stackoverflow.com/questions/76389249/provided-value-to-securestore-is-larger-than-2048-bytes-while-trying-to-store
 
@@ -72,6 +73,16 @@ class LargeSecureStore {
   }
 }
 
+/**
+ * Generate and persist a new 32-byte (256-bit) key as hex.
+ */
+async function createEncryptionKey(): Promise<string> {
+  const bytes = await ExpoCrypto.getRandomBytesAsync(32);       // 32 bytes = 256-bit
+  const hex = Buffer.from(bytes).toString("hex");               // store as hex string
+  await SecureStore.setItemAsync(ENCRYPTION_KEY_NAME, hex);
+  return hex;
+}
+
 // Define a constant key name
 const ENCRYPTION_KEY_NAME = "ENCRYPTION_KEY";
 
@@ -79,14 +90,15 @@ const ENCRYPTION_KEY_NAME = "ENCRYPTION_KEY";
  * Retrieves the stored encryption key.
  */
 export const getEncryptionKey = async (): Promise<string | null> => {
-  console.log("🔍 Retrieving Encryption Key...");
-  const key = await SecureStore.getItemAsync(ENCRYPTION_KEY_NAME);
-  console.log("🔑 Retrieved Key:", key);
+  let key = await SecureStore.getItemAsync(ENCRYPTION_KEY_NAME);
+  if (!key) {
+    key = await createEncryptionKey();
+  }
   return key;
 };
 
-const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-const SUPABASE_URL = Platform.OS === "ios" ? process.env.EXPO_PUBLIC_SUPABASE_URL_IOS : process.env.EXPO_PUBLIC_SUPABASE_URL_ANDROID;
+const PUBLIC_ANON = process.env.EXPO_PUBLIC_SUPABASE_KEY;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 
 if (!PUBLIC_ANON || !SUPABASE_URL) {
   throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY');

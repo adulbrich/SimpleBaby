@@ -263,6 +263,8 @@ export default function Health() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {/*ScrollView Prevents items from flowing off page on small devices*/}
+
       <View
         className={`main-container justify-between transition-all ${
           isTyping ? "-translate-y-[40%]" : "translate-y-0"
@@ -311,6 +313,22 @@ export default function Health() {
                 }
                 testID="health-note-entry"
               />
+            </View>
+          
+            {/* Action buttons to save or reset form */}
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 grow"
+                onPress={handleSaveHealthLog}
+              >
+                <Text>➕ Add to log</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 items-center"
+                onPress={() => handleResetFields()}
+              >
+                <Text>🗑️ Reset fields</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
