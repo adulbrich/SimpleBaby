@@ -33,6 +33,7 @@ export default function Header(
             <TouchableOpacity
                 className='pr-4'
                 onPress={() => router.push(headerLink.link)}
+                testID='header-link'
             >
                 <View className='flex-row gap-2 p-2 border-2 rounded-full border-[#000] dark:border-[#293c25] bg-[#fff2af] dark:bg-[#6fac7d]'>
                     <Text className='pl-2'>{headerLink.icon}</Text>

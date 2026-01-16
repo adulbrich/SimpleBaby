@@ -47,6 +47,7 @@ describe("Tracker button component", () => {
         await userEvent.press(screen.getByTestId("test-button"));
 
         expect(router.push).toHaveBeenCalledTimes(1);
+        expect(router.push).toHaveBeenLastCalledWith(testLink);
     });
 
     test("Plays sound on press", async () => {
