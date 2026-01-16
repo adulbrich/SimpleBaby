@@ -191,7 +191,7 @@ export default function HealthModule({
                   : ""
               }`}
               onPress={() => handleCategoryPress(category as HealthCategory)}
-              testID={`health-category-${category}-button`}
+              testID={`health-category-${category.toLowerCase()}-button`}
             >
               <Text className="scale-100 text-2xl">
                 {category === "Growth"
@@ -200,7 +200,7 @@ export default function HealthModule({
                   ? "🏃‍♂️"
                   : "💊"}
               </Text>
-              <Text className="feeding-category-text">{category.toLowerCase()}</Text>
+              <Text className="feeding-category-text">{category}</Text>
             </TouchableOpacity>
           ))}
         </View>

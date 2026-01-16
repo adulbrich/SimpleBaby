@@ -25,9 +25,9 @@ describe("Health component <HealthModule/>", () => {
     test("Renders category and date buttons", () => {
         render(<HealthModule/>);
 
-        expect(screen.getByTestId("health-category-Growth-button")).toBeTruthy();
-        expect(screen.getByTestId("health-category-Activity-button")).toBeTruthy();
-        expect(screen.getByTestId("health-category-Meds-button")).toBeTruthy();
+        expect(screen.getByTestId("health-category-growth-button")).toBeTruthy();
+        expect(screen.getByTestId("health-category-activity-button")).toBeTruthy();
+        expect(screen.getByTestId("health-category-meds-button")).toBeTruthy();
         expect(screen.getByTestId("health-date-button")).toBeTruthy();
     });
 
@@ -44,7 +44,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule/>);
         // switch to activity
         await userEvent.press(
-            screen.getByTestId("health-category-Activity-button")
+            screen.getByTestId("health-category-activity-button")
         );
 
         expect(screen.getByTestId("health-activity-type")).toBeTruthy();
@@ -55,7 +55,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule/>);
         // switch to activity
         await userEvent.press(
-            screen.getByTestId("health-category-Meds-button")
+            screen.getByTestId("health-category-meds-button")
         );
 
         expect(screen.getByTestId("health-meds-name")).toBeTruthy();
@@ -155,21 +155,21 @@ describe("Health component <HealthModule/>", () => {
         expect(onCategoryUpdate.mock.calls[0][0]).toBe("Growth");
 
         // switch to activity
-        await userEvent.press(screen.getByTestId("health-category-Activity-button"));
+        await userEvent.press(screen.getByTestId("health-category-activity-button"));
 
         // category should last have been changed to activity
         expect(onCategoryUpdate).toHaveBeenCalledTimes(2);
         expect(onCategoryUpdate.mock.calls[1][0]).toBe("Activity");
 
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-Meds-button"));
+        await userEvent.press(screen.getByTestId("health-category-meds-button"));
 
         // category should last have been changed to meds
         expect(onCategoryUpdate).toHaveBeenCalledTimes(3);
         expect(onCategoryUpdate.mock.calls[2][0]).toBe("Meds");
 
         // switch back to growth
-        await userEvent.press(screen.getByTestId("health-category-Growth-button"));
+        await userEvent.press(screen.getByTestId("health-category-growth-button"));
 
         // category should last have been changed to growth
         expect(onCategoryUpdate).toHaveBeenCalledTimes(4);
@@ -213,7 +213,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onActivityUpdate={onActivtityUpdate}/>);
 
         // switch to activity
-        await userEvent.press(screen.getByTestId("health-category-Activity-button"));
+        await userEvent.press(screen.getByTestId("health-category-activity-button"));
 
         // growth should start with empty/default values. Use loose equality to compare objects
         expect(onActivtityUpdate).toHaveBeenCalledTimes(1);
@@ -238,7 +238,7 @@ describe("Health component <HealthModule/>", () => {
         
         render(<HealthModule/>);
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-Meds-button"));
+        await userEvent.press(screen.getByTestId("health-category-meds-button"));
 
         // Press change time button
         await userEvent.press(screen.getByTestId("health-meds-time"));
@@ -264,7 +264,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
 
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-Meds-button"));
+        await userEvent.press(screen.getByTestId("health-category-meds-button"));
         const timeAfterNow = new Date();
 
         // growth should start with empty/default values, except the time, which will be initialized to the current time
@@ -304,7 +304,7 @@ describe("Health component <HealthModule/>", () => {
 
         render(<HealthModule/>);
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-Meds-button"));
+        await userEvent.press(screen.getByTestId("health-category-meds-button"));
 
         // ensure time picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -327,7 +327,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
 
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-Meds-button"));
+        await userEvent.press(screen.getByTestId("health-category-meds-button"));
         const timeAfterNow = new Date();
 
         // growth should start with empty/default values, except the time, which will be initialized to the current time
