@@ -93,7 +93,7 @@ describe("Feeding component <FeedingCategory/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange({type: 'set'}, testDate));
 
-        // ensure date has been updated once since first useEffect() call
+        // ensure date has been updated once
         expect(onTimeUpdate).toHaveBeenCalledTimes(1);
         // ensure second call to onDatesUpdate was with the test date as the start date
         expect(onTimeUpdate.mock.calls[0][0]).toBe(testDate);
@@ -128,7 +128,7 @@ describe("Feeding component <FeedingCategory/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testDate));
 
-        // ensure date has been updated once since first useEffect() call
+        // ensure date has been updated once
         expect(onTimeUpdate).toHaveBeenCalledTimes(1);
         // ensure second call to onDatesUpdate was with the test date as the start date
         expect(onTimeUpdate.mock.calls[0][0]).toBe(testDate);

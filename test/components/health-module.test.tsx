@@ -21,11 +21,6 @@ describe("Health component <HealthModule/>", () => {
         (DateTimePicker as jest.Mock).mockClear();
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
-    
-    afterEach(() => {
-        // reset timers for test clean-up
-        jest.useRealTimers();
-    });
 
     test("Renders category and date buttons", () => {
         render(<HealthModule/>);
