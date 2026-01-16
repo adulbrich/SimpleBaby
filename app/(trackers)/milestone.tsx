@@ -18,6 +18,7 @@ import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { encryptData } from '@/library/crypto';
 
 
 export default function Milestone() {
@@ -25,7 +26,6 @@ export default function Milestone() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
     const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
     const [milestoneDate, setMilestoneDate] = useState(new Date());
     const [note, setNote] = useState('');
 
@@ -68,17 +68,19 @@ export default function Milestone() {
     const createMilestoneLog = async (
         childId: string,
         name: string,
-        description: string,
         milestoneTime: Date,
-        note = '',
+        note: string,
     ) => {
+
+        const encryptedName = await encryptData(name);
+        const encryptedNote = note ? await encryptData(note) : null;
+
         const { data, error } = await supabase.from('milestone_logs').insert([
             {
                 child_id: childId,
-                name,
-                description,
-                milestone_time: milestoneTime.toISOString(),
-                note,
+                title: encryptedName,
+                achieved_at: milestoneTime.toISOString(),
+                note: encryptedNote,
             },
         ]);
 
@@ -105,9 +107,8 @@ export default function Milestone() {
         return await createMilestoneLog(
             childId,
             name,
-            description,
             milestoneDate,
-            note,
+            note
         );
     };
 
@@ -116,7 +117,7 @@ export default function Milestone() {
      * Navigates back to the main tab screen on success.
      */
     const handleSaveMilestoneLog = async () => {
-        if (name && description && milestoneDate) {
+        if (name && milestoneDate) {
             const result = await saveMilestoneLog();
             if (result.success) {
                 router.replace('/(tabs)');
@@ -125,14 +126,13 @@ export default function Milestone() {
                 Alert.alert(`Failed to save milestone log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide a milestone name, description, and date');
+            Alert.alert('Please provide a milestone name and date');
         }
     };
 
     // Handle the UI logic when resetting fields
     const handleResetFields = () => {
         setName("");
-        setDescription("");
         setMilestoneDate(new Date());
         setNote("");
     };
@@ -168,19 +168,6 @@ export default function Milestone() {
                             value={name}
                             onChangeText={setName}
                             testID="milestone-item-name"
-                        />
-                        </View>
-
-                        <View className="ml-4 mr-4">
-                        <Text className="feeding-module-label">Milestone Description</Text>
-                        <TextInput
-                            className="text-input-internal"
-                            placeholder="e.g., Billy crawled for the first time today, and he..."
-                            autoCapitalize="none"
-                            keyboardType="default"
-                            value={description}
-                            onChangeText={setDescription}
-                            testID="milestone-item-desc"
                         />
                         </View>
 
