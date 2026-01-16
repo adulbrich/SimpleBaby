@@ -46,8 +46,7 @@ const MilestoneLogsView: React.FC = () => {
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
     
     useEffect(() => {
-        fetchMilestoneLogs();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        fetchMilestoneLogs();         
     }, []);
     
     const fetchMilestoneLogs = async () => {
