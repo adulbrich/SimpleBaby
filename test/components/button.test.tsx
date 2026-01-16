@@ -2,11 +2,7 @@ import Button from "@/components/button";
 import { render, screen, userEvent } from "@testing-library/react-native";
 
 
-describe("Diaper component <DiaperModule/>", () => {
-
-    beforeEach(() => {
-        // to clear the .mock.calls array
-    });
+describe("Button component", () => {
 
     test("Renders button text", () => {
         const testLabel = "test label";
