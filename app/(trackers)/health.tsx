@@ -316,7 +316,7 @@ export default function Health() {
             </View>
           
             {/* Action buttons to save or reset form */}
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-2 pb-5">
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 grow"
                 onPress={handleSaveHealthLog}

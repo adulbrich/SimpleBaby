@@ -110,7 +110,9 @@ export default function Diaper() {
             {/*ScrollView Prevents items from flowing off page on small devices*/}
             <View
                 className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
+                style={{ 
+                    paddingBottom: insets.bottom,
+                 }}
             >
         <ScrollView>
                 {/* Main form stack with diaper inputs and note */}
@@ -150,7 +152,7 @@ export default function Diaper() {
                     </View>
                 </View>
                 {/* Action buttons row */}
-                <View className='flex-row gap-2'>
+                <View className='flex-row gap-2 pb-5'>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveDiaperLog}
