@@ -17,7 +17,7 @@ export default function ModalsLayout() {
                     name='profile'
                     options={{
                         headerTitle: 'Profile',
-                        headerRight: () => <Button onPress={() => {router.navigate('/(modals)/settings')}} title="⚙️ Settings" />,
+                        headerRight: () => <Button onPress={() => {router.navigate('/(modals)/settings');}} title="⚙️ Settings" />,
                     }}
                 />
             </Stack>
