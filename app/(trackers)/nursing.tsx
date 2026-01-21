@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ export default function Nursing() {
     const [leftAmount, setLeftAmount] = useState('');
     const [rightAmount, setRightAmount] = useState('');
     const [note, setNote] = useState('');
+    const [reset, setReset] = useState<number>(0);
 
     // Insert a new nursing log entry into Supabase
     const createNursingLog = async (
@@ -106,12 +108,23 @@ export default function Nursing() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setLeftDuration("00:00:00");
+        setRightDuration("00:00:00");
+        setLeftAmount("");
+        setRightAmount("");
+        setNote("");
+        setReset(prev => prev + 1);
+    };
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
+	    <ScrollView>
                 <View
                     className={`gap-6 transition-all duration-300 ${
                         isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -119,8 +132,10 @@ export default function Nursing() {
                 >
                     {/* Stopwatch component controls left/right timer states */}
                     <NursingStopwatch
+                        key={`nursing-stopwatch-${reset}`}
                         onTimeUpdateLeft={setLeftDuration}
                         onTimeUpdateRight={setRightDuration}
+                        testID={"nursing-stopwatch"}
                     />
                     {/* Volume Input Section */}
                     <View className='stopwatch-primary'>
@@ -144,6 +159,7 @@ export default function Nursing() {
                                     onChangeText={setLeftAmount}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
+                                    testID='nursing-left-amount'
                                 />
                             </View>
                             {/* Right Amount Input */}
@@ -160,6 +176,7 @@ export default function Nursing() {
                                     onChangeText={setRightAmount}
                                     onFocus={() => setIsTyping(true)}
                                     onBlur={() => setIsTyping(false)}
+                                    testID='nursing-right-amount'
                                 />
                             </View>
                         </View>
@@ -182,6 +199,7 @@ export default function Nursing() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='nursing-note-entry'
                             />
                         </View>
                     </View>
@@ -191,16 +209,19 @@ export default function Nursing() {
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveNursingLog}
+                        testID='nursing-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
+                        onPress={() => handleResetFields()}
+                        testID='nursing-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );

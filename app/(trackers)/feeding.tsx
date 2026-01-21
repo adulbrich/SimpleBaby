@@ -6,13 +6,14 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
-import FeedingCategory from '@/components/feeding-category';
+import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
 import { encryptData } from '@/library/crypto';  // ✅ Added
 
 // Feeding.tsx
@@ -21,7 +22,7 @@ import { encryptData } from '@/library/crypto';  // ✅ Added
 export default function Feeding() {
     const insets = useSafeAreaInsets();
     const [isTyping, setIsTyping] = useState(false);
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState<FeedingCategoryList>('Liquid');
     const [itemName, setItemName] = useState('');
     const [amount, setAmount] = useState('');
     const [feedingTime, setFeedingTime] = useState(new Date());
@@ -100,63 +101,80 @@ export default function Feeding() {
         }
     };
 
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setCategory("Liquid");
+        setItemName("");
+        setAmount("");
+        setFeedingTime(new Date());
+        setNote("");
+    };
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
             <View
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
-                <View
-                    className={`gap-6 transition-all duration-300 ${
-                        isTyping ? '-translate-y-[40%]' : 'translate-y-0'
-                    }`}
-                >
-                    {/* FeedingCategory component handles category/item/amount/time inputs */}
-                    <FeedingCategory
-                        onCategoryUpdate={setCategory}
-                        onItemNameUpdate={setItemName}
-                        onAmountUpdate={setAmount}
-                        onTimeUpdate={setFeedingTime}
-                        testID='feeding-data-entry'
-                    />
-                    {/* Note input section */}
-                    <View className='bottom-5'>
-                        <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
-                            <Text className='bg-gray-200 p-3 rounded-xl font'>
-                                Add a note
-                            </Text>
+                <ScrollView>         
+                    <View
+                        className={`gap-6 transition-all duration-300 ${
+                            isTyping ? '-translate-y-[40%]' : 'translate-y-0'
+                        }`}
+                    >
+                        {/* FeedingCategory component handles category/item/amount/time inputs */}
+                        <FeedingCategory
+                            category={category}
+                            itemName={itemName}
+                            amount={amount}
+                            feedingTime={feedingTime}
+                            onCategoryUpdate={setCategory}
+                            onItemNameUpdate={setItemName}
+                            onAmountUpdate={setAmount}
+                            onTimeUpdate={setFeedingTime}
+                            testID='feeding-data-entry'
+                        />
+                        {/* Note input section */}
+                        <View className='bottom-5'>
+                            <View className='items-start top-5 left-3 z-10' testID='feeding-note'>
+                                <Text className='bg-gray-200 p-3 rounded-xl font'>
+                                    Add a note
+                                </Text>
+                            </View>
+                            <View className='p-4 pt-9 bg-white rounded-xl z-0'>
+                                <TextInput
+                                    placeholderTextColor={'#aaa'}
+                                    placeholder='i.e. does not like pureed carrots'
+                                    multiline={true}
+                                    maxLength={200}
+                                    onFocus={() => setIsTyping(true)}
+                                    onBlur={() => setIsTyping(false)}
+                                    value={note}
+                                    onChangeText={setNote}
+                                    testID='feeding-note-entry'
+                                />
+                            </View>
                         </View>
-                        <View className='p-4 pt-9 bg-white rounded-xl z-0'>
-                            <TextInput
-                                placeholderTextColor={'#aaa'}
-                                placeholder='i.e. does not like pureed carrots'
-                                multiline={true}
-                                maxLength={200}
-                                onFocus={() => setIsTyping(true)}
-                                onBlur={() => setIsTyping(false)}
-                                value={note}
-                                onChangeText={setNote}
-                            />
+                        {/* Action buttons for saving and resetting form */}
+                        <View className='flex-row gap-2'>
+                            <TouchableOpacity
+                                className='rounded-full p-4 bg-red-100 grow'
+                                onPress={handleSaveFeedingLog}
+                                testID='feeding-save-log-button'
+                            >
+                                <Text>➕ Add to log</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                className='rounded-full p-4 bg-red-100 items-center'
+                                onPress={() => handleResetFields()}
+                                testID='feeding-reset-form-button'
+                            >
+                                <Text>🗑️ Reset fields</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                </View>
-                {/* Action buttons for saving and resetting form */}
-                <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 grow'
-                        onPress={handleSaveFeedingLog}
-                        testID='feeding-save-log-button'
-                    >
-                        <Text>➕ Add to log</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className='rounded-full p-4 bg-red-100 items-center'
-                        onPress={() => router.replace('./')}
-                        testID='feeding-reset-form-button'
-                    >
-                        <Text>🗑️ Reset fields</Text>
-                    </TouchableOpacity>
-                </View>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );

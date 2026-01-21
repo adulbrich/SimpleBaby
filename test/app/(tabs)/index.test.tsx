@@ -33,6 +33,9 @@ jest.mock("expo-blur", () => ({
     BlurView: () => <></>
 }));
 
+jest.mock("expo-audio", () => ({
+    useAudioPlayer: () => <></>
+}));
 
 describe("Tracker screen", () => {
     test("Loads tracker option buttons", () => {

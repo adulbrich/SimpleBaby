@@ -70,11 +70,11 @@
 }
 
 .nursing-side-button-active {
-    @apply dark:bg-[#699d8e] p-4 w-[7rem] scale-100 items-center;
+    @apply bg-[#DCC2A0] dark:bg-[#699d8e] p-4 w-[7rem] scale-100 items-center;
 }
 
 .nursing-side-button {
-    @apply dark:bg-[#243925] p-4 w-[7rem] scale-100 items-center;
+    @apply bg-[#FFF9EF] dark:bg-[#243925] p-4 w-[7rem] scale-100 items-center;
 }
 
 .subtitle {

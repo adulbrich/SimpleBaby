@@ -47,6 +47,7 @@ export default function Health() {
     date: new Date(),
     note: "",
   });
+  const [reset, setReset] = useState(0);
 
     // Create a new health log entry into the database using Supabase client
   const createHealthLog = async (log: any) => {
@@ -246,8 +247,24 @@ export default function Health() {
     }));
   }, []);
 
+  // handle the reset logic for the health screen UI
+  const handleResetFields = () => {
+    setHealthLog({
+      child_id: "",
+      category: "Growth",      
+      date: new Date(),
+      growth: { length: "", weight: "", head: "" },
+      activity: undefined,
+      meds: undefined,
+      note: "",
+    });
+    setReset(prev => prev + 1);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {/*ScrollView Prevents items from flowing off page on small devices*/}
+
       <View
         className={`main-container justify-between transition-all ${
           isTyping ? "-translate-y-[40%]" : "translate-y-0"
@@ -257,11 +274,13 @@ export default function Health() {
         <ScrollView>
           {/* Render the health input form module with update handlers */}
           <HealthModule
+            key={`health-module-${reset}`}
             onDateUpdate={handleDateUpdate}
             onCategoryUpdate={handleCategoryUpdate}
             onGrowthUpdate={handleGrowthUpdate}
             onActivityUpdate={handleActivityUpdate}
             onMedsUpdate={handleMedsUpdate}
+            testID="health-main-inputs"
           />
            {/* Multiline input for additional notes */}
           <View className="bottom-5 pt-5">
@@ -292,25 +311,29 @@ export default function Health() {
                     note,
                   }))
                 }
+                testID="health-note-entry"
               />
+            </View>
+          
+            {/* Action buttons to save or reset form */}
+            <View className="flex-row gap-2 pt-4">
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 grow"
+                onPress={handleSaveHealthLog}
+                testID="health-save-log-button"
+              >
+                <Text>➕ Add to log</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 items-center"
+                onPress={() => handleResetFields()}
+                testID="health-reset-form-button"
+              >
+                <Text>🗑️ Reset fields</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
-        {/* Action buttons to save or reset form */}
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 grow"
-            onPress={handleSaveHealthLog}
-          >
-            <Text>➕ Add to log</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 items-center"
-            onPress={() => router.replace("./")}
-          >
-            <Text>🗑️ Reset fields</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </TouchableWithoutFeedback>
   );
