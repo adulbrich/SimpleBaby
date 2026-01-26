@@ -85,18 +85,21 @@ export default function Stopwatch({ onTimeUpdate, testID }: {onTimeUpdate: any, 
                 <TouchableOpacity
                     className='stopwatch-button dark:bg-[#d2f1e0]'
                     onPress={() => setRunning(true)}
+                    testID='sleep-stopwatch-start'
                 >
                     <Text className='stopwatch-button-text'>Start</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='stopwatch-button dark:bg-[#f1efd2]'
                     onPress={() => setRunning(false)}
+                    testID='sleep-stopwatch-stop'
                 >
                     <Text className='stopwatch-button-text'>Stop</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='stopwatch-button dark:bg-[#f1d2d2]'
                     onPress={reset}
+                    testID='sleep-stopwatch-reset'
                 >
                     <Text className='stopwatch-button-text'>Reset</Text>
                 </TouchableOpacity>

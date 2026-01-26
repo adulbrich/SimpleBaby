@@ -157,7 +157,7 @@ export default function Feeding() {
                             </View>
                         </View>
                         {/* Action buttons for saving and resetting form */}
-                        <View className='flex-row gap-2'>
+                        <View className='flex-row gap-2 pb-5'>
                             <TouchableOpacity
                                 className='rounded-full p-4 bg-red-100 grow'
                                 onPress={handleSaveFeedingLog}

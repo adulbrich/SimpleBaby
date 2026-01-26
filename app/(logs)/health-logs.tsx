@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -31,6 +31,10 @@ interface HealthLog {
   meds_name: string | null;
   meds_amount: string | null;
   meds_time_taken: string | null;
+  vaccine_name: string | null;
+  vaccine_location: string | null;
+  other_name: string | null;
+  other_description: string | null;
   note: string | null;
 }
 
@@ -41,10 +45,6 @@ const HealthLogsView: React.FC = () => {
   const [editingLog, setEditingLog] = useState<HealthLog | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
 
-  useEffect(() => {
-    fetchHealthLogs();
-  });
-
   const safeDecrypt = async (value: string | null): Promise<string> => {
     if (!value || !value.includes('U2FsdGVkX1')) return '';
     try {
@@ -54,7 +54,7 @@ const HealthLogsView: React.FC = () => {
     }
   };
 
-  const fetchHealthLogs = async () => {
+  const fetchHealthLogs = useCallback(async () => {
     try {
       const { success, childId, error: childError } = await getActiveChildId();
       if (!success || !childId) {
@@ -79,6 +79,10 @@ const HealthLogsView: React.FC = () => {
           activity_duration: await safeDecrypt(entry.activity_duration),
           meds_name: await safeDecrypt(entry.meds_name),
           meds_amount: await safeDecrypt(entry.meds_amount),
+          vaccine_name: await safeDecrypt(entry.vaccine_name),
+          vaccine_location: await safeDecrypt(entry.vaccine_location),
+          other_name: await safeDecrypt(entry.other_name),
+          other_description: await safeDecrypt(entry.other_description),
           note: await safeDecrypt(entry.note),
         }))
       );
@@ -90,7 +94,11 @@ const HealthLogsView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchHealthLogs();
+  }, [fetchHealthLogs]);
 
   const handleSaveEdit = async () => {
     if (!editingLog) return;
@@ -103,6 +111,10 @@ const HealthLogsView: React.FC = () => {
         activity_duration: editingLog.activity_duration ? await encryptData(editingLog.activity_duration) : null,
         meds_name: editingLog.meds_name ? await encryptData(editingLog.meds_name) : null,
         meds_amount: editingLog.meds_amount ? await encryptData(editingLog.meds_amount) : null,
+        vaccine_name: editingLog.vaccine_name ? await encryptData(editingLog.vaccine_name) : null,
+        vaccine_location: editingLog.vaccine_location ? await encryptData(editingLog.vaccine_location) : null,
+        other_name: editingLog.other_name ? await encryptData(editingLog.other_name) : null,
+        other_description: editingLog.other_description ? await encryptData(editingLog.other_description) : null,
         note: editingLog.note ? await encryptData(editingLog.note) : null,
       };
 
@@ -153,6 +165,10 @@ const HealthLogsView: React.FC = () => {
       {item.activity_duration && <Text>Duration: {item.activity_duration}</Text>}
       {item.meds_name && <Text>Med: {item.meds_name}</Text>}
       {item.meds_amount && <Text>Amount: {item.meds_amount}</Text>}
+      {item.vaccine_name && <Text>Vaccine: {item.vaccine_name}</Text>}
+      {item.vaccine_location && <Text>Location: {item.vaccine_location}</Text>}
+      {item.other_name && <Text>Name: {item.other_name}</Text>}
+      {item.other_description && <Text>Description: {item.other_description}</Text>}
       {item.note && <Text className="italic text-gray-500">📝 {item.note}</Text>}
       <View className="flex-row justify-end mt-3 gap-3">
         <Pressable className="px-3 py-2 rounded-full bg-blue-100" onPress={() => { setEditingLog(item); setEditModalVisible(true); }}>
@@ -204,14 +220,18 @@ const HealthLogsView: React.FC = () => {
         >
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 16, backgroundColor: '#00000099' }}>
             <View className="bg-white w-full rounded-2xl p-6">
-              <Text className="text-xl font-bold mb-4">Edit Health Log</Text>
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Length (cm)" value={editingLog?.growth_length || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_length: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Weight (kg)" value={editingLog?.growth_weight || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_weight: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Head (cm)" value={editingLog?.growth_head || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_head: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Activity Type" value={editingLog?.activity_type || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, activity_type: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Activity Duration" value={editingLog?.activity_duration || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, activity_duration: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Medication Name" value={editingLog?.meds_name || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, meds_name: text } : prev)} />
-              <TextInput className="border mb-2 px-3 py-2" placeholder="Medication Amount" value={editingLog?.meds_amount || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, meds_amount: text } : prev)} />
+              <Text className="text-xl font-bold mb-4">Edit &apos;{editingLog?.category}&apos; Health Log</Text>
+              {editingLog?.growth_length && <TextInput className="border mb-2 px-3 py-2" placeholder="Length (cm)" value={editingLog?.growth_length || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_length: text } : prev)} />}
+              {editingLog?.growth_weight && <TextInput className="border mb-2 px-3 py-2" placeholder="Weight (kg)" value={editingLog?.growth_weight || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_weight: text } : prev)} />}
+              {editingLog?.growth_head && <TextInput className="border mb-2 px-3 py-2" placeholder="Head (cm)" value={editingLog?.growth_head || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, growth_head: text } : prev)} />}
+              {editingLog?.activity_type && <TextInput className="border mb-2 px-3 py-2" placeholder="Activity Type" value={editingLog?.activity_type || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, activity_type: text } : prev)} />}
+              {editingLog?.activity_duration && <TextInput className="border mb-2 px-3 py-2" placeholder="Activity Duration" value={editingLog?.activity_duration || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, activity_duration: text } : prev)} />}
+              {editingLog?.meds_name && <TextInput className="border mb-2 px-3 py-2" placeholder="Medication Name" value={editingLog?.meds_name || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, meds_name: text } : prev)} />}
+              {editingLog?.meds_amount && <TextInput className="border mb-2 px-3 py-2" placeholder="Medication Amount" value={editingLog?.meds_amount || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, meds_amount: text } : prev)} />}
+              {editingLog?.vaccine_name && <TextInput className="border mb-2 px-3 py-2" placeholder="Vaccine Name" value={editingLog?.vaccine_name || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, vaccine_name: text } : prev)} />}
+              {editingLog?.vaccine_location && <TextInput className="border mb-2 px-3 py-2" placeholder="Vaccine Location" value={editingLog?.vaccine_location || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, vaccine_location: text } : prev)} />}
+              {editingLog?.other_name && <TextInput className="border mb-2 px-3 py-2" placeholder="Other Event Name" value={editingLog?.other_name || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, other_name: text } : prev)} />}
+              {editingLog?.other_description && <TextInput className="border mb-2 px-3 py-2" placeholder="Other Event Description" value={editingLog?.other_description || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, other_description: text } : prev)} />}
               <TextInput className="border mb-2 px-3 py-2" placeholder="Note" value={editingLog?.note || ''} onChangeText={(text) => setEditingLog((prev) => prev ? { ...prev, note: text } : prev)} />
               <View className="flex-row justify-end gap-3 mt-4">
                 <TouchableOpacity className="bg-gray-200 rounded-full px-4 py-2" onPress={() => setEditModalVisible(false)}>

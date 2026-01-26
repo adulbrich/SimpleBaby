@@ -35,6 +35,14 @@ interface HealthLog {
     amount: string;
     timeTaken: Date;
   };
+  vaccine?: {
+    name: string;
+    location: string;
+  };
+  other?: {
+    name: string;
+    description: string;
+  };
   note: string;
 }
 
@@ -94,6 +102,16 @@ export default function Health() {
         );
         return;
       }
+    } else if (healthLog.category === "Vaccine") {
+        if (!healthLog.vaccine?.name) {
+          Alert.alert("Error", "Please provide a name for the vaccine received.");
+          return;
+        }
+    } else if (healthLog.category === "Other") {
+        if (!healthLog.other?.name) {
+          Alert.alert("Error", "Please provide a title for the health event.");
+          return;
+        }
     }
 
     const { success, childId, error } = await getActiveChildId();
@@ -132,6 +150,18 @@ export default function Health() {
           ? await encryptData(healthLog.meds.amount)
           : null,
         meds_time_taken: healthLog.meds?.timeTaken || null,
+        vaccine_name: healthLog.vaccine?.name
+          ? await encryptData(healthLog.vaccine.name)
+          : null,
+        vaccine_location: healthLog.vaccine?.location
+          ? await encryptData(healthLog.vaccine.location)
+          : null,
+        other_name: healthLog.other?.name
+          ? await encryptData(healthLog.other.name)
+          : null,
+        other_description: healthLog.other?.description
+          ? await encryptData(healthLog.other.description)
+          : null,
         note: healthLog.note ? await encryptData(healthLog.note) : null,
       };
 
@@ -172,6 +202,14 @@ export default function Health() {
         category === "Meds"
           ? { name: "", amount: "", timeTaken: new Date() }
           : undefined,
+      vaccine:
+        category === "Vaccine"
+          ? { name: "", location: "" }
+          : undefined,
+      other:
+        category === "Other"
+          ? { name: "", description: "" }
+          : undefined
     }));
   }, []);
 
@@ -247,6 +285,34 @@ export default function Health() {
     }));
   }, []);
 
+  const handleVaccineUpdate = useCallback((vaccine: {
+    name?: string;
+    location?: string;
+  }) => {
+    setHealthLog((prev) => ({
+      ...prev,
+      vaccine: {
+        name: prev.vaccine?.name || "",
+        location: prev.vaccine?.location || "",
+        ...vaccine,
+      },
+    }));
+  }, []);
+
+    const handleOtherUpdate = useCallback((other: {
+    name?: string;
+    description?: string;
+  }) => {
+    setHealthLog((prev) => ({
+      ...prev,
+      other: {
+        name: prev.other?.name || "",
+        description: prev.other?.description || "",
+        ...other,
+      },
+    }));
+  }, []);
+
   // handle the reset logic for the health screen UI
   const handleResetFields = () => {
     setHealthLog({
@@ -256,6 +322,8 @@ export default function Health() {
       growth: { length: "", weight: "", head: "" },
       activity: undefined,
       meds: undefined,
+      vaccine: undefined,
+      other: undefined,
       note: "",
     });
     setReset(prev => prev + 1);
@@ -280,6 +348,8 @@ export default function Health() {
             onGrowthUpdate={handleGrowthUpdate}
             onActivityUpdate={handleActivityUpdate}
             onMedsUpdate={handleMedsUpdate}
+            onVaccineUpdate={handleVaccineUpdate}
+            onOtherUpdate={handleOtherUpdate}
             testID="health-main-inputs"
           />
            {/* Multiline input for additional notes */}
@@ -316,39 +386,24 @@ export default function Health() {
             </View>
           
             {/* Action buttons to save or reset form */}
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-2 pb-5">
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 grow"
                 onPress={handleSaveHealthLog}
+                testID="health-save-log-button"
               >
                 <Text>➕ Add to log</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 items-center"
                 onPress={() => handleResetFields()}
+                testID="health-reset-form-button"
               >
                 <Text>🗑️ Reset fields</Text>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
-        {/* Action buttons to save or reset form */}
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 grow"
-            onPress={handleSaveHealthLog}
-            testID="health-save-log-button"
-          >
-            <Text>➕ Add to log</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 items-center"
-            onPress={() => handleResetFields()}
-            testID="health-reset-form-button"
-          >
-            <Text>🗑️ Reset fields</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </TouchableWithoutFeedback>
   );
