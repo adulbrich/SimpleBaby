@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -47,10 +47,6 @@ const MilestoneLogsView: React.FC = () => {
     
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
-    
-    useEffect(() => {
-        fetchMilestoneLogs();         
-    }, []);
 
     const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
         try {
@@ -70,7 +66,7 @@ const MilestoneLogsView: React.FC = () => {
         }
     };
     
-    const fetchMilestoneLogs = async () => {
+    const fetchMilestoneLogs = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -132,7 +128,11 @@ const MilestoneLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchMilestoneLogs();         
+    }, [fetchMilestoneLogs]);
     
     const openEditModal = (log: MilestoneLog) => {
         setEditingLog(log);
