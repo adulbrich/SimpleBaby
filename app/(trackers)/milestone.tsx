@@ -18,6 +18,7 @@ import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
 
 
@@ -25,6 +26,7 @@ export default function Milestone() {
     const insets = useSafeAreaInsets();
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [category, setCategory] = useState<MilestoneCategoryList>('Motor');
     const [name, setName] = useState('');
     const [milestoneDate, setMilestoneDate] = useState(new Date());
     const [note, setNote] = useState('');
@@ -67,6 +69,7 @@ export default function Milestone() {
      */
     const createMilestoneLog = async (
         childId: string,
+        category: MilestoneCategoryList,
         name: string,
         milestoneTime: Date,
         note: string,
@@ -78,6 +81,7 @@ export default function Milestone() {
         const { data, error } = await supabase.from('milestone_logs').insert([
             {
                 child_id: childId,
+                category,
                 title: encryptedName,
                 achieved_at: milestoneTime.toISOString(),
                 note: encryptedNote,
@@ -106,6 +110,7 @@ export default function Milestone() {
 
         return await createMilestoneLog(
             childId,
+            category,
             name,
             milestoneDate,
             note
@@ -132,6 +137,7 @@ export default function Milestone() {
 
     // Handle the UI logic when resetting fields
     const handleResetFields = () => {
+        setCategory('Motor');
         setName("");
         setMilestoneDate(new Date());
         setNote("");
@@ -150,6 +156,12 @@ export default function Milestone() {
                             isTyping ? '-translate-y-[40%]' : 'translate-y-0'
                         }`}
                     ></View>
+
+                    <MilestoneCategory
+                        category={category}
+                        onCategoryUpdate={setCategory}
+                        testID='milestone-category-modal'
+                    />
 
                     {/* Name and Description inputs */}
                     <View className="stopwatch-primary">
