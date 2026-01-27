@@ -227,8 +227,7 @@ const MilestoneLogsView: React.FC = () => {
                 source={{ uri: photoSignedUrls[item.id] }}
                 style={{ width: "100%", height: 220, borderRadius: 12, marginTop: 12 }}
                 resizeMode="cover"
-                onLoad={() => console.log("✅ Image loaded", item.id)}
-                onError={(e) => console.log("❌ Image failed", item.id, e.nativeEvent)} // currently used for debugging, delete later
+                onError={(e) => console.log("❌ Image Failed to Load:", item.id, e.nativeEvent)}
             />
             ) : null}
 
@@ -353,6 +352,11 @@ const MilestoneLogsView: React.FC = () => {
                                 multiline
                                 />
                         </View>
+
+                        {/* Photo */}
+                        <Text className="text-xs text-gray-400 mt-1">
+                            Photos cannot be edited/updated yet in this menu. This feature will be added in a later release. For now, please create a new log.
+                        </Text>
         
         <View className="flex-row justify-end gap-3 mt-4">
                             <TouchableOpacity className="bg-gray-200 rounded-full px-4 py-2" onPress={() => setEditModalVisible(false)}>

@@ -88,8 +88,8 @@ export default function Milestone() {
     const uploadPhoto = async (childId: string, uri: string) => {
         setUploadingPhoto(true);
         try {
-            const { data: { user }, error: userError, } = await supabase.auth.getUser();
-            
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
             if (userError || !user) {
                 throw new Error("Not authenticated");
             }
@@ -97,13 +97,25 @@ export default function Milestone() {
             const extension = uri.split(".").pop()?.toLowerCase() ?? "jpg";
             const path = `${user.id}/${childId}/${Date.now()}.${extension}`;
 
-            const response = await fetch(uri);
-            const blob = await response.blob();
+            const res = await fetch(uri);
+            const arrayBuffer = await res.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+
+            if (bytes.length === 0) {
+                throw new Error("Selected photo is empty (0 bytes). Check the URI source.");
+            }
+
+            const contentType =
+            extension === "png"
+                ? "image/png"
+                : extension === "webp"
+                ? "image/webp"
+                : "image/jpeg";
 
             const { data, error } = await supabase.storage
             .from("milestone-photos")
-            .upload(path, blob, {
-                contentType: blob.type || "image/jpeg",
+            .upload(path, bytes, {
+                contentType,
                 upsert: false,
             });
 
@@ -112,11 +124,10 @@ export default function Milestone() {
             }
 
             return data.path;
-
         } finally {
             setUploadingPhoto(false);
         }
-    };
+        };
 
      /**
      * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
