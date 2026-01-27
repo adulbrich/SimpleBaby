@@ -15,7 +15,7 @@ export default function Tab() {
     const insets = useSafeAreaInsets();
 
     const bars: Button[] = [
-        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-log', testID: "trends-Sleep-button"},
+        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-logs', testID: "trends-Sleep-button"},
         { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs', testID: "trends-Feeding-button"},
         { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs', testID: "trends-Nursing-button" },
         { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs', testID: "trends-Diaper-button" },
