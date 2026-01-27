@@ -31,6 +31,7 @@ export default function Milestone() {
     const [name, setName] = useState('');
     const [milestoneDate, setMilestoneDate] = useState(new Date());
     const [photoUri, setPhotoUri] = useState<string | null>(null);
+    const [photoName, setPhotoName] = useState<string | null>(null);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [note, setNote] = useState('');
 
@@ -75,12 +76,20 @@ export default function Milestone() {
 
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
-            allowsEditing: true,
+            allowsEditing: Platform.OS === "ios" ? true : false,
             quality: 0.85,
         });
 
         if (!result.canceled) {
-            setPhotoUri(result.assets[0].uri);
+            const asset = result.assets[0];
+            setPhotoUri(asset.uri);
+
+            if (asset.fileName) {
+                setPhotoName(asset.fileName);
+            } else {
+                const derivedName = asset.uri.split("/").pop() ?? "An image has been selected.";
+                setPhotoName(derivedName);
+            }
         }
     };
 
@@ -297,6 +306,11 @@ export default function Milestone() {
                             <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
                         </TouchableOpacity>
                         </View>
+                        {photoName ? (
+                        <Text className="text-sm text-gray-500 mt-2 text-center">
+                            {photoName}
+                        </Text>
+                        ) : null}
                     </View>
                     </View>
 
