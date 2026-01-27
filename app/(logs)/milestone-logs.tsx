@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
+    Image,
     FlatList,
     ActivityIndicator,
     Alert,
@@ -41,6 +42,8 @@ const MilestoneLogsView: React.FC = () => {
     
     const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+
+    const [photoSignedUrls, setPhotoSignedUrls] = useState<Record<string, string>>({});
     
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
@@ -48,6 +51,24 @@ const MilestoneLogsView: React.FC = () => {
     useEffect(() => {
         fetchMilestoneLogs();         
     }, []);
+
+    const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
+        try {
+            const { data, error } = await supabase.storage
+                .from("milestone-photos")
+                .createSignedUrl(path, 600);
+
+            if (error) {
+                console.warn("SIGN ERROR:", { message: error.message, name: error.name, status: (error as any).status });
+                return null;
+            }
+
+            return data?.signedUrl ?? null;
+        } catch (e) {
+            console.warn("⚠️ Signed URL error:", e);
+            return null;
+        }
+    };
     
     const fetchMilestoneLogs = async () => {
         try {
@@ -86,6 +107,24 @@ const MilestoneLogsView: React.FC = () => {
                     note: entry.note ? await safeDecrypt(entry.note) : '',
                 }))
             );
+
+            const signedPairs = await Promise.all(
+            decryptedLogs.map(async (log) => {
+                if (!log.photo_url) {
+                    return [log.id, null] as const;
+                }
+                const signed = await getSignedPhotoUrl(log.photo_url);
+                return [log.id, signed] as const;
+            })
+            );
+
+            const nextMap: Record<string, string> = {};
+            for (const [id, signed] of signedPairs) {
+                if (signed) {
+                    nextMap[id] = signed;
+                }
+            }
+            setPhotoSignedUrls(nextMap);
             
             setMilestoneLogs(decryptedLogs);
         } catch (err) {
@@ -182,6 +221,17 @@ const MilestoneLogsView: React.FC = () => {
             {item.note ? (
                 <Text className="text-sm italic text-gray-500 mt-2">📝 {item.note}</Text>
             ) : null}
+
+            {photoSignedUrls[item.id] ? (
+            <Image
+                source={{ uri: photoSignedUrls[item.id] }}
+                style={{ width: "100%", height: 220, borderRadius: 12, marginTop: 12 }}
+                resizeMode="cover"
+                onLoad={() => console.log("✅ Image loaded", item.id)}
+                onError={(e) => console.log("❌ Image failed", item.id, e.nativeEvent)} // currently used for debugging, delete later
+            />
+            ) : null}
+
             
             <View className="flex-row justify-end gap-3 mt-4">
             <Pressable className="px-3 py-2 rounded-full bg-blue-100" onPress={() => openEditModal(item)}>
@@ -257,7 +307,7 @@ const MilestoneLogsView: React.FC = () => {
                                 }
                             />
                             <Text className="text-xs text-gray-400 mt-1">
-                            Must match your milestone_category enum values (or keep “Other”).
+                            Must enter: Cognitive, Social, Motor, Language, or Other.
                             </Text>
                         </View>
         

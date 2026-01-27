@@ -1,5 +1,6 @@
 import {
     Text,
+    Image,
     View,
     TextInput,
     TouchableOpacity,
@@ -9,6 +10,7 @@ import {
     ScrollView,
     Platform
 } from 'react-native';
+import * as ImagePicker from "expo-image-picker";
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import supabase from '@/library/supabase-client';
@@ -29,6 +31,8 @@ export default function Milestone() {
     const [category, setCategory] = useState<MilestoneCategoryList>('Motor');
     const [name, setName] = useState('');
     const [milestoneDate, setMilestoneDate] = useState(new Date());
+    const [photoUri, setPhotoUri] = useState<string | null>(null);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [note, setNote] = useState('');
 
     const showDatePickerModal = () => {
@@ -63,6 +67,57 @@ export default function Milestone() {
         return date.toLocaleDateString();
     };
 
+    const pickPhoto = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert("Permission needed", "Please allow photo library access to attach a milestone photo.");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            quality: 0.85,
+        });
+
+        if (!result.canceled) {
+            setPhotoUri(result.assets[0].uri);
+        }
+    };
+
+    const uploadPhoto = async (childId: string, uri: string) => {
+        setUploadingPhoto(true);
+        try {
+            const { data: { user }, error: userError, } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                throw new Error("Not authenticated");
+            }
+
+            const extension = uri.split(".").pop()?.toLowerCase() ?? "jpg";
+            const path = `${user.id}/${childId}/${Date.now()}.${extension}`;
+
+            const response = await fetch(uri);
+            const blob = await response.blob();
+
+            const { data, error } = await supabase.storage
+            .from("milestone-photos")
+            .upload(path, blob, {
+                contentType: blob.type || "image/jpeg",
+                upsert: false,
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            return data.path;
+
+        } finally {
+            setUploadingPhoto(false);
+        }
+    };
+
      /**
      * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
      * Converts milestoneTime to ISO string before sending.
@@ -72,6 +127,7 @@ export default function Milestone() {
         category: MilestoneCategoryList,
         name: string,
         milestoneTime: Date,
+        photoPath: string | null,
         note: string,
     ) => {
 
@@ -84,6 +140,7 @@ export default function Milestone() {
                 category,
                 title: encryptedName,
                 achieved_at: milestoneTime.toISOString(),
+                photo_url: photoPath,
                 note: encryptedNote,
             },
         ]);
@@ -108,11 +165,22 @@ export default function Milestone() {
             return { success: false, error };
         }
 
+        let photoPath: string | null = null;
+        if (photoUri) {
+            try {
+                photoPath = await uploadPhoto(String(childId), photoUri);
+            } catch (e) {
+                Alert.alert("Photo upload failed", String(e));
+               return { success: false, error: e };
+            }
+        }
+
         return await createMilestoneLog(
             childId,
             category,
             name,
             milestoneDate,
+            photoPath,
             note
         );
     };
@@ -140,6 +208,7 @@ export default function Milestone() {
         setCategory('Motor');
         setName("");
         setMilestoneDate(new Date());
+        setPhotoUri(null);
         setNote("");
     };
 
@@ -207,6 +276,17 @@ export default function Milestone() {
                             />
                         </View>
                         )}
+
+                        <View className="ml-4 mr-4 flex-row items-center justify-between">
+                        <Text className="feeding-module-label">Milestone Photo</Text>
+                        <TouchableOpacity
+                            className="rounded-full p-4 bg-red-100 items-center"
+                            onPress={pickPhoto}
+                            disabled={uploadingPhoto}
+                            >
+                            <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+                        </TouchableOpacity>
+                        </View>
                     </View>
                     </View>
 
