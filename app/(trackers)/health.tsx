@@ -77,36 +77,51 @@ export default function Health() {
     }
 
     if (healthLog.category === "Growth") {
-      const missingFields = []
-      if (!healthLog.growth?.length) missingFields.push("length")
-      if (!healthLog.growth?.weight) missingFields.push("weight")
-      if (!healthLog.growth?.head) missingFields.push("head")
-      const formattedMissing = missingFields.length > 1
-          ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+      const missingFields = [];
+      if (!healthLog.growth?.length) missingFields.push("length");
+      if (!healthLog.growth?.weight) missingFields.push("weight");
+      if (!healthLog.growth?.head) missingFields.push("head");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
           : missingFields[0];
-      Alert.alert("Missing Information", `Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`);
-      return;
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
 
     } else if (healthLog.category === "Activity") {
-      const missingFields = []
-      if (!healthLog.activity?.type) missingFields.push("type")
-      if (!healthLog.activity?.duration) missingFields.push("duration")
+      const missingFields = [];
+      if (!healthLog.activity?.type) missingFields.push("type");
+      if (!healthLog.activity?.duration) missingFields.push("duration");
+      if (missingFields.length > 0) {
         const formattedMissing = missingFields.length > 1
-          ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
           : missingFields[0];
-      Alert.alert("Missing Information", `Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`);
-      return;
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
 
     } else if (healthLog.category === "Meds") {
-      const missingFields = []
-      if (!healthLog.meds?.name) missingFields.push("name")
-      if (!healthLog.meds?.amount) missingFields.push("amount")
-      if (!healthLog.meds?.timeTaken) missingFields.push("time taken")
-      const formattedMissing = missingFields.length > 1
-          ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+      const missingFields = [];
+      if (!healthLog.meds?.name) missingFields.push("name");
+      if (!healthLog.meds?.amount) missingFields.push("amount");
+      if (!healthLog.meds?.timeTaken) missingFields.push("time taken");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
           : missingFields[0];
-      Alert.alert("Missing Information", `Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`);
-      return;
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
 
     } else if (healthLog.category === "Vaccine") {
         if (!healthLog.vaccine?.name) {
