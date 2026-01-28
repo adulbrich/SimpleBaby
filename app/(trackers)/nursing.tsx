@@ -110,7 +110,7 @@ export default function Nursing() {
             const formattedMissing = missingFields.length > 1
                 ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
                 : missingFields[0];
-            Alert.alert("Missing Information", `Failed to save the nursing log. You are missing the following fields: ${formattedMissing}.`);
+            Alert.alert("Missing Information", `Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
