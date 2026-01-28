@@ -128,9 +128,7 @@ export default function Sleep() {
                 Alert.alert(`Failed to save sleep log: ${result.error}`);
             }
         } else {
-            Alert.alert(
-                'Please provide either stopwatch time or start/end times',
-            );
+            Alert.alert("Missing Information", 'Failed to save the Sleep log. Please provide either a stopwatch time or manual start and end times.');
         }
     };
 

@@ -92,7 +92,13 @@ export default function Diaper() {
                 Alert.alert(`Failed to save diaper log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide consistency and amount');
+            const missingFields = [];
+            if (!consistency) missingFields.push("consistency");
+            if (!amount) missingFields.push("amount");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the diaper log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
