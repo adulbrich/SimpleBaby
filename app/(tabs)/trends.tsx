@@ -19,7 +19,7 @@ export default function Tab() {
         { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs', testID: "trends-Feeding-button"},
         { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs', testID: "trends-Nursing-button" },
         { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs', testID: "trends-Diaper-button" },
-        { label: 'Milestone Logs', icon: '🌟', link: '/(trackers)/milestone', testID: "trends-Milestone-button" },
+        { label: 'Milestone Logs', icon: '🌟', link: '/(logs)/milestone-logs', testID: "trends-Milestone-button" },
         { label: 'Health Logs', icon: '💚', link: '/(logs)/health-logs', testID: "trends-Health-button" },
     ];
 

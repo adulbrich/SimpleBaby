@@ -41,18 +41,9 @@ export default function TrackersLayout() {
             <Stack.Screen name='sleep' options={{ title: 'Sleep Tracker' }} />
             <Stack.Screen name='diaper' options={{ title: 'Diaper Tracker' }} />
             <Stack.Screen name='health' options={{ title: 'Health Tracker' }} />
-            <Stack.Screen
-                name='feeding'
-                options={{ title: 'Feeding Tracker' }}
-            />
-            <Stack.Screen
-                name='nursing'
-                options={{ title: 'Nursing Tracker' }}
-            />
-            <Stack.Screen
-                name='milestone'
-                options={{ title: 'Nursing Tracker' }}
-            />
+            <Stack.Screen name='feeding' options={{ title: 'Feeding Tracker' }} />
+            <Stack.Screen name='nursing' options={{ title: 'Nursing Tracker' }} />
+            <Stack.Screen name='milestone' options={{ title: 'Milestone Tracker' }} />
         </Stack>
     );
 }
