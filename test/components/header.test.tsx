@@ -21,7 +21,7 @@ describe("header component", () => {
         const testTitle = "test title";
         const testLabel = "test label";
         const testIcon = "test icon";
-        render(Header(testTitle, {icon: testIcon, title: testLabel, link: ":"}, undefined));
+        render(<Header title={testTitle} headerLink={{icon: testIcon, title: testLabel, link: ":"}}></Header>);
 
         expect(screen.getByText(testTitle)).toBeTruthy();
         expect(screen.getByText(testLabel)).toBeTruthy();
@@ -30,7 +30,7 @@ describe("header component", () => {
 
     test("Re-routes user on press", async () => {
         const testLink = "test:link";
-        render(Header("", {icon: "", title: "", link: testLink}, undefined));
+        render(<Header title={""} headerLink={{icon: "", title: "", link: testLink}}></Header>);
 
         await userEvent.press(screen.getByTestId("header-link"));
 
