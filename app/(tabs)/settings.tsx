@@ -1,15 +1,24 @@
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 
 export default function SettingScreen() {
   return (
-    <View className="main-container items-center justify-center">
-      <Text className="text-lg font-bold text-center">
-        SimpleBaby App
-      </Text>
-
-      <Text className="text-center mt-2 text-gray-600 dark:text-gray-300">
-        Version 1.0.0{'\n'}This is the settings page
-      </Text>
+    <View className="main-container items-left justify-center">
+      <ScrollView>
+        <View className="bg-gray-100">
+          <Text className="text-lg font-bold text-left p-4 gap-4 mb-1 bg-white">
+            Settings Name 1
+          </Text>
+          <Text className="text-lg font-bold text-left p-4 gap-4 mb-1 bg-white">
+            Settings Name 2
+          </Text>
+          <Text className="text-lg font-bold text-left p-4 gap-4 mb-1 bg-white">
+            Settings Name 3
+          </Text>
+          <Text className="text-lg font-bold text-left p-4 gap-4 mb-1 bg-white">
+            Settings Name 4
+          </Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
