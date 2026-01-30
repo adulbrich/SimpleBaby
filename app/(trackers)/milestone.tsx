@@ -218,7 +218,13 @@ export default function Milestone() {
                 Alert.alert(`Failed to save milestone log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide a milestone name and date');
+            const missingFields = [];
+            if (!name) missingFields.push("name");
+            if (!milestoneDate) missingFields.push("date");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 

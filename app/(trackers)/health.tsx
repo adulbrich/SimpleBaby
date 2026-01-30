@@ -77,39 +77,60 @@ export default function Health() {
     }
 
     if (healthLog.category === "Growth") {
-      if (
-        !healthLog.growth?.length &&
-        !healthLog.growth?.weight &&
-        !healthLog.growth?.head
-      ) {
-        Alert.alert("Error", "Please provide at least one growth measurement");
-        return;
-      }
-    } else if (healthLog.category === "Activity") {
-      if (!healthLog.activity?.type || !healthLog.activity?.duration) {
-        Alert.alert("Error", "Please provide both activity type and duration");
-        return;
-      }
-    } else if (healthLog.category === "Meds") {
-      if (
-        !healthLog.meds?.name ||
-        !healthLog.meds?.amount ||
-        !healthLog.meds?.timeTaken
-      ) {
+      const missingFields = [];
+      if (!healthLog.growth?.length) missingFields.push("length");
+      if (!healthLog.growth?.weight) missingFields.push("weight");
+      if (!healthLog.growth?.head) missingFields.push("head");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
         Alert.alert(
-          "Error",
-          "Please provide medication name, amount, and time taken"
+          "Missing Information",
+          `Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`
         );
         return;
       }
+
+    } else if (healthLog.category === "Activity") {
+      const missingFields = [];
+      if (!healthLog.activity?.type) missingFields.push("type");
+      if (!healthLog.activity?.duration) missingFields.push("duration");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
+
+    } else if (healthLog.category === "Meds") {
+      const missingFields = [];
+      if (!healthLog.meds?.name) missingFields.push("name");
+      if (!healthLog.meds?.amount) missingFields.push("amount");
+      if (!healthLog.meds?.timeTaken) missingFields.push("time taken");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
+
     } else if (healthLog.category === "Vaccine") {
         if (!healthLog.vaccine?.name) {
-          Alert.alert("Error", "Please provide a name for the vaccine received.");
+          Alert.alert("Missing Information", "Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.");
           return;
         }
     } else if (healthLog.category === "Other") {
         if (!healthLog.other?.name) {
-          Alert.alert("Error", "Please provide a title for the health event.");
+          Alert.alert("Missing Information", "Failed to save the 'Other' Health log. Please provide at least a title for the health event.");
           return;
         }
     }
@@ -386,7 +407,7 @@ export default function Health() {
             </View>
           
             {/* Action buttons to save or reset form */}
-            <View className="flex-row gap-2 pb-5">
+            <View className="flex-row gap-2 pb-5 pt-5">
               <TouchableOpacity
                 className="rounded-full p-4 bg-red-100 grow"
                 onPress={handleSaveHealthLog}

@@ -141,8 +141,8 @@ describe("Track health screen", () => {
         );
 
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide at least one growth measurement`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe("Failed to save the Growth Health log. You are missing the following fields: length, weight and head.");
     });
         
     test("Catch unfilled activity inputs", async () => {
@@ -155,8 +155,8 @@ describe("Track health screen", () => {
         );
 
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide both activity type and duration`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe("Failed to save the Activity Health log. You are missing the following fields: type and duration.");
     });
         
     test("Catch unfilled meds inputs", async () => {
@@ -169,8 +169,8 @@ describe("Track health screen", () => {
         );
 
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide medication name, amount, and time taken`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe("Failed to save the Medicine Health log. You are missing the following fields: name and amount.");
     });
         
     test("Catch getActiveChildId error", async () => {
@@ -185,7 +185,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -209,7 +209,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -239,7 +239,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -258,7 +258,7 @@ describe("Track health screen", () => {
     test("Redirects user on successful submit", async () => {
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -371,7 +371,7 @@ describe("Track health screen", () => {
         // fill date
         await setHealthInputs({
             date: testDate,
-            growth: {length: "x", weight: "", head: ""}  // fill in minum required inputs to avoid errors
+            growth: {length: "x", weight: "y", head: "z"}  // fill in required inputs to avoid errors
         });
 
         // submit log
