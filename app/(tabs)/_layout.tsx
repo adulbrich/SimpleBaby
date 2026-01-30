@@ -13,13 +13,10 @@ const Profile: HeaderLink = {
   icon: '👩',
 };
 
-/**
- * Empty header link used when we want NO right-side button
- */
-const EmptyHeaderLink: HeaderLink = {
-  link: '/',
-  title: '',
-  icon: '',
+const Calendar: HeaderLink = {
+    link: '/(modals)/calendar',
+    title: 'Calendar',
+    icon: '📅',
 };
 
 export default function TabLayout() {
@@ -47,7 +44,13 @@ export default function TabLayout() {
         options={{
           tabBarLabel: 'Trackers',
           tabBarIcon: ({ color }) => Icon(color, '👶'),
-          header: () => Header('👶 SimpleBaby', Profile, insets.top),
+          header: () => (
+            <Header
+              title="👶 SimpleBaby"
+              headerLink={Profile}
+              topInset={insets.top}
+            />
+          ),
         }}
       />
 
@@ -56,8 +59,13 @@ export default function TabLayout() {
         options={{
           title: 'Logs',
           tabBarIcon: ({ color }) => Icon(color, '📈'),
-          // Calendar header button removed by using EmptyHeaderLink
-          header: () => Header('📈 Logs', EmptyHeaderLink, insets.top),
+          header: () => (
+            <Header
+              title="📈 Logs"
+              headerLink={Calendar}
+              topInset={insets.top}
+            />
+          ),
         }}
       />
 
@@ -66,7 +74,7 @@ export default function TabLayout() {
         options={{
           title: 'About',
           tabBarIcon: ({ color }) => Icon(color, '❓'),
-          header: () => Header('❓ About', EmptyHeaderLink, insets.top),
+          header: () => <Header title="❓ About" topInset={insets.top}/>,
         }}
       />
     </Tabs>
