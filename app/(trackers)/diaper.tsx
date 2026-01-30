@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -91,7 +92,13 @@ export default function Diaper() {
                 Alert.alert(`Failed to save diaper log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide consistency and amount');
+            const missingFields = [];
+            if (!consistency) missingFields.push("consistency");
+            if (!amount) missingFields.push("amount");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Diaper log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
@@ -106,10 +113,14 @@ export default function Diaper() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            {/*ScrollView Prevents items from flowing off page on small devices*/}
             <View
                 className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
+                style={{ 
+                    paddingBottom: insets.bottom,
+                 }}
             >
+        <ScrollView>
                 {/* Main form stack with diaper inputs and note */}
                 <View
                     className={`gap-6 transition-all duration-300 ${
@@ -121,6 +132,7 @@ export default function Diaper() {
                         onConsistencyUpdate={setConsistency}
                         onAmountUpdate={setAmount}
                         onTimeUpdate={setChangeTime}
+                        testID={"diaper-main-inputs"}
                     />
                     {/* Note input section */}
                     <View className='bottom-5'>
@@ -140,25 +152,29 @@ export default function Diaper() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
+                                testID='diaper-note-entry'
                             />
                         </View>
                     </View>
                 </View>
                 {/* Action buttons row */}
-                <View className='flex-row gap-2'>
+                <View className='flex-row gap-2 pb-5'>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveDiaperLog}
+                        testID='diaper-save-log-button'
                     >
                         <Text>➕ Add to log</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 items-center'
                         onPress={() => handleResetFields()}
+                        testID='diaper-reset-form-button'
                     >
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
+        </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );

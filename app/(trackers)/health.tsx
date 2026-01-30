@@ -35,6 +35,14 @@ interface HealthLog {
     amount: string;
     timeTaken: Date;
   };
+  vaccine?: {
+    name: string;
+    location: string;
+  };
+  other?: {
+    name: string;
+    description: string;
+  };
   note: string;
 }
 
@@ -69,31 +77,62 @@ export default function Health() {
     }
 
     if (healthLog.category === "Growth") {
-      if (
-        !healthLog.growth?.length &&
-        !healthLog.growth?.weight &&
-        !healthLog.growth?.head
-      ) {
-        Alert.alert("Error", "Please provide at least one growth measurement");
-        return;
-      }
-    } else if (healthLog.category === "Activity") {
-      if (!healthLog.activity?.type || !healthLog.activity?.duration) {
-        Alert.alert("Error", "Please provide both activity type and duration");
-        return;
-      }
-    } else if (healthLog.category === "Meds") {
-      if (
-        !healthLog.meds?.name ||
-        !healthLog.meds?.amount ||
-        !healthLog.meds?.timeTaken
-      ) {
+      const missingFields = [];
+      if (!healthLog.growth?.length) missingFields.push("length");
+      if (!healthLog.growth?.weight) missingFields.push("weight");
+      if (!healthLog.growth?.head) missingFields.push("head");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
         Alert.alert(
-          "Error",
-          "Please provide medication name, amount, and time taken"
+          "Missing Information",
+          `Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`
         );
         return;
       }
+
+    } else if (healthLog.category === "Activity") {
+      const missingFields = [];
+      if (!healthLog.activity?.type) missingFields.push("type");
+      if (!healthLog.activity?.duration) missingFields.push("duration");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
+
+    } else if (healthLog.category === "Meds") {
+      const missingFields = [];
+      if (!healthLog.meds?.name) missingFields.push("name");
+      if (!healthLog.meds?.amount) missingFields.push("amount");
+      if (!healthLog.meds?.timeTaken) missingFields.push("time taken");
+      if (missingFields.length > 0) {
+        const formattedMissing = missingFields.length > 1
+          ? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
+          : missingFields[0];
+        Alert.alert(
+          "Missing Information",
+          `Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`
+        );
+        return;
+      }
+
+    } else if (healthLog.category === "Vaccine") {
+        if (!healthLog.vaccine?.name) {
+          Alert.alert("Missing Information", "Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.");
+          return;
+        }
+    } else if (healthLog.category === "Other") {
+        if (!healthLog.other?.name) {
+          Alert.alert("Missing Information", "Failed to save the 'Other' Health log. Please provide at least a title for the health event.");
+          return;
+        }
     }
 
     const { success, childId, error } = await getActiveChildId();
@@ -132,6 +171,18 @@ export default function Health() {
           ? await encryptData(healthLog.meds.amount)
           : null,
         meds_time_taken: healthLog.meds?.timeTaken || null,
+        vaccine_name: healthLog.vaccine?.name
+          ? await encryptData(healthLog.vaccine.name)
+          : null,
+        vaccine_location: healthLog.vaccine?.location
+          ? await encryptData(healthLog.vaccine.location)
+          : null,
+        other_name: healthLog.other?.name
+          ? await encryptData(healthLog.other.name)
+          : null,
+        other_description: healthLog.other?.description
+          ? await encryptData(healthLog.other.description)
+          : null,
         note: healthLog.note ? await encryptData(healthLog.note) : null,
       };
 
@@ -172,6 +223,14 @@ export default function Health() {
         category === "Meds"
           ? { name: "", amount: "", timeTaken: new Date() }
           : undefined,
+      vaccine:
+        category === "Vaccine"
+          ? { name: "", location: "" }
+          : undefined,
+      other:
+        category === "Other"
+          ? { name: "", description: "" }
+          : undefined
     }));
   }, []);
 
@@ -247,6 +306,34 @@ export default function Health() {
     }));
   }, []);
 
+  const handleVaccineUpdate = useCallback((vaccine: {
+    name?: string;
+    location?: string;
+  }) => {
+    setHealthLog((prev) => ({
+      ...prev,
+      vaccine: {
+        name: prev.vaccine?.name || "",
+        location: prev.vaccine?.location || "",
+        ...vaccine,
+      },
+    }));
+  }, []);
+
+    const handleOtherUpdate = useCallback((other: {
+    name?: string;
+    description?: string;
+  }) => {
+    setHealthLog((prev) => ({
+      ...prev,
+      other: {
+        name: prev.other?.name || "",
+        description: prev.other?.description || "",
+        ...other,
+      },
+    }));
+  }, []);
+
   // handle the reset logic for the health screen UI
   const handleResetFields = () => {
     setHealthLog({
@@ -256,6 +343,8 @@ export default function Health() {
       growth: { length: "", weight: "", head: "" },
       activity: undefined,
       meds: undefined,
+      vaccine: undefined,
+      other: undefined,
       note: "",
     });
     setReset(prev => prev + 1);
@@ -263,6 +352,8 @@ export default function Health() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {/*ScrollView Prevents items from flowing off page on small devices*/}
+
       <View
         className={`main-container justify-between transition-all ${
           isTyping ? "-translate-y-[40%]" : "translate-y-0"
@@ -278,6 +369,9 @@ export default function Health() {
             onGrowthUpdate={handleGrowthUpdate}
             onActivityUpdate={handleActivityUpdate}
             onMedsUpdate={handleMedsUpdate}
+            onVaccineUpdate={handleVaccineUpdate}
+            onOtherUpdate={handleOtherUpdate}
+            testID="health-main-inputs"
           />
            {/* Multiline input for additional notes */}
           <View className="bottom-5 pt-5">
@@ -308,25 +402,29 @@ export default function Health() {
                     note,
                   }))
                 }
+                testID="health-note-entry"
               />
+            </View>
+          
+            {/* Action buttons to save or reset form */}
+            <View className="flex-row gap-2 pb-5 pt-5">
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 grow"
+                onPress={handleSaveHealthLog}
+                testID="health-save-log-button"
+              >
+                <Text>➕ Add to log</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="rounded-full p-4 bg-red-100 items-center"
+                onPress={() => handleResetFields()}
+                testID="health-reset-form-button"
+              >
+                <Text>🗑️ Reset fields</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
-        {/* Action buttons to save or reset form */}
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 grow"
-            onPress={handleSaveHealthLog}
-          >
-            <Text>➕ Add to log</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="rounded-full p-4 bg-red-100 items-center"
-            onPress={() => handleResetFields()}
-          >
-            <Text>🗑️ Reset fields</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </TouchableWithoutFeedback>
   );

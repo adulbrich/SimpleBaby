@@ -95,7 +95,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Liquid')}
-                        testID='feeding-category-liquid'
+                        testID='feeding-category-liquid-button'
                     >
                         <Text className='scale-100 text-2xl'>🍼</Text>
                         <Text className='feeding-category-text'>Liquid</Text>
@@ -108,7 +108,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Soft')}
-                        testID='feeding-category-soft'
+                        testID='feeding-category-soft-button'
                     >
                         <Text className='scale-100 text-2xl'>🥣</Text>
                         <Text className='feeding-category-text'>Soft</Text>
@@ -121,7 +121,7 @@ export default function FeedingCategory({
                                 : ''
                         }`}
                         onPress={() => handleCategoryPress('Solid')}
-                        testID='feeding-category-solid'
+                        testID='feeding-category-solid-button'
                     >
                         <Text className='scale-100 text-2xl'>🥕</Text>
                         <Text className='feeding-category-text'>Solid</Text>
@@ -168,6 +168,7 @@ export default function FeedingCategory({
                             <TouchableOpacity
                                 className='rounded-full bg-red-50 p-4'
                                 onPress={showTimePicker}
+                                testID='feeding-time-button'
                             >
                                 <Text>
                                     {showIOSPicker ? 'Close' : 'Choose'} ⏰

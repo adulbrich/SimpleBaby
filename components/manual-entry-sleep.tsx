@@ -101,6 +101,7 @@ export default function ManualEntry({
                     <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
                         <TouchableOpacity
                             className='rounded-full bg-red-50 p-4'
+                            testID='sleep-manual-start-time'
                             onPress={() => {
                                 if (
                                     showIOSPicker &&
@@ -131,6 +132,7 @@ export default function ManualEntry({
                     <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
                         <TouchableOpacity
                             className='rounded-full bg-red-50 p-4'
+                            testID='sleep-manual-end-time'
                             onPress={() => {
                                 if (
                                     showIOSPicker &&

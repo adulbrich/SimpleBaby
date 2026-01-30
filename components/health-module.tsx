@@ -12,20 +12,23 @@ import {
 } from "react-native";
 
 /**
- * HealthModule component lets users select a health category (Growth, Activity, Meds),
+ * HealthModule component lets users select a health category (Growth, Activity, Meds, Vaccine, or Other),
  * enter relevant details, and pick date and time for entries.
  * Supports iOS inline spinner pickers and Android native dialogs for date and time.
  * Calls provided callbacks when date, category, or input data changes.
  */
 
-export type HealthCategory = "Growth" | "Activity" | "Meds";
+export type HealthCategory = "Growth" | "Activity" | "Meds" | "Vaccine" | "Other";
 
-interface HealthModuleProps {
+export interface HealthModuleProps {
   onDateUpdate?: (date: Date) => void;
   onCategoryUpdate?: (category: HealthCategory) => void;
   onGrowthUpdate?: (growth: GrowthData) => void;
   onActivityUpdate?: (activity: ActivityData) => void;
   onMedsUpdate?: (meds: MedsData) => void;
+  onVaccineUpdate?: (vaccine: VaccineData) => void;
+  onOtherUpdate?: (other: OtherData) => void;
+  testID?: string;
 }
 
 export interface GrowthData {
@@ -45,12 +48,27 @@ export interface MedsData {
   timeTaken: Date;
 }
 
+export interface VaccineData {
+  name: string;
+  location: string;
+  date: Date;
+}
+
+export interface OtherData {
+  name: string;
+  description: string;
+  date: Date;
+}
+
 export default function HealthModule({
   onDateUpdate,
   onCategoryUpdate,
   onGrowthUpdate,
   onActivityUpdate,
   onMedsUpdate,
+  onVaccineUpdate,
+  onOtherUpdate,
+  testID,
 }: HealthModuleProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -70,6 +88,16 @@ export default function HealthModule({
     name: "",
     amount: "",
     timeTaken: new Date(),
+  });
+  const [vaccine, setVaccine] = useState<VaccineData>({
+    name: "",
+    location: "",
+    date: new Date()
+  });
+  const [other, setOther] = useState<OtherData>({
+    name: "",
+    description: "",
+    date: new Date()
   });
 
   const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -171,30 +199,47 @@ export default function HealthModule({
     }
   }, [meds, selectedCategory, onMedsUpdate]);
 
+  useEffect(() => {
+    if (onVaccineUpdate && selectedCategory === "Vaccine") {
+      onVaccineUpdate(vaccine);
+    }
+  }, [vaccine, selectedCategory, onVaccineUpdate]);
+
+    useEffect(() => {
+    if (onOtherUpdate && selectedCategory === "Other") {
+      onOtherUpdate(other);
+    }
+  }, [other, selectedCategory, onOtherUpdate]);
+
   return (
-    <View className="flex-col gap-6">
+    <View className="flex-col gap-6" testID={testID}>
       <View className="stopwatch-primary">
         <View className="items-start bottom-5 left-3">
           <Text className="bg-gray-200 p-3 rounded-xl font">
             🩺 Choose Type
           </Text>
         </View>
-        <View className="flex-row gap-4 justify-center mb-6">
-          {["Growth", "Activity", "Meds"].map((category) => (
+        <View className="flex-row flex-wrap gap-4 justify-center mb-6">
+          {["Growth", "Activity", "Meds", "Vaccine", "Other"].map((category) => (
             <TouchableOpacity
               key={category}
-              className={`feeding-category-button ${
+              className={`feeding-category-button h-[15%] ${
                 selectedCategory === category
                   ? "feeding-category-button-active"
                   : ""
               }`}
               onPress={() => handleCategoryPress(category as HealthCategory)}
+              testID={`health-category-${category.toLowerCase()}-button`}
             >
               <Text className="scale-100 text-2xl">
                 {category === "Growth"
                   ? "📏"
                   : category === "Activity"
                   ? "🏃‍♂️"
+                  : category === "Vaccine"
+                  ? "💉"
+                  : category === "Other"
+                  ? "❓"
                   : "💊"}
               </Text>
               <Text className="feeding-category-text">{category}</Text>
@@ -225,6 +270,7 @@ export default function HealthModule({
                       length: text,
                     }))
                   }
+                  testID="health-growth-length"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -241,6 +287,7 @@ export default function HealthModule({
                       weight: text,
                     }))
                   }
+                  testID="health-growth-weight"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -257,6 +304,7 @@ export default function HealthModule({
                       head: text,
                     }))
                   }
+                  testID="health-growth-head"
                 />
               </View>
             </>
@@ -277,6 +325,7 @@ export default function HealthModule({
                       type: text,
                     }))
                   }
+                  testID="health-activity-type"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -293,6 +342,7 @@ export default function HealthModule({
                       duration: text,
                     }))
                   }
+                  testID="health-activity-duration"
                 />
               </View>
             </>
@@ -313,6 +363,7 @@ export default function HealthModule({
                       name: text,
                     }))
                   }
+                  testID="health-meds-name"
                 />
               </View>
               <View className="ml-4 mr-4">
@@ -329,6 +380,7 @@ export default function HealthModule({
                       amount: text,
                     }))
                   }
+                  testID="health-meds-amount"
                 />
               </View>
               <View className="ml-4 mr-4 flex-row items-center justify-between">
@@ -337,6 +389,7 @@ export default function HealthModule({
                   <TouchableOpacity
                     className="rounded-full bg-red-50 p-4"
                     onPress={showTimePickerModal}
+                    testID="health-meds-time"
                   >
                     <Text>Choose ⏰</Text>
                   </TouchableOpacity>
@@ -357,12 +410,85 @@ export default function HealthModule({
               )}
             </>
           )}
+          {selectedCategory === "Vaccine" && (
+            <>
+              <View className="ml-4 mr-4">
+                <Text className="feeding-module-label">Name</Text>
+                <TextInput
+                  className="text-input-internal"
+                  placeholder="e.g., COVID-19 Vaccine"
+                  autoCapitalize="none"
+                  keyboardType="default"
+                  value={vaccine.name}
+                  onChangeText={(text: string) =>
+                    setVaccine((prevName) => ({
+                      ...prevName,
+                      name: text,
+                    }))
+                  }
+                />
+              </View>
+              <View className="ml-4 mr-4">
+                <Text className="feeding-module-label">Location</Text>
+                <TextInput
+                  className="text-input-internal"
+                  placeholder="e.g., Kaiser Permanente NW"
+                  autoCapitalize="none"
+                  keyboardType="default"
+                  value={vaccine.location}
+                  onChangeText={(text: string) =>
+                    setVaccine((prevLocation) => ({
+                      ...prevLocation,
+                      location: text,
+                    }))
+                  }
+                />
+              </View>
+            </>
+          )}
+          {selectedCategory === "Other" && (
+            <>
+              <View className="ml-4 mr-4">
+                <Text className="feeding-module-label">Name</Text>
+                <TextInput
+                  className="text-input-internal"
+                  placeholder="e.g., Elbow Surgery"
+                  autoCapitalize="none"
+                  keyboardType="default"
+                  value={other.name}
+                  onChangeText={(text: string) =>
+                    setOther((prevName) => ({
+                      ...prevName,
+                      name: text,
+                    }))
+                  }
+                />
+              </View>
+              <View className="ml-4 mr-4">
+                <Text className="feeding-module-label">Description</Text>
+                <TextInput
+                  className="text-input-internal"
+                  placeholder="e.g., went to doctor's office for procedure"
+                  autoCapitalize="none"
+                  keyboardType="default"
+                  value={other.description}
+                  onChangeText={(text: string) =>
+                    setOther((prevDescription) => ({
+                      ...prevDescription,
+                      description: text,
+                    }))
+                  }
+                />
+              </View>
+            </>
+          )}
           <View className="ml-4 mr-4 flex-row items-center justify-between">
             <Text className="feeding-module-label">Date</Text>
             <View className="flex-row items-center bg-red-100 rounded-full gap-2">
               <TouchableOpacity
                 className="rounded-full bg-red-50 p-4"
                 onPress={showDatePickerModal}
+                testID="health-date-button"
               >
                 <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
               </TouchableOpacity>

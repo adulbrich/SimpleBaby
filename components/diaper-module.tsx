@@ -20,10 +20,12 @@ export default function DiaperModule({
     onTimeUpdate,
     onConsistencyUpdate,
     onAmountUpdate,
+    testID,
 }: {
     onTimeUpdate?: (time: Date) => void
     onConsistencyUpdate?: (consistency: DiaperConsistency) => void
     onAmountUpdate?: (amount: DiaperAmount) => void
+    testID?: string
 }) {
     const [changeTime, setChangeTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
@@ -87,7 +89,7 @@ export default function DiaperModule({
     };
 
     return (
-        <View className='flex-col gap-6'>
+        <View className='flex-col gap-6' testID={testID}>
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
                     <Text className='bg-gray-200 p-3 rounded-xl font'>
@@ -102,6 +104,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleConsistencyPress('Wet')}
+                        testID='diaper-consistency-wet-button'
                     >
                         <Text className='scale-100 text-2xl'>💧</Text>
                         <Text className='feeding-category-text'>Wet</Text>
@@ -113,6 +116,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleConsistencyPress('Dry')}
+                        testID='diaper-consistency-dry-button'
                     >
                         <Text className='scale-100 text-2xl'>🌵</Text>
                         <Text className='feeding-category-text'>Dry</Text>
@@ -124,6 +128,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleConsistencyPress('Mixed')}
+                        testID='diaper-consistency-mixed-button'
                     >
                         <Text className='scale-100 text-2xl'>🌦️</Text>
                         <Text className='feeding-category-text'>Mixed</Text>
@@ -144,6 +149,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleAmountPress('SM')}
+                        testID='diaper-amount-sm-button'
                     >
                         <Text className='diaper-amount-text'>SM</Text>
                     </TouchableOpacity>
@@ -154,6 +160,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleAmountPress('MD')}
+                        testID='diaper-amount-md-button'
                     >
                         <Text className='diaper-amount-text'>MD</Text>
                     </TouchableOpacity>
@@ -164,6 +171,7 @@ export default function DiaperModule({
                                 : ''
                         }`}
                         onPress={() => handleAmountPress('LG')}
+                        testID='diaper-amount-lg-button'
                     >
                         <Text className='diaper-amount-text'>LG</Text>
                     </TouchableOpacity>
@@ -184,6 +192,7 @@ export default function DiaperModule({
                             <TouchableOpacity
                                 className='rounded-full bg-red-50 p-4'
                                 onPress={showTimePicker}
+                                testID='diaper-time-button'
                             >
                                 <Text>
                                     {showIOSPicker ? 'Close' : 'Choose'} ⏰

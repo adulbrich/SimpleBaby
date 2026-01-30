@@ -6,6 +6,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    ScrollView
 } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -103,7 +104,13 @@ export default function Nursing() {
                 Alert.alert(`Failed to save nursing log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide at least one side duration or amount');
+            const missingFields = [];
+            if (leftDuration === '00:00:00' || rightDuration === '00:00:00') missingFields.push("left or right duration");
+            if (leftAmount === '' || rightAmount === '') missingFields.push("left or right amount");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} or ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
@@ -123,6 +130,7 @@ export default function Nursing() {
                 className='main-container justify-between'
                 style={{ paddingBottom: insets.bottom }}
             >
+	    <ScrollView>
                 <View
                     className={`gap-6 transition-all duration-300 ${
                         isTyping ? '-translate-y-[40%]' : 'translate-y-0'
@@ -197,13 +205,13 @@ export default function Nursing() {
                                 onBlur={() => setIsTyping(false)}
                                 value={note}
                                 onChangeText={setNote}
-                                testID='nursing-note'
+                                testID='nursing-note-entry'
                             />
                         </View>
                     </View>
                 </View>
                 {/* Bottom Buttons */}
-                <View className='flex-row gap-2'>
+                <View className='flex-row gap-2 pb-5'>
                     <TouchableOpacity
                         className='rounded-full p-4 bg-red-100 grow'
                         onPress={handleSaveNursingLog}
@@ -219,6 +227,7 @@ export default function Nursing() {
                         <Text>🗑️ Reset fields</Text>
                     </TouchableOpacity>
                 </View>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     );
