@@ -23,9 +23,39 @@ export default function LogsLayout() {
             }}
         >
             <Stack.Screen
-                name='sleep-log'
+                name='sleep-logs'
                 options={{
-                    headerTitle: 'Sleep Log 🌙',
+                    headerTitle: 'Sleep',
+                }}
+            />
+            <Stack.Screen
+                name='feeding-logs'
+                options={{
+                    headerTitle: 'Feeding',
+                }}
+            />
+            <Stack.Screen
+                name='nursing-logs'
+                options={{
+                    headerTitle: 'Nursing',
+                }}
+            />
+            <Stack.Screen
+                name='diaper-logs'
+                options={{
+                    headerTitle: 'Diapers',
+                }}
+            />
+            <Stack.Screen
+                name='milestone-logs'
+                options={{
+                    headerTitle: 'Milestones',
+                }}
+            />
+            <Stack.Screen
+                name='health-logs'
+                options={{
+                    headerTitle: 'Health',
                 }}
             />
         </Stack>
