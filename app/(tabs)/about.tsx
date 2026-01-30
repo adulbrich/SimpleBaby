@@ -26,7 +26,7 @@ export default function AboutScreen() {
             Core Purpose
           </Text>
           <Text style={{ fontSize: 16, color: subTextColor, lineHeight: 22 }}>
-            SimpleBaby was created to meet the need for a streamlined, secure application that allows parents to track critical information about their child's growth and health.
+            SimpleBaby was created to meet the need for a streamlined, secure application that allows parents to track critical information about their child&apos;s growth and health.
           </Text>
         </View>
 
