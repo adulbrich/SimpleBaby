@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Text,
     ScrollView,
@@ -12,6 +12,9 @@ import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
+import AddChildPopup from '@/components/add-child-popup';
+import { getChildNames, saveNewChild } from '@/library/utils';
+import supabase from '@/library/supabase-client';
 
 /**
  * Profile Screen
@@ -27,6 +30,9 @@ export default function Profile() {
     const player = useAudioPlayer(alertSound);
 
     const { session } = useAuth();
+
+    const [ showAddChild, setShowAddChild] = useState(false);
+    const [ newChildName, setNewChildName] = useState("");
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
@@ -40,6 +46,46 @@ export default function Profile() {
         }
     };
 
+    const handleSaveChild = async () => {
+        if (!newChildName) {
+            Alert.alert('Please enter a name!');
+            return;
+        }
+
+        try {
+            saveNewChild(newChildName);  // try to save new child
+            setShowAddChild(false);  // Close modal if successful
+            setNewChildName("");  // reset child name
+        } catch (error: any) {
+            Alert.alert(
+                'Error',
+                error.message || 'An error occurred while saving child data.',
+            );
+        }
+    };
+
+    const handleSwitchChild = async () => {
+        try {
+            const names = await getChildNames();  // get list of names associated with current user account
+            if (names.length === 0) {
+                throw new Error("No children found");
+            }
+            // get index of current name
+            const currentNamei = names.indexOf(session?.user.user_metadata?.activeChild);
+            const nextName =
+                currentNamei >= 0 && currentNamei + 1 < names.length ?
+                names[currentNamei + 1] :  // get next name in the list, if current name has valid index
+                names[0];  // otherwise revert to first name in the list
+
+            // Update user session metadata with the active child
+            await supabase.auth.updateUser({
+                data: { activeChild: nextName },
+            });
+        } catch {
+            Alert.alert("Unable to switch children");
+        }
+    };
+
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
             <ScrollView>
@@ -48,10 +94,23 @@ export default function Profile() {
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Active Child
                         </Text>
-                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {session?.user.user_metadata?.activeChild}
-                        </Text>
+                        <TouchableOpacity
+                            onPress={handleSwitchChild}
+                        >
+                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                👶 {session?.user.user_metadata?.activeChild}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
+                    <TouchableOpacity
+                        onPress={() => setShowAddChild(true)}
+                    >
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                            <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                                Add Child
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👤 Name
@@ -145,6 +204,17 @@ export default function Profile() {
                     />
                 )}
             </View>
+            <AddChildPopup
+                visible={showAddChild}
+                childName={newChildName}
+                onChildNameUpdate={(name: string) => setNewChildName(name)}
+                handleSave={handleSaveChild}
+                handleCancel={() => {
+                    setShowAddChild(false);
+                    setNewChildName("");  // reset name
+                }}
+                header={"Add New Child"}
+            />
         </SafeAreaView>
     );
 }
