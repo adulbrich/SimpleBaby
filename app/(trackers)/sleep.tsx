@@ -120,6 +120,14 @@ export default function Sleep() {
                 Alert.alert(`Failed to save sleep log: ${result.error}`);
             }
         } else if (startTime && endTime) {
+            if (endTime.getTime() <= startTime.getTime()) {
+                Alert.alert(
+                    "Missing Information",
+                    'Failed to save the Sleep log. Please provide either a stopwatch time or manual start and end times.',
+                );
+                return;
+            }
+
             const result = await saveSleepLog(null, startTime, endTime, note);
             if (result.success) {
                 router.replace('/(tabs)');
