@@ -11,6 +11,7 @@ export default function ModalsLayout() {
                     name='calendar'
                     options={{
                         presentation: 'modal',
+                        headerTitle: "Calendar"
                     }}
                 />
                 <Stack.Screen
