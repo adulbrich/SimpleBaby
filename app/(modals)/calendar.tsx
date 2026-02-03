@@ -20,7 +20,7 @@ export default function CalendarModal() {
         return {
             [ymd]: { selected: true }
         };
-    }, [selectedDate])
+    }, [selectedDate]);
 
     const loadDay = useCallback(async (date: Date) => {
         setLoading(true);
@@ -41,11 +41,11 @@ export default function CalendarModal() {
             setLoading(false);
         }
 
-    }, [])
+    }, []);
 
     useEffect(() => {
         loadDay(selectedDate);
-    }, [loadDay])
+    }, [loadDay, selectedDate]);
     
     return (
         <>
