@@ -90,8 +90,8 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
     type: "Sleep",
     id: row.id,
     at: row.start_time,
-    title: `Sleep • ${row.duration ?? ""}`.trim(),
-    details: "",
+    title: "Sleep",
+    details: `Time: ${row.duration ?? "N/A"}`,
     raw: row,
   }));
 
@@ -103,7 +103,7 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
       type: "Feeding",
       id: row.id,
       at: row.feeding_time,
-      title: `Feeding • ${category}`.trim(),
+      title: `Feeding • ${category}`,
       details: [item, amount].filter(Boolean).join(" • "),
       raw: row,
     };
@@ -116,14 +116,13 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
       type: "Diaper",
       id: row.id,
       at: row.change_time,
-      title: `Diaper • ${consistency}`.trim(),
+      title: `Diaper • ${consistency}`,
       details: amount ? `Amount: ${amount}` : "",
       raw: row,
     };
   }));
 
   const nursingLogs: CalendarLog[] = await Promise.all((nursingRes.data ?? []).map(async (row: any) => {
-    const side = await safeDecrypt(row.side);
     const leftDuration = await safeDecrypt(row.left_duration);
     const rightDuration = await safeDecrypt(row.right_duration);
     return {
@@ -143,7 +142,7 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
       type: "Health",
       id: row.id,
       at: row.date,
-      title: `Health • ${category}`.trim(),
+      title: `Health • ${category}`,
       details: note,
       raw: row,
     };
@@ -155,7 +154,7 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
       type: "Milestone",
       id: row.id,
       at: row.achieved_at,
-      title: `Milestone • ${title}`.trim(),
+      title: `Milestone • ${title}`,
       details: row.category ?? "",
       raw: row,
     };
