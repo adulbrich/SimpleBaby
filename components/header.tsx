@@ -12,14 +12,16 @@ import { Href, router } from 'expo-router';
 export interface HeaderLink {
     icon: string
     title: string
-    link: Href
+    link?: Href
 }
 
-export default function Header(
-    title: string,
-    headerLink: HeaderLink,
-    topInset: DimensionValue | undefined,
-) {
+interface HeaderProps {
+    title: string
+    headerLink?: HeaderLink
+    topInset?: DimensionValue
+}
+
+export default function Header({ title, headerLink, topInset }: HeaderProps) {
     return (
         <View
             className='flex-row bg-[#fff5e4] dark:bg-[#0b2218] justify-between p-0 m-0'
@@ -30,11 +32,16 @@ export default function Header(
             <Text className='pl-4 font-bold dark:text-white text-black text-2xl scale-100'>
                 {title}
             </Text>
-            <TouchableOpacity
-                className='pr-4'
-                onPress={() => router.push(headerLink.link)}
-                testID='header-link'
-            >
+            {headerLink ? (
+                <TouchableOpacity
+                    className='pr-4'
+                    onPress={() => {
+                        if (headerLink.link) {
+                            router.push(headerLink.link);
+                        }
+                    }}
+                    testID='header-link'
+                >
                 <View className='flex-row gap-2 p-2 border-2 rounded-full border-[#000] dark:border-[#293c25] bg-[#fff2af] dark:bg-[#6fac7d]'>
                     <Text className='pl-2'>{headerLink.icon}</Text>
                     <Text className='pr-2 dark:text-[#ffefa9] font-bold'>
@@ -42,6 +49,7 @@ export default function Header(
                     </Text>
                 </View>
             </TouchableOpacity>
+            ) : null}
         </View>
     );
 }
