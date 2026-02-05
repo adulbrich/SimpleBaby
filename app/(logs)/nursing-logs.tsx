@@ -38,7 +38,7 @@ const NursingLogsView: React.FC = () => {
 
     useEffect(() => {
         fetchNursingLogs();
-    });
+    }, []);
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
         if (!value || !value.includes('U2FsdGVkX1')) return value || '';
