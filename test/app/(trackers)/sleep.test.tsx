@@ -104,14 +104,7 @@ describe("Track sleep screen", () => {
         jest.spyOn(console, "error").mockClear();
         (Stopwatch as jest.Mock).mockClear();
         (ManualEntry as jest.Mock).mockClear();
-        (supabase.from("").insert as jest.Mock).mockReset();
-        (supabase.from("").insert as jest.Mock).mockImplementation(
-            async () => ({ error: false })
-        );
-        (getActiveChildId as jest.Mock).mockReset();
-        (getActiveChildId as jest.Mock).mockImplementation(
-            async () => ({ success: true })
-        );
+        (supabase.from("").insert as jest.Mock).mockClear();
     });
 
     test("Renders sleep tracking inputs", () => {
