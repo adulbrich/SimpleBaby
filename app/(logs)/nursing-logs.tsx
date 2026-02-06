@@ -109,6 +109,15 @@ const NursingLogsView: React.FC = () => {
 
             if (error) throw error;
 
+            const safeDecrypt = async (value: string | null): Promise<string> => {
+                if (!value || !value.includes('U2FsdGVkX1')) return value || '';
+                try {
+                    return await decryptData(value);
+                } catch {
+                    return '[Decryption Failed]';
+                }
+            };
+
             const decrypted = await Promise.all(
                 (data || []).map(async (entry) => ({
                     ...entry,
