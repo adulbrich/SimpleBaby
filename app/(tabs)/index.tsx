@@ -14,6 +14,7 @@ import { useAuth } from '@/library/auth-provider';
 import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
 import supabase from '@/library/supabase-client';
+import { createChild, getActiveChildId, setActiveChildId } from '@/library/local-store';
 
 export default function MainTab() {
     type Button = {
@@ -47,7 +48,7 @@ export default function MainTab() {
         { label: 'Health', icon: '💚', link: '/health' as ExternalPathString },
     ];
 
-    const { session } = useAuth();
+    const { isGuest, session } = useAuth();
     const [newChildState, setChildState] = useState(false);
     const [childName, setChildName] = useState('');
 
@@ -57,6 +58,17 @@ export default function MainTab() {
             return;
         }
 
+        let child = childName.charAt(0).toUpperCase() + childName.slice(1);
+
+        // GUEST MODE: local-only
+        if (isGuest) {
+            const newChild = await createChild(child);
+            await setActiveChildId(newChild.id);
+            setChildState(false);
+            return;
+        }
+
+        // SIGNED IN: Supabase connection
         try {
             const user = await supabase.auth.getUser();
             const userId = user.data?.user?.id;
@@ -93,14 +105,26 @@ export default function MainTab() {
     };
 
     useEffect(() => {
-        if (session) {
-            // Check if activeChild exists in user_metadata
-            const activeChild = session.user.user_metadata?.activeChild;
-            if (!activeChild) {
-                // If no active child, prompt the user to add a child
+        const checkChild = async () => {
+            if (session) {
+                // Check if activeChild exists in user_metadata
+                const activeChild = session.user.user_metadata?.activeChild;
+                if (!activeChild) {
+                    // If no active child, prompt the user to add a child
+                    setChildState(true);
+                }
+                return;
+            }
+
+            // Guest mode path:
+            const activeId = await getActiveChildId();
+            if (!activeId) {
                 setChildState(true);
             }
-        }
+        };
+
+        checkChild();
+        
     }, [session]);
 
     return (

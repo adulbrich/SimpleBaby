@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
-import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
+import supabase from '@/library/supabase-client';
 
 /**
  * Profile Screen
@@ -26,17 +26,30 @@ export default function Profile() {
 
     const player = useAudioPlayer(alertSound);
 
-    const { session } = useAuth();
+    const { isGuest, exitGuest, session } = useAuth();
+
+    const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
-        const { error } = await signOut();
-        if (error) {
-            console.error('Error signing out:', error);
-        } else {
-            console.log('Signed out successfully');
-            router.dismissAll();
-            router.replace('/');
+        try {
+            if (isGuest) {
+                // Guest sign-out: leave guest mode (local-only)
+                await exitGuest();
+
+                // Send them back to auth entry
+                router.replace("/");
+                return;
+            }
+
+            // Signed-in session sign-out: Supabase sign out
+            const { error } = await supabase.auth.signOut();
+            
+            if (error) throw error;
+            router.replace("/");
+
+        } catch (e: any) {
+            Alert.alert("Sign out failed", e?.message ?? "Please try again.");
         }
     };
 
@@ -57,8 +70,7 @@ export default function Profile() {
                             👤 Name
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
-                            {session?.user.user_metadata.firstName}{' '}
-                            {session?.user.user_metadata.lastName}
+                            {isGuest ? "Guest" : `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -95,7 +107,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {session?.user.user_metadata.email}
+                                {isGuest ? "N/A - Guest" : `${session?.user.user_metadata.email}`}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -112,7 +124,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                Change my password
+                                {isGuest ? "N/A - Guest" : "Change my password"}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -136,9 +148,9 @@ export default function Profile() {
                 </View>
             </ScrollView>
             <View className='pt-4'>
-                {session && (
+                {(session || isGuest) && (
                     <Button
-                        text='Sign Out'
+                        text={signOutLabel}
                         action={handleSignOut}
                         buttonClass='bg-red-600 border-gray-500'
                         textClass='font-bold dark:text-white'
