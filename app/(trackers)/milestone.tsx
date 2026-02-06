@@ -21,6 +21,8 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
+import { useAuth } from "@/library/auth-provider";
+import { insertRow, getActiveChildId as getLocalActiveChildId } from "@/library/local-store";
 
 
 export default function Milestone() {
@@ -34,6 +36,7 @@ export default function Milestone() {
     const [photoName, setPhotoName] = useState<string | null>(null);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [note, setNote] = useState('');
+    const { isGuest } = useAuth();
 
     const showDatePickerModal = () => {
         if (showDatePicker === true) {
@@ -153,6 +156,23 @@ export default function Milestone() {
         const encryptedName = await encryptData(name);
         const encryptedNote = note ? await encryptData(note) : null;
 
+        if (isGuest) {
+            try {
+                const row = await insertRow("milestone_logs", {
+                    child_id: childId,
+                    category,
+                    title: encryptedName,
+                    achieved_at: milestoneTime.toISOString(),
+                    photo_url: photoPath,
+                    note: encryptedNote
+                });
+                return { success: true, data: row };
+            } catch (error) {
+                console.error("Error creating milestone log (guest):", error);
+                return { success: false, error };
+            }
+        }
+
         const { data, error } = await supabase.from('milestone_logs').insert([
             {
                 child_id: childId,
@@ -177,25 +197,40 @@ export default function Milestone() {
     * Returns success/error object for handling in UI.
     */
     const saveMilestoneLog = async () => {
-        const { success, childId, error } = await getActiveChildId();
-
-        if (!success) {
-            Alert.alert(`Error: ${error}`);
-            return { success: false, error };
+        let childId: string | null = null;
+        
+        if (isGuest) {
+            childId = await getLocalActiveChildId();
+            if (!childId) {
+                Alert.alert("Error", "No active child selected (Guest Mode).");
+                return { success: false, error: "No active child in guest mode" };
+            }
+        } else {
+            const result = await getActiveChildId();
+            if (!result?.success || !result.childId) {
+                Alert.alert(`Error: ${result?.error}`);
+                return { success: false, error: result?.error };
+            }
+            childId = String(result.childId);
         }
 
         let photoPath: string | null = null;
+
         if (photoUri) {
-            try {
-                photoPath = await uploadPhoto(String(childId), photoUri);
-            } catch (e) {
-                Alert.alert("Photo upload failed", String(e));
-               return { success: false, error: e };
+            if (isGuest) {
+                photoPath = photoUri; // in guest mode: store the local URI directly
+            } else {
+                try {
+                    photoPath = await uploadPhoto(String(childId), photoUri); // logged-in: upload to Supabase storage
+                } catch (e) {
+                    Alert.alert("Photo upload failed", String(e));
+                    return { success: false, error: e };
+                }
             }
         }
 
         return await createMilestoneLog(
-            childId,
+            String(childId),
             category,
             name,
             milestoneDate,

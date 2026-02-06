@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { encryptData } from "@/library/crypto";
+import { useAuth } from '@/library/auth-provider';
+import { insertRow, getActiveChildId as getLocalActiveChildId } from '@/library/local-store';
 
 // Define the shape of the health log data object with optional nested properties
 interface HealthLog {
@@ -56,9 +58,20 @@ export default function Health() {
     note: "",
   });
   const [reset, setReset] = useState(0);
+  const { isGuest } = useAuth();
 
     // Create a new health log entry into the database using Supabase client
   const createHealthLog = async (log: any) => {
+    if (isGuest) {
+      try {
+        const row = await insertRow("health_logs", log);
+        return { success: true, data: row };
+      } catch (error) {
+        console.error("Error creating health log (guest):", error);
+        return { success: false, error };
+      }
+    }
+    
     const { data, error } = await supabase.from("health_logs").insert([log]);
 
     if (error) {
@@ -135,11 +148,21 @@ export default function Health() {
         }
     }
 
-    const { success, childId, error } = await getActiveChildId();
+    let childId: string | null = null;
 
-    if (!success) {
-      Alert.alert("Error", `Failed to get active child: ${error}`);
-      return;
+    if (isGuest) {
+      childId = await getLocalActiveChildId();
+      if (!childId) {
+        Alert.alert("Error", "No active child selected (Guest Mode).");
+        return;
+      }
+    } else {
+      const { success, childId: cloudChildId, error } = await getActiveChildId();
+      if (!success) {
+        Alert.alert("Error", `Failed to get active child: ${error}`);
+        return;
+      }
+      childId = cloudChildId;
     }
 
 
@@ -148,7 +171,7 @@ export default function Health() {
       const encryptedLog = {
         child_id: childId,
         category: healthLog.category,
-        date: healthLog.date,
+        date: healthLog.date.toISOString(),
         growth_length: healthLog.growth?.length
           ? await encryptData(healthLog.growth.length)
           : null,

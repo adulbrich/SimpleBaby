@@ -48,6 +48,11 @@ jest.mock("@/components/diaper-module.tsx", () => {
     return DiaperModuleMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
+
 /*
  *  setDiaperInputs:
  *      Reads update handlers from first call to DiaperModule mock

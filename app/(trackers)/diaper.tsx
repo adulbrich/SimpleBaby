@@ -15,6 +15,8 @@ import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import DiaperModule from '@/components/diaper-module';
 import { encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { insertRow, getActiveChildId as getLocalActiveChildId } from '@/library/local-store';
 
 // Diaper.tsx
 // Screen for logging diaper changes — includes selecting consistency, amount, change time, notes, and save logic
@@ -27,6 +29,7 @@ export default function Diaper() {
     const [changeTime, setChangeTime] = useState(new Date());
     const [note, setNote] = useState('');
     const [reset, setReset] = useState<number>(0);
+    const { isGuest } = useAuth();
 
     // Create a new diaper log into the database
     const createDiaperLog = async (
@@ -63,8 +66,45 @@ export default function Diaper() {
         }
     };
 
+    const createDiaperLogGuest = async (
+        childId: string,
+        consistency: string,
+        amount: string,
+        changeTime: Date,
+        note = '',
+    ) => {
+        try {
+            const encryptedConsistency = await encryptData(consistency);
+            const encryptedAmount = await encryptData(amount);
+            const encryptedNote = note ? await encryptData(note) : null;
+
+            const row = await insertRow('diaper_logs', {
+                child_id: childId,
+                consistency: encryptedConsistency,
+                amount: encryptedAmount,
+                note: encryptedNote,
+                change_time: changeTime.toISOString(),
+                logged_at: new Date().toISOString()
+            });
+
+            return { success: true, data: row };
+
+            } catch {
+                return { success: false, error: 'Encryption or local save error' };
+            }
+  };
+
     // Get active child ID and save diaper log
     const saveDiaperLog = async () => {
+        if (isGuest) {
+            const childId = await getLocalActiveChildId();
+            if (!childId) {
+                Alert.alert('No active child set (guest mode)');
+                return { success: false, error: 'No active child set' };
+            }
+            return await createDiaperLogGuest(childId, consistency, amount, changeTime, note);
+        }
+        
         const { success, childId, error } = await getActiveChildId();
 
         if (!success) {

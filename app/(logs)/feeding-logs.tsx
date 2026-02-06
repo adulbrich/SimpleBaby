@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,8 @@ import { format } from 'date-fns';
 import { getActiveChildId } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import { encryptData, decryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { listRows, updateRow, deleteRow, getActiveChildId as getLocalActiveChildId, LocalRow } from '@/library/local-store';
 
 interface FeedingLog {
     id: string
@@ -28,23 +30,69 @@ interface FeedingLog {
     note: string | null
 }
 
+type LocalFeedingRow = LocalRow & {
+    child_id: string;
+    category: string;
+    item_name: string;
+    amount: string;
+    feeding_time: string;
+    note: string | null;
+};
+
 const FeedingLogsView: React.FC = () => {
     const [feedingLogs, setFeedingLogs] = useState<FeedingLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const { isGuest } = useAuth();
 
-    useEffect(() => {
-        fetchFeedingLogs();
-    }, []);
+    const safeDecrypt = async (value: string | null): Promise<string> => {
+        if (!value || !value.includes('U2FsdGVkX1')) return '';
+        try {
+            return await decryptData(value);
+        } catch (err) {
+            console.warn('⚠️ Decryption failed for:', value);
+            return `[Decryption Failed]: ${err}`;
+        }
+    };
 
      /**
      * Fetches feeding logs from Supabase for the active child.
      * Handles child ID resolution and fetch errors.
      */
-    const fetchFeedingLogs = async () => {
+    const fetchFeedingLogs = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        
         try {
+            if (isGuest) {
+                const childId = await getLocalActiveChildId();
+                if (!childId) throw new Error('No active child selected (Guest Mode)');
+
+                const rows = await listRows<LocalFeedingRow>('feeding_logs');
+
+                const childRows = rows
+                    .filter((r) => r.child_id === childId)
+                    .sort(
+                    (a, b) =>
+                        new Date(b.feeding_time).getTime() - new Date(a.feeding_time).getTime(),
+                    );
+
+                const decryptedLogs = await Promise.all(
+                    childRows.map(async (entry) => ({
+                    ...entry,
+                    category: await safeDecrypt(entry.category),
+                    item_name: await safeDecrypt(entry.item_name),
+                    amount: await safeDecrypt(entry.amount),
+                    note: entry.note ? await safeDecrypt(entry.note) : '',
+                    })),
+                );
+
+                setFeedingLogs(decryptedLogs as FeedingLog[]);
+                return;
+                }
+
             const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
@@ -61,16 +109,6 @@ const FeedingLogsView: React.FC = () => {
                 .order('feeding_time', { ascending: false });
 
             if (error) throw error;
-
-            const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return '';
-                try {
-                    return await decryptData(value);
-                } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value);
-                    return `[Decryption Failed]: ${err}`;
-                }
-            };
 
             const decryptedLogs = await Promise.all(
                 (data || []).map(async (entry) => ({
@@ -89,7 +127,11 @@ const FeedingLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isGuest]);
+
+    useEffect(() => {
+        fetchFeedingLogs();
+    }, [fetchFeedingLogs]);
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -98,6 +140,16 @@ const FeedingLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
+                    if (isGuest) {
+                        const ok = await deleteRow('feeding_logs', id);
+                        if (!ok) {
+                            Alert.alert('Error deleting log');
+                            return;
+                        }
+                        setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
+                        return;
+                    }
+
                     const { error } = await supabase.from('feeding_logs').delete().eq('id', id);
                     if (error) {
                         Alert.alert('Error deleting log');
@@ -119,6 +171,23 @@ const FeedingLogsView: React.FC = () => {
             const encryptedItemName = await encryptData(item_name);
             const encryptedAmount = await encryptData(amount);
             const encryptedNote = note ? await encryptData(note) : null;
+
+            if (isGuest) {
+                const ok = await updateRow('feeding_logs', id, {
+                    category: encryptedCategory,
+                    item_name: encryptedItemName,
+                    amount: encryptedAmount,
+                    note: encryptedNote,
+                });
+                if (!ok) {
+                    Alert.alert('Failed to update log');
+                    return;
+                }
+
+                await fetchFeedingLogs();
+                setEditModalVisible(false);
+                return;
+            }
 
             const { error } = await supabase
                 .from('feeding_logs')

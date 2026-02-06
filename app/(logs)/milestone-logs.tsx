@@ -18,7 +18,9 @@ import { format } from "date-fns";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { getActiveChildId } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData } from "@/library/crypto";
+import { decryptData, encryptData } from "@/library/crypto";
+import { useAuth } from "@/library/auth-provider";
+import { listRows, updateRow, deleteRow, getActiveChildId as getLocalActiveChildId, LocalRow } from "@/library/local-store";
 
 type MilestoneCategory = 'Motor' | 'Language' | 'Social' | 'Cognitive' | 'Other'
 
@@ -35,20 +37,30 @@ interface MilestoneLog {
     updated_at: string;
 }
 
+type LocalMilestoneRow = LocalRow & {
+    id: string;
+    child_id: string;
+    category: string;
+    title: string;
+    achieved_at: string;
+    photo_url: string | null;
+    note: string | null;
+}
+
 const MilestoneLogsView: React.FC = () => {
     const [milestoneLogs, setMilestoneLogs] = useState<MilestoneLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
     const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
-
     const [photoSignedUrls, setPhotoSignedUrls] = useState<Record<string, string>>({});
-    
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
+    const { isGuest } = useAuth();
 
     const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
+        if (isGuest) return path;
+        
         try {
             const { data, error } = await supabase.storage
                 .from("milestone-photos")
@@ -70,65 +82,77 @@ const MilestoneLogsView: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-            
-            const result = await getActiveChildId();
-            if (!result?.success || !result.childId) {
-                throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
+
+            let childId: string | null = null;
+
+            if (isGuest) {
+                childId = await getLocalActiveChildId();
+                if (!childId) throw new Error("No active child selected (Guest Mode)");
+                } else {
+                    const result = await getActiveChildId();
+                    if (!result?.success || !result.childId) {
+                        throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
+                    }
+                childId = String(result.childId);
             }
-            
-            const childId = String(result.childId);
-            
-            const { data, error } = await supabase
-            .from("milestone_logs")
-            .select("*")
-            .eq("child_id", childId)
-            .order("achieved_at", { ascending: false });
-            
-            if (error) throw error;
-            
+
+            let data: any[] = [];
+
+            if (isGuest) {
+                const rows = await listRows<LocalMilestoneRow>("milestone_logs");
+                data = rows
+                    .filter((r) => r.child_id === childId)
+                    .sort((a, b) => new Date(b.achieved_at).getTime() - new Date(a.achieved_at).getTime());
+            } else {
+                const res = await supabase
+                    .from("milestone_logs")
+                    .select("*")
+                    .eq("child_id", childId)
+                    .order("achieved_at", { ascending: false });
+
+                if (res.error) throw res.error;
+                data = res.data || [];
+            }
+
             const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return '';
+                if (!value || !value.includes("U2FsdGVkX1")) return "";
                 try {
                     return await decryptData(value);
                 } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value);
+                    console.warn("⚠️ Decryption failed for:", value);
                     return `[Decryption Failed]: ${err}`;
                 }
             };
-            
+
             const decryptedLogs = await Promise.all(
-                (data || []).map(async (entry) => ({
-                    ...entry,
-                    title: await safeDecrypt(entry.title),
-                    note: entry.note ? await safeDecrypt(entry.note) : '',
-                }))
+            (data || []).map(async (entry) => ({
+                ...entry,
+                title: await safeDecrypt(entry.title),
+                note: entry.note ? await safeDecrypt(entry.note) : "",
+            })),
             );
 
             const signedPairs = await Promise.all(
             decryptedLogs.map(async (log) => {
-                if (!log.photo_url) {
-                    return [log.id, null] as const;
-                }
+                if (!log.photo_url) return [log.id, null] as const;
                 const signed = await getSignedPhotoUrl(log.photo_url);
                 return [log.id, signed] as const;
-            })
+            }),
             );
 
             const nextMap: Record<string, string> = {};
             for (const [id, signed] of signedPairs) {
-                if (signed) {
-                    nextMap[id] = signed;
-                }
+                if (signed) nextMap[id] = signed;
             }
             setPhotoSignedUrls(nextMap);
-            
             setMilestoneLogs(decryptedLogs);
+
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unknown error occurred");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isGuest]);
 
     useEffect(() => {
         fetchMilestoneLogs();         
@@ -153,28 +177,46 @@ const MilestoneLogsView: React.FC = () => {
     
     const handleSaveEdit = async () => {
         if (!editingLog) return;
-        
-        const title = editingLog.title?.trim();
-        if (!title) {
+
+        const titlePlain = editingLog.title?.trim();
+        if (!titlePlain) {
             Alert.alert("Missing title", "Please enter a milestone title.");
             return;
         }
-        
+
         try {
+            const encryptedTitle = await encryptData(titlePlain);
+            const notePlain = editingLog.note?.trim();
+            const encryptedNote = notePlain ? await encryptData(notePlain) : null;
+
             const patch = {
-                title,
+                title: encryptedTitle,
                 category: editingLog.category ?? "Other",
-                note: editingLog.note?.trim() ? editingLog.note.trim() : null,
+                note: encryptedNote,
                 achieved_at: editAchievedAt.toISOString(),
             };
-            
-            const { error } = await supabase.from("milestone_logs").update(patch).eq("id", editingLog.id);
-            
-            if (error) {
-                Alert.alert("Error updating milestone", error.message);
+
+            if (isGuest) {
+            const ok = await updateRow("milestone_logs", editingLog.id, patch);
+            if (!ok) {
+                Alert.alert("Update error", "Failed to update milestone (Guest Mode).");
                 return;
             }
-            
+            await fetchMilestoneLogs();
+            setEditModalVisible(false);
+            return;
+            }
+
+            const { error } = await supabase
+            .from("milestone_logs")
+            .update(patch)
+            .eq("id", editingLog.id);
+
+            if (error) {
+            Alert.alert("Error updating milestone", error.message);
+            return;
+            }
+
             await fetchMilestoneLogs();
             setEditModalVisible(false);
         } catch (err) {
@@ -189,6 +231,16 @@ const MilestoneLogsView: React.FC = () => {
                 text: "Delete",
                 style: "destructive",
                 onPress: async () => {
+                    if (isGuest) {
+                        const ok = await deleteRow("milestone_logs", id);
+                        if (!ok) {
+                        Alert.alert("Error deleting milestone (Guest Mode)");
+                        return;
+                        }
+                        setMilestoneLogs((prev) => prev.filter((m) => m.id !== id));
+                        return;
+                    }
+
                     const { error } = await supabase.from("milestone_logs").delete().eq("id", id);
                     if (error) {
                         Alert.alert("Error deleting milestone", error.message);

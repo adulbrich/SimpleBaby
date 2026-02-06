@@ -14,7 +14,9 @@ import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
-import { encryptData } from '@/library/crypto';  // ✅ Added
+import { encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { insertRow, getActiveChildId as getLocalActiveChildId } from '@/library/local-store';
 
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
@@ -27,6 +29,7 @@ export default function Feeding() {
     const [amount, setAmount] = useState('');
     const [feedingTime, setFeedingTime] = useState(new Date());
     const [note, setNote] = useState('');
+    const { isGuest } = useAuth();
 
     // Function to create a new feeding log record into Supabase
     const createFeedingLog = async (
@@ -38,7 +41,6 @@ export default function Feeding() {
         note = '',
     ) => {
         try {
-            // ✅ Encrypt before inserting
             const encryptedCategory = await encryptData(category);
             const encryptedItemName = await encryptData(itemName);
             const encryptedAmount = await encryptData(amount);
@@ -69,6 +71,35 @@ export default function Feeding() {
 
     // Fetch active child ID and save feeding log for that child
     const saveFeedingLog = async () => {
+        if (isGuest) {
+            const childId = await getLocalActiveChildId();
+            if (!childId) {
+                Alert.alert('Error: No active child selected (Guest Mode).');
+                return { success: false, error: 'No active child in guest mode' };
+            }
+
+            try {
+                const encryptedCategory = await encryptData(category);
+                const encryptedItemName = await encryptData(itemName);
+                const encryptedAmount = await encryptData(amount);
+                const encryptedNote = note ? await encryptData(note) : null;
+
+                await insertRow('feeding_logs', {
+                    child_id: childId,
+                    category: encryptedCategory,
+                    item_name: encryptedItemName,
+                    amount: encryptedAmount,
+                    feeding_time: feedingTime.toISOString(),
+                    note: encryptedNote,
+                });
+
+                return { success: true, data: null };
+            } catch (err) {
+                console.error('❌ Guest insert failed:', err);
+                return { success: false, error: 'Encryption or local save error' };
+            }
+        }
+        
         const { success, childId, error } = await getActiveChildId();
 
         if (!success) {

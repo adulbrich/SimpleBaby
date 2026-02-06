@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -17,9 +17,27 @@ import { format } from 'date-fns';
 import { getActiveChildId } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import { decryptData, encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import {
+    listRows,
+    updateRow,
+    deleteRow,
+    getActiveChildId as getLocalActiveChildId,
+    LocalRow,
+} from '@/library/local-store';
 
 interface NursingLog {
     id: string
+    child_id: string
+    left_duration: string | null
+    right_duration: string | null
+    logged_at: string
+    note: string | null
+    left_amount: string | null
+    right_amount: string | null
+}
+
+type LocalNursingRow = LocalRow & {
     child_id: string
     left_duration: string | null
     right_duration: string | null
@@ -35,10 +53,7 @@ const NursingLogsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<NursingLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
-
-    useEffect(() => {
-        fetchNursingLogs();
-    });
+    const { isGuest } = useAuth();
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
         if (!value || !value.includes('U2FsdGVkX1')) return value || '';
@@ -49,8 +64,38 @@ const NursingLogsView: React.FC = () => {
         }
     };
 
-    const fetchNursingLogs = async () => {
+    const fetchNursingLogs = useCallback(async () => {
         try {
+            if (isGuest) {
+                const childId = await getLocalActiveChildId();
+                if (!childId) {
+                    throw new Error('No active child selected (Guest Mode)');
+                }
+
+                const rows = await listRows<LocalNursingRow>('nursing_logs');
+
+                const childRows = rows
+                    .filter((r) => r.child_id === childId)
+                    .sort(
+                    (a, b) =>
+                        new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime(),
+                    );
+
+                const decrypted = await Promise.all(
+                    childRows.map(async (entry) => ({
+                    ...entry,
+                    left_duration: await safeDecrypt(entry.left_duration),
+                    right_duration: await safeDecrypt(entry.right_duration),
+                    left_amount: await safeDecrypt(entry.left_amount),
+                    right_amount: await safeDecrypt(entry.right_amount),
+                    note: await safeDecrypt(entry.note),
+                    })),
+                );
+
+                setNursingLogs(decrypted as NursingLog[]);
+                return;
+            }
+
             const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
@@ -81,7 +126,11 @@ const NursingLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isGuest]);
+
+    useEffect(() => {
+        fetchNursingLogs();
+    }, [fetchNursingLogs]);
 
     const handleSaveEdit = async () => {
         if (!editingLog) return;
@@ -93,6 +142,18 @@ const NursingLogsView: React.FC = () => {
                 right_amount: editingLog.right_amount ? await encryptData(editingLog.right_amount) : null,
                 note: editingLog.note ? await encryptData(editingLog.note) : null,
             };
+
+            if (isGuest) {
+                const ok = await updateRow('nursing_logs', editingLog.id, updated);
+                if (!ok) {
+                    Alert.alert('Error updating log');
+                    return;
+                }
+
+                await fetchNursingLogs();
+                setEditModalVisible(false);
+                return;
+            }
 
             const { error } = await supabase
                 .from('nursing_logs')
@@ -118,6 +179,16 @@ const NursingLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
+                    if (isGuest) {
+                        const ok = await deleteRow('nursing_logs', id);
+                        if (!ok) {
+                            Alert.alert('Error deleting log');
+                            return;
+                        }
+                        setNursingLogs((prev) => prev.filter((log) => log.id !== id));
+                        return;
+                    }
+
                     const { error } = await supabase.from('nursing_logs').delete().eq('id', id);
                     if (error) {
                         Alert.alert('Error deleting log');
