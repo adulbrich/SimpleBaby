@@ -234,6 +234,7 @@ export default function Milestone() {
         setName("");
         setMilestoneDate(new Date());
         setPhotoUri(null);
+        setPhotoName(null);
         setNote("");
     };
 
