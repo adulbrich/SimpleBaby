@@ -58,7 +58,7 @@ const MilestoneLogsView: React.FC = () => {
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
     const { isGuest } = useAuth();
 
-    const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
+    const getSignedPhotoUrl = useCallback(async (path: string): Promise<string | null> => {
         if (isGuest) return path;
         
         try {
@@ -76,7 +76,7 @@ const MilestoneLogsView: React.FC = () => {
             console.warn("⚠️ Signed URL error:", e);
             return null;
         }
-    };
+    }, [isGuest]);
     
     const fetchMilestoneLogs = useCallback(async () => {
         try {
@@ -152,7 +152,7 @@ const MilestoneLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [isGuest]);
+    }, [isGuest, getSignedPhotoUrl]);
 
     useEffect(() => {
         fetchMilestoneLogs();         

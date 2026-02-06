@@ -49,12 +49,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const enterGuest = async () => {
         await enterGuestMode();
         setIsGuest(true);
-    }
+    };
 
     const exitGuest = async () => {
         await exitGuestMode();
         setIsGuest(false);
-    }
+    };
 
     const signIn = async (email: string, password: string) => {
         try {
