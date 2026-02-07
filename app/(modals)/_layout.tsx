@@ -1,16 +1,31 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform } from 'react-native';
+import { Platform, TouchableOpacity, Text } from 'react-native';
 
 export default function ModalsLayout() {
     return (
         <>
             <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
-            <Stack screenOptions={{ presentation: 'modal' }}>
+            <Stack screenOptions={{
+                presentation: 'modal',
+                headerLeft: () => (
+                    <TouchableOpacity
+                        onPress={() => {
+                            router.dismissTo('/(tabs)/trends');
+                        }}
+                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
+                    >
+                        <Text className='dark:color-[#fff] font-bold'>
+                            ⬅️ Back
+                        </Text>
+                    </TouchableOpacity>
+                ),
+             }}>
                 <Stack.Screen
                     name='calendar'
                     options={{
                         presentation: 'modal',
+                        headerTitle: "Calendar"
                     }}
                 />
                 <Stack.Screen
