@@ -15,6 +15,8 @@ import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import NursingStopwatch from '@/components/nursing-stopwatch';
 import { encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { insertRow, getActiveChildId as getLocalActiveChildId } from '@/library/local-store';
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
@@ -28,6 +30,7 @@ export default function Nursing() {
     const [rightAmount, setRightAmount] = useState('');
     const [note, setNote] = useState('');
     const [reset, setReset] = useState<number>(0);
+    const { isGuest } = useAuth();
 
     // Insert a new nursing log entry into Supabase
     const createNursingLog = async (
@@ -70,6 +73,40 @@ export default function Nursing() {
     
     // Retrieve the current active child, then save log to Supabase
     const saveNursingLog = async () => {
+        if (isGuest) {
+            const childId = await getLocalActiveChildId();
+            if (!childId) {
+                Alert.alert('Error: No active child selected (Guest Mode).');
+                return { success: false, error: 'No active child in guest mode' };
+            }
+
+            try {
+                const normalizedLeftAmount = leftAmount.trim() === '' ? '0' : leftAmount.trim();
+                const normalizedRightAmount = rightAmount.trim() === '' ? '0' : rightAmount.trim();
+
+                const encryptedLeftDuration = await encryptData(leftDuration);
+                const encryptedRightDuration = await encryptData(rightDuration);
+                const encryptedLeftAmount = await encryptData(normalizedLeftAmount);
+                const encryptedRightAmount = await encryptData(normalizedRightAmount);
+                const encryptedNote = note ? await encryptData(note) : null;
+
+                await insertRow('nursing_logs', {
+                    child_id: childId,
+                    left_duration: encryptedLeftDuration,
+                    right_duration: encryptedRightDuration,
+                    left_amount: encryptedLeftAmount,
+                    right_amount: encryptedRightAmount,
+                    note: encryptedNote,
+                    logged_at: new Date().toISOString()
+                });
+
+                return { success: true, data: null };
+            } catch (err) {
+                console.error('Guest insert failed:', err);
+                return { success: false, error: 'Encryption or local save error' };
+            }
+        }
+        
         const { success, childId, error } = await getActiveChildId();
 
         if (!success) {

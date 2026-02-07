@@ -42,6 +42,10 @@ jest.mock("@/components/health-module.tsx", () => {
     return HealthModuleMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
 /*
  *  setHealthInputs:
  *      Reads update handlers from first call to HealthModule mock
@@ -383,7 +387,7 @@ describe("Track health screen", () => {
 
         // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
         expect(insertedObject.child_id).toBe(testID);
-        expect(insertedObject.date).toBe(testDate);
+        expect(insertedObject.date).toBe(testDate.toISOString());
         expect(insertedObject.note).toBe(await encryptData(testNote));
 
         // Ensure that log was saved successfully

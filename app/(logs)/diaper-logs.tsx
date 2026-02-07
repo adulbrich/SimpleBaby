@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,8 @@ import { format } from 'date-fns';
 import { getActiveChildId } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import { encryptData, decryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { listRows, updateRow, deleteRow, getActiveChildId as getLocalActiveChildId, LocalRow } from '@/library/local-store';
 
 interface DiaperLog {
     id: string
@@ -27,20 +29,60 @@ interface DiaperLog {
     note: string | null
 }
 
+type LocalDiaperRow = LocalRow & {
+    child_id: string;
+    consistency: string;
+    amount: string;
+    logged_at: string;
+    note: string | null;
+    change_time: string;
+}
+
 const DiaperLogsView: React.FC = () => {
     const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
     const [editingLog, setEditingLog] = useState<DiaperLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const { isGuest } = useAuth();
 
-    useEffect(() => {
-        fetchDiaperLogs();
-    }, []);
-
-    const fetchDiaperLogs = async () => {
+    const safeDecrypt = async (value: string | null): Promise<string> => {
+        if (!value || !value.includes('U2FsdGVkX1')) return '';
         try {
+            return await decryptData(value);
+        } catch (err) {
+            console.warn('⚠️ Decryption failed for:', value);
+            return `[Decryption Failed]: ${err}`;
+        }
+    };
+
+    const fetchDiaperLogs = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            if (isGuest) {
+                const childId = await getLocalActiveChildId();
+                if (!childId) throw new Error('No active child set (guest mode)');
+                
+                const rows = await listRows<LocalDiaperRow>('diaper_logs');
+                const childRows = rows
+                    .filter((r) => r.child_id === childId)
+                    .sort((a, b) => new Date(b.change_time).getTime() - new Date(a.change_time).getTime());
+
+                const decrypted = await Promise.all(
+                childRows.map(async (entry) => ({
+                        ...entry,
+                        consistency: await safeDecrypt(entry.consistency),
+                        amount: await safeDecrypt(entry.amount),
+                        note: entry.note ? await safeDecrypt(entry.note) : '',
+                    })),
+                );
+
+                setDiaperLogs(decrypted as DiaperLog[]);
+                return;
+            }
+
             const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get active child ID');
@@ -53,16 +95,6 @@ const DiaperLogsView: React.FC = () => {
                 .order('logged_at', { ascending: false });
 
             if (error) throw error;
-
-            const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return '';
-                try {
-                    return await decryptData(value);
-                } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value);
-                    return `[Decryption Failed]: ${err}`;
-                }
-            };
 
             const decryptedLogs = await Promise.all(
                 (data || []).map(async (entry) => ({
@@ -80,7 +112,11 @@ const DiaperLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isGuest]);
+
+    useEffect(() => {
+        fetchDiaperLogs();
+    }, [fetchDiaperLogs]);
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -89,6 +125,13 @@ const DiaperLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
+                    if (isGuest) {
+                        const ok = await deleteRow('diaper_logs', id);
+                        if (!ok) Alert.alert('Error deleting log');
+                        setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
+                        return;
+                    }
+
                     const { error } = await supabase.from('diaper_logs').delete().eq('id', id);
                     if (error) {
                         Alert.alert('Error deleting log');
@@ -109,6 +152,22 @@ const DiaperLogsView: React.FC = () => {
             const encryptedConsistency = await encryptData(consistency);
             const encryptedAmount = await encryptData(amount);
             const encryptedNote = note ? await encryptData(note) : null;
+
+            if (isGuest) {
+                const ok = await updateRow('diaper_logs', id, {
+                    consistency: encryptedConsistency,
+                    amount: encryptedAmount,
+                    note: encryptedNote,
+                });
+                if (!ok) {
+                    Alert.alert('Failed to update log');
+                    return;
+                }
+
+                await fetchDiaperLogs();
+                setEditModalVisible(false);
+                return;
+            }
 
             const { error } = await supabase
                 .from('diaper_logs')

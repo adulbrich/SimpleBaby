@@ -17,6 +17,8 @@ import { getActiveChildId } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import { decryptData, encryptData } from '@/library/crypto';
 import { format } from 'date-fns';
+import { useAuth } from "@/library/auth-provider";
+import { listRows, updateRow, deleteRow, getActiveChildId as getLocalActiveChildId, LocalRow } from "@/library/local-store";
 
 interface HealthLog {
   id: string;
@@ -38,12 +40,15 @@ interface HealthLog {
   note: string | null;
 }
 
+type LocalHealthRow = LocalRow & HealthLog;
+
 const HealthLogsView: React.FC = () => {
   const [logs, setLogs] = useState<HealthLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingLog, setEditingLog] = useState<HealthLog | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const { isGuest } = useAuth();
 
   const safeDecrypt = async (value: string | null): Promise<string> => {
     if (!value || !value.includes('U2FsdGVkX1')) return '';
@@ -56,6 +61,41 @@ const HealthLogsView: React.FC = () => {
 
   const fetchHealthLogs = useCallback(async () => {
     try {
+
+      setLoading(true);
+      setError(null);
+
+      if (isGuest) {
+        const childId = await getLocalActiveChildId();
+        if (!childId) throw new Error("No active child selected (Guest Mode)");
+
+        const rows = await listRows<LocalHealthRow>("health_logs");
+        const childRows = rows
+          .filter((r) => r.child_id === childId)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        const decrypted = await Promise.all(
+          childRows.map(async (entry) => ({
+            ...entry,
+            growth_length: await safeDecrypt(entry.growth_length),
+            growth_weight: await safeDecrypt(entry.growth_weight),
+            growth_head: await safeDecrypt(entry.growth_head),
+            activity_type: await safeDecrypt(entry.activity_type),
+            activity_duration: await safeDecrypt(entry.activity_duration),
+            meds_name: await safeDecrypt(entry.meds_name),
+            meds_amount: await safeDecrypt(entry.meds_amount),
+            vaccine_name: await safeDecrypt(entry.vaccine_name),
+            vaccine_location: await safeDecrypt(entry.vaccine_location),
+            other_name: await safeDecrypt(entry.other_name),
+            other_description: await safeDecrypt(entry.other_description),
+            note: await safeDecrypt(entry.note),
+          }))
+        );
+
+        setLogs(decrypted);
+        return;
+      }
+
       const { success, childId, error: childError } = await getActiveChildId();
       if (!success || !childId) {
         throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
@@ -94,7 +134,7 @@ const HealthLogsView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isGuest]);
 
   useEffect(() => {
     fetchHealthLogs();
@@ -117,6 +157,17 @@ const HealthLogsView: React.FC = () => {
         other_description: editingLog.other_description ? await encryptData(editingLog.other_description) : null,
         note: editingLog.note ? await encryptData(editingLog.note) : null,
       };
+
+      if (isGuest) {
+        const ok = await updateRow("health_logs", editingLog.id, updated);
+        if (!ok) {
+          Alert.alert("Error updating log");
+          return;
+        }
+        await fetchHealthLogs();
+        setEditModalVisible(false);
+        return;
+      }
 
       const { error } = await supabase
         .from('health_logs')
@@ -143,6 +194,16 @@ const HealthLogsView: React.FC = () => {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
+          if (isGuest) {
+            const ok = await deleteRow("health_logs", id);
+            if (!ok) {
+              Alert.alert("Error deleting log");
+              return;
+            }
+            setLogs((prev) => prev.filter((log) => log.id !== id));
+            return;
+          }
+
           const { error } = await supabase.from('health_logs').delete().eq('id', id);
           if (error) {
             Alert.alert('Error deleting log');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,14 @@ import { format } from 'date-fns';
 import { getActiveChildId } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import { decryptData, encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import {
+    listRows,
+    updateRow,
+    deleteRow,
+    getActiveChildId as getLocalActiveChildId,
+    LocalRow,
+} from '@/library/local-store';
 
 interface SleepLog {
     id: string
@@ -26,19 +34,61 @@ interface SleepLog {
     note: string | null
 }
 
+type LocalSleepRow = LocalRow & {
+    child_id: string;
+    start_time: string;
+    end_time: string;
+    duration: string | null;
+    note: string | null;
+}
+
 const SleepLogsView: React.FC = () => {
     const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<SleepLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const { isGuest } = useAuth();
 
-    useEffect(() => {
-        fetchSleepLogs();
-    }, []);
-
-    const fetchSleepLogs = async () => {
+    const safeDecrypt = async (value: string | null): Promise<string> => {
+        if (!value || !value.includes('U2FsdGVkX1')) return value || '';
         try {
+            return await decryptData(value);
+        } catch (err) {
+            console.warn('⚠️ Decryption failed for:', value);
+            return `[Decryption Failed]: ${err}`;
+        }
+    };
+
+    const fetchSleepLogs = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            if (isGuest) {
+                const childId = await getLocalActiveChildId();
+                if (!childId) throw new Error('No active child selected (Guest Mode)');
+
+                const rows = await listRows<LocalSleepRow>('sleep_logs');
+
+                const childRows = rows
+                    .filter((r) => r.child_id === childId)
+                    .sort(
+                    (a, b) =>
+                        new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
+                    );
+
+                const decrypted = await Promise.all(
+                    childRows.map(async (entry) => ({
+                    ...entry,
+                    note: await safeDecrypt(entry.note),
+                    })),
+                );
+
+                setSleepLogs(decrypted as SleepLog[]);
+                return;
+            }
+
             const { success, childId, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
@@ -56,16 +106,6 @@ const SleepLogsView: React.FC = () => {
 
             if (error) throw error;
 
-            const safeDecrypt = async (value: string | null): Promise<string> => {
-                if (!value || !value.includes('U2FsdGVkX1')) return value || '';
-                try {
-                    return await decryptData(value);
-                } catch (err) {
-                    console.warn('⚠️ Decryption failed for:', value);
-                    return `[Decryption Failed]: ${err}`;
-                }
-            };
-
             const decrypted = await Promise.all(
                 (data || []).map(async (entry) => ({
                     ...entry,
@@ -80,7 +120,11 @@ const SleepLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isGuest]);
+
+    useEffect(() => {
+        fetchSleepLogs();
+    }, [fetchSleepLogs]);
 
     const handleDelete = async (id: string) => {
         Alert.alert('Delete Entry', 'Are you sure you want to delete this log?', [
@@ -89,6 +133,16 @@ const SleepLogsView: React.FC = () => {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: async () => {
+                    if (isGuest) {
+                        const ok = await deleteRow('sleep_logs', id);
+                        if (!ok) {
+                            Alert.alert('Error deleting log');
+                            return;
+                        }
+                        setSleepLogs((prev) => prev.filter((log) => log.id !== id));
+                        return;
+                    }
+
                     const { error } = await supabase
                         .from('sleep_logs')
                         .delete()
@@ -108,6 +162,24 @@ const SleepLogsView: React.FC = () => {
 
         try {
             const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
+
+            if (isGuest) {
+                const ok = await updateRow('sleep_logs', editingLog.id, {
+                    start_time: editingLog.start_time,
+                    end_time: editingLog.end_time,
+                    duration: editingLog.duration,
+                    note: encryptedNote,
+                });
+
+                if (!ok) {
+                    Alert.alert('Failed to update log');
+                    return;
+                }
+
+                await fetchSleepLogs();
+                setEditModalVisible(false);
+                return;
+            }
 
             const { error } = await supabase
                 .from('sleep_logs')

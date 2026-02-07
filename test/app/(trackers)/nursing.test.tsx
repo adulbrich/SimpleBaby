@@ -49,6 +49,11 @@ jest.mock("@/components/nursing-stopwatch.tsx", () => {
     return NursingStopwatchMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
+
 /*
  *  setNursingInputs:
  *      Reads update handlers from first call to NursingStopwatch mock

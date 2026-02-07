@@ -52,6 +52,11 @@ jest.mock("@/components/manual-entry-sleep.tsx", () => {
     return ManualInputsMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
+
 /*
  *  setSleepInputs:
  *      Reads update handlers from first call to <Stopwatch/> and <ManualEntry/> mocks

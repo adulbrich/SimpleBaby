@@ -16,6 +16,8 @@ import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import { encryptData } from '@/library/crypto';
+import { useAuth } from '@/library/auth-provider';
+import { insertRow, getActiveChildId as getLocalActiveChildId } from '@/library/local-store';
 
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
@@ -27,6 +29,7 @@ export default function Sleep() {
     const [stopwatchTime, setStopwatchTime] = useState('00:00:00');
     const [note, setNote] = useState('');
     const [reset, setReset] = useState<number>(0);
+    const { isGuest } = useAuth();
 
     // Update manual entry times
     const handleDatesUpdate = (start: Date, end: Date) => {
@@ -79,19 +82,10 @@ export default function Sleep() {
         endTime: Date | null = null,
         note = '',
     ) => {
-        const { success, childId, error } = await getActiveChildId();
-
-        if (!success) {
-            Alert.alert(`Error: ${error}`);
-            return { success: false, error };
-        }
-
-        let finalStartTime, finalEndTime;
+        let finalStartTime: Date, finalEndTime: Date;
 
         if (stopwatchTime) {
-            const [hours, minutes, seconds] = stopwatchTime
-                .split(':')
-                .map(Number);
+            const [hours, minutes, seconds] = stopwatchTime.split(':').map(Number);
             const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
             finalEndTime = new Date();
@@ -101,9 +95,51 @@ export default function Sleep() {
             finalEndTime = endTime;
         } else {
             Alert.alert(
-                'Error: Either stopwatch time or start/end times must be provided',
+            'Error: Either stopwatch time or start/end times must be provided',
             );
             return { success: false, error: 'Missing time data' };
+        }
+
+        // compute duration (same format as your createSleepLog)
+        const durationMs = finalEndTime.getTime() - finalStartTime.getTime();
+        const durationSec = Math.floor(durationMs / 1000);
+        const hours = Math.floor(durationSec / 3600);
+        const minutes = Math.floor((durationSec % 3600) / 60);
+        const seconds = durationSec % 60;
+
+        const duration = `${hours.toString().padStart(2, '0')}:${minutes
+            .toString()
+            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (isGuest) {
+            const childId = await getLocalActiveChildId();
+            if (!childId) {
+                Alert.alert('Error: No active child selected (Guest Mode).');
+                return { success: false, error: 'No active child in guest mode' };
+            }
+
+            try {
+                const encryptedNote = note ? await encryptData(note) : null;
+
+                await insertRow('sleep_logs', {
+                    child_id: childId,
+                    start_time: finalStartTime.toISOString(),
+                    end_time: finalEndTime.toISOString(),
+                    duration,
+                    note: encryptedNote,
+                });
+
+                return { success: true, data: null };
+            } catch (err) {
+                console.error('❌ Guest insert failed:', err);
+                return { success: false, error: 'Encryption or local save error' };
+            }
+    }
+
+        const { success, childId, error } = await getActiveChildId();
+        if (!success) {
+            Alert.alert(`Error: ${error}`);
+            return { success: false, error };
         }
 
         return await createSleepLog(childId, finalStartTime, finalEndTime, note);

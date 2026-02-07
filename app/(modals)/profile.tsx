@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     ScrollView,
@@ -8,10 +8,11 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
-import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
+import { getActiveChildId, listChildren } from '@/library/local-store';
+import supabase from '@/library/supabase-client';
 
 /**
  * Profile Screen
@@ -26,19 +27,51 @@ export default function Profile() {
 
     const player = useAudioPlayer(alertSound);
 
-    const { session } = useAuth();
+    const { isGuest, exitGuest, session } = useAuth();
+
+    const [guestChildName, setGuestChildName] = useState<string>('None');
+
+    const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
-        const { error } = await signOut();
-        if (error) {
-            console.error('Error signing out:', error);
-        } else {
-            console.log('Signed out successfully');
-            router.dismissAll();
-            router.replace('/');
+        try {
+            if (isGuest) {
+                // Guest sign-out: leave guest mode (local-only)
+                await exitGuest();
+
+                // Send them back to auth entry
+                router.replace("/");
+                return;
+            }
+
+            // Signed-in session sign-out: Supabase sign out
+            const { error } = await supabase.auth.signOut();
+            
+            if (error) throw error;
+            router.replace("/");
+
+        } catch (e: any) {
+            Alert.alert("Sign out failed", e?.message ?? "Please try again.");
         }
     };
+
+    useEffect(() => {
+        const loadGuestChild = async () => {
+            if (!isGuest) return;
+            const activeId = await getActiveChildId();
+            if (!activeId) {
+                setGuestChildName("Guest Child");
+                return;
+            }
+
+            const children = await listChildren();
+            const activeChild = children.find(c => c.id === activeId);
+            setGuestChildName(activeChild?.name ?? 'Guest Child');
+        };
+
+        loadGuestChild();
+    }, [isGuest]);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -49,7 +82,7 @@ export default function Profile() {
                             Active Child
                         </Text>
                         <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {session?.user.user_metadata?.activeChild}
+                            👶 {isGuest ? guestChildName : session?.user.user_metadata?.activeChild}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -57,8 +90,7 @@ export default function Profile() {
                             👤 Name
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
-                            {session?.user.user_metadata.firstName}{' '}
-                            {session?.user.user_metadata.lastName}
+                            {isGuest ? "Guest" : `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -95,7 +127,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {session?.user.user_metadata.email}
+                                {isGuest ? "N/A - Guest" : `${session?.user.user_metadata.email}`}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -112,7 +144,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                Change my password
+                                {isGuest ? "N/A - Guest" : "Change my password"}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -136,9 +168,9 @@ export default function Profile() {
                 </View>
             </ScrollView>
             <View className='pt-4'>
-                {session && (
+                {(session || isGuest) && (
                     <Button
-                        text='Sign Out'
+                        text={signOutLabel}
                         action={handleSignOut}
                         buttonClass='bg-red-600 border-gray-500'
                         textClass='font-bold dark:text-white'

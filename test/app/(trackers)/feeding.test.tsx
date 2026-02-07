@@ -46,6 +46,10 @@ jest.mock("@/components/feeding-category.tsx", () => {
     return FeedingCategoryMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
 /*
  *  setFeedingInputs:
  *      Reads update handlers from first call to FeedingCategory mock
