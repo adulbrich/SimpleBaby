@@ -34,6 +34,7 @@ const FeedingLogsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
     useEffect(() => {
         fetchFeedingLogs();
@@ -45,7 +46,7 @@ const FeedingLogsView: React.FC = () => {
      */
     const fetchFeedingLogs = async () => {
         try {
-            const { success, childId, error: childError } = await getActiveChildId();
+            const { success, childId, childName, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
                     typeof childError === 'string'
@@ -53,6 +54,8 @@ const FeedingLogsView: React.FC = () => {
                         : childError?.message || 'Failed to get active child ID'
                 );
             }
+            if (childName) setActiveChildName(childName);
+
             // Query diaper logs from Supabase and sort by most recent change time
             const { data, error } = await supabase
                 .from('feeding_logs')
@@ -179,6 +182,8 @@ const FeedingLogsView: React.FC = () => {
                 <ActivityIndicator size="large" color="#e11d48" />
             ) : error ? (
                 <Text className="text-red-600 text-center">Error: {error}</Text>
+            ) : feedingLogs.length === 0 ? (
+                <Text>You don&apos;t have any feeding logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
             ) : (
                 <FlatList
                     data={feedingLogs}

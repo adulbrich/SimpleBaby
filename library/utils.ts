@@ -37,5 +37,5 @@ export const getActiveChildId = async () => {
         return { success: false, error };
     }
 
-    return { success: true, childId: data.id };
+    return { success: true, childId: data.id, childName: activeChildName };
 };
