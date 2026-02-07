@@ -39,6 +39,7 @@ const MilestoneLogsView: React.FC = () => {
     const [milestoneLogs, setMilestoneLogs] = useState<MilestoneLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
     
     const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -75,7 +76,8 @@ const MilestoneLogsView: React.FC = () => {
             if (!result?.success || !result.childId) {
                 throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
             }
-            
+
+            if (result.childName) setActiveChildName(result.childName);
             const childId = String(result.childId);
             
             const { data, error } = await supabase
@@ -253,6 +255,8 @@ const MilestoneLogsView: React.FC = () => {
             <ActivityIndicator size="large" color="#e11d48" />
         ) : error ? (
             <Text className="text-red-600">{error}</Text>
+        ) : milestoneLogs.length === 0 ? (
+            <Text>You don&apos;t have any milestone logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
         ) : (
             <FlatList
             data={milestoneLogs}

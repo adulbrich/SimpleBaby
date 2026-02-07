@@ -44,6 +44,7 @@ const HealthLogsView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [editingLog, setEditingLog] = useState<HealthLog | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
   const safeDecrypt = async (value: string | null): Promise<string> => {
     if (!value || !value.includes('U2FsdGVkX1')) return '';
@@ -56,10 +57,12 @@ const HealthLogsView: React.FC = () => {
 
   const fetchHealthLogs = useCallback(async () => {
     try {
-      const { success, childId, error: childError } = await getActiveChildId();
+      const { success, childId, childName, error: childError } = await getActiveChildId();
       if (!success || !childId) {
         throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
       }
+
+      if (childName) setActiveChildName(childName);
 
       const { data, error } = await supabase
         .from('health_logs')
@@ -201,12 +204,16 @@ const HealthLogsView: React.FC = () => {
   return (
     <View className="flex-1 bg-gray-50 p-4">
       <Text className="text-2xl font-bold mb-4">🩺 Health Logs</Text>
-      <FlatList
-        data={logs}
-        renderItem={renderLog}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 16 }}
-      />
+      {logs.length === 0 ? (
+        <Text>You don&apos;t have any health logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
+      ) :
+        <FlatList
+          data={logs}
+          renderItem={renderLog}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 16 }}
+        />
+      }
 
       <Modal
         visible={editModalVisible}
