@@ -73,6 +73,7 @@ export default function SignInScreen() {
                             onChangeText={setEmail}
                             autoCapitalize='none'
                             keyboardType='email-address'
+                            testID='sign-in-email'
                         />
                     </View>
                     <View className=''>
@@ -83,12 +84,14 @@ export default function SignInScreen() {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={passwordHidden}
+                            testID='sign-in-password'
                         />
                     </View>
                     <View className='flex-row mt-2 justify-between mb-5'>
                         <TouchableOpacity
                             onPress={() => setPasswordHidden(!passwordHidden)}
                             className=''
+                            testID='sign-in-show-password'
                         >
                             <Text className='dark:text-white'>
                                 {passwordHidden
@@ -103,6 +106,7 @@ export default function SignInScreen() {
                                     'This feature is not yet implemented.',
                                 )
                             }
+                            testID='sign-in-forgot-password'
                         >
                             <Text className='dark:text-white'>
                                 Forgot your password?
@@ -116,18 +120,21 @@ export default function SignInScreen() {
                         action={handleSignIn}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID='sign-in-button'
                     />
                     <Button
                         text='Sign Up Instead'
                         action={handleSignUp}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID='sign-in-sign-up-button'
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        testID='sign-in-guest-button'
                     />
                 </View>
             </SafeAreaView>
