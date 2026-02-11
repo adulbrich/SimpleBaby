@@ -132,7 +132,7 @@ describe("Track feeding screen", () => {
         expect(screen.getByTestId("feeding-reset-form-button")).toBeTruthy();
     });
     
-    test("Refreshes on reset 2", async () => {
+    test("Refreshes on reset", async () => {
         const testCategory = "Soft";
         const testName = "test name";
         const testAmount = "test amount";

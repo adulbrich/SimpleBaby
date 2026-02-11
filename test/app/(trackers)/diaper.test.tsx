@@ -131,7 +131,6 @@ describe("Track diaper screen", () => {
     
     test("Catch unfilled inputs", async () => {
         render(<Diaper/>);
-        //setDiaperInputs({ consistency: "wet", amount: "SM"});  // fill in minimum required inputs
 
         await userEvent.press(
             screen.getByTestId("diaper-save-log-button")
