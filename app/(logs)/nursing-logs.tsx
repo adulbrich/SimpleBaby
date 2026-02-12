@@ -167,7 +167,7 @@ const NursingLogsView: React.FC = () => {
             {loading ? (
                 <ActivityIndicator size="large" color="#e11d48" />
             ) : error ? (
-                <Text className="text-red-600">{error}</Text>
+                <Text className="text-red-600 text-center">Error: {error}</Text>
             ) : nursingLogs.length === 0 ? (
                 <Text>You don&apos;t have any nursing logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
             ) : (
