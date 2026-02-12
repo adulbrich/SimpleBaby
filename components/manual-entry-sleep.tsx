@@ -71,6 +71,7 @@ export default function ManualEntry({
                             setEndDate(selectedDate);
                         }
                     }
+                    setShowIOSPicker(false);
                 },
                 mode: 'time',
                 is24Hour: false,
