@@ -2,29 +2,39 @@ import {
     Modal,
     View,
     Text,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
+    FlatList,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
 
 
-export default function AddChildPopup(
+export default function SwitchChildPopup(
     {
         visible,
-        childName,
-        onChildNameUpdate,
-        handleSave,
+        childNames,
+        currentChild,
+        handleSwitch,
         handleCancel
     } : {
         visible?: boolean;
-        childName: string;
-        onChildNameUpdate: (text: string) => void;
-        handleSave: () => void;
+        childNames: string[];
+        currentChild: string;
+        handleSwitch: (name: string) => void;
         handleCancel: () => void;
     }
 ) {
+    const renderChildSelectButton = ({ item }: { item: string }) => (
+        currentChild === item ? <></> :
+        <Button
+            text={item}
+            action={() => handleSwitch(item)}
+            textClass='font-bold text-black'
+            buttonClass='bg-[#fff6c9] dark:bg-[#466755] border-[#c4b798] dark:border-[#152619]'
+        />
+    );
+
     return (
         <Modal visible={visible} transparent>
             <TouchableWithoutFeedback
@@ -38,32 +48,20 @@ export default function AddChildPopup(
                     <View className='p-8 h-[50%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
-                                Add a Child
+                                Change active child
                             </Text>
                             <Text className='subtitle'>
-                                Please enter the name of the child you would like to add:
+                                Currently tracking progress for {currentChild}.
+                                Select another child to switch to:
                             </Text>
                         </View>
                         <View className='grow justify-between'>
                             <View>
-                                <Text className='text font-bold mb-1'>
-                                    Child Name
-                                </Text>
-                                <TextInput
-                                    className='text-input'
-                                    placeholder='Enter a name'
-                                    value={childName}
-                                    onChangeText={onChildNameUpdate}
-                                    autoCapitalize='none'
-                                    keyboardType='default'
-                                />
-                            </View>
-                            <View>
-                                <Button
-                                    text='Save New Child'
-                                    action={handleSave}
-                                    textClass='font-bold'
-                                    buttonClass='button-normal'
+                                <FlatList
+                                    data={childNames}
+                                    renderItem={renderChildSelectButton}
+                                    keyExtractor={(item) => item}
+                                    contentContainerStyle={{ paddingBottom: 16 }}
                                 />
                             </View>
                             <View>

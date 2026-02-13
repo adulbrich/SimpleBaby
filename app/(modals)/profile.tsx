@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     ScrollView,
@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
 import AddChildPopup from '@/components/add-child-popup';
+import SwitchChildPopup from '@/components/switch-child-popup';
 import { getChildNames, saveNewChild } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 
@@ -31,8 +32,12 @@ export default function Profile() {
 
     const { session } = useAuth();
 
-    const [ showAddChild, setShowAddChild] = useState(false);
-    const [ newChildName, setNewChildName] = useState("");
+    const [showAddChild, setShowAddChild] = useState(false);
+    const [showSwitchChild, setShowSwitchChild] = useState(false);
+    const [newChildName, setNewChildName] = useState("");
+    const [childNames, setChildNames] = useState<string[]>([]);
+    const [loadingNames, setLoadingNames] = useState(true);
+    const [namesError, setNamesError] = useState<string | null>(null);
     
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
@@ -56,34 +61,53 @@ export default function Profile() {
             saveNewChild(newChildName);  // try to save new child
             setShowAddChild(false);  // Close modal if successful
             setNewChildName("");  // reset child name
+            fetchChildNames();  // reload child names for switching
         } catch (error: any) {
             Alert.alert(
                 'Error',
                 error.message || 'An error occurred while saving child data.',
             );
+        } finally {
+            setShowSwitchChild(false);
         }
     };
 
-    const handleSwitchChild = async () => {
+    const handleSwitchChild = async (name: string) => {
         try {
-            const names = await getChildNames();  // get list of names associated with current user account
-            if (names.length === 0) {
-                throw new Error("No children found");
+            if (childNames.indexOf(name) === -1) {
+                throw new Error("Unable to find selected child");
             }
-            // get index of current name
-            const currentNamei = names.indexOf(session?.user.user_metadata?.activeChild);
-            const nextName =
-                currentNamei >= 0 && currentNamei + 1 < names.length ?
-                names[currentNamei + 1] :  // get next name in the list, if current name has valid index
-                names[0];  // otherwise revert to first name in the list
-
             // Update user session metadata with the active child
             await supabase.auth.updateUser({
-                data: { activeChild: nextName },
+                data: { activeChild: name },
             });
-        } catch {
-            Alert.alert("Unable to switch children");
+        } catch (err) {
+            Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
+
+            // reload names
+            setLoadingNames(true);
+            fetchChildNames();
+        } finally {
+            setShowSwitchChild(false);
         }
+    };
+
+    useEffect(() => {
+        fetchChildNames();
+    }, []);
+
+    const fetchChildNames = async () => {
+        try {
+            const { success, names } = await getChildNames();
+
+            if (!success) throw new Error("Unable to retrieve child names");
+
+            if (names) setChildNames(names);
+        } catch (err) {
+            setNamesError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } finally {
+            setLoadingNames(false);
+        };
     };
 
     return (
@@ -95,19 +119,44 @@ export default function Profile() {
                             Active Child
                         </Text>
                         <TouchableOpacity
-                            onPress={handleSwitchChild}
+                            onPress={() => undefined}
                         >
                             <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
                                 👶 {session?.user.user_metadata?.activeChild}
                             </Text>
                         </TouchableOpacity>
                     </View>
+                    { loadingNames ?
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
+                                Loading Child Profiles...
+                            </Text>
+                        </View>
+                        : namesError ?
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
+                                Error loading child names
+                            </Text>
+                        </View>
+                        : childNames.length < 2 ?
+                        undefined  // show nothing if the user has no other child accounts
+                        :
+                        <TouchableOpacity
+                            onPress={() => setShowSwitchChild(true)}
+                        >
+                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                                <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                                    🔃 Switch Child
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    }
                     <TouchableOpacity
                         onPress={() => setShowAddChild(true)}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
                             <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
-                                Add Child
+                                ✚ Add Child
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -213,7 +262,15 @@ export default function Profile() {
                     setShowAddChild(false);
                     setNewChildName("");  // reset name
                 }}
-                header={"Add New Child"}
+            />
+            <SwitchChildPopup
+                visible={showSwitchChild}
+                childNames={childNames}
+                currentChild={session?.user.user_metadata?.activeChild}
+                handleSwitch={handleSwitchChild}
+                handleCancel={() => {
+                    setShowSwitchChild(false);
+                }}
             />
         </SafeAreaView>
     );

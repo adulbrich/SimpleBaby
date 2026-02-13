@@ -69,7 +69,7 @@ export const saveNewChild = async (childName: string) => {
 };
 
 
-export async function getChildNames(): Promise<string[]> {
+export async function getChildNames(): Promise<{success: boolean; names: string[]}> {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -86,5 +86,5 @@ export async function getChildNames(): Promise<string[]> {
         throw new Error("Failed to retrieve children");
     }
 
-    return data.map(({name}) => name);  // extract name, since each row is returned as {columnName: value, ...}
+    return {success:true, names: data.map(({name}) => name)};  // extract name, since each row is returned as {columnName: value, ...}
 };
