@@ -188,10 +188,7 @@ const HealthLogsView: React.FC = () => {
         <View className="flex-1 bg-gray-50 p-4">
             <Text className="text-2xl font-bold mb-4">🩺 Health Logs</Text>
             {loading ?
-                <>
-                    <ActivityIndicator size="large" color="#e11d48" />
-                    <Text className="mt-2 text-gray-500">Loading health logs...</Text>
-                </>
+                <ActivityIndicator size="large" color="#e11d48" />
             : error ?
                 <Text className="text-red-600 text-center">Error: {error}</Text>
             : logs.length === 0 ? (
