@@ -11,7 +11,7 @@ export default function ModalsLayout() {
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
-                            router.dismissTo('/(tabs)/trends');
+                            router.back();
                         }}
                         className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
                     >
