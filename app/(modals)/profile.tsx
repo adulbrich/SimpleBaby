@@ -72,14 +72,14 @@ export default function Profile() {
         }
     };
 
-    const handleSwitchChild = async (name: string) => {
+    const handleSwitchChild = async (index: number) => {
         try {
-            if (childNames.indexOf(name) === -1) {
+            if (index < 0 || index >= childNames.length) {  // if index is invalid
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
             await supabase.auth.updateUser({
-                data: { activeChild: name },
+                data: { activeChild: childNames[index] },
             });
         } catch (err) {
             Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
@@ -114,43 +114,39 @@ export default function Profile() {
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
             <ScrollView>
                 <View className='flex-col gap-4'>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Active Child
                         </Text>
-                        <TouchableOpacity
-                            onPress={() => undefined}
-                        >
-                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                                👶 {session?.user.user_metadata?.activeChild}
-                            </Text>
-                        </TouchableOpacity>
+                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                            👶 {session?.user.user_metadata?.activeChild}
+                        </Text>
                     </View>
-                    { loadingNames ?
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                    { loadingNames ? (
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
                                 Loading Child Profiles...
                             </Text>
                         </View>
-                        : namesError ?
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                    ) : namesError ? (
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
                                 Error loading child names
                             </Text>
                         </View>
-                        : childNames.length < 2 ?
+                    ) : childNames.length < 2 ? (
                         undefined  // show nothing if the user has no other child accounts
-                        :
+                    ) : (
                         <TouchableOpacity
                             onPress={() => setShowSwitchChild(true)}
                         >
-                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                                 <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                                     🔃 Switch Child
                                 </Text>
                             </View>
                         </TouchableOpacity>
-                    }
+                    )}
                     <TouchableOpacity
                         onPress={() => setShowAddChild(true)}
                     >

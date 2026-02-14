@@ -4,10 +4,11 @@ import {
     Text,
     TouchableWithoutFeedback,
     Keyboard,
-    FlatList,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
+import ListSelect from './list-select';
+import { useEffect, useState } from 'react';
 
 
 export default function SwitchChildPopup(
@@ -21,22 +22,17 @@ export default function SwitchChildPopup(
         visible?: boolean;
         childNames: string[];
         currentChild: string;
-        handleSwitch: (name: string) => void;
+        handleSwitch: (index: number) => void;
         handleCancel: () => void;
     }
 ) {
-    const renderChildSelectButton = ({ item }: { item: string }) => (
-        currentChild === item ? <></> :
-        <Button
-            text={item}
-            action={() => handleSwitch(item)}
-            textClass='font-bold text-black'
-            buttonClass='bg-[#fff6c9] dark:bg-[#466755] border-[#c4b798] dark:border-[#152619]'
-        />
-    );
+    const [selected, setSelected] = useState<number>(-1);
+
+    // call useEffect to get correct index after childNames parameter loads
+    useEffect(() => setSelected(childNames.indexOf(currentChild)), [childNames, currentChild]);
 
     return (
-        <Modal visible={visible} transparent>
+        <Modal visible={visible} transparent onRequestClose={handleCancel}>
             <TouchableWithoutFeedback
                 onPress={Keyboard.dismiss}
                 accessible={false}
@@ -45,25 +41,29 @@ export default function SwitchChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 h-[50%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='p-8 h-[60%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
                                 Change active child
                             </Text>
                             <Text className='subtitle'>
-                                Currently tracking progress for {currentChild}.
-                                Select another child to switch to:
+                                Select a child to switch to:
                             </Text>
                         </View>
-                        <View className='grow justify-between'>
-                            <View>
-                                <FlatList
-                                    data={childNames}
-                                    renderItem={renderChildSelectButton}
-                                    keyExtractor={(item) => item}
-                                    contentContainerStyle={{ paddingBottom: 16 }}
+                        <View className='justify-between'>
+                            <View className='h-[50%]'>
+                                <ListSelect
+                                    items={childNames}
+                                    selected={selected}
+                                    onSelect={setSelected}
                                 />
                             </View>
+                                <Button
+                                    text='Select'
+                                    action={() => handleSwitch(selected)}
+                                    textClass='font-bold'
+                                    buttonClass='button-normal mb-2'
+                                />
                             <View>
                                 <Button
                                     text='Cancel'
