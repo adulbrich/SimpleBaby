@@ -8,7 +8,7 @@ export default function SettingScreen() {
         <View className="bg-gray-100">
           <TouchableOpacity className="p-4 gap-4 mb-1 bg-white"
             onPress={() => {
-              router.push('/(modals)/tos')}}>
+              router.push('/(modals)/tos');}}>
             <Text className="text-lg font-bold text-left">
               Terms of Service
             </Text>

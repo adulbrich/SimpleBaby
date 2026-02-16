@@ -4,7 +4,6 @@ import {
     ScrollView,
     View
 } from 'react-native';
-import { useAuth } from '@/library/auth-provider';
 
 /**
  * Profile Screen
@@ -13,11 +12,7 @@ import { useAuth } from '@/library/auth-provider';
  * Some options like changing email or password and managing caretakers are shown as placeholders with alerts.
  */
 
-const alertSound = require('../../assets/sounds/ui-pop.mp3');
-
 export default function Profile() {
-
-    const { session } = useAuth();
     
     return (
         <ScrollView>
