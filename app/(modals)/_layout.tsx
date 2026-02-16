@@ -19,6 +19,13 @@ export default function ModalsLayout() {
                         headerTitle: 'Profile',
                     }}
                 />
+                <Stack.Screen
+                    name='tos'
+                    options={{
+                        headerTitle: 'Terms of Service',
+                    }}
+                />
+
             </Stack>
         </>
     );

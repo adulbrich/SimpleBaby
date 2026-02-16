@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 
 export default function SettingScreen() {
@@ -5,11 +6,13 @@ export default function SettingScreen() {
     <View className="main-container items-left justify-center">
       <ScrollView>
         <View className="bg-gray-100">
-          <View className="p-4 gap-4 mb-1 bg-white">
+          <TouchableOpacity className="p-4 gap-4 mb-1 bg-white"
+            onPress={() => {
+              router.push('/(modals)/tos')}}>
             <Text className="text-lg font-bold text-left">
-              Settings Name 1
+              Terms of Service
             </Text>
-          </View>
+          </TouchableOpacity>
           <View className="p-4 gap-4 mb-1 bg-white">
             <Text className="text-lg font-bold text-left">
               Settings Name 2
