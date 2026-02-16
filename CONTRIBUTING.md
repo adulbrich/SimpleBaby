@@ -14,7 +14,7 @@ Then, assuming you have Node.js and npm installed, run the following command in 
 
 ```npm install```
 
-Using npx, you can then start the application with the Expo command line interface:
+Using npx, you can then start the development server for the application with the Expo CLI, allowing you to then begin running an emulator of your choice:
 
 ```npx expo start```
 
@@ -48,20 +48,22 @@ Copy the environment variables that you are given from the Supabase dashboard, c
 After your organization and project have been set up, you will want to use the Supabase command line interface to continue to get set up. This is necessary in order to apply the migration files to your project database, and to make future changes to the app's database setup (e.g., adding new log types, adding categories for a log type, etc). You can easily use the Supabase CLI with npx, but if you'd prefer to directly install the CLI, check out the instructions below from the Supabase documentation. This guide will assume you are using npx to work with the Supabase CLI.
 - [Supabase - Local Dev / CLI](https://supabase.com/docs/guides/local-development/cli/getting-started?queryGroups=platform&platform=npm)
 
-You will then need to install Docker Desktop, which is a prerequisite to manage the local development stack. Generally, you will only need Docker Desktop running when doing first time setup and linking of the database or when you are attempting to make updates to the database (e.g., updating table schemas). You can find the download link for Docker Desktop here:
+You will then need to install Docker Desktop, which is a prerequisite to manage the local development stack. Generally, you will only need Docker Desktop running when doing first time setup and linking of the database (assuming you are not manually copy-pasting migration files into Supabase's SQL editor) or when you are attempting to make updates to the database (e.g., updating table schemas). You can find the download link for Docker Desktop here:
 - [Docker Desktop](https://docs.docker.com/desktop)
 
 Run the following command to connect your Supabase CLI to your Supabase account. Follow the on-screen prompts to continue logging in and linking your local/remote setups.
 
 ```npx supabase login```
 
-After this, in order to get the remote Supabase database set up, you will want to link your CLI with your project. In Supabase, go to your Project Settings and copy your Project ID. Then, run the command below, replacing the bracketed code with your Project ID.
+After this, in order to get the remote Supabase database set up, you will want to link your CLI with your project. In Supabase, go to your Project Settings, which can be accessed via the left sidebar, and copy your Project ID. Then, run the command below, replacing the bracketed code with your Project ID.
 
 ```npx supabase link --project-ref <your-project-id>```
 
 Then, run the following command to push this project's database migrations to your remote Supabase project:
 
 ```npx supabase db push```
+
+Lastly, you will want to add a bucket to your database in order to store files in the app (e.g., for milestone logs). In the Supabase dashboard, go to the left sidebar menu and click on Storage. From there, press Files and select the Buckets tab. Press the "New bucket" button, and create a bucket titled `milestone-logs`. Leave the three options (public bucket, restrict file size, and restrict MIME) all unchecked. Then, create the bucket.
 
 Now, you are officially all set to run the application, work with your database, and develop changes for the project! If you run into any trouble with setting up your database, refer to to the official Supabase documentation for assistance:
 - [Supabase Docs](https://supabase.com/docs)
