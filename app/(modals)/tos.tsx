@@ -2,15 +2,9 @@ import React from 'react';
 import {
     Text,
     ScrollView,
-    View,
-    TouchableOpacity,
-    Alert
+    View
 } from 'react-native';
-import { router } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
-import { signOut } from '@/library/auth';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '@/components/button';
 
 /**
  * Profile Screen
