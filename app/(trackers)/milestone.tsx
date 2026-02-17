@@ -16,8 +16,8 @@ import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import DateTimePicker, {
-  DateTimePickerAndroid,
-  DateTimePickerEvent,
+    DateTimePickerAndroid,
+    DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
@@ -269,6 +269,7 @@ export default function Milestone() {
         setName("");
         setMilestoneDate(new Date());
         setPhotoUri(null);
+        setPhotoName(null);
         setNote("");
     };
 
@@ -316,8 +317,9 @@ export default function Milestone() {
                         <Text className="feeding-module-label">Date</Text>
                         <View className="flex-row items-center bg-red-100 rounded-full gap-2">
                             <TouchableOpacity
-                            className="rounded-full bg-red-50 p-4"
-                            onPress={showDatePickerModal}
+                                className="rounded-full bg-red-50 p-4"
+                                onPress={showDatePickerModal}
+                                testID='milestone-date-button'
                             >
                             <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
                             </TouchableOpacity>
@@ -328,11 +330,11 @@ export default function Milestone() {
                         {showDatePicker && Platform.OS === "ios" && (
                         <View className="items-center">
                             <DateTimePicker
-                            testID="dateTimePicker"
-                            value={milestoneDate}
-                            mode="date"
-                            onChange={onChangeDate}
-                            display="spinner"
+                                testID="dateTimePicker"
+                                value={milestoneDate}
+                                mode="date"
+                                onChange={onChangeDate}
+                                display="spinner"
                             />
                         </View>
                         )}
@@ -343,7 +345,8 @@ export default function Milestone() {
                             className="rounded-full p-4 bg-red-100 items-center"
                             onPress={pickPhoto}
                             disabled={uploadingPhoto}
-                            >
+                            testID='milestone-photo-button'
+                        >
                             <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
                         </TouchableOpacity>
                         </View>
@@ -381,12 +384,14 @@ export default function Milestone() {
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 grow'
                             onPress={handleSaveMilestoneLog}
+                            testID='milestone-save-log-button'
                         >
                         <Text>➕ Add to log</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 items-center'
                             onPress={handleResetFields}
+                            testID='milestone-reset-form-button'
                         >
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>

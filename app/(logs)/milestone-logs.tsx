@@ -51,6 +51,7 @@ const MilestoneLogsView: React.FC = () => {
     const [milestoneLogs, setMilestoneLogs] = useState<MilestoneLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [photoSignedUrls, setPhotoSignedUrls] = useState<Record<string, string>>({});
@@ -93,7 +94,8 @@ const MilestoneLogsView: React.FC = () => {
                     if (!result?.success || !result.childId) {
                         throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
                     }
-                childId = String(result.childId);
+                    setActiveChildName(result.childName);
+                    childId = String(result.childId);
             }
 
             let data: any[] = [];
@@ -152,11 +154,11 @@ const MilestoneLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [isGuest, getSignedPhotoUrl]);
+    }, [getSignedPhotoUrl, isGuest]);
 
     useEffect(() => {
-        fetchMilestoneLogs();         
-    }, [fetchMilestoneLogs]);
+        fetchMilestoneLogs();
+    }, [fetchMilestoneLogs]);    
     
     const openEditModal = (log: MilestoneLog) => {
         setEditingLog(log);
@@ -304,7 +306,9 @@ const MilestoneLogsView: React.FC = () => {
         {loading ? (
             <ActivityIndicator size="large" color="#e11d48" />
         ) : error ? (
-            <Text className="text-red-600">{error}</Text>
+            <Text className="text-red-600 text-center">Error: {error}</Text>
+        ) : milestoneLogs.length === 0 ? (
+            <Text>You don&apos;t have any milestone logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
         ) : (
             <FlatList
             data={milestoneLogs}

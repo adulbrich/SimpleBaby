@@ -42,6 +42,7 @@ const DiaperLogsView: React.FC = () => {
     const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<DiaperLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const { isGuest } = useAuth();
@@ -83,10 +84,12 @@ const DiaperLogsView: React.FC = () => {
                 return;
             }
 
-            const { success, childId, error: childError } = await getActiveChildId();
+            const { success, childId, childName, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get active child ID');
             }
+
+            if (childName) setActiveChildName(childName);
 
             const { data, error } = await supabase
                 .from('diaper_logs')
@@ -222,6 +225,8 @@ const DiaperLogsView: React.FC = () => {
                 <ActivityIndicator size="large" color="#e11d48" />
             ) : error ? (
                 <Text className="text-red-600 text-center">Error: {error}</Text>
+            ) : diaperLogs.length === 0 ? (
+                <Text>You don&apos;t have any diaper logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
             ) : (
                 <FlatList
                     data={diaperLogs}

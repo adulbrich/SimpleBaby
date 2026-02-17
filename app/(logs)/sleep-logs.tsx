@@ -48,6 +48,7 @@ const SleepLogsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [editingLog, setEditingLog] = useState<SleepLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
     const { isGuest } = useAuth();
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
@@ -89,7 +90,7 @@ const SleepLogsView: React.FC = () => {
                 return;
             }
 
-            const { success, childId, error: childError } = await getActiveChildId();
+            const { success, childId, childName, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(
                     typeof childError === 'string'
@@ -97,6 +98,8 @@ const SleepLogsView: React.FC = () => {
                         : childError?.message || 'Failed to get active child ID'
                 );
             }
+
+            if (childName) setActiveChildName(childName);
 
             const { data, error } = await supabase
                 .from('sleep_logs')
@@ -248,6 +251,8 @@ const SleepLogsView: React.FC = () => {
                 <ActivityIndicator size="large" color="#e11d48" />
             ) : error ? (
                 <Text className="text-red-600 text-center">Error: {error}</Text>
+            ) : sleepLogs.length === 0 ? (
+                <Text>You don&apos;t have any sleep logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
             ) : (
                 <FlatList
                     data={sleepLogs}

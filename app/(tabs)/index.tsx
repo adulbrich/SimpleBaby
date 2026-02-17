@@ -149,7 +149,7 @@ export default function MainTab() {
                             intensity={10}
                             className='grow items-center justify-center'
                         >
-                            <View className='p-8 h-[50%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                            <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                                 <View className='mb-5'>
                                     <Text className='subheading font-bold mb-6'>
                                         Welcome to SimpleBaby
@@ -164,7 +164,7 @@ export default function MainTab() {
                                             Child Name
                                         </Text>
                                         <TextInput
-                                            className='text-input'
+                                            className='text-input mb-4'
                                             placeholder='Enter a name to start tracking'
                                             value={childName}
                                             onChangeText={setChildName}

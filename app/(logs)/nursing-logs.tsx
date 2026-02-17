@@ -54,6 +54,7 @@ const NursingLogsView: React.FC = () => {
     const [editingLog, setEditingLog] = useState<NursingLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const { isGuest } = useAuth();
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
         if (!value || !value.includes('U2FsdGVkX1')) return value || '';
@@ -96,10 +97,12 @@ const NursingLogsView: React.FC = () => {
                 return;
             }
 
-            const { success, childId, error: childError } = await getActiveChildId();
+            const { success, childId, childName, error: childError } = await getActiveChildId();
             if (!success || !childId) {
                 throw new Error(typeof childError === 'string' ? childError : childError?.message || 'Failed to get child ID');
             }
+
+            if (childName) setActiveChildName(childName);
 
             const { data, error } = await supabase
                 .from('nursing_logs')
@@ -232,7 +235,13 @@ const NursingLogsView: React.FC = () => {
     return (
         <View className="flex-1 bg-gray-50 p-4">
             <Text className="text-2xl font-bold mb-4">🍼 Nursing Logs</Text>
-            {loading ? <ActivityIndicator size="large" color="#e11d48" /> : error ? <Text className="text-red-600">{error}</Text> : (
+            {loading ? (
+                <ActivityIndicator size="large" color="#e11d48" />
+            ) : error ? (
+                <Text className="text-red-600 text-center">Error: {error}</Text>
+            ) : nursingLogs.length === 0 ? (
+                <Text>You don&apos;t have any nursing logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
+            ) : (
                 <FlatList
                     data={nursingLogs}
                     renderItem={renderNursingLogItem}

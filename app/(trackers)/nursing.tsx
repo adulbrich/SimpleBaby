@@ -114,12 +114,15 @@ export default function Nursing() {
             return { success: false, error };
         }
 
+        const normalizedLeftAmount = leftAmount.trim() === '' ? '0' : leftAmount.trim();
+        const normalizedRightAmount = rightAmount.trim() === '' ? '0' : rightAmount.trim();
+
         return await createNursingLog(
             childId,
             leftDuration,
             rightDuration,
-            leftAmount.trim(),
-            rightAmount.trim(),
+            normalizedLeftAmount,
+            normalizedRightAmount,
             note,
         );
     };
