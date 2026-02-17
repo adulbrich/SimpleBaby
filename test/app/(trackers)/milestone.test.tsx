@@ -65,7 +65,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => {
-    const getActiveChildId = jest.fn(async () => ({ success: true }));
+    const getActiveChildId = jest.fn(async () => ({ success: true, childId: "test-child-id" }))
     return {
         getActiveChildId: getActiveChildId
     };
@@ -76,6 +76,10 @@ jest.mock("react-native", () => {
     module.Alert.alert = jest.fn();
     return module;
 });
+
+jest.mock("@/library/auth-provider", () => ({
+    useAuth: () => ({ isGuest: false }),
+}));
 
 // mock fetch()
 (global.fetch as any) = jest.fn(async () => ({

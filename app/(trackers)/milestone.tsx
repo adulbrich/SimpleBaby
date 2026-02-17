@@ -40,28 +40,28 @@ export default function Milestone() {
 
     const showDatePickerModal = () => {
         if (showDatePicker === true) {
-          setShowDatePicker(false);
-          return;
+            setShowDatePicker(false);
+            return;
         }
     
         if (Platform.OS === "android") {
-          DateTimePickerAndroid.open({
-            value: milestoneDate,
-            onChange: (event, selectedDate) => {
-              if (selectedDate) {
-                setMilestoneDate(selectedDate);
-              }
+            DateTimePickerAndroid.open({
+                value: milestoneDate,
+                onChange: (event, selectedDate) => {
+                if (selectedDate) {
+                    setMilestoneDate(selectedDate);
+                }
             },
             mode: "date",
           });
         } else {
-          setShowDatePicker(true);
+            setShowDatePicker(true);
         }
       };
 
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === "set" && selectedDate) {
-        setMilestoneDate(selectedDate);
+            setMilestoneDate(selectedDate);
         }
         setShowDatePicker(false);
     };
