@@ -65,7 +65,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => {
-    const getActiveChildId = jest.fn(async () => ({ success: true, childId: "test-child-id" }))
+    const getActiveChildId = jest.fn(async () => ({ success: true, childId: "test-child-id" }));
     return {
         getActiveChildId: getActiveChildId
     };
