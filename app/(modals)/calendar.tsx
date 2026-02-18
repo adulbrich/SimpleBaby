@@ -2,7 +2,7 @@ import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { Calendar } from "react-native-calendars";
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
-import { fetchLogsForDay, CalendarLog } from "@/library/calendar";
+import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
 import { getActiveChildId } from '@/library/utils';
 
 function toYMD(d: Date) {
@@ -11,16 +11,27 @@ function toYMD(d: Date) {
 
 export default function CalendarModal() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [visibleMonth, setVisibleMonth] = useState<Date>(new Date());
+    const [daysWithLogs, setDaysWithLogs] = useState<Set<string>>(new Set());
     const [logs, setLogs] = useState<CalendarLog[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const markedDates = useMemo(() => {
-        const ymd = toYMD(selectedDate);
-        return {
-            [ymd]: { selected: true }
+        const marks: Record<string, any> = {};
+
+        for (const ymd of daysWithLogs) {
+            marks[ymd] = { marked: true };
+        }
+
+        const selectedYMD = toYMD(selectedDate);
+        marks[selectedYMD] = {
+            ...(marks[selectedYMD] ?? {}),
+            selected: true,
         };
-    }, [selectedDate]);
+
+        return marks;
+    }, [daysWithLogs, selectedDate]);
 
     const loadDay = useCallback(async (date: Date) => {
         setLoading(true);
@@ -46,6 +57,21 @@ export default function CalendarModal() {
     useEffect(() => {
         loadDay(selectedDate);
     }, [loadDay, selectedDate]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+            const result = await getActiveChildId();
+            if (!result?.success || !result.childId) return;
+
+            const childId = String(result.childId);
+            const days = await fetchDaysWithLogsForMonth(childId, visibleMonth);
+            setDaysWithLogs(days);
+            } catch {
+            setDaysWithLogs(new Set());
+            }
+        })();
+    }, [visibleMonth]);
     
     return (
         <>
@@ -55,7 +81,9 @@ export default function CalendarModal() {
                     onDayPress={(day) => {
                         const d = new Date(day.dateString + "T00:00:00");
                         setSelectedDate(d);
-                        loadDay(d);
+                    }}
+                    onMonthChange={(m) => {
+                        setVisibleMonth(new Date(m.dateString + "T00:00:00"));
                     }}
                 />
 
