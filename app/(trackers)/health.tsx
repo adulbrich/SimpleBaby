@@ -63,8 +63,11 @@ export default function Health() {
 	const [reset, setReset] = useState(0);
 	const { isGuest } = useAuth();
 
-	// Create a new health log entry into the database using Supabase client
-	const createHealthLog = async (log: any) => {
+	/**
+	 * Saves and inserts the health log for database entry.
+	 * Returns success/error object for handling in the UI.
+	 */
+	const saveHealthLog = async (log: any) => {
 		if (isGuest) {
 			try {
 				const row = await insertRow("health_logs", log);
@@ -84,8 +87,11 @@ export default function Health() {
 		return { success: true, data };
 	};
 
-	// Validate input fields and save the health log entry
-	const handleSaveHealthLog = async () => {
+	/**
+	 * Validates form inputs for the health log.
+	 * Upon validation, calls saveHealthLog() to save to the database.
+	 */
+	const createHealthLog = async () => {
 		if (!healthLog.category) {
 			Alert.alert("Error", "Please provide a category");
 			return;
@@ -220,7 +226,7 @@ export default function Health() {
 				note: healthLog.note ? await encryptData(healthLog.note) : null,
 			};
 
-			const result = await createHealthLog(encryptedLog);
+			const result = await saveHealthLog(encryptedLog);
 
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -436,7 +442,7 @@ export default function Health() {
 						<View className="flex-row gap-2 pb-5 pt-5">
 							<TouchableOpacity
 								className="rounded-full p-4 bg-red-100 grow"
-								onPress={handleSaveHealthLog}
+								onPress={createHealthLog}
 								testID="health-save-log-button"
 							>
 								<Text>➕ Add to log</Text>
