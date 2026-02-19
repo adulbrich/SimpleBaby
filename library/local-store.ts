@@ -86,25 +86,38 @@ export async function listChildren(): Promise<Child[]> {
 // createChild()
 // creates a child object and adds it to the local db
 export async function createChild(name: string): Promise<Child> {
-	const children = await listChildren();
-	const child: Child = {
-		id: uuidv4(),
-		name,
-		created_at: new Date().toISOString(),
-	};
-	children.push(child);
-	await setJson(KEYS.children, children);
-	const active = await getActiveChildId(); // if this is the first child, set it active automatically
-	if (!active) {
-		await setActiveChildId(child.id);
+	if (!name.trim()) {
+		throw new Error("Child name is required.");
 	}
-	return child;
+	try {
+		const children = await listChildren();
+		const child: Child = {
+			id: uuidv4(),
+			name,
+			created_at: new Date().toISOString(),
+		};
+		children.push(child);
+		await setJson(KEYS.children, children);
+		const active = await getActiveChildId(); // if this is the first child, set it active automatically
+		if (!active) {
+			await setActiveChildId(child.id);
+		}
+		return child;
+	} catch (error) {
+		console.error("Failed to create child in local storage:", error);
+		throw new Error("Unable to save child data locally.");
+	}
 }
 
 // getActiveChildId()
 // retrieves the childId of the active child
 export async function getActiveChildId(): Promise<string | null> {
-	return await AsyncStorage.getItem(KEYS.activeChildId);
+	try {
+		return await AsyncStorage.getItem(KEYS.activeChildId);
+	} catch (error) {
+		console.error("Failed to read active child ID from local storage:", error);
+		return null;
+	}
 }
 
 // setActiveChildId
@@ -169,12 +182,20 @@ export async function deleteRow(
 	tableName: string,
 	id: string,
 ): Promise<boolean> {
-	const tableKey = KEYS.table(tableName);
-	const rows = await getJson<any[]>(tableKey, []);
-	const next = rows.filter((r) => r.id !== id);
-	if (next.length === rows.length) {
-        return false;
-    }
-	await setJson(tableKey, next);
-	return true;
+	try {
+		const tableKey = KEYS.table(tableName);
+		const rows = await getJson<any[]>(tableKey, []);
+		const next = rows.filter((r) => r.id !== id);
+		if (next.length === rows.length) {
+			return false;
+		}
+		await setJson(tableKey, next);
+		return true;
+	} catch (error) {
+		console.error(
+			`Failed to delete row "${id}" from table "${tableName}" in local storage:`,
+			error,
+		);
+		return false;
+	}
 }
