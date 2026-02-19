@@ -98,10 +98,6 @@ export async function createChild(name: string): Promise<Child> {
 		};
 		children.push(child);
 		await setJson(KEYS.children, children);
-		const active = await getActiveChildId(); // if this is the first child, set it active automatically
-		if (!active) {
-			await setActiveChildId(child.id);
-		}
 		return child;
 	} catch (error) {
 		console.error("Failed to create child in local storage:", error);
