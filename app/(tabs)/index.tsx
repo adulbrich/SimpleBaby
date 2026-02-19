@@ -17,7 +17,6 @@ import supabase from "@/library/supabase-client";
 import {
 	createChild,
 	getActiveChildId,
-	setActiveChildId,
 } from "@/library/local-store";
 
 export default function MainTab() {
