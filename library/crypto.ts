@@ -1,6 +1,6 @@
 import CryptoES from 'crypto-es';
 import * as Crypto from 'expo-crypto';
-import { Buffer } from 'buffer'; // ✅ Import Buffer polyfill
+import { Buffer } from 'buffer';
 import { getEncryptionKey } from './supabase-client';
 
 /**

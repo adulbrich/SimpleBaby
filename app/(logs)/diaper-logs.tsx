@@ -129,8 +129,10 @@ const DiaperLogsView: React.FC = () => {
                 style: 'destructive',
                 onPress: async () => {
                     if (isGuest) {
-                        const ok = await deleteRow('diaper_logs', id);
-                        if (!ok) Alert.alert('Error deleting log');
+                        const success = await deleteRow('diaper_logs', id);
+                        if (!success) { 
+                            Alert.alert('Error deleting log');
+                        }
                         setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
                         return;
                     }
@@ -157,12 +159,12 @@ const DiaperLogsView: React.FC = () => {
             const encryptedNote = note ? await encryptData(note) : null;
 
             if (isGuest) {
-                const ok = await updateRow('diaper_logs', id, {
+                const success = await updateRow('diaper_logs', id, {
                     consistency: encryptedConsistency,
                     amount: encryptedAmount,
                     note: encryptedNote,
                 });
-                if (!ok) {
+                if (!success) {
                     Alert.alert('Failed to update log');
                     return;
                 }

@@ -147,8 +147,8 @@ const NursingLogsView: React.FC = () => {
             };
 
             if (isGuest) {
-                const ok = await updateRow('nursing_logs', editingLog.id, updated);
-                if (!ok) {
+                const success = await updateRow('nursing_logs', editingLog.id, updated);
+                if (!success) {
                     Alert.alert('Error updating log');
                     return;
                 }
@@ -183,8 +183,8 @@ const NursingLogsView: React.FC = () => {
                 style: 'destructive',
                 onPress: async () => {
                     if (isGuest) {
-                        const ok = await deleteRow('nursing_logs', id);
-                        if (!ok) {
+                        const success = await deleteRow('nursing_logs', id);
+                        if (!success) {
                             Alert.alert('Error deleting log');
                             return;
                         }

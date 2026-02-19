@@ -137,8 +137,8 @@ const SleepLogsView: React.FC = () => {
                 style: 'destructive',
                 onPress: async () => {
                     if (isGuest) {
-                        const ok = await deleteRow('sleep_logs', id);
-                        if (!ok) {
+                        const success = await deleteRow('sleep_logs', id);
+                        if (!success) {
                             Alert.alert('Error deleting log');
                             return;
                         }
@@ -167,14 +167,14 @@ const SleepLogsView: React.FC = () => {
             const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
 
             if (isGuest) {
-                const ok = await updateRow('sleep_logs', editingLog.id, {
+                const success = await updateRow('sleep_logs', editingLog.id, {
                     start_time: editingLog.start_time,
                     end_time: editingLog.end_time,
                     duration: editingLog.duration,
                     note: encryptedNote,
                 });
 
-                if (!ok) {
+                if (!success) {
                     Alert.alert('Failed to update log');
                     return;
                 }

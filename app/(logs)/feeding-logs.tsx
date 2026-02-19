@@ -144,8 +144,8 @@ const FeedingLogsView: React.FC = () => {
                 style: 'destructive',
                 onPress: async () => {
                     if (isGuest) {
-                        const ok = await deleteRow('feeding_logs', id);
-                        if (!ok) {
+                        const success = await deleteRow('feeding_logs', id);
+                        if (!success) {
                             Alert.alert('Error deleting log');
                             return;
                         }
@@ -176,13 +176,13 @@ const FeedingLogsView: React.FC = () => {
             const encryptedNote = note ? await encryptData(note) : null;
 
             if (isGuest) {
-                const ok = await updateRow('feeding_logs', id, {
+                const success = await updateRow('feeding_logs', id, {
                     category: encryptedCategory,
                     item_name: encryptedItemName,
                     amount: encryptedAmount,
                     note: encryptedNote,
                 });
-                if (!ok) {
+                if (!success) {
                     Alert.alert('Failed to update log');
                     return;
                 }

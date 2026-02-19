@@ -199,8 +199,8 @@ const MilestoneLogsView: React.FC = () => {
             };
 
             if (isGuest) {
-            const ok = await updateRow("milestone_logs", editingLog.id, patch);
-            if (!ok) {
+            const success = await updateRow("milestone_logs", editingLog.id, patch);
+            if (!success) {
                 Alert.alert("Update error", "Failed to update milestone (Guest Mode).");
                 return;
             }
@@ -234,10 +234,10 @@ const MilestoneLogsView: React.FC = () => {
                 style: "destructive",
                 onPress: async () => {
                     if (isGuest) {
-                        const ok = await deleteRow("milestone_logs", id);
-                        if (!ok) {
-                        Alert.alert("Error deleting milestone (Guest Mode)");
-                        return;
+                        const success = await deleteRow("milestone_logs", id);
+                        if (!success) {
+                            Alert.alert("Error deleting milestone (Guest Mode)");
+                            return;
                         }
                         setMilestoneLogs((prev) => prev.filter((m) => m.id !== id));
                         return;

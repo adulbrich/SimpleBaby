@@ -162,10 +162,10 @@ const HealthLogsView: React.FC = () => {
             };
 
             if (isGuest) {
-                const ok = await updateRow("health_logs", editingLog.id, updated);
-                if (!ok) {
-                Alert.alert("Error updating log");
-                return;
+                const success = await updateRow("health_logs", editingLog.id, updated);
+                if (!success) {
+                    Alert.alert("Error updating log");
+                    return;
                 }
                 await fetchHealthLogs();
                 setEditModalVisible(false);
@@ -197,10 +197,10 @@ const HealthLogsView: React.FC = () => {
         style: 'destructive',
         onPress: async () => {
           if (isGuest) {
-            const ok = await deleteRow("health_logs", id);
-            if (!ok) {
-              Alert.alert("Error deleting log");
-              return;
+            const success = await deleteRow("health_logs", id);
+            if (!success) {
+                Alert.alert("Error deleting log");
+                return;
             }
             setLogs((prev) => prev.filter((log) => log.id !== id));
             return;
