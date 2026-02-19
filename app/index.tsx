@@ -9,12 +9,12 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // RootIndex.tsx
 // Entry screen for the app — handles redirect if user is already logged in, otherwise shows welcome screen with sign-in/up options
 export default function RootIndex() {
-  const { session, loading, isGuest, enterGuest } = useAuth();
+  const { session, loading, isGuest } = useAuth();
 
   // If user is authenticated and loading is complete, redirect to home tabs
   useEffect(() => {
     // Once loading is done, if session exists or we have a guest session, redirect to (tabs)
-    if (!loading && (session || isGuest)) {
+    if (!loading && session) {
       router.replace("/(tabs)");
     }
   }, [session, isGuest, loading]);
@@ -44,8 +44,7 @@ export default function RootIndex() {
     return router.replace("/(auth)/signup");
   };
   const handleGuest = async () => {
-    await enterGuest();
-    router.replace("/(auth)/guest");
+    return router.replace("/(auth)/guest");
   };
   const buttonTextClass = "";
 
