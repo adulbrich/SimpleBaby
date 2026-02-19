@@ -93,7 +93,7 @@ export default function Profile() {
                             {isGuest ? "Guest" : `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`}
                         </Text>
                     </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👪 Caretakers
                         </Text>
@@ -109,8 +109,8 @@ export default function Profile() {
                                 Manage
                             </Text>
                         </TouchableOpacity>
-                    </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    </View>}
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             📧 Email
                         </Text>
@@ -127,11 +127,11 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {isGuest ? "N/A - Guest" : `${session?.user.user_metadata.email}`}
+                                {session?.user.user_metadata.email}
                             </Text>
                         </TouchableOpacity>
-                    </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    </View>}
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             🔑 Password
                         </Text>
@@ -144,10 +144,10 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {isGuest ? "N/A - Guest" : "Change my password"}
+                                Change my password
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </View>}
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             🤖 App Version
