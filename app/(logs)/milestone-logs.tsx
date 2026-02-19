@@ -60,6 +60,10 @@ type LocalMilestoneRow = LocalRow & {
 	note: string | null;
 };
 
+function isMilestoneCategory(val: string): val is MilestoneCategory {
+    return ["Motor", "Language", "Social", "Cognitive", "Other"].includes(val as MilestoneCategory);
+}
+
 const MilestoneLogsView: React.FC = () => {
 	const [milestoneLogs, setMilestoneLogs] = useState<MilestoneLog[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -215,11 +219,19 @@ const MilestoneLogsView: React.FC = () => {
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
 
+        // Validate that there is a milestone title present
 		const titlePlain = editingLog.title?.trim();
 		if (!titlePlain) {
 			Alert.alert("Missing title", "Please enter a milestone title.");
 			return;
 		}
+
+        // Validate that the category text input belongs to the MilestoneCategory type
+        const milestoneCategory = editingLog.category ?? "Other";
+        if (!isMilestoneCategory(milestoneCategory)) {
+            Alert.alert("Invalid Category", "Please enter a valid milestone category.");
+            return;
+        }
 
 		try {
 			const encryptedTitle = await encryptData(titlePlain);
