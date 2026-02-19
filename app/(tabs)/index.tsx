@@ -66,8 +66,7 @@ export default function MainTab() {
 
 		// GUEST MODE: local-only
 		if (isGuest) {
-			const newChild = await createChild(child);
-			await setActiveChildId(newChild.id);
+			await createChild(child);
 			setChildState(false);
 			return;
 		}
