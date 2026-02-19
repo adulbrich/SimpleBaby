@@ -86,6 +86,8 @@ jest.mock("@/library/auth-provider", () => ({
     arrayBuffer: async() => new ArrayBuffer(1),
 }));
 
+jest.mock("expo-crypto", () => ({}));
+
 /*
  *  setmilestoneInputs:
  *      Reads update handlers from first call to MilestoneCategory mock

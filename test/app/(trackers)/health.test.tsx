@@ -46,6 +46,8 @@ jest.mock("@/library/auth-provider", () => ({
   useAuth: () => ({ isGuest: false }),
 }));
 
+jest.mock("expo-crypto", () => ({}));
+
 /*
  *  setHealthInputs:
  *      Reads update handlers from first call to HealthModule mock

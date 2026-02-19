@@ -52,6 +52,7 @@ jest.mock("@/library/auth-provider", () => ({
   useAuth: () => ({ isGuest: false }),
 }));
 
+jest.mock("expo-crypto", () => ({}));
 
 /*
  *  setDiaperInputs:

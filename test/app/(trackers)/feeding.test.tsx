@@ -60,6 +60,8 @@ jest.mock("@/library/auth-provider", () => ({
   useAuth: () => ({ isGuest: false }),
 }));
 
+jest.mock("expo-crypto", () => ({}));
+
 /*
  *  setFeedingInputs:
  *      Reads update handlers from first call to FeedingCategory mock
