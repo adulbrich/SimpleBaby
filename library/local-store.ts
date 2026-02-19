@@ -1,6 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
 
+type TableName =
+	| "feeding_logs"
+	| "nursing_logs"
+	| "milestone_logs"
+	| "diaper_logs"
+	| "health_logs"
+	| "sleep_logs";
+
 // KEYS
 // holds common keys necessary for interacting with the local db
 const KEYS = {
@@ -8,7 +16,7 @@ const KEYS = {
 	guestId: "sb:guestId",
 	activeChildId: "sb:activeChildId",
 	children: "sb:children",
-	table: (name: string) => `sb:table:${name}`,
+	table: (name: TableName) => `sb:table:${name}`,
 };
 
 // Child Type
@@ -133,7 +141,7 @@ export type LocalRow = { id: string; created_at: string; [k: string]: any };
 // insertRow()
 // inserts a row into the local db
 export async function insertRow<T extends object>(
-	tableName: string,
+	tableName: TableName,
 	row: T,
 ): Promise<boolean> {
 	try {
@@ -161,7 +169,7 @@ export async function insertRow<T extends object>(
 // listRows()
 // lists rows from a specific table in the local db
 export async function listRows<T extends object>(
-	tableName: string,
+	tableName: TableName,
 ): Promise<(LocalRow & T)[]> {
 	return await getJson<(LocalRow & T)[]>(KEYS.table(tableName), []);
 }
@@ -169,7 +177,7 @@ export async function listRows<T extends object>(
 // updateRow()
 // updates a row in the local db
 export async function updateRow<T extends object>(
-	tableName: string,
+	tableName: TableName,
 	id: string,
 	patch: Partial<T>,
 ): Promise<boolean> {
@@ -187,7 +195,7 @@ export async function updateRow<T extends object>(
 // deleteRow()
 // deletes a row from a specific table in the local db
 export async function deleteRow(
-	tableName: string,
+	tableName: TableName,
 	id: string,
 ): Promise<boolean> {
 	try {
