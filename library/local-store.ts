@@ -55,7 +55,7 @@ export async function enterGuestMode() {
 		guestId = uuidv4();
 		await AsyncStorage.setItem(KEYS.guestId, guestId);
 	}
-	return { guestId };
+	return;
 }
 
 // exitGuestMode()
