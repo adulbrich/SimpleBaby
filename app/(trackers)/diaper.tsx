@@ -34,7 +34,7 @@ export default function Diaper() {
 	const [reset, setReset] = useState<number>(0);
 	const { isGuest } = useAuth();
 
-	// Create a new diaper log into the database
+	// Create a new diaper log into the database (either Guest or remotely)
 	const createDiaperLog = async (
 		childId: string,
 		consistency: string,
