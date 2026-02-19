@@ -62,7 +62,7 @@ export default function MainTab() {
 			return;
 		}
 
-		let child = childName.charAt(0).toUpperCase() + childName.slice(1);
+		const child = childName.charAt(0).toUpperCase() + childName.slice(1);
 
 		// GUEST MODE: local-only
 		if (isGuest) {
@@ -80,8 +80,6 @@ export default function MainTab() {
 			if (!userId) {
 				throw new Error("User not found.");
 			}
-
-			let child = childName.charAt(0).toUpperCase() + childName.slice(1);
 
 			// Insert child into the database
 			const { error } = await supabase
