@@ -51,7 +51,7 @@ export default function MainTab() {
 		{ label: "Health", icon: "💚", link: "/health" as ExternalPathString },
 	];
 
-	const { isGuest, session } = useAuth();
+	const { isGuest, session, loading } = useAuth();
 	const [newChildState, setChildState] = useState(false);
 	const [childName, setChildName] = useState("");
 
@@ -105,7 +105,19 @@ export default function MainTab() {
 	};
 
 	useEffect(() => {
+		let cancelled = false;
 		const checkChild = async () => {
+			// if we're still loading, stop the check for child state
+			if (loading) {
+				return;
+			}
+
+			// do not show modal if no active session or not in guest mode
+			if (!session && !isGuest) {
+				setChildState(false);
+				return;
+			}
+
 			// Check if there is an active child when NOT using guest mode
 			if (session) {
 				const activeChild = session.user.user_metadata?.activeChild; // check metadata for a child
@@ -115,15 +127,18 @@ export default function MainTab() {
 				return;
 			}
 
-			// Guest mode path:
+			// Check for guest mode:
 			const activeId = await getActiveChildId();
-			if (!activeId) {
-				setChildState(true);
+			if (!cancelled) {
+				setChildState(!activeId);
 			}
 		};
 
 		checkChild();
-	}, [session]);
+		return () => {
+			cancelled = true;
+		}
+	}, [session, isGuest, loading]);
 
 	return (
 		<View className="main-container flex-col">
