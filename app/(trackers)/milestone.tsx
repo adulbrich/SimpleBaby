@@ -154,7 +154,7 @@ export default function Milestone() {
 	};
 
 	/**
-	 * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
+	 * Inserts a new milestone log into either the local or remote database.
 	 * Converts milestoneTime to ISO string before sending.
 	 */
 	const saveMilestoneLog = async (

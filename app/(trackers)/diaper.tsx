@@ -34,8 +34,11 @@ export default function Diaper() {
 	const [reset, setReset] = useState<number>(0);
 	const { isGuest } = useAuth();
 
-	// Create a new diaper log into the database (either Guest or remotely)
-	const createDiaperLog = async (
+	/**
+	 * Saves and inserts a new diaper log into either the local or remote database.
+	 * Encrypts consistency, amount, and the note before proceeding.
+	 */
+	const saveDiaperLog = async (
 		childId: string,
 		consistency: string,
 		amount: string,
@@ -84,15 +87,15 @@ export default function Diaper() {
 	};
 
 
-	// Get active child ID and save diaper log
-	const saveDiaperLog = async () => {
+	// Get active child ID, determine save location, and begin to create the diaper log
+	const createDiaperLog = async () => {
 		if (isGuest) {
 			const childId = await getLocalActiveChildId();
 			if (!childId) {
 				Alert.alert("No active child set (guest mode)");
 				return { success: false, error: "No active child set" };
 			}
-			return await createDiaperLog(
+			return await saveDiaperLog(
 				childId,
 				consistency,
 				amount,
@@ -108,7 +111,7 @@ export default function Diaper() {
 			return { success: false, error };
 		}
 
-		return await createDiaperLog(
+		return await saveDiaperLog(
 			childId,
 			consistency,
 			amount,
@@ -117,10 +120,10 @@ export default function Diaper() {
 		);
 	};
 
-	// Validate and handle save action with alerts
+	// Validate and handle the save action with alerts based on the result
 	const handleSaveDiaperLog = async () => {
 		if (consistency && amount) {
-			const result = await saveDiaperLog();
+			const result = await createDiaperLog();
 			if (result.success) {
 				router.replace("/(tabs)");
 				Alert.alert("Diaper log saved successfully!");
