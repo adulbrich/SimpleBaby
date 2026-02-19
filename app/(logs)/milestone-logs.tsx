@@ -74,6 +74,16 @@ const MilestoneLogsView: React.FC = () => {
 	const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
 	const { isGuest } = useAuth();
 
+    const safeDecrypt = async (value: string | null): Promise<string> => {
+        if (!value || !value.includes("U2FsdGVkX1")) return "";
+        try {
+            return await decryptData(value);
+        } catch (err) {
+            console.warn("⚠️ Decryption failed for:", value);
+            return `[Decryption Failed]: ${err}`;
+        }
+    };
+
 	const getSignedPhotoUrl = useCallback(
 		async (path: string): Promise<string | null> => {
 			if (isGuest) return path;
@@ -147,16 +157,6 @@ const MilestoneLogsView: React.FC = () => {
 				if (res.error) throw res.error;
 				data = res.data || [];
 			}
-
-			const safeDecrypt = async (value: string | null): Promise<string> => {
-				if (!value || !value.includes("U2FsdGVkX1")) return "";
-				try {
-					return await decryptData(value);
-				} catch (err) {
-					console.warn("⚠️ Decryption failed for:", value);
-					return `[Decryption Failed]: ${err}`;
-				}
-			};
 
 			const decryptedLogs = await Promise.all(
 				(data || []).map(async (entry) => ({
