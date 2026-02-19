@@ -86,7 +86,9 @@ const MilestoneLogsView: React.FC = () => {
 
 	const getSignedPhotoUrl = useCallback(
 		async (path: string): Promise<string | null> => {
-			if (isGuest) return path;
+			if (isGuest) {
+                return path;
+            }
 
 			try {
 				const { data, error } = await supabase.storage
@@ -116,11 +118,22 @@ const MilestoneLogsView: React.FC = () => {
 			setLoading(true);
 			setError(null);
 
-			let childId: string | null = null;
+			let data: any[] = [];
 
 			if (isGuest) {
-				childId = await getLocalActiveChildId();
+				const childId = await getLocalActiveChildId();
 				if (!childId) throw new Error("No active child selected (Guest Mode)");
+
+				// get & sort milestone logs descendingly
+				const rows = await listRows<LocalMilestoneRow>("milestone_logs");
+				data = rows
+					.filter((r) => r.child_id === childId)
+					.sort(
+						(a, b) =>
+							new Date(b.achieved_at).getTime() -
+							new Date(a.achieved_at).getTime(),
+					);
+
 			} else {
 				const result = await getActiveChildId();
 				if (!result?.success || !result.childId) {
@@ -131,23 +144,8 @@ const MilestoneLogsView: React.FC = () => {
 					);
 				}
 				setActiveChildName(result.childName);
-				childId = String(result.childId);
-			}
+				const childId = String(result.childId);
 
-			let data: any[] = [];
-
-			if (isGuest) {
-
-                // get & sort milestone logs descendingly
-				const rows = await listRows<LocalMilestoneRow>("milestone_logs");
-				data = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.achieved_at).getTime() -
-							new Date(a.achieved_at).getTime(),
-					);
-			} else {
 				const res = await supabase
 					.from("milestone_logs")
 					.select("*")
@@ -168,7 +166,9 @@ const MilestoneLogsView: React.FC = () => {
 
 			const signedPairs = await Promise.all(
 				decryptedLogs.map(async (log) => {
-					if (!log.photo_url) return [log.id, null] as const;
+					if (!log.photo_url) {
+                        return [log.id, null] as const;
+                    }
 					const signed = await getSignedPhotoUrl(log.photo_url);
 					return [log.id, signed] as const;
 				}),
@@ -178,8 +178,10 @@ const MilestoneLogsView: React.FC = () => {
 			for (const [id, signed] of signedPairs) {
 				if (signed) nextMap[id] = signed;
 			}
+
 			setPhotoSignedUrls(nextMap);
 			setMilestoneLogs(decryptedLogs);
+
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : "An unknown error occurred",

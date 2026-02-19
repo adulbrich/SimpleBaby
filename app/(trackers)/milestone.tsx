@@ -210,6 +210,7 @@ export default function Milestone() {
 	 */
 	const saveMilestoneLog = async () => {
 		let childId: string | null = null;
+		let photoPath: string | null = null;
 
 		if (isGuest) {
 			childId = await getLocalActiveChildId();
@@ -217,6 +218,7 @@ export default function Milestone() {
 				Alert.alert("Error", "No active child selected (Guest Mode).");
 				return { success: false, error: "No active child in guest mode" };
 			}
+			if (photoUri) photoPath = photoUri; // in guest mode: store the local URI directly
 		} else {
 			const result = await getActiveChildId();
 			if (!result?.success || !result.childId) {
@@ -224,14 +226,7 @@ export default function Milestone() {
 				return { success: false, error: result?.error };
 			}
 			childId = String(result.childId);
-		}
-
-		let photoPath: string | null = null;
-
-		if (photoUri) {
-			if (isGuest) {
-				photoPath = photoUri; // in guest mode: store the local URI directly
-			} else {
+			if (photoUri) {
 				try {
 					photoPath = await uploadPhoto(String(childId), photoUri); // logged-in: upload to Supabase storage
 				} catch (e) {
