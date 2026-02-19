@@ -62,7 +62,7 @@ export default function GuestScreen() {
             <View className='flex-col gap-2'>
                 <Button
                     text='Cancel'
-                    action={() => router.replace("..")}
+                    action={() => router.back()}
                     textClass={buttonTextClass}
                     buttonClass='button-red'
                 />
