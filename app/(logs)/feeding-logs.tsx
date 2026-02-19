@@ -77,8 +77,8 @@ const FeedingLogsView: React.FC = () => {
 				const childId = await getLocalActiveChildId();
 				if (!childId) throw new Error("No active child selected (Guest Mode)");
 
+                // get & sort feeding logs descendingly
 				const rows = await listRows<LocalFeedingRow>("feeding_logs");
-
 				const childRows = rows
 					.filter((r) => r.child_id === childId)
 					.sort(

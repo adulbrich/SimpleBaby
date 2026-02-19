@@ -127,6 +127,8 @@ const MilestoneLogsView: React.FC = () => {
 			let data: any[] = [];
 
 			if (isGuest) {
+
+                // get & sort milestone logs descendingly
 				const rows = await listRows<LocalMilestoneRow>("milestone_logs");
 				data = rows
 					.filter((r) => r.child_id === childId)

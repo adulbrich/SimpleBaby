@@ -77,11 +77,14 @@ const HealthLogsView: React.FC = () => {
 					throw new Error("No active child selected (Guest Mode)");
 				}
 
+                // get & sort health logs descendingly
 				const rows = await listRows<LocalHealthRow>("health_logs");
 				const childRows = rows
 					.filter((r) => r.child_id === childId)
 					.sort(
-						(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+						(a, b) => 
+                            new Date(b.date).getTime() - 
+                            new Date(a.date).getTime(),
 					);
 
 				const decrypted = await Promise.all(

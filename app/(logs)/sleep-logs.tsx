@@ -70,8 +70,8 @@ const SleepLogsView: React.FC = () => {
 				const childId = await getLocalActiveChildId();
 				if (!childId) throw new Error("No active child selected (Guest Mode)");
 
+                // get & sort sleep logs descendingly
 				const rows = await listRows<LocalSleepRow>("sleep_logs");
-
 				const childRows = rows
 					.filter((r) => r.child_id === childId)
 					.sort(
