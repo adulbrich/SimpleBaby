@@ -157,7 +157,7 @@ export default function Milestone() {
 	 * Inserts a new milestone log into the 'milestone_logs' table on Supabase.
 	 * Converts milestoneTime to ISO string before sending.
 	 */
-	const createMilestoneLog = async (
+	const saveMilestoneLog = async (
 		childId: string,
 		category: MilestoneCategoryList,
 		name: string,
@@ -205,10 +205,10 @@ export default function Milestone() {
 	};
 
 	/**
-	 * Gets the currently active child ID and attempts to save the milestone log.
-	 * Returns success/error object for handling in UI.
+	 * Gets the currently active child ID and attempts to create the milestone log for database entry.
+	 * Returns success/error object for handling in the UI.
 	 */
-	const saveMilestoneLog = async () => {
+	const createMilestoneLog = async () => {
 		let childId: string | null = null;
 		let photoPath: string | null = null;
 
@@ -236,7 +236,7 @@ export default function Milestone() {
 			}
 		}
 
-		return await createMilestoneLog(
+		return await saveMilestoneLog(
 			String(childId),
 			category,
 			name,
@@ -252,7 +252,7 @@ export default function Milestone() {
 	 */
 	const handleSaveMilestoneLog = async () => {
 		if (name && milestoneDate) {
-			const result = await saveMilestoneLog();
+			const result = await createMilestoneLog();
 			if (result.success) {
 				router.replace("/(tabs)");
 				Alert.alert("Milestone log saved successfully!");

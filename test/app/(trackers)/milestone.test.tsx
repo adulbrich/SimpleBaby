@@ -94,7 +94,7 @@ jest.mock("expo-crypto", () => ({}));
  *      Calls update handlers with provided inputs
  *      Sets other inputs by component testIDs
 */
-async function setmilestoneInputs({
+async function setMilestoneInputs({
     category,
     name,
     time,
@@ -224,7 +224,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote,
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote,
             photo: {uri: "x", fileName: testPhotoName}});
 
         // ensure all entered data is visible
@@ -274,13 +274,13 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // add image with no given name
-        await setmilestoneInputs({photo: {uri: testUri}});
+        await setMilestoneInputs({photo: {uri: testUri}});
 
         // ensure file path name is displayed on the screen
         expect(screen.getByText(testFileName)).toBeTruthy();
 
         // add image with a given name
-        await setmilestoneInputs({photo: {uri: testUri, fileName: testName}});
+        await setMilestoneInputs({photo: {uri: testUri, fileName: testName}});
 
         // ensure file path name is displayed on the screen
         expect(screen.getByText(testName)).toBeTruthy();
@@ -297,7 +297,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -327,7 +327,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -357,7 +357,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -490,7 +490,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
 
         // submit log
         await userEvent.press(
@@ -533,7 +533,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
 
         // submit log
         await userEvent.press(
