@@ -50,17 +50,19 @@ export default function Diaper() {
 			const encryptedAmount = await encryptData(amount);
 			const encryptedNote = note ? await encryptData(note) : null;
 
-            if (isGuest) {
-                const row = await insertRow("diaper_logs", {
-                    child_id: childId,
-                    consistency: encryptedConsistency,
-                    amount: encryptedAmount,
-                    note: encryptedNote,
-                    change_time: changeTime.toISOString(),
-                    logged_at: new Date().toISOString(),
-                });
-			    return { success: true, data: row };
-            } else {
+			if (isGuest) {
+				const saved = await insertRow("diaper_logs", {
+					child_id: childId,
+					consistency: encryptedConsistency,
+					amount: encryptedAmount,
+					note: encryptedNote,
+					change_time: changeTime.toISOString(),
+					logged_at: new Date().toISOString(),
+				});
+				return saved
+					? { success: true }
+					: { success: false, error: "Failed to save diaper log locally." };
+			} else {
                 const { data, error } = await supabase.from("diaper_logs").insert([
                     {
                         child_id: childId,

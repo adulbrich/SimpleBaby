@@ -98,7 +98,7 @@ export default function Feeding() {
 					note: encryptedNote,
 				});
 
-				return { success: true, data: null };
+				return { success: true };
 			} catch (err) {
 				console.error("❌ Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };

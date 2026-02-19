@@ -168,22 +168,24 @@ export default function Milestone() {
 		const encryptedName = await encryptData(name);
 		const encryptedNote = note ? await encryptData(note) : null;
 
-		if (isGuest) {
-			try {
-				const row = await insertRow("milestone_logs", {
-					child_id: childId,
-					category,
-					title: encryptedName,
-					achieved_at: milestoneTime.toISOString(),
-					photo_url: photoPath,
-					note: encryptedNote,
-				});
-				return { success: true, data: row };
-			} catch (error) {
-				console.error("Error creating milestone log (guest):", error);
-				return { success: false, error };
+			if (isGuest) {
+				try {
+					const saved = await insertRow("milestone_logs", {
+						child_id: childId,
+						category,
+						title: encryptedName,
+						achieved_at: milestoneTime.toISOString(),
+						photo_url: photoPath,
+						note: encryptedNote,
+					});
+					return saved
+						? { success: true }
+						: { success: false, error: "Failed to save milestone log locally." };
+				} catch (error) {
+					console.error("Error creating milestone log (guest):", error);
+					return { success: false, error };
+				}
 			}
-		}
 
 		const { data, error } = await supabase.from("milestone_logs").insert([
 			{

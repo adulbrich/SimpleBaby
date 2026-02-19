@@ -67,16 +67,18 @@ export default function Health() {
 	 * Saves and inserts the health log for database entry.
 	 * Returns success/error object for handling in the UI.
 	 */
-	const saveHealthLog = async (log: any) => {
-		if (isGuest) {
-			try {
-				const row = await insertRow("health_logs", log);
-				return { success: true, data: row };
-			} catch (error) {
-				console.error("Error creating health log (guest):", error);
-				return { success: false, error };
+		const saveHealthLog = async (log: any) => {
+			if (isGuest) {
+				try {
+					const saved = await insertRow("health_logs", log);
+					return saved
+						? { success: true }
+						: { success: false, error: "Failed to save health log locally." };
+				} catch (error) {
+					console.error("Error creating health log (guest):", error);
+					return { success: false, error };
+				}
 			}
-		}
 
 		const { data, error } = await supabase.from("health_logs").insert([log]);
 		if (error) {

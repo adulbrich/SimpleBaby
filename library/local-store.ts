@@ -135,19 +135,27 @@ export type LocalRow = { id: string; created_at: string; [k: string]: any };
 export async function insertRow<T extends object>(
 	tableName: string,
 	row: T,
-): Promise<LocalRow & T> {
-	const tableKey = KEYS.table(tableName);
-	const rows = await getJson<(LocalRow & T)[]>(tableKey, []);
+): Promise<boolean> {
+	try {
+		const tableKey = KEYS.table(tableName);
+		const rows = await getJson<(LocalRow & T)[]>(tableKey, []);
 
-	const newRow = {
-		id: uuidv4(),
-		created_at: new Date().toISOString(),
-		...row,
-	} as LocalRow & T;
+		const newRow = {
+			id: uuidv4(),
+			created_at: new Date().toISOString(),
+			...row,
+		} as LocalRow & T;
 
-	rows.push(newRow);
-	await setJson(tableKey, rows);
-	return newRow;
+		rows.push(newRow);
+		await setJson(tableKey, rows);
+		return true;
+	} catch (error) {
+		console.error(
+			`Failed to insert row into table "${tableName}" in local storage:`,
+			error,
+		);
+		return false;
+	}
 }
 
 // listRows()
