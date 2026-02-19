@@ -47,54 +47,42 @@ export default function Diaper() {
 			const encryptedAmount = await encryptData(amount);
 			const encryptedNote = note ? await encryptData(note) : null;
 
-			const { data, error } = await supabase.from("diaper_logs").insert([
-				{
-					child_id: childId,
-					consistency: encryptedConsistency,
-					amount: encryptedAmount,
-					change_time: changeTime.toISOString(),
-					note: encryptedNote,
-				},
-			]);
+            if (isGuest) {
+                const row = await insertRow("diaper_logs", {
+                    child_id: childId,
+                    consistency: encryptedConsistency,
+                    amount: encryptedAmount,
+                    note: encryptedNote,
+                    change_time: changeTime.toISOString(),
+                    logged_at: new Date().toISOString(),
+                });
+			    return { success: true, data: row };
+            } else {
+                const { data, error } = await supabase.from("diaper_logs").insert([
+                    {
+                        child_id: childId,
+                        consistency: encryptedConsistency,
+                        amount: encryptedAmount,
+                        change_time: changeTime.toISOString(),
+                        note: encryptedNote,
+                    },
+			    ]);
 
-			if (error) {
-				console.error("Error creating diaper log:", error);
-				return { success: false, error };
-			}
+                if (error) {
+                    console.error("Error creating diaper log:", error);
+                    return { success: false, error };
+                }
 
-			return { success: true, data };
+			    return { success: true, data };
+            }
+
+			
 		} catch (err) {
 			console.error("❌ Encryption or insert failed:", err);
 			return { success: false, error: "Encryption or database error" };
 		}
 	};
 
-	const createDiaperLogGuest = async (
-		childId: string,
-		consistency: string,
-		amount: string,
-		changeTime: Date,
-		note = "",
-	) => {
-		try {
-			const encryptedConsistency = await encryptData(consistency);
-			const encryptedAmount = await encryptData(amount);
-			const encryptedNote = note ? await encryptData(note) : null;
-
-			const row = await insertRow("diaper_logs", {
-				child_id: childId,
-				consistency: encryptedConsistency,
-				amount: encryptedAmount,
-				note: encryptedNote,
-				change_time: changeTime.toISOString(),
-				logged_at: new Date().toISOString(),
-			});
-
-			return { success: true, data: row };
-		} catch {
-			return { success: false, error: "Encryption or local save error" };
-		}
-	};
 
 	// Get active child ID and save diaper log
 	const saveDiaperLog = async () => {
@@ -104,7 +92,7 @@ export default function Diaper() {
 				Alert.alert("No active child set (guest mode)");
 				return { success: false, error: "No active child set" };
 			}
-			return await createDiaperLogGuest(
+			return await createDiaperLog(
 				childId,
 				consistency,
 				amount,
