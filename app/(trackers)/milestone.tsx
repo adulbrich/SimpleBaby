@@ -21,6 +21,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
+import Button from '@/components/button';
 
 
 export default function Milestone() {
@@ -315,11 +316,25 @@ export default function Milestone() {
                             <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
                         </TouchableOpacity>
                         </View>
-                        {photoName ? (
-                        <Text className="text-sm text-gray-500 mt-2 text-center">
-                            {photoName}
-                        </Text>
-                        ) : null}
+						{photoName || photoUri ? (
+							<>
+								<View className="flex flex-col" accessible>
+									<Text className="text-sm text-gray-500 mt-2 text-center">
+										({photoName})
+									</Text>
+									<TouchableOpacity
+										onPress={ () => {
+											setPhotoName(null);
+											setPhotoUri(null); 
+										}}
+										testID="remove-milestone-photo-button"
+									>
+										<Text className="text-center text-gray-500 underline">Remove Photo</Text>
+									</TouchableOpacity>
+								</View>
+							</>
+						)
+						: <></>}
                     </View>
                     </View>
 
