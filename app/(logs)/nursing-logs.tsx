@@ -37,15 +37,7 @@ interface NursingLog {
 	right_amount: string | null;
 }
 
-type LocalNursingRow = LocalRow & {
-	child_id: string;
-	left_duration: string | null;
-	right_duration: string | null;
-	logged_at: string;
-	note: string | null;
-	left_amount: string | null;
-	right_amount: string | null;
-};
+type LocalNursingRow = LocalRow & Omit<NursingLog, "id">;
 
 const NursingLogsView: React.FC = () => {
 	const [nursingLogs, setNursingLogs] = useState<NursingLog[]>([]);

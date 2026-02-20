@@ -28,19 +28,14 @@ import {
 
 interface SleepLog {
 	id: string;
+	child_id: string;
 	start_time: string;
 	end_time: string;
 	duration: string | null;
 	note: string | null;
 }
 
-type LocalSleepRow = LocalRow & {
-	child_id: string;
-	start_time: string;
-	end_time: string;
-	duration: string | null;
-	note: string | null;
-};
+type LocalSleepRow = LocalRow & Omit<SleepLog, "id">;
 
 const SleepLogsView: React.FC = () => {
 	const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);

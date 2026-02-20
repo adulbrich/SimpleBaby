@@ -36,14 +36,7 @@ interface FeedingLog {
 	note: string | null;
 }
 
-type LocalFeedingRow = LocalRow & {
-	child_id: string;
-	category: string;
-	item_name: string;
-	amount: string;
-	feeding_time: string;
-	note: string | null;
-};
+type LocalFeedingRow = LocalRow & Omit<FeedingLog, "id">;
 
 const FeedingLogsView: React.FC = () => {
 	const [feedingLogs, setFeedingLogs] = useState<FeedingLog[]>([]);

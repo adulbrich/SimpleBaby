@@ -50,15 +50,7 @@ interface MilestoneLog {
 	updated_at: string;
 }
 
-type LocalMilestoneRow = LocalRow & {
-	id: string;
-	child_id: string;
-	category: string;
-	title: string;
-	achieved_at: string;
-	photo_url: string | null;
-	note: string | null;
-};
+type LocalMilestoneRow = LocalRow & Omit<MilestoneLog, "id"> & { child_id: string; };
 
 function isMilestoneCategory(val: string): val is MilestoneCategory {
     return ["Motor", "Language", "Social", "Cognitive", "Other"].includes(val as MilestoneCategory);

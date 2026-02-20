@@ -35,14 +35,7 @@ interface DiaperLog {
 	note: string | null;
 }
 
-type LocalDiaperRow = LocalRow & {
-	child_id: string;
-	consistency: string;
-	amount: string;
-	logged_at: string;
-	note: string | null;
-	change_time: string;
-};
+type LocalDiaperRow = LocalRow & Omit<DiaperLog, "id">;
 
 const DiaperLogsView: React.FC = () => {
 	const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([]);

@@ -46,7 +46,7 @@ interface HealthLog {
 	note: string | null;
 }
 
-type LocalHealthRow = LocalRow & HealthLog;
+type LocalHealthRow = LocalRow & Omit<HealthLog, "id">;
 
 const HealthLogsView: React.FC = () => {
 	const [logs, setLogs] = useState<HealthLog[]>([]);
