@@ -137,7 +137,7 @@ export default function MainTab() {
 		checkChild();
 		return () => {
 			cancelled = true;
-		}
+		};
 	}, [session, isGuest, loading]);
 
 	return (
