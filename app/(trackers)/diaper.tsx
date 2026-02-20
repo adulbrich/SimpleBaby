@@ -104,22 +104,22 @@ export default function Diaper() {
 				changeTime,
 				note,
 			);
-		}
+		} else {
+            const { success, childId, error } = await getActiveChildId();
 
-		const { success, childId, error } = await getActiveChildId();
+            if (!success) {
+                Alert.alert(`Error: ${error}`);
+                return { success: false, error };
+            }
 
-		if (!success) {
-			Alert.alert(`Error: ${error}`);
-			return { success: false, error };
-		}
-
-		return await saveDiaperLog(
-			childId,
-			consistency,
-			amount,
-			changeTime,
-			note,
-		);
+            return await saveDiaperLog(
+                childId,
+                consistency,
+                amount,
+                changeTime,
+                note,
+            );
+        }
 	};
 
 	// Validate and handle the save action with alerts based on the result

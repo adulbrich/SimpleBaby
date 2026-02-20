@@ -88,44 +88,45 @@ const NursingLogsView: React.FC = () => {
 
 				setNursingLogs(decrypted as NursingLog[]);
 				return;
-			}
+			} else {
+                const {
+                    success,
+                    childId,
+                    childName,
+                    error: childError,
+                } = await getActiveChildId();
 
-			const {
-				success,
-				childId,
-				childName,
-				error: childError,
-			} = await getActiveChildId();
-			if (!success || !childId) {
-				throw new Error(
-					typeof childError === "string"
-						? childError
-						: childError?.message || "Failed to get child ID",
-				);
-			}
+                if (!success || !childId) {
+                    throw new Error(
+                        typeof childError === "string"
+                            ? childError
+                            : childError?.message || "Failed to get child ID",
+                    );
+                }
 
-			if (childName) setActiveChildName(childName);
+                if (childName) setActiveChildName(childName);
 
-			const { data, error } = await supabase
-				.from("nursing_logs")
-				.select("*")
-				.eq("child_id", childId)
-				.order("logged_at", { ascending: false });
+                const { data, error } = await supabase
+                    .from("nursing_logs")
+                    .select("*")
+                    .eq("child_id", childId)
+                    .order("logged_at", { ascending: false });
 
-			if (error) throw error;
+                if (error) throw error;
 
-			const decrypted = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					left_duration: await safeDecrypt(entry.left_duration),
-					right_duration: await safeDecrypt(entry.right_duration),
-					left_amount: await safeDecrypt(entry.left_amount),
-					right_amount: await safeDecrypt(entry.right_amount),
-					note: await safeDecrypt(entry.note),
-				})),
-			);
+                const decrypted = await Promise.all(
+                    (data || []).map(async (entry) => ({
+                        ...entry,
+                        left_duration: await safeDecrypt(entry.left_duration),
+                        right_duration: await safeDecrypt(entry.right_duration),
+                        left_amount: await safeDecrypt(entry.left_amount),
+                        right_amount: await safeDecrypt(entry.right_amount),
+                        note: await safeDecrypt(entry.note),
+                    })),
+                );
 
-			setNursingLogs(decrypted);
+                setNursingLogs(decrypted);
+            }
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : "An unknown error occurred",
@@ -168,20 +169,20 @@ const NursingLogsView: React.FC = () => {
 				await fetchNursingLogs();
 				setEditModalVisible(false);
 				return;
-			}
+			} else {
+                const { error } = await supabase
+                    .from("nursing_logs")
+                    .update(updated)
+                    .eq("id", editingLog.id);
 
-			const { error } = await supabase
-				.from("nursing_logs")
-				.update(updated)
-				.eq("id", editingLog.id);
+                if (error) {
+                    Alert.alert("Error updating log");
+                    return;
+                }
 
-			if (error) {
-				Alert.alert("Error updating log");
-				return;
-			}
-
-			await fetchNursingLogs();
-			setEditModalVisible(false);
+                await fetchNursingLogs();
+                setEditModalVisible(false);
+            }
 		} catch (err) {
 			Alert.alert(`Encryption or update error: ${err}`);
 		}
@@ -202,17 +203,17 @@ const NursingLogsView: React.FC = () => {
 						}
 						setNursingLogs((prev) => prev.filter((log) => log.id !== id));
 						return;
-					}
-
-					const { error } = await supabase
-						.from("nursing_logs")
-						.delete()
-						.eq("id", id);
-					if (error) {
-						Alert.alert("Error deleting log");
-						return;
-					}
-					setNursingLogs((prev) => prev.filter((log) => log.id !== id));
+					} else {
+                        const { error } = await supabase
+                            .from("nursing_logs")
+                            .delete()
+                            .eq("id", id);
+                        if (error) {
+                            Alert.alert("Error deleting log");
+                            return;
+                        }
+                        setNursingLogs((prev) => prev.filter((log) => log.id !== id));
+                    }
 				},
 			},
 		]);

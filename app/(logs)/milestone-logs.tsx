@@ -84,27 +84,27 @@ const MilestoneLogsView: React.FC = () => {
 		async (path: string): Promise<string | null> => {
 			if (isGuest) {
                 return path;
+            } else {
+                try {
+                    const { data, error } = await supabase.storage
+                        .from("milestone-photos")
+                        .createSignedUrl(path, 600);
+
+                    if (error) {
+                        console.warn("SIGN ERROR:", {
+                            message: error.message,
+                            name: error.name,
+                            status: (error as any).status,
+                        });
+                        return null;
+                    }
+
+                    return data?.signedUrl ?? null;
+                } catch (e) {
+                    console.warn("⚠️ Signed URL error:", e);
+                    return null;
+                }
             }
-
-			try {
-				const { data, error } = await supabase.storage
-					.from("milestone-photos")
-					.createSignedUrl(path, 600);
-
-				if (error) {
-					console.warn("SIGN ERROR:", {
-						message: error.message,
-						name: error.name,
-						status: (error as any).status,
-					});
-					return null;
-				}
-
-				return data?.signedUrl ?? null;
-			} catch (e) {
-				console.warn("⚠️ Signed URL error:", e);
-				return null;
-			}
 		},
 		[isGuest],
 	);
@@ -249,20 +249,20 @@ const MilestoneLogsView: React.FC = () => {
 				await fetchMilestoneLogs();
 				setEditModalVisible(false);
 				return;
-			}
+			} else {
+                const { error } = await supabase
+                    .from("milestone_logs")
+                    .update(patch)
+                    .eq("id", editingLog.id);
 
-			const { error } = await supabase
-				.from("milestone_logs")
-				.update(patch)
-				.eq("id", editingLog.id);
+                if (error) {
+                    Alert.alert("Error updating milestone", error.message);
+                    return;
+                }
 
-			if (error) {
-				Alert.alert("Error updating milestone", error.message);
-				return;
-			}
-
-			await fetchMilestoneLogs();
-			setEditModalVisible(false);
+                await fetchMilestoneLogs();
+                setEditModalVisible(false);
+            }
 		} catch (err) {
 			Alert.alert("Update error", String(err));
 		}
@@ -286,17 +286,17 @@ const MilestoneLogsView: React.FC = () => {
 							}
 							setMilestoneLogs((prev) => prev.filter((m) => m.id !== id));
 							return;
-						}
-
-						const { error } = await supabase
-							.from("milestone_logs")
-							.delete()
-							.eq("id", id);
-						if (error) {
-							Alert.alert("Error deleting milestone", error.message);
-							return;
-						}
-						setMilestoneLogs((prev) => prev.filter((log) => log.id !== id));
+						} else {
+                            const { error } = await supabase
+                                .from("milestone_logs")
+                                .delete()
+                                .eq("id", id);
+                            if (error) {
+                                Alert.alert("Error deleting milestone", error.message);
+                                return;
+                            }
+                            setMilestoneLogs((prev) => prev.filter((log) => log.id !== id));
+                        }
 					},
 				},
 			],

@@ -78,15 +78,14 @@ export default function Health() {
 					console.error("Error creating health log (guest):", error);
 					return { success: false, error };
 				}
+			} else {
+				const { data, error } = await supabase.from("health_logs").insert([log]);
+				if (error) {
+					console.error("Error creating health log:", error);
+					return { success: false, error };
+				}
+				return { success: true, data };
 			}
-
-		const { data, error } = await supabase.from("health_logs").insert([log]);
-		if (error) {
-			console.error("Error creating health log:", error);
-			return { success: false, error };
-		}
-
-		return { success: true, data };
 	};
 
 	/**

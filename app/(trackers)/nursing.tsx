@@ -110,28 +110,28 @@ export default function Nursing() {
 				console.error("Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };
 			}
+		} else {
+			const { success, childId, error } = await getActiveChildId();
+
+			if (!success) {
+				Alert.alert(`Error: ${error}`);
+				return { success: false, error };
+			}
+
+			const normalizedLeftAmount =
+				leftAmount.trim() === "" ? "0" : leftAmount.trim();
+			const normalizedRightAmount =
+				rightAmount.trim() === "" ? "0" : rightAmount.trim();
+
+			return await createNursingLog(
+				childId,
+				leftDuration,
+				rightDuration,
+				normalizedLeftAmount,
+				normalizedRightAmount,
+				note,
+			);
 		}
-
-		const { success, childId, error } = await getActiveChildId();
-
-		if (!success) {
-			Alert.alert(`Error: ${error}`);
-			return { success: false, error };
-		}
-
-		const normalizedLeftAmount =
-			leftAmount.trim() === "" ? "0" : leftAmount.trim();
-		const normalizedRightAmount =
-			rightAmount.trim() === "" ? "0" : rightAmount.trim();
-
-		return await createNursingLog(
-			childId,
-			leftDuration,
-			rightDuration,
-			normalizedLeftAmount,
-			normalizedRightAmount,
-			note,
-		);
 	};
 
 	// Validate input, then call save

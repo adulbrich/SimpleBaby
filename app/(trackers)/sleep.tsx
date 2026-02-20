@@ -134,15 +134,15 @@ export default function Sleep() {
 				console.error("❌ Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };
 			}
-		}
+		} else {
+            const { success, childId, error } = await getActiveChildId();
+            if (!success) {
+                Alert.alert(`Error: ${error}`);
+                return { success: false, error };
+            }
 
-		const { success, childId, error } = await getActiveChildId();
-		if (!success) {
-			Alert.alert(`Error: ${error}`);
-			return { success: false, error };
-		}
-
-		return await createSleepLog(childId, finalStartTime, finalEndTime, note);
+            return await createSleepLog(childId, finalStartTime, finalEndTime, note);
+        }
 	};
 
 	// Handle UI logic for saving a sleep entry depending on method

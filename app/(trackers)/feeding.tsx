@@ -103,23 +103,23 @@ export default function Feeding() {
 				console.error("❌ Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };
 			}
-		}
+		} else {
+            const { success, childId, error } = await getActiveChildId();
 
-		const { success, childId, error } = await getActiveChildId();
+            if (!success) {
+                Alert.alert(`Error: ${error}`);
+                return { success: false, error };
+            }
 
-		if (!success) {
-			Alert.alert(`Error: ${error}`);
-			return { success: false, error };
-		}
-
-		return await createFeedingLog(
-			childId,
-			category,
-			itemName,
-			amount,
-			feedingTime,
-			note,
-		);
+            return await createFeedingLog(
+                childId,
+                category,
+                itemName,
+                amount,
+                feedingTime,
+                note,
+            );
+        }
 	};
 
 	// Validate input fields and trigger save action

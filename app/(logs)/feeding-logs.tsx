@@ -92,43 +92,43 @@ const FeedingLogsView: React.FC = () => {
 
 				setFeedingLogs(decryptedLogs as FeedingLog[]);
 				return;
-			}
+			} else {
+				const {
+					success,
+					childId,
+					childName,
+					error: childError,
+				} = await getActiveChildId();
+				if (!success || !childId) {
+					throw new Error(
+						typeof childError === "string"
+							? childError
+							: childError?.message || "Failed to get active child ID",
+					);
+				}
+				if (childName) setActiveChildName(childName);
 
-			const {
-				success,
-				childId,
-				childName,
-				error: childError,
-			} = await getActiveChildId();
-			if (!success || !childId) {
-				throw new Error(
-					typeof childError === "string"
-						? childError
-						: childError?.message || "Failed to get active child ID",
+				// Query diaper logs from Supabase and sort by most recent change time
+				const { data, error } = await supabase
+					.from("feeding_logs")
+					.select("*")
+					.eq("child_id", childId)
+					.order("feeding_time", { ascending: false });
+
+				if (error) throw error;
+
+				const decryptedLogs = await Promise.all(
+					(data || []).map(async (entry) => ({
+						...entry,
+						category: await safeDecrypt(entry.category),
+						item_name: await safeDecrypt(entry.item_name),
+						amount: await safeDecrypt(entry.amount),
+						note: entry.note ? await safeDecrypt(entry.note) : "",
+					})),
 				);
+
+				setFeedingLogs(decryptedLogs);
 			}
-			if (childName) setActiveChildName(childName);
-
-			// Query diaper logs from Supabase and sort by most recent change time
-			const { data, error } = await supabase
-				.from("feeding_logs")
-				.select("*")
-				.eq("child_id", childId)
-				.order("feeding_time", { ascending: false });
-
-			if (error) throw error;
-
-			const decryptedLogs = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					category: await safeDecrypt(entry.category),
-					item_name: await safeDecrypt(entry.item_name),
-					amount: await safeDecrypt(entry.amount),
-					note: entry.note ? await safeDecrypt(entry.note) : "",
-				})),
-			);
-
-			setFeedingLogs(decryptedLogs);
 		} catch (err) {
 			console.error("❌ Fetch or decryption error:", err);
 			setError(
@@ -158,17 +158,19 @@ const FeedingLogsView: React.FC = () => {
 						}
 						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 						return;
-					}
+					} else {
+						const { error } = await supabase
+							.from("feeding_logs")
+							.delete()
+							.eq("id", id);
 
-					const { error } = await supabase
-						.from("feeding_logs")
-						.delete()
-						.eq("id", id);
-					if (error) {
-						Alert.alert("Error deleting log");
-						return;
+						if (error) {
+							Alert.alert("Error deleting log");
+							return;
+						}
+
+						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 					}
-					setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 				},
 			},
 		]);
@@ -200,25 +202,25 @@ const FeedingLogsView: React.FC = () => {
 				await fetchFeedingLogs();
 				setEditModalVisible(false);
 				return;
+			} else {
+				const { error } = await supabase
+					.from("feeding_logs")
+					.update({
+						category: encryptedCategory,
+						item_name: encryptedItemName,
+						amount: encryptedAmount,
+						note: encryptedNote,
+					})
+					.eq("id", id);
+
+				if (error) {
+					Alert.alert("Failed to update log");
+					return;
+				}
+
+				await fetchFeedingLogs();
+				setEditModalVisible(false);
 			}
-
-			const { error } = await supabase
-				.from("feeding_logs")
-				.update({
-					category: encryptedCategory,
-					item_name: encryptedItemName,
-					amount: encryptedAmount,
-					note: encryptedNote,
-				})
-				.eq("id", id);
-
-			if (error) {
-				Alert.alert("Failed to update log");
-				return;
-			}
-
-			await fetchFeedingLogs();
-			setEditModalVisible(false);
 		} catch (err) {
 			console.error("❌ Encryption or update error:", err);
 			Alert.alert("Something went wrong during save.");

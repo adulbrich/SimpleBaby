@@ -84,40 +84,40 @@ const SleepLogsView: React.FC = () => {
 
 				setSleepLogs(decrypted as SleepLog[]);
 				return;
-			}
+			} else {
+				const {
+					success,
+					childId,
+					childName,
+					error: childError,
+				} = await getActiveChildId();
+				if (!success || !childId) {
+					throw new Error(
+						typeof childError === "string"
+							? childError
+							: childError?.message || "Failed to get active child ID",
+					);
+				}
 
-			const {
-				success,
-				childId,
-				childName,
-				error: childError,
-			} = await getActiveChildId();
-			if (!success || !childId) {
-				throw new Error(
-					typeof childError === "string"
-						? childError
-						: childError?.message || "Failed to get active child ID",
+				if (childName) setActiveChildName(childName);
+
+				const { data, error } = await supabase
+					.from("sleep_logs")
+					.select("*")
+					.eq("child_id", childId)
+					.order("start_time", { ascending: false });
+
+				if (error) throw error;
+
+				const decrypted = await Promise.all(
+					(data || []).map(async (entry) => ({
+						...entry,
+						note: await safeDecrypt(entry.note),
+					})),
 				);
+
+				setSleepLogs(decrypted);
 			}
-
-			if (childName) setActiveChildName(childName);
-
-			const { data, error } = await supabase
-				.from("sleep_logs")
-				.select("*")
-				.eq("child_id", childId)
-				.order("start_time", { ascending: false });
-
-			if (error) throw error;
-
-			const decrypted = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					note: await safeDecrypt(entry.note),
-				})),
-			);
-
-			setSleepLogs(decrypted);
 		} catch (err) {
 			console.error("❌ Fetch or decryption error:", err);
 			setError(
@@ -147,17 +147,17 @@ const SleepLogsView: React.FC = () => {
 						}
 						setSleepLogs((prev) => prev.filter((log) => log.id !== id));
 						return;
+					} else {
+						const { error } = await supabase
+							.from("sleep_logs")
+							.delete()
+							.eq("id", id);
+						if (error) {
+							Alert.alert("Error deleting log");
+							return;
+						}
+						setSleepLogs((prev) => prev.filter((log) => log.id !== id));
 					}
-
-					const { error } = await supabase
-						.from("sleep_logs")
-						.delete()
-						.eq("id", id);
-					if (error) {
-						Alert.alert("Error deleting log");
-						return;
-					}
-					setSleepLogs((prev) => prev.filter((log) => log.id !== id));
 				},
 			},
 		]);
@@ -187,25 +187,25 @@ const SleepLogsView: React.FC = () => {
 				await fetchSleepLogs();
 				setEditModalVisible(false);
 				return;
+			} else {
+				const { error } = await supabase
+					.from("sleep_logs")
+					.update({
+						start_time: editingLog.start_time,
+						end_time: editingLog.end_time,
+						duration: editingLog.duration,
+						note: encryptedNote,
+					})
+					.eq("id", editingLog.id);
+
+				if (error) {
+					Alert.alert("Failed to update log");
+					return;
+				}
+
+				await fetchSleepLogs();
+				setEditModalVisible(false);
 			}
-
-			const { error } = await supabase
-				.from("sleep_logs")
-				.update({
-					start_time: editingLog.start_time,
-					end_time: editingLog.end_time,
-					duration: editingLog.duration,
-					note: encryptedNote,
-				})
-				.eq("id", editingLog.id);
-
-			if (error) {
-				Alert.alert("Failed to update log");
-				return;
-			}
-
-			await fetchSleepLogs();
-			setEditModalVisible(false);
 		} catch (err) {
 			console.error("❌ Encryption or update error:", err);
 			Alert.alert("Something went wrong during save.");

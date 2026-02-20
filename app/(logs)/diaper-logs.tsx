@@ -86,42 +86,42 @@ const DiaperLogsView: React.FC = () => {
 
 				setDiaperLogs(decrypted as DiaperLog[]);
 				return;
-			}
+			} else {
+                const {
+				    success,
+				    childId,
+				    childName,
+				    error: childError,
+			    } = await getActiveChildId();
+                if (!success || !childId) {
+                    throw new Error(
+                        typeof childError === "string"
+                            ? childError
+                            : childError?.message || "Failed to get active child ID",
+                    );
+                }
 
-			const {
-				success,
-				childId,
-				childName,
-				error: childError,
-			} = await getActiveChildId();
-			if (!success || !childId) {
-				throw new Error(
-					typeof childError === "string"
-						? childError
-						: childError?.message || "Failed to get active child ID",
-				);
-			}
+                if (childName) setActiveChildName(childName);
 
-			if (childName) setActiveChildName(childName);
+                const { data, error } = await supabase
+                    .from("diaper_logs")
+                    .select("*")
+                    .eq("child_id", childId)
+                    .order("logged_at", { ascending: false });
 
-			const { data, error } = await supabase
-				.from("diaper_logs")
-				.select("*")
-				.eq("child_id", childId)
-				.order("logged_at", { ascending: false });
+                if (error) throw error;
 
-			if (error) throw error;
+                const decryptedLogs = await Promise.all(
+                    (data || []).map(async (entry) => ({
+                        ...entry,
+                        consistency: await safeDecrypt(entry.consistency),
+                        amount: await safeDecrypt(entry.amount),
+                        note: entry.note ? await safeDecrypt(entry.note) : "",
+                    })),
+                );
 
-			const decryptedLogs = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					consistency: await safeDecrypt(entry.consistency),
-					amount: await safeDecrypt(entry.amount),
-					note: entry.note ? await safeDecrypt(entry.note) : "",
-				})),
-			);
-
-			setDiaperLogs(decryptedLogs);
+                setDiaperLogs(decryptedLogs);
+            }
 		} catch (err) {
 			console.error("❌ Fetch or decryption error:", err);
 			setError(
@@ -150,17 +150,18 @@ const DiaperLogsView: React.FC = () => {
 						}
 						setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
 						return;
-					}
+					} else {
+                        const { error } = await supabase
+                            .from("diaper_logs")
+                            .delete()
+                            .eq("id", id);
 
-					const { error } = await supabase
-						.from("diaper_logs")
-						.delete()
-						.eq("id", id);
-					if (error) {
-						Alert.alert("Error deleting log");
-						return;
-					}
-					setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
+                        if (error) {
+                            Alert.alert("Error deleting log");
+                            return;
+                        }
+                        setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
+                    }
 				},
 			},
 		]);
@@ -190,24 +191,24 @@ const DiaperLogsView: React.FC = () => {
 				await fetchDiaperLogs();
 				setEditModalVisible(false);
 				return;
-			}
+			} else {
+                const { error } = await supabase
+                    .from("diaper_logs")
+                    .update({
+                        consistency: encryptedConsistency,
+                        amount: encryptedAmount,
+                        note: encryptedNote,
+                    })
+                    .eq("id", id);
 
-			const { error } = await supabase
-				.from("diaper_logs")
-				.update({
-					consistency: encryptedConsistency,
-					amount: encryptedAmount,
-					note: encryptedNote,
-				})
-				.eq("id", id);
+                if (error) {
+                    Alert.alert("Failed to update log");
+                    return;
+                }
 
-			if (error) {
-				Alert.alert("Failed to update log");
-				return;
-			}
-
-			await fetchDiaperLogs();
-			setEditModalVisible(false);
+                await fetchDiaperLogs();
+                setEditModalVisible(false);
+            }
 		} catch (err) {
 			console.error("❌ Encryption or update error:", err);
 			Alert.alert("Something went wrong during save.");

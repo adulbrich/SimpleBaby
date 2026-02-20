@@ -107,53 +107,53 @@ const HealthLogsView: React.FC = () => {
 
 				setLogs(decrypted);
 				return;
-			}
+			} else {
+                const {
+                    success,
+                    childId,
+                    childName,
+                    error: childError,
+                } = await getActiveChildId();
+                if (!success || !childId) {
+                    throw new Error(
+                        typeof childError === "string"
+                            ? childError
+                            : childError?.message || "Failed to get child ID",
+                    );
+                }
 
-			const {
-				success,
-				childId,
-				childName,
-				error: childError,
-			} = await getActiveChildId();
-			if (!success || !childId) {
-				throw new Error(
-					typeof childError === "string"
-						? childError
-						: childError?.message || "Failed to get child ID",
-				);
-			}
+                if (childName) setActiveChildName(childName);
 
-			if (childName) setActiveChildName(childName);
+                const { data, error } = await supabase
+                    .from("health_logs")
+                    .select("*")
+                    .eq("child_id", childId)
+                    .order("date", { ascending: false });
 
-			const { data, error } = await supabase
-				.from("health_logs")
-				.select("*")
-				.eq("child_id", childId)
-				.order("date", { ascending: false });
+                if (error) {
+                    throw error;
+                }
 
-			if (error) {
-				throw error;
-			}
+                const decrypted = await Promise.all(
+                    (data || []).map(async (entry) => ({
+                        ...entry,
+                        growth_length: await safeDecrypt(entry.growth_length),
+                        growth_weight: await safeDecrypt(entry.growth_weight),
+                        growth_head: await safeDecrypt(entry.growth_head),
+                        activity_type: await safeDecrypt(entry.activity_type),
+                        activity_duration: await safeDecrypt(entry.activity_duration),
+                        meds_name: await safeDecrypt(entry.meds_name),
+                        meds_amount: await safeDecrypt(entry.meds_amount),
+                        vaccine_name: await safeDecrypt(entry.vaccine_name),
+                        vaccine_location: await safeDecrypt(entry.vaccine_location),
+                        other_name: await safeDecrypt(entry.other_name),
+                        other_description: await safeDecrypt(entry.other_description),
+                        note: await safeDecrypt(entry.note),
+                    })),
+                );
 
-			const decrypted = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					growth_length: await safeDecrypt(entry.growth_length),
-					growth_weight: await safeDecrypt(entry.growth_weight),
-					growth_head: await safeDecrypt(entry.growth_head),
-					activity_type: await safeDecrypt(entry.activity_type),
-					activity_duration: await safeDecrypt(entry.activity_duration),
-					meds_name: await safeDecrypt(entry.meds_name),
-					meds_amount: await safeDecrypt(entry.meds_amount),
-					vaccine_name: await safeDecrypt(entry.vaccine_name),
-					vaccine_location: await safeDecrypt(entry.vaccine_location),
-					other_name: await safeDecrypt(entry.other_name),
-					other_description: await safeDecrypt(entry.other_description),
-					note: await safeDecrypt(entry.note),
-				})),
-			);
-
-			setLogs(decrypted);
+                setLogs(decrypted);
+            }
 		} catch (err) {
 			console.error("❌ Fetch or decryption error:", err);
 			setError(err instanceof Error ? err.message : "Unknown error");
@@ -215,19 +215,19 @@ const HealthLogsView: React.FC = () => {
 				await fetchHealthLogs();
 				setEditModalVisible(false);
 				return;
-			}
-
-			const { error } = await supabase
+			} else {
+                const { error } = await supabase
 				.from("health_logs")
 				.update(updated)
 				.eq("id", editingLog.id);
 
-			if (error) {
-				Alert.alert("Error updating log");
-				return;
-			}
-			await fetchHealthLogs();
-			setEditModalVisible(false);
+                if (error) {
+                    Alert.alert("Error updating log");
+                    return;
+                }
+                await fetchHealthLogs();
+                setEditModalVisible(false);
+            }
 		} catch (err) {
 			console.error("❌ Encryption or update error:", err);
 			Alert.alert("Encryption or update failed");
@@ -249,17 +249,17 @@ const HealthLogsView: React.FC = () => {
 						}
 						setLogs((prev) => prev.filter((log) => log.id !== id));
 						return;
-					}
-
-					const { error } = await supabase
-						.from("health_logs")
-						.delete()
-						.eq("id", id);
-					if (error) {
-						Alert.alert("Error deleting log");
-						return;
-					}
-					setLogs((prev) => prev.filter((log) => log.id !== id));
+					} else {
+                        const { error } = await supabase
+                            .from("health_logs")
+                            .delete()
+                            .eq("id", id);
+                        if (error) {
+                            Alert.alert("Error deleting log");
+                            return;
+                        }
+                        setLogs((prev) => prev.filter((log) => log.id !== id));
+                    }
 				},
 			},
 		]);
