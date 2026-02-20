@@ -21,7 +21,6 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
-import Button from '@/components/button';
 
 
 export default function Milestone() {
