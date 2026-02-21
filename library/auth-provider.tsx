@@ -18,8 +18,8 @@ type AuthContextType = {
     loading: boolean
     error: string | null
     isGuest: boolean;
-    enterGuest: () => Promise<void>
-    exitGuest: () => Promise<void>
+    enterGuest: () => Promise<void | { error?: any }>
+    exitGuest: () => Promise<void | { error?: any }>
     signIn: (
         email: string,
         password: string,
@@ -47,13 +47,23 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const [error, setError] = useState<string | null>(null);
 
     const enterGuest = async () => {
-        await enterGuestMode();
-        setIsGuest(true);
+        try {
+            await enterGuestMode();
+            setIsGuest(true);
+        } catch (err: any) {
+            setError(err.message);
+            return { error: err };
+        }
     };
 
     const exitGuest = async () => {
-        await exitGuestMode();
-        setIsGuest(false);
+        try {
+            await exitGuestMode();
+            setIsGuest(false);
+        } catch (err: any) {
+            setError(err.message);
+            return { error: err };
+        }
     };
 
     const signIn = async (email: string, password: string) => {
