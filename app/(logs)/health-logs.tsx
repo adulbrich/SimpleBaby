@@ -104,9 +104,7 @@ const HealthLogsView: React.FC = () => {
 						note: await safeDecrypt(entry.note),
 					})),
 				);
-
 				setLogs(decrypted);
-				return;
 			} else {
                 const {
                     success,
@@ -214,7 +212,6 @@ const HealthLogsView: React.FC = () => {
 				}
 				await fetchHealthLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
                 const { error } = await supabase
 				.from("health_logs")
@@ -248,7 +245,6 @@ const HealthLogsView: React.FC = () => {
 							return;
 						}
 						setLogs((prev) => prev.filter((log) => log.id !== id));
-						return;
 					} else {
                         const { error } = await supabase
                             .from("health_logs")
