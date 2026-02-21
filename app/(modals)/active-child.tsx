@@ -137,26 +137,26 @@ export default function ActiveChild() {
         }
     };
 
-    const fetchCreatedDate = async () => {
-        try {
-            const { success, date } = await getChildCreatedDate(session?.user.user_metadata?.activeChild);
-            if (!success) throw new Error("Unable to retrieve date.");
-
-            if (date) {
-                setCreatedDate((new Date(date)).toDateString());
-            } else {
-                throw new Error("Failed to retrieve valid date.");
-            }
-        } catch (err) {
-            setDateError(err instanceof Error ? err.message : 'An unknown error occurred.');
-        } finally {
-            setLoadingDate(false);
-        };
-    };
-
     useEffect(() => {
+        const fetchCreatedDate = async () => {
+            try {
+                const { success, date } = await getChildCreatedDate(session?.user.user_metadata?.activeChild);
+                if (!success) throw new Error("Unable to retrieve date.");
+
+                if (date) {
+                    setCreatedDate((new Date(date)).toDateString());
+                } else {
+                    throw new Error("Failed to retrieve valid date.");
+                }
+            } catch (err) {
+                setDateError(err instanceof Error ? err.message : 'An unknown error occurred.');
+            } finally {
+                setLoadingDate(false);
+            };
+        };
+
         fetchCreatedDate();
-    }, [fetchCreatedDate]);
+    }, []);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
