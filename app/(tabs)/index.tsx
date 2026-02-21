@@ -65,9 +65,12 @@ export default function MainTab() {
 
 		// GUEST MODE: local-only
 		if (isGuest) {
-			await createChild(child);
-			setChildState(false);
-			return;
+			try {
+				await createChild(child);
+				setChildState(false);
+			} catch {
+				Alert.alert("Error", "Could not create the child in guest mode. Please try again");
+			}
 		} else {
 			// SIGNED IN: Supabase connection
 			try {
@@ -107,30 +110,20 @@ export default function MainTab() {
 	useEffect(() => {
 		let cancelled = false;
 		const checkChild = async () => {
-			// if we're still loading, stop the check for child state
-			if (loading) {
-				return;
-			}
+			if (loading) return;
 
-			// do not show modal if no active session or not in guest mode
-			if (!session && !isGuest) {
-				setChildState(false);
-				return;
-			}
-
-			// Check if there is an active child when NOT using guest mode
-			if (session) {
-				const activeChild = session.user.user_metadata?.activeChild; // check metadata for a child
-				if (!activeChild) {
-					setChildState(true); // If no active child, prompt the user to add a child
+			if (isGuest) {
+				const activeId = await getActiveChildId();
+				if (!cancelled) {
+					setChildState(!activeId);
 				}
-				return;
-			}
-
-			// Check for guest mode:
-			const activeId = await getActiveChildId();
-			if (!cancelled) {
-				setChildState(!activeId);
+			} else {
+				if (!session) {
+					setChildState(false);
+					return;
+				}
+				const activeChild = session.user.user_metadata?.activeChild;
+				setChildState(!activeChild);
 			}
 		};
 
