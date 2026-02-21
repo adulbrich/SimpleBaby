@@ -34,6 +34,12 @@ export default function ModalsLayout() {
                         headerTitle: 'Profile',
                     }}
                 />
+                <Stack.Screen
+                    name='active-child'
+                    options={{
+                        headerTitle: 'Active Child',
+                    }}
+                />
             </Stack>
         </>
     );

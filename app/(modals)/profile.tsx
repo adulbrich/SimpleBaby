@@ -67,8 +67,6 @@ export default function Profile() {
                 'Error',
                 error.message || 'An error occurred while saving child data.',
             );
-        } finally {
-            setShowSwitchChild(false);
         }
     };
 
@@ -118,9 +116,11 @@ export default function Profile() {
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Active Child
                         </Text>
-                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {session?.user.user_metadata?.activeChild}
-                        </Text>
+                        <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
+                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                👶 {session?.user.user_metadata?.activeChild}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                     { loadingNames ? (
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
