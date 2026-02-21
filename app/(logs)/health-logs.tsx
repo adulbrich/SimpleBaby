@@ -73,9 +73,7 @@ const HealthLogsView: React.FC = () => {
 
 			if (isGuest) {
 				const childId = await getLocalActiveChildId();
-				if (!childId) {
-					throw new Error("No active child selected (Guest Mode)");
-				}
+				if (!childId) throw new Error("No active child selected (Guest Mode)");
 
                 // get & sort health logs descendingly
 				const rows = await listRows<LocalHealthRow>("health_logs");

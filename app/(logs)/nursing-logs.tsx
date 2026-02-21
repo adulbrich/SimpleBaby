@@ -61,9 +61,7 @@ const NursingLogsView: React.FC = () => {
 		try {
 			if (isGuest) {
 				const childId = await getLocalActiveChildId();
-				if (!childId) {
-					throw new Error("No active child selected (Guest Mode)");
-				}
+				if (!childId) throw new Error("No active child selected (Guest Mode)");
 
                 // get & sort nursing logs descendingly
 				const rows = await listRows<LocalNursingRow>("nursing_logs");
