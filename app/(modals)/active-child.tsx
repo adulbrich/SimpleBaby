@@ -156,7 +156,7 @@ export default function ActiveChild() {
         };
 
         fetchCreatedDate();
-    }, []);
+    }, [session?.user.user_metadata?.activeChild]);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
