@@ -58,16 +58,19 @@ export default function Profile() {
 
     useEffect(() => {
         const loadGuestChild = async () => {
-            if (!isGuest) return;
-            const activeId = await getActiveChildId();
-            if (!activeId) {
-                setGuestChildName("Guest Child");
-                return;
+            try {
+                if (!isGuest) return;
+                const activeId = await getActiveChildId();
+                if (!activeId) {
+                    setGuestChildName("Guest Child");
+                    return;
+                }
+                const children = await listChildren();
+                const activeChild = children.find(c => c.id === activeId);
+                setGuestChildName(activeChild?.name ?? 'Guest Child');
+            } catch {
+                Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.")
             }
-
-            const children = await listChildren();
-            const activeChild = children.find(c => c.id === activeId);
-            setGuestChildName(activeChild?.name ?? 'Guest Child');
         };
 
         loadGuestChild();
