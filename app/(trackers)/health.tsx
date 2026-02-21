@@ -70,8 +70,8 @@ export default function Health() {
 	const saveHealthLog = async (log: any) => {
 		if (isGuest) {
 			try {
-				const saved = await insertRow("health_logs", log);
-				return saved
+				const success = await insertRow("health_logs", log);
+				return success
 					? { success: true }
 					: { success: false, error: "Failed to save health log locally." };
 			} catch (error) {

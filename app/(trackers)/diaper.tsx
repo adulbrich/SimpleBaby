@@ -51,7 +51,7 @@ export default function Diaper() {
 			const encryptedNote = note ? await encryptData(note) : null;
 
 			if (isGuest) {
-				const saved = await insertRow("diaper_logs", {
+				const success = await insertRow("diaper_logs", {
 					child_id: childId,
 					consistency: encryptedConsistency,
 					amount: encryptedAmount,
@@ -59,7 +59,7 @@ export default function Diaper() {
 					change_time: changeTime.toISOString(),
 					logged_at: new Date().toISOString(),
 				});
-				return saved
+				return success
 					? { success: true }
 					: { success: false, error: "Failed to save diaper log locally." };
 			} else {

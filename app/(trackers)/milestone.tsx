@@ -170,7 +170,7 @@ export default function Milestone() {
 
 		if (isGuest) {
 			try {
-				const saved = await insertRow("milestone_logs", {
+				const success = await insertRow("milestone_logs", {
 					child_id: childId,
 					category,
 					title: encryptedName,
@@ -178,7 +178,7 @@ export default function Milestone() {
 					photo_url: photoPath,
 					note: encryptedNote,
 				});
-				return saved
+				return success
 					? { success: true }
 					: { success: false, error: "Failed to save milestone log locally." };
 			} catch (error) {

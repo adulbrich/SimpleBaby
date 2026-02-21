@@ -89,7 +89,7 @@ export default function Feeding() {
 				const encryptedAmount = await encryptData(amount);
 				const encryptedNote = note ? await encryptData(note) : null;
 
-				await insertRow("feeding_logs", {
+				const success = await insertRow("feeding_logs", {
 					child_id: childId,
 					category: encryptedCategory,
 					item_name: encryptedItemName,
@@ -98,7 +98,9 @@ export default function Feeding() {
 					note: encryptedNote,
 				});
 
-				return { success: true };
+				return success
+					? { success: true }
+					: { success: false, error: "Failed to save feeding log locally." };
 			} catch (err) {
 				console.error("❌ Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };

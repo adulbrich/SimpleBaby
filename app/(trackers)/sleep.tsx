@@ -121,7 +121,7 @@ export default function Sleep() {
 			try {
 				const encryptedNote = note ? await encryptData(note) : null;
 
-				await insertRow("sleep_logs", {
+				const success = await insertRow("sleep_logs", {
 					child_id: childId,
 					start_time: finalStartTime.toISOString(),
 					end_time: finalEndTime.toISOString(),
@@ -129,7 +129,9 @@ export default function Sleep() {
 					note: encryptedNote,
 				});
 
-				return { success: true };
+				return success
+					? { success: true }
+					: { success: false, error: "Failed to save sleep log locally." };
 			} catch (err) {
 				console.error("❌ Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };

@@ -95,7 +95,7 @@ export default function Nursing() {
 				const encryptedRightAmount = await encryptData(normalizedRightAmount);
 				const encryptedNote = note ? await encryptData(note) : null;
 
-				await insertRow("nursing_logs", {
+				const success = await insertRow("nursing_logs", {
 					child_id: childId,
 					left_duration: encryptedLeftDuration,
 					right_duration: encryptedRightDuration,
@@ -105,7 +105,9 @@ export default function Nursing() {
 					logged_at: new Date().toISOString(),
 				});
 
-				return { success: true };
+				return success
+					? { success: true }
+					: { success: false, error: "Failed to save nursing log locally." };
 			} catch (err) {
 				console.error("Guest insert failed:", err);
 				return { success: false, error: "Encryption or local save error" };
