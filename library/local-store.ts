@@ -39,9 +39,9 @@ function uuidv4(): string {
 // getJson()
 // retrieves a given row from the local db
 async function getJson<T>(key: string, fallback: T): Promise<T> {
-	const raw = await AsyncStorage.getItem(key);
-	if (!raw) return fallback;
 	try {
+		const raw = await AsyncStorage.getItem(key);
+		if (!raw) return fallback;
 		return JSON.parse(raw) as T;
 	} catch {
 		return fallback;
@@ -63,7 +63,6 @@ export async function enterGuestMode() {
 		guestId = uuidv4();
 		await AsyncStorage.setItem(KEYS.guestId, guestId);
 	}
-	return;
 }
 
 // exitGuestMode()
@@ -77,12 +76,6 @@ export async function exitGuestMode() {
 // verifies that isGuest key is true (i.e. === "1")
 export async function isGuestMode(): Promise<boolean> {
 	return (await AsyncStorage.getItem(KEYS.isGuest)) === "1";
-}
-
-// getGuestId()
-// retrieves the guestId key from storage
-export async function getGuestId(): Promise<string | null> {
-	return await AsyncStorage.getItem(KEYS.guestId);
 }
 
 // listChildren()
@@ -181,15 +174,23 @@ export async function updateRow<T extends object>(
 	id: string,
 	patch: Partial<T>,
 ): Promise<boolean> {
-	const tableKey = KEYS.table(tableName);
-	const rows = await getJson<(LocalRow & T)[]>(tableKey, []);
-	const index = rows.findIndex((r) => r.id === id);
-	if (index === -1) {
+	try {
+		const tableKey = KEYS.table(tableName);
+		const rows = await getJson<(LocalRow & T)[]>(tableKey, []);
+		const index = rows.findIndex((r) => r.id === id);
+		if (index === -1) {
+			return false;
+		}
+		rows[index] = { ...rows[index], ...patch };
+		await setJson(tableKey, rows);
+		return true;
+	} catch (error) {
+		console.error(
+			`Failed to update the row in table "${tableName}" in local storage:`,
+			error,
+		);
 		return false;
 	}
-	rows[index] = { ...rows[index], ...patch };
-	await setJson(tableKey, rows);
-	return true;
 }
 
 // deleteRow()
