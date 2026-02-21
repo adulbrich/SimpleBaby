@@ -221,7 +221,7 @@ export default function ActiveChild() {
                 visible={showSelectChild}
                 childNames={childNames}
                 currentChild={session?.user.user_metadata?.activeChild}
-                showCancelButton={false}
+                hideCancelButton={true}
                 handleSwitch={handleSelectChild}
                 handleCancel={handleCancelSelectChild}
             />

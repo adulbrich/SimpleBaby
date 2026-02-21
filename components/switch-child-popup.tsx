@@ -16,14 +16,14 @@ export default function SwitchChildPopup(
         visible,
         childNames,
         currentChild,
-        showCancelButton,
+        hideCancelButton,
         handleSwitch,
         handleCancel
     } : {
         visible?: boolean;
         childNames: string[];
         currentChild?: string;
-        showCancelButton?: boolean;
+        hideCancelButton?: boolean;
         handleSwitch: (index: number) => void;
         handleCancel: () => void;
     }
@@ -68,7 +68,7 @@ export default function SwitchChildPopup(
                                     textClass='font-bold'
                                     buttonClass='button-normal mb-2'
                                 />
-                            { showCancelButton &&
+                            { !hideCancelButton &&
                                 <View>
                                     <Button
                                         text='Cancel'
