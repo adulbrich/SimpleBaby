@@ -92,13 +92,11 @@ export default function Profile() {
 
     useEffect(() => {
         fetchChildNames();
-    }, []);
+    }, [session?.user.user_metadata?.activeChild]);  // re-fetch child names if the user renames a child
 
     const fetchChildNames = async () => {
         try {
-            const { success, names } = await getChildNames();
-
-            if (!success) throw new Error("Unable to retrieve child names");
+            const { names } = await getChildNames();
 
             if (names) setChildNames(names);
         } catch (err) {

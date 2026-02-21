@@ -16,12 +16,14 @@ export default function SwitchChildPopup(
         visible,
         childNames,
         currentChild,
+        showCancelButton,
         handleSwitch,
         handleCancel
     } : {
         visible?: boolean;
         childNames: string[];
-        currentChild: string;
+        currentChild?: string;
+        showCancelButton?: boolean;
         handleSwitch: (index: number) => void;
         handleCancel: () => void;
     }
@@ -29,7 +31,9 @@ export default function SwitchChildPopup(
     const [selected, setSelected] = useState<number>(-1);
 
     // call useEffect to get correct index after childNames parameter loads
-    useEffect(() => setSelected(childNames.indexOf(currentChild)), [childNames, currentChild]);
+    useEffect(() => {
+        if (currentChild) setSelected(childNames.indexOf(currentChild));
+    }, [childNames, currentChild]);
 
     return (
         <Modal visible={visible} transparent onRequestClose={handleCancel}>
@@ -44,7 +48,7 @@ export default function SwitchChildPopup(
                     <View className='p-8 h-[60%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
-                                Change active child
+                                Select Child
                             </Text>
                             <Text className='subtitle'>
                                 Select a child to switch to:
@@ -64,14 +68,16 @@ export default function SwitchChildPopup(
                                     textClass='font-bold'
                                     buttonClass='button-normal mb-2'
                                 />
-                            <View>
-                                <Button
-                                    text='Cancel'
-                                    action={handleCancel}
-                                    textClass='font-bold'
-                                    buttonClass='bg-red-600 border-gray-500'
-                                />
-                            </View>
+                            { showCancelButton &&
+                                <View>
+                                    <Button
+                                        text='Cancel'
+                                        action={handleCancel}
+                                        textClass='font-bold'
+                                        buttonClass='bg-red-600 border-gray-500'
+                                    />
+                                </View>
+                            }
                         </View>
                     </View>
                 </BlurView>

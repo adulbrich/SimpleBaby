@@ -69,7 +69,7 @@ export const saveNewChild = async (childName: string) => {
 };
 
 
-export async function getChildNames(): Promise<{success: boolean; names: string[]}> {
+export async function getChildNames(): Promise<{ names: string[] }> {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -86,7 +86,7 @@ export async function getChildNames(): Promise<{success: boolean; names: string[
         throw new Error("Failed to retrieve children.");
     }
 
-    return { success: true, names: data.map(({name}) => name) };  // extract name, since each row is returned as {columnName: value, ...}
+    return { names: data.map(({name}) => name) };  // extract name, since each row is returned as {columnName: value, ...}
 };
 
 
@@ -130,13 +130,43 @@ export async function updateChildName(oldChildName: string, newChildName: string
     if (getError) {
         throw new Error("Failed to find child ID.");
     }
-    const childID: string = String(data.id);  // extract id field as a string
+    const childID: string = String(data.id);  // ensure id field is a string
 
     const { error } = await supabase
         .from("children")
         .update({name: newChildName})
-        .eq("id", childID)
+        .eq("id", childID);
     if (error) {
         throw new Error("Failed to update child name.");
+    }
+};
+
+
+export async function deleteChild(childName: string) {
+    const user = await supabase.auth.getUser();
+    const userId = user.data?.user?.id;
+
+    if (!userId) {
+        throw new Error('User not found.');
+    }
+
+    // get child id
+    const { data, error: getError } = await supabase
+        .from("children")
+        .select("id")
+        .eq("user_id", userId)  // filter by userID
+        .eq("name", childName)  // and by child name
+        .single();  // restrict to one row
+    if (getError) {
+        throw new Error("Failed to find child ID.");
+    }
+    const childID: string = String(data.id);  // ensure id field is a string
+
+    const { error } = await supabase
+        .from("children")
+        .delete()
+        .eq("id", childID);
+    if (error) {
+        throw new Error("Failed to delete child.");
     }
 };

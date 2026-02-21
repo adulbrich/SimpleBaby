@@ -8,12 +8,12 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
-import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import RenameChildPopup from '@/components/rename-child-popup';
-import { getChildCreatedDate, updateChildName } from '@/library/utils';
+import { getChildCreatedDate, updateChildName, getChildNames, deleteChild } from '@/library/utils';
 import supabase from '@/library/supabase-client';
+import SwitchChildPopup from '@/components/switch-child-popup';
 
 /**
  * Profile Screen
@@ -31,10 +31,86 @@ export default function ActiveChild() {
     const [createdDate, setCreatedDate] = useState<string|undefined>(undefined);
     const [loadingDate, setLoadingDate] = useState(true);
     const [dateError, setDateError] = useState<string | null>(null);
+    const [showSelectChild, setShowSelectChild] = useState(false);
+    const [childNames, setChildNames] = useState<string[]>([]);
     
-    // Handles user sign-out and route reset
+    // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
-        //
+        try {
+            Alert.alert(
+                "Confirm Delete",
+                `Are you sure you want to delete ${session?.user.user_metadata?.activeChild}?`,
+                [{
+                    text: "Cancel",
+                    style: "cancel",
+                    isPreferred: true,
+                },
+                {
+                    text: "Confirm",
+                    style: "destructive",
+                    onPress: handleConfirmedDeleteChild,
+                }]
+            );
+        } catch (err) {
+            Alert.alert("Error", err instanceof Error ? err.message : 'An unknown error occurred');
+        }
+    };
+    
+    // Handles second user request to delete a child, after confirmation
+    const handleConfirmedDeleteChild = async () => {
+        try {
+            const { names } = await getChildNames(); // get child names
+            if (names.length === 0) throw new Error("Unable to access child data");
+
+            await deleteChild(session?.user.user_metadata?.activeChild);  // delete the current child
+
+            const otherNames = names.filter(name => name !== session?.user.user_metadata?.activeChild);
+            if (otherNames.length > 0) {
+                // store names to display to user
+                setChildNames(otherNames);
+                // show selection pop up for the user to select a new child
+                setShowSelectChild(true);
+            } else {
+                // the user has no other child accounts
+                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
+                // remove the active child from the user's supabase account. This will propagate to the user's session
+                await supabase.auth.updateUser({
+                    data: { activeChild: null },
+                });
+            }
+        } catch (err) {
+            Alert.alert("Error", err instanceof Error ? err.message : 'An unknown error occurred');
+        }
+    };
+
+    const handleSelectChild = async (index: number) => {
+        try {
+            if (index < 0 || index >= childNames.length) {  // if index is invalid
+                throw new Error("Unable to find selected child");
+            }
+            // Update user session metadata with the active child
+            await supabase.auth.updateUser({
+                data: { activeChild: childNames[index] },
+            });
+            // send the user back to the profile page
+            router.dismissTo("/(modals)/profile");
+        } catch (err) {
+            Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
+        }
+    };
+
+    const handleCancelSelectChild = async () => {
+        try {
+            // Update user session metadata with the next child that wasn't deleted
+            await supabase.auth.updateUser({
+                data: { activeChild: childNames[0] },
+            });
+        } catch (err) {
+            console.error("Failed to select new child", err instanceof Error ? err.message : 'Failed to change active child.');
+        } finally {
+            setShowSelectChild(false);
+            router.dismissTo("/(modals)/profile");  // send the user back to the profile page
+        }
     };
 
     const handleRenameChild = async () => {
@@ -61,10 +137,6 @@ export default function ActiveChild() {
         }
     };
 
-    useEffect(() => {
-        fetchCreatedDate();
-    }, []);
-
     const fetchCreatedDate = async () => {
         try {
             const { success, date } = await getChildCreatedDate(session?.user.user_metadata?.activeChild);
@@ -73,7 +145,7 @@ export default function ActiveChild() {
             if (date) {
                 setCreatedDate((new Date(date)).toDateString());
             } else {
-                throw new Error("Failed to retrieve valid date.")
+                throw new Error("Failed to retrieve valid date.");
             }
         } catch (err) {
             setDateError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -81,6 +153,10 @@ export default function ActiveChild() {
             setLoadingDate(false);
         };
     };
+
+    useEffect(() => {
+        fetchCreatedDate();
+    }, [fetchCreatedDate]);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -95,7 +171,10 @@ export default function ActiveChild() {
                         </Text>
                     </View>
                     <TouchableOpacity
-                        onPress={() => setShowRenameChild(true)}
+                        onPress={() => {
+                            setNewChildName(session?.user.user_metadata?.activeChild);  // autofill with current name
+                            setShowRenameChild(true);
+                        }}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
                             <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
@@ -137,6 +216,14 @@ export default function ActiveChild() {
                     setShowRenameChild(false);
                     setNewChildName("");  // reset name
                 }}
+            />
+            <SwitchChildPopup
+                visible={showSelectChild}
+                childNames={childNames}
+                currentChild={session?.user.user_metadata?.activeChild}
+                showCancelButton={false}
+                handleSwitch={handleSelectChild}
+                handleCancel={handleCancelSelectChild}
             />
         </SafeAreaView>
     );
