@@ -68,39 +68,39 @@ export default function MainTab() {
 			await createChild(child);
 			setChildState(false);
 			return;
-		}
+		} else {
+			// SIGNED IN: Supabase connection
+			try {
+				const user = await supabase.auth.getUser();
+				const userId = user.data?.user?.id;
 
-		// SIGNED IN: Supabase connection
-		try {
-			const user = await supabase.auth.getUser();
-			const userId = user.data?.user?.id;
+				if (!userId) {
+					throw new Error("User not found.");
+				}
 
-			if (!userId) {
-				throw new Error("User not found.");
+				// Insert child into the database
+				const { error } = await supabase
+					.from("children")
+					.insert([{ user_id: userId, name: child }])
+					.select("id")
+					.single();
+
+				if (error) {
+					throw error;
+				}
+
+				// Update user session metadata with the active child
+				await supabase.auth.updateUser({
+					data: { activeChild: child },
+				});
+
+				setChildState(false); // Close modal
+			} catch (error: any) {
+				Alert.alert(
+					"Error",
+					error.message || "An error occurred while saving child data.",
+				);
 			}
-
-			// Insert child into the database
-			const { error } = await supabase
-				.from("children")
-				.insert([{ user_id: userId, name: child }])
-				.select("id")
-				.single();
-
-			if (error) {
-				throw error;
-			}
-
-			// Update user session metadata with the active child
-			await supabase.auth.updateUser({
-				data: { activeChild: child },
-			});
-
-			setChildState(false); // Close modal
-		} catch (error: any) {
-			Alert.alert(
-				"Error",
-				error.message || "An error occurred while saving child data.",
-			);
 		}
 	};
 
