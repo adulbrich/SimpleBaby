@@ -175,7 +175,10 @@ export default function Health() {
 				error,
 			} = await getActiveChildId();
 			if (!success) {
-				return { success: false, error: error };
+				return {
+					success: false,
+					error: `Failed to get active child: ${error}`,
+				};
 			}
 			childId = cloudChildId;
 		}
@@ -239,7 +242,12 @@ export default function Health() {
 			router.replace("/(tabs)");
 			Alert.alert("Success", "Health log saved successfully!");
 		} else if (result.error && !String(result.error).startsWith("Missing required")) {
-			Alert.alert("Error", `Failed to save health log: ${result.error}`);
+			const errorMessage = String(result.error);
+			if (errorMessage.startsWith("Failed to ")) {
+				Alert.alert("Error", errorMessage);
+			} else {
+				Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
+			}
 		}
 	};
 
