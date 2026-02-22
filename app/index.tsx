@@ -54,10 +54,10 @@ export default function RootIndex() {
 				<View className="w-full overflow-visible items-center">
 					<Image
 						style={{
-						width,
-						height: width,
-						position: "relative",
-						left: width / 2,
+							width,
+							height: width,
+							position: "relative",
+							left: width / 2,
 						}}
 						source={require("@/assets/images/bottle.png")}
 						placeholder={{}}
@@ -68,11 +68,11 @@ export default function RootIndex() {
 					</View>
 					{/* App welcome text */}
 					<View className="mt-10">
-					<Text className="subheading">Welcome to</Text>
-					<Text className="heading">SimpleBaby</Text>
-					<Text className="subtitle">
-						{"A secure baby tracker that's easy to use."}
-					</Text>
+						<Text className="subheading">Welcome to</Text>
+						<Text className="heading">SimpleBaby</Text>
+						<Text className="subtitle">
+							{"A secure baby tracker that's easy to use."}
+						</Text>
 					</View>
 					{/* Auth action buttons */}
 					<View className="flex-col gap-2 mt-10">
