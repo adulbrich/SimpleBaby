@@ -16,8 +16,8 @@ import supabase from '@/library/supabase-client';
 import { router } from 'expo-router';
 import { getActiveChildId } from '@/library/utils';
 import DateTimePicker, {
-  DateTimePickerAndroid,
-  DateTimePickerEvent,
+    DateTimePickerAndroid,
+    DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import MilestoneCategory, { MilestoneCategoryList } from '@/components/milestone-category';
 import { encryptData } from '@/library/crypto';
@@ -218,7 +218,13 @@ export default function Milestone() {
                 Alert.alert(`Failed to save milestone log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide a milestone name and date');
+            const missingFields = [];
+            if (!name) missingFields.push("name");
+            if (!milestoneDate) missingFields.push("date");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
@@ -228,6 +234,7 @@ export default function Milestone() {
         setName("");
         setMilestoneDate(new Date());
         setPhotoUri(null);
+        setPhotoName(null);
         setNote("");
     };
 
@@ -277,6 +284,7 @@ export default function Milestone() {
                             <TouchableOpacity
                             className="rounded-full bg-red-50 p-4"
                             onPress={showDatePickerModal}
+                            testID='milestone-date-button'
                             >
                             <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
                             </TouchableOpacity>
@@ -302,6 +310,7 @@ export default function Milestone() {
                             className="rounded-full p-4 bg-red-100 items-center"
                             onPress={pickPhoto}
                             disabled={uploadingPhoto}
+                            testID='milestone-photo-button'
                             >
                             <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
                         </TouchableOpacity>
@@ -340,12 +349,14 @@ export default function Milestone() {
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 grow'
                             onPress={handleSaveMilestoneLog}
+                            testID='milestone-save-log-button'
                         >
                         <Text>➕ Add to log</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='rounded-full p-4 bg-red-100 items-center'
                             onPress={handleResetFields}
+                            testID='milestone-reset-form-button'
                         >
                             <Text>🗑️ Reset fields</Text>
                         </TouchableOpacity>

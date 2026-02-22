@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -39,6 +39,7 @@ const MilestoneLogsView: React.FC = () => {
     const [milestoneLogs, setMilestoneLogs] = useState<MilestoneLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeChildName, setActiveChildName] = useState<string | null>(null);
     
     const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -48,25 +49,11 @@ const MilestoneLogsView: React.FC = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
 
-    const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
-        try {
-            const { data, error } = await supabase.storage
-                .from("milestone-photos")
-                .createSignedUrl(path, 600);
-
-            if (error) {
-                console.warn("SIGN ERROR:", { message: error.message, name: error.name, status: (error as any).status });
-                return null;
-            }
-
-            return data?.signedUrl ?? null;
-        } catch (e) {
-            console.warn("⚠️ Signed URL error:", e);
-            return null;
-        }
-    };
+    useEffect(() => {
+        fetchMilestoneLogs();         
+    }, []);
     
-    const fetchMilestoneLogs = useCallback(async () => {
+    const fetchMilestoneLogs = async () => {
         try {
             setLoading(true);
             setError(null);
@@ -75,7 +62,8 @@ const MilestoneLogsView: React.FC = () => {
             if (!result?.success || !result.childId) {
                 throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
             }
-            
+
+            if (result.childName) setActiveChildName(result.childName);
             const childId = String(result.childId);
             
             const { data, error } = await supabase
@@ -93,6 +81,24 @@ const MilestoneLogsView: React.FC = () => {
                 } catch (err) {
                     console.warn('⚠️ Decryption failed for:', value);
                     return `[Decryption Failed]: ${err}`;
+                }
+            };
+
+            const getSignedPhotoUrl = async (path: string): Promise<string | null> => {
+                try {
+                    const { data, error } = await supabase.storage
+                        .from("milestone-photos")
+                        .createSignedUrl(path, 600);
+
+                    if (error) {
+                        console.warn("SIGN ERROR:", { message: error.message, name: error.name, status: (error as any).status });
+                        return null;
+                    }
+
+                    return data?.signedUrl ?? null;
+                } catch (e) {
+                    console.warn("⚠️ Signed URL error:", e);
+                    return null;
                 }
             };
             
@@ -128,11 +134,7 @@ const MilestoneLogsView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    useEffect(() => {
-        fetchMilestoneLogs();         
-    }, [fetchMilestoneLogs]);
+    };
     
     const openEditModal = (log: MilestoneLog) => {
         setEditingLog(log);
@@ -252,7 +254,9 @@ const MilestoneLogsView: React.FC = () => {
         {loading ? (
             <ActivityIndicator size="large" color="#e11d48" />
         ) : error ? (
-            <Text className="text-red-600">{error}</Text>
+            <Text className="text-red-600 text-center">Error: {error}</Text>
+        ) : milestoneLogs.length === 0 ? (
+            <Text>You don&apos;t have any milestone logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
         ) : (
             <FlatList
             data={milestoneLogs}

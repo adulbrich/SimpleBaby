@@ -97,7 +97,14 @@ export default function Feeding() {
                 Alert.alert(`Failed to save feeding log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide category, item name, and amount');
+            const missingFields = [];
+            if (!category) missingFields.push("category");
+            if (!itemName) missingFields.push("item name");
+            if (!amount) missingFields.push("amount");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} and ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Feeding log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 

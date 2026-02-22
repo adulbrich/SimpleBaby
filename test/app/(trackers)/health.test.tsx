@@ -52,13 +52,17 @@ async function setHealthInputs({
     growth,
     activity,
     meds,
+    vaccine,
+    other,
     date,
 } : {
     category?: HealthCategory;
     growth?: { length?: string; weight?: string; head?: string; };
     activity?: { type: string; duration: string; };
     meds?: { name?: string; amount?: string; timeTaken?: Date; };
-    date?: Date,
+    vaccine?: { name?: string; location?: string; };
+    other?: { name?: string; description?: string; };
+    date?: Date;
 }) {
     // read parameters to first call of HealthModule
     const {
@@ -66,6 +70,8 @@ async function setHealthInputs({
         onGrowthUpdate,
         onActivityUpdate,
         onMedsUpdate,
+        onVaccineUpdate,
+        onOtherUpdate,
         onDateUpdate,
     } = (HealthModule as jest.Mock).mock.calls[0][0];
 
@@ -81,6 +87,12 @@ async function setHealthInputs({
     if (meds) {
         await act(() => onMedsUpdate?.(meds));
     }
+    if (vaccine) {
+        await act(() => onVaccineUpdate?.(vaccine));
+    }
+    if (other) {
+        await act(() => onOtherUpdate?.(other));
+    }
     if (date) {
         await act(() => onDateUpdate?.(date));
     }
@@ -94,6 +106,7 @@ describe("Track health screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (supabase.from("").insert as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
+        (router.replace as jest.Mock).mockClear();
     });
 
     test("Renders health tracking inputs", () => {
@@ -139,10 +152,40 @@ describe("Track health screen", () => {
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
-
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide at least one growth measurement`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1])
+            .toBe("Failed to save the Growth Health log. You are missing the following fields: length, weight and head.");
+
+        // repeat with length and weight filled
+        await setHealthInputs({growth: {length: "x", weight: "y", head: ""}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[1][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[1][1])
+            .toBe("Failed to save the Growth Health log. You are missing the following fields: head.");
+
+        // repeat with length and head filled
+        await setHealthInputs({growth: {length: "x", weight: "", head: "y"}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[2][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[2][1])
+            .toBe("Failed to save the Growth Health log. You are missing the following fields: weight.");
+
+        // repeat with weight and head filled
+        await setHealthInputs({growth: {length: "", weight: "x", head: "y"}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[3][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[3][1])
+            .toBe("Failed to save the Growth Health log. You are missing the following fields: length.");
     });
         
     test("Catch unfilled activity inputs", async () => {
@@ -153,10 +196,30 @@ describe("Track health screen", () => {
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
-
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide both activity type and duration`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1])
+            .toBe("Failed to save the Activity Health log. You are missing the following fields: type and duration.");
+
+        // repeat with type filled
+        await setHealthInputs({activity: {type: "x", duration: ""}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[1][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[1][1])
+            .toBe("Failed to save the Activity Health log. You are missing the following fields: duration.");
+
+        // repeat with duration filled
+        await setHealthInputs({activity: {type: "", duration: "x"}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[2][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[2][1])
+            .toBe("Failed to save the Activity Health log. You are missing the following fields: type.");
     });
         
     test("Catch unfilled meds inputs", async () => {
@@ -167,10 +230,58 @@ describe("Track health screen", () => {
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
-
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Error`);
-        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide medication name, amount, and time taken`);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1])
+            .toBe("Failed to save the Medicine Health log. You are missing the following fields: name and amount.");
+
+        // repeat with name filled
+        await setHealthInputs({meds: {name: "x", amount: ""}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[1][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[1][1])
+            .toBe("Failed to save the Medicine Health log. You are missing the following fields: amount.");
+
+        // repeat with amount filled
+        await setHealthInputs({meds: {name: "", amount: "x"}});
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[2][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[2][1])
+            .toBe("Failed to save the Medicine Health log. You are missing the following fields: name.");
+    });
+        
+    test("Catch unfilled vaccine inputs", async () => {
+        render(<Health/>);
+
+        await setHealthInputs({category: "Vaccine"});  // switch to meds category
+
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1])
+            .toBe("Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.");
+    });
+        
+    test("Catch unfilled other inputs", async () => {
+        render(<Health/>);
+
+        await setHealthInputs({category: "Other"});  // switch to meds category
+
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Missing Information");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1])
+            .toBe("Failed to save the 'Other' Health log. Please provide at least a title for the health event.");
     });
         
     test("Catch getActiveChildId error", async () => {
@@ -185,7 +296,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -209,7 +320,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -239,7 +350,7 @@ describe("Track health screen", () => {
     
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -258,7 +369,7 @@ describe("Track health screen", () => {
     test("Redirects user on successful submit", async () => {
         render(<Health/>);
 
-        await setHealthInputs({growth: {length: "x", weight: "", head: ""}});  // fill in any input
+        await setHealthInputs({growth: {length: "x", weight: "y", head: "z"}});  // fill in required inputs
         await userEvent.press(
             screen.getByTestId("health-save-log-button")
         );
@@ -351,6 +462,56 @@ describe("Track health screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Success`);
     });
         
+    test("Saves correct values (vaccine)", async () => {
+        const testName = "test name";
+        const testLocation = "test location";
+        render(<Health/>);
+
+        // fill inputs
+        await setHealthInputs({category: "Vaccine", vaccine: {name: testName, location: testLocation}});
+
+        // submit log
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+
+        // Ensure Supabase.insert was called with the correct values, which should now be encrypted
+        expect(insertedObject.category).toBe("Vaccine");
+        expect(insertedObject.vaccine_name).toBe(await encryptData(testName));
+        expect(insertedObject.vaccine_location).toBe(await encryptData(testLocation));
+
+        // Ensure that log was saved successfully
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Success`);
+    });
+        
+    test("Saves correct values (other)", async () => {
+        const testName = "test name";
+        const testDescription = "test description";
+        render(<Health/>);
+
+        // fill inputs
+        await setHealthInputs({category: "Other", other: {name: testName, description: testDescription}});
+
+        // submit log
+        await userEvent.press(
+            screen.getByTestId("health-save-log-button")
+        );
+
+        const insertedObject = (supabase.from("").insert as jest.Mock).mock.calls[0][0][0];
+
+        // Ensure Supabase.insert was called with the correct values, which should now be encrypted
+        expect(insertedObject.category).toBe("Other");
+        expect(insertedObject.other_name).toBe(await encryptData(testName));
+        expect(insertedObject.other_description).toBe(await encryptData(testDescription));
+
+        // Ensure that log was saved successfully
+        // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Success`);
+    });
+        
     test("Saves correct values (id/date/note)", async () => {
         const testNote = "test note";
         const testDate = new Date;
@@ -371,7 +532,7 @@ describe("Track health screen", () => {
         // fill date
         await setHealthInputs({
             date: testDate,
-            growth: {length: "x", weight: "", head: ""}  // fill in minum required inputs to avoid errors
+            growth: {length: "x", weight: "y", head: "z"}  // fill in required inputs to avoid errors
         });
 
         // submit log

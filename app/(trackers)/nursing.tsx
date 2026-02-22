@@ -77,12 +77,15 @@ export default function Nursing() {
             return { success: false, error };
         }
 
+        const normalizedLeftAmount = leftAmount.trim() === '' ? '0' : leftAmount.trim();
+        const normalizedRightAmount = rightAmount.trim() === '' ? '0' : rightAmount.trim();
+
         return await createNursingLog(
             childId,
             leftDuration,
             rightDuration,
-            leftAmount.trim(),
-            rightAmount.trim(),
+            normalizedLeftAmount,
+            normalizedRightAmount,
             note,
         );
     };
@@ -104,7 +107,13 @@ export default function Nursing() {
                 Alert.alert(`Failed to save nursing log: ${result.error}`);
             }
         } else {
-            Alert.alert('Please provide at least one side duration or amount');
+            const missingFields = [];
+            if (leftDuration === '00:00:00' || rightDuration === '00:00:00') missingFields.push("left or right duration");
+            if (leftAmount === '' || rightAmount === '') missingFields.push("left or right amount");
+            const formattedMissing = missingFields.length > 1
+                ? `${missingFields.slice(0, -1).join(', ')} or ${missingFields.slice(-1)}`
+                : missingFields[0];
+            Alert.alert("Missing Information", `Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`);
         }
     };
 
