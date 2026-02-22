@@ -123,7 +123,7 @@ export async function getActiveChildId(): Promise<string | null> {
 
 // setActiveChildId
 // sets the active child in the guest local db
-export async function setActiveChildId(childId: string) {
+async function setActiveChildId(childId: string) {
 	await AsyncStorage.setItem(KEYS.activeChildId, childId);
 }
 
