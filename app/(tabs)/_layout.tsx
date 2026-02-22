@@ -70,7 +70,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Settings',
                     tabBarIcon: ({ color }) => Icon(color, '⚙️'),
-                    header: () => Header('⚙️ Setting', Calendar, insets.top)
+                    //header: () => <Header title="⚙️ Settings" topInset={insets.top}/>
                 }}
             />
         </Tabs>
