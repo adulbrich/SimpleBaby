@@ -61,14 +61,14 @@ export default function CalendarModal() {
     useEffect(() => {
         (async () => {
             try {
-            const result = await getActiveChildId();
-            if (!result?.success || !result.childId) return;
+                const result = await getActiveChildId();
+                if (!result?.success || !result.childId) return;
 
-            const childId = String(result.childId);
-            const days = await fetchDaysWithLogsForMonth(childId, visibleMonth);
-            setDaysWithLogs(days);
+                const childId = String(result.childId);
+                const days = await fetchDaysWithLogsForMonth(childId, visibleMonth);
+                setDaysWithLogs(days);
             } catch {
-            setDaysWithLogs(new Set());
+                setDaysWithLogs(new Set());
             }
         })();
     }, [visibleMonth]);
