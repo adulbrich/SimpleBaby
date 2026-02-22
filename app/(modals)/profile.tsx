@@ -69,7 +69,7 @@ export default function Profile() {
                 const activeChild = children.find(c => c.id === activeId);
                 setGuestChildName(activeChild?.name ?? 'Guest Child');
             } catch {
-                Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.")
+                Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
             }
         };
 

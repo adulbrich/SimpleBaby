@@ -175,7 +175,7 @@ export default function Health() {
 				error,
 			} = await getActiveChildId();
 			if (!success) {
-				return { success: false, error: `Failed to get active child: ${error}` };
+				return { success: false, error: error };
 			}
 			childId = cloudChildId;
 		}
