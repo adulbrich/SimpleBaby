@@ -64,10 +64,10 @@ export default function Health() {
 	const { isGuest } = useAuth();
 
 	/**
-	 * Saves and inserts the health log for database entry.
+	 * Creates a health log record in storage.
 	 * Returns success/error object for handling in the UI.
 	 */
-	const saveHealthLog = async (log: any) => {
+	const createHealthLog = async (log: any) => {
 		if (isGuest) {
 			try {
 				const success = await insertRow("health_logs", log);
@@ -89,13 +89,11 @@ export default function Health() {
 	};
 
 	/**
-	 * Validates form inputs for the health log.
-	 * Upon validation, calls saveHealthLog() to save to the database.
+	 * Validates form inputs, prepares encrypted payload, and saves the health log.
 	 */
-	const createHealthLog = async () => {
+	const saveHealthLog = async () => {
 		if (!healthLog.category) {
-			Alert.alert("Error", "Please provide a category");
-			return;
+			return { success: false, error: "Please provide a category" };
 		}
 
 		if (healthLog.category === "Growth") {
@@ -112,7 +110,7 @@ export default function Health() {
 					"Missing Information",
 					`Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`,
 				);
-				return;
+				return { success: false, error: "Missing required growth fields" };
 			}
 		} else if (healthLog.category === "Activity") {
 			const missingFields = [];
@@ -127,7 +125,7 @@ export default function Health() {
 					"Missing Information",
 					`Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`,
 				);
-				return;
+				return { success: false, error: "Missing required activity fields" };
 			}
 		} else if (healthLog.category === "Meds") {
 			const missingFields = [];
@@ -143,7 +141,7 @@ export default function Health() {
 					"Missing Information",
 					`Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`,
 				);
-				return;
+				return { success: false, error: "Missing required medicine fields" };
 			}
 		} else if (healthLog.category === "Vaccine") {
 			if (!healthLog.vaccine?.name) {
@@ -151,7 +149,7 @@ export default function Health() {
 					"Missing Information",
 					"Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.",
 				);
-				return;
+				return { success: false, error: "Missing required vaccine fields" };
 			}
 		} else if (healthLog.category === "Other") {
 			if (!healthLog.other?.name) {
@@ -159,7 +157,7 @@ export default function Health() {
 					"Missing Information",
 					"Failed to save the 'Other' Health log. Please provide at least a title for the health event.",
 				);
-				return;
+				return { success: false, error: "Missing required other fields" };
 			}
 		}
 
@@ -168,8 +166,7 @@ export default function Health() {
 		if (isGuest) {
 			childId = await getLocalActiveChildId();
 			if (!childId) {
-				Alert.alert("Error", "No active child selected (Guest Mode).");
-				return;
+				return { success: false, error: "No active child selected (Guest Mode)." };
 			}
 		} else {
 			const {
@@ -178,8 +175,7 @@ export default function Health() {
 				error,
 			} = await getActiveChildId();
 			if (!success) {
-				Alert.alert("Error", `Failed to get active child: ${error}`);
-				return;
+				return { success: false, error: `Failed to get active child: ${error}` };
 			}
 			childId = cloudChildId;
 		}
@@ -227,17 +223,23 @@ export default function Health() {
 				note: healthLog.note ? await encryptData(healthLog.note) : null,
 			};
 
-			const result = await saveHealthLog(encryptedLog);
-
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Success", "Health log saved successfully!");
-			} else {
-				Alert.alert("Error", `Failed to save health log: ${result.error}`);
-			}
+			return await createHealthLog(encryptedLog);
 		} catch (err) {
 			console.error("❌ Encryption failed:", err);
-			Alert.alert("Error", "Failed to encrypt and save health log.");
+			return { success: false, error: "Failed to encrypt and save health log." };
+		}
+	};
+
+	/**
+	 * Handles UI submit action for saving the health log.
+	 */
+	const handleSaveHealthLog = async () => {
+		const result = await saveHealthLog();
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Success", "Health log saved successfully!");
+		} else if (result.error && !String(result.error).startsWith("Missing required")) {
+			Alert.alert("Error", `Failed to save health log: ${result.error}`);
 		}
 	};
 
@@ -443,7 +445,7 @@ export default function Health() {
 						<View className="flex-row gap-2 pb-5 pt-5">
 							<TouchableOpacity
 								className="rounded-full p-4 bg-red-100 grow"
-								onPress={createHealthLog}
+								onPress={handleSaveHealthLog}
 								testID="health-save-log-button"
 							>
 								<Text>➕ Add to log</Text>

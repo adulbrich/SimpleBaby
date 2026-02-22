@@ -38,7 +38,7 @@ export default function Diaper() {
 	 * Saves and inserts a new diaper log into either the local or remote database.
 	 * Encrypts consistency, amount, and the note before proceeding.
 	 */
-	const saveDiaperLog = async (
+	const createDiaperLog = async (
 		childId: string,
 		consistency: string,
 		amount: string,
@@ -90,14 +90,14 @@ export default function Diaper() {
 
 
 	// Get active child ID, determine save location, and begin to create the diaper log
-	const createDiaperLog = async () => {
+	const saveDiaperLog = async () => {
 		if (isGuest) {
 			const childId = await getLocalActiveChildId();
 			if (!childId) {
 				Alert.alert("No active child set (guest mode)");
 				return { success: false, error: "No active child set" };
 			}
-			return await saveDiaperLog(
+			return await createDiaperLog(
 				childId,
 				consistency,
 				amount,
@@ -112,7 +112,7 @@ export default function Diaper() {
                 return { success: false, error };
             }
 
-            return await saveDiaperLog(
+            return await createDiaperLog(
                 childId,
                 consistency,
                 amount,
@@ -125,7 +125,7 @@ export default function Diaper() {
 	// Validate and handle the save action with alerts based on the result
 	const handleSaveDiaperLog = async () => {
 		if (consistency && amount) {
-			const result = await createDiaperLog();
+			const result = await saveDiaperLog();
 			if (result.success) {
 				router.replace("/(tabs)");
 				Alert.alert("Diaper log saved successfully!");

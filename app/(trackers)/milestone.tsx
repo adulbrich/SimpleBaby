@@ -157,7 +157,7 @@ export default function Milestone() {
 	 * Inserts a new milestone log into either the local or remote database.
 	 * Converts milestoneTime to ISO string before sending.
 	 */
-	const saveMilestoneLog = async (
+	const createMilestoneLog = async (
 		childId: string,
 		category: MilestoneCategoryList,
 		name: string,
@@ -207,10 +207,10 @@ export default function Milestone() {
 	};
 
 	/**
-	 * Gets the currently active child ID and attempts to create the milestone log for database entry.
+	 * Gets the currently active child ID and attempts to save the milestone log for database entry.
 	 * Returns success/error object for handling in the UI.
 	 */
-	const createMilestoneLog = async () => {
+	const saveMilestoneLog = async () => {
 		let childId: string | null = null;
 		let photoPath: string | null = null;
 
@@ -238,7 +238,7 @@ export default function Milestone() {
 			}
 		}
 
-		return await saveMilestoneLog(
+		return await createMilestoneLog(
 			String(childId),
 			category,
 			name,
@@ -254,7 +254,7 @@ export default function Milestone() {
 	 */
 	const handleSaveMilestoneLog = async () => {
 		if (name && milestoneDate) {
-			const result = await createMilestoneLog();
+			const result = await saveMilestoneLog();
 			if (result.success) {
 				router.replace("/(tabs)");
 				Alert.alert("Milestone log saved successfully!");
