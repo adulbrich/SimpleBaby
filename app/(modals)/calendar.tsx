@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
 import { getActiveChildId } from '@/library/utils';
+import { useAuth } from '@/library/auth-provider';
 
 function toYMD(d: Date) {
     return format(d, "yyyy-MM-dd");
@@ -18,6 +19,7 @@ export default function CalendarModal() {
     const [error, setError] = useState<string | null>(null);
     const dayRequestIdRef = useRef(0);
     const monthRequestIdRef = useRef(0);
+    const { isGuest } = useAuth();
 
     const markedDates = useMemo(() => {
         const marks: Record<string, any> = {};
@@ -86,6 +88,17 @@ export default function CalendarModal() {
             }
         })();
     }, [visibleMonth]);
+
+    if (isGuest) {
+        return (
+            <>
+                <View className='flex-1 bg-gray-50 p-4'>
+                    <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
+                    <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
+                </View>
+            </>
+        );
+    }
     
     return (
         <>
