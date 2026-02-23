@@ -276,14 +276,29 @@ export default function Milestone() {
 		}
 	};
 
-	// Handle the UI logic when resetting fields
-	const handleResetFields = () => {
-		setCategory("Motor");
-		setName("");
-		setMilestoneDate(new Date());
-		setPhotoUri(null);
-		setPhotoName(null);
-		setNote("");
+    // Handle the UI logic when resetting fields
+    const handleResetFields = () => {
+        setCategory('Motor');
+        setName("");
+        setMilestoneDate(new Date());
+        setPhotoUri(null);
+        setPhotoName(null);
+        setNote("");
+    };
+
+	// Show a confirmation alert when attempting to remove a photo
+	const handleRemovePhoto = () => {
+		Alert.alert(
+			"Confirm", 
+			"Are you sure you want to remove this photo?",
+			[
+				{ text: "Confirm", onPress: () => {
+					setPhotoName(null);
+					setPhotoUri(null); }
+				},
+				{ text: "Cancel" }
+			]
+		);
 	};
 
 	return (
@@ -354,24 +369,32 @@ export default function Milestone() {
 								</View>
 							)}
 
-							<View className="ml-4 mr-4 flex-row items-center justify-between">
-								<Text className="feeding-module-label">Milestone Photo</Text>
+                        <View className="ml-4 mr-4 flex-row items-center justify-between">
+                        <Text className="feeding-module-label">Milestone Photo</Text>
+                        <TouchableOpacity
+                            className="rounded-full p-4 bg-red-100 items-center"
+                            onPress={pickPhoto}
+                            disabled={uploadingPhoto}
+                            testID='milestone-photo-button'
+                            >
+                            <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+                        </TouchableOpacity>
+                        </View>
+						{(photoName || photoUri) && (
+							<View className="flex flex-col" accessible>
+								<Text className="text-sm text-gray-500 mt-2 text-center">
+									({photoName})
+								</Text>
 								<TouchableOpacity
-									className="rounded-full p-4 bg-red-100 items-center"
-									onPress={pickPhoto}
-									disabled={uploadingPhoto}
-									testID="milestone-photo-button"
+									onPress={handleRemovePhoto}
+									testID="remove-milestone-photo-button"
 								>
-									<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+									<Text className="text-center text-gray-500 underline">Remove Photo</Text>
 								</TouchableOpacity>
 							</View>
-							{photoName ? (
-								<Text className="text-sm text-gray-500 mt-2 text-center">
-									{photoName}
-								</Text>
-							) : null}
-						</View>
-					</View>
+						)}
+                    </View>
+                    </View>
 
 					{/* Note input section */}
 					<View className="bottom-5 pt-4">
