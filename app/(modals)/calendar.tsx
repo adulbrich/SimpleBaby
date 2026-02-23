@@ -1,6 +1,6 @@
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { Calendar } from "react-native-calendars";
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
 import { getActiveChildId } from '@/library/utils';
@@ -16,6 +16,8 @@ export default function CalendarModal() {
     const [logs, setLogs] = useState<CalendarLog[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const dayRequestIdRef = useRef(0);
+    const monthRequestIdRef = useRef(0);
 
     const markedDates = useMemo(() => {
         const marks: Record<string, any> = {};
@@ -34,6 +36,7 @@ export default function CalendarModal() {
     }, [daysWithLogs, selectedDate]);
 
     const loadDay = useCallback(async (date: Date) => {
+        const requestId = ++dayRequestIdRef.current;
         setLoading(true);
         setError(null);
 
@@ -44,12 +47,18 @@ export default function CalendarModal() {
             }
             const childId = String(result.childId);
             const items = await fetchLogsForDay(childId, date);
-            setLogs(items);
+            if (requestId === dayRequestIdRef.current) {
+                setLogs(items);
+            }
         } catch (e: any) {
-            setError(e?.message ?? "Failed to load logs.");
-            setLogs([]);
+            if (requestId === dayRequestIdRef.current) {
+                setError(e?.message ?? "Failed to load logs.");
+                setLogs([]);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === dayRequestIdRef.current) {
+                setLoading(false);
+            }
         }
 
     }, []);
@@ -60,15 +69,20 @@ export default function CalendarModal() {
 
     useEffect(() => {
         (async () => {
+            const requestId = ++monthRequestIdRef.current;
             try {
                 const result = await getActiveChildId();
                 if (!result?.success || !result.childId) return;
 
                 const childId = String(result.childId);
                 const days = await fetchDaysWithLogsForMonth(childId, visibleMonth);
-                setDaysWithLogs(days);
+                if (requestId === monthRequestIdRef.current) {
+                    setDaysWithLogs(days);
+                }
             } catch {
-                setDaysWithLogs(new Set());
+                if (requestId === monthRequestIdRef.current) {
+                    setDaysWithLogs(new Set());
+                }
             }
         })();
     }, [visibleMonth]);
