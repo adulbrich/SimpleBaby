@@ -15,6 +15,8 @@ jest.mock("@/library/auth-provider", () => ({
   }),
 }));
 
+jest.mock("expo-crypto", () => ({}));
+
 describe("Login screen", () => {
     test("Renders app logo", () => {
       render(<RootIndex/>);

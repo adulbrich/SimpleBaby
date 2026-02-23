@@ -52,7 +52,7 @@ export default function AboutScreen() {
 
         {/* Mission Statement */}
         <Text style={{ fontSize: 14, color: subTextColor, textAlign: 'center', fontStyle: 'italic', marginTop: 20 }}>
-          Designed to make baby tracking simple and stress-free 💛
+          Designed to make baby tracking simple and stress-free. 💛
         </Text>
       </View>
     </ScrollView>

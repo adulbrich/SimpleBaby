@@ -42,6 +42,12 @@ jest.mock("@/components/health-module.tsx", () => {
     return HealthModuleMock;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+  useAuth: () => ({ isGuest: false }),
+}));
+
+jest.mock("expo-crypto", () => ({}));
+
 /*
  *  setHealthInputs:
  *      Reads update handlers from first call to HealthModule mock
@@ -307,7 +313,7 @@ describe("Track health screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Failed to get active child: ${testErrorMessage}`);
     });
         
-    test("Catch ecryption error", async () => {
+    test("Catch encryption error", async () => {
         const testErrorMessage = "testErrorEncryption";
 
         // library/crypto.ts -> encryptData() should be mocked to throw an error
@@ -544,7 +550,7 @@ describe("Track health screen", () => {
 
         // Ensure supabase.from().insert() was called with the correct values; the note should now be encrypted
         expect(insertedObject.child_id).toBe(testID);
-        expect(insertedObject.date).toBe(testDate);
+        expect(insertedObject.date).toBe(testDate.toISOString());
         expect(insertedObject.note).toBe(await encryptData(testNote));
 
         // Ensure that log was saved successfully
