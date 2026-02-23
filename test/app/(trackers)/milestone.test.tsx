@@ -225,7 +225,7 @@ describe("Track milestone screen", () => {
         expect(screen.getByText(testCategory)).toBeTruthy();
         expect(screen.getByDisplayValue(testName)).toBeTruthy();
         expect(screen.getByText(testTime.toLocaleDateString())).toBeTruthy();
-        expect(screen.getByText(testPhotoName)).toBeTruthy();
+        expect(screen.getByText(`(${testPhotoName})`)).toBeTruthy();
         expect(screen.getByDisplayValue(testNote)).toBeTruthy();
 
         // submit log
@@ -271,13 +271,13 @@ describe("Track milestone screen", () => {
         await setmilestoneInputs({photo: {uri: testUri}});
 
         // ensure file path name is displayed on the screen
-        expect(screen.getByText(testFileName)).toBeTruthy();
+        expect(screen.getByText(`(${testFileName})`)).toBeTruthy();
 
         // add image with a given name
         await setmilestoneInputs({photo: {uri: testUri, fileName: testName}});
 
         // ensure file path name is displayed on the screen
-        expect(screen.getByText(testName)).toBeTruthy();
+        expect(screen.getByText(`(${testName})`)).toBeTruthy();
     });
             
     test("Catch getUser error", async () => {

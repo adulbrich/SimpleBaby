@@ -238,6 +238,21 @@ export default function Milestone() {
         setNote("");
     };
 
+	// Show a confirmation alert when attempting to remove a photo
+	const handleRemovePhoto = () => {
+		Alert.alert(
+			"Confirm", 
+			"Are you sure you want to remove this photo?",
+			[
+				{ text: "Confirm", onPress: () => {
+					setPhotoName(null);
+					setPhotoUri(null); }
+				},
+				{ text: "Cancel" }
+			]
+		);
+	};
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             {/*ScrollView Prevents items from flowing off page on small devices*/}
@@ -315,11 +330,19 @@ export default function Milestone() {
                             <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
                         </TouchableOpacity>
                         </View>
-                        {photoName ? (
-                        <Text className="text-sm text-gray-500 mt-2 text-center">
-                            {photoName}
-                        </Text>
-                        ) : null}
+						{(photoName || photoUri) && (
+							<View className="flex flex-col" accessible>
+								<Text className="text-sm text-gray-500 mt-2 text-center">
+									({photoName})
+								</Text>
+								<TouchableOpacity
+									onPress={handleRemovePhoto}
+									testID="remove-milestone-photo-button"
+								>
+									<Text className="text-center text-gray-500 underline">Remove Photo</Text>
+								</TouchableOpacity>
+							</View>
+						)}
                     </View>
                     </View>
 
