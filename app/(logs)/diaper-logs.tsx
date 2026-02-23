@@ -149,10 +149,12 @@ const DiaperLogsView: React.FC = () => {
                 <Text className="text-sm italic text-gray-500 mt-1">📝 {item.note}</Text>
             )}
             <View className="flex-row justify-end gap-3 mt-4">
-                <Pressable className="px-3 py-2 rounded-full bg-blue-100" onPress={() => { setEditingLog(item); setEditModalVisible(true); }}>
+                <Pressable className="px-3 py-2 rounded-full bg-blue-100" testID='diaper-logs-edit-button'
+                    onPress={() => { setEditingLog(item); setEditModalVisible(true); }}>
                     <Text className="text-blue-700">✏️ Edit</Text>
                 </Pressable>
-                <Pressable className="px-3 py-2 rounded-full bg-red-100" onPress={() => handleDelete(item.id)}>
+                <Pressable className="px-3 py-2 rounded-full bg-red-100" testID='diaper-logs-delete-button'
+                    onPress={() => handleDelete(item.id)}>
                     <Text className="text-red-700">🗑️ Delete</Text>
                 </Pressable>
             </View>
@@ -163,17 +165,18 @@ const DiaperLogsView: React.FC = () => {
         <View className="flex-1 bg-gray-50 p-4">
             <Text className="text-2xl font-bold mb-4">🧷 Diaper Logs</Text>
             {loading ? (
-                <ActivityIndicator size="large" color="#e11d48" />
+                <ActivityIndicator size="large" color="#e11d48" testID='diaper-logs-loading' />
             ) : error ? (
-                <Text className="text-red-600 text-center">Error: {error}</Text>
+                <Text className="text-red-600 text-center" testID='diaper-logs-loading-error'>Error: {error}</Text>
             ) : diaperLogs.length === 0 ? (
-                <Text>You don&apos;t have any diaper logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
+                <Text testID='diaper-no-logs'>You don&apos;t have any diaper logs{activeChildName ? ` for ${activeChildName}` : ""} yet!</Text>
             ) : (
                 <FlatList
                     data={diaperLogs}
                     renderItem={renderDiaperLogItem}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={{ paddingBottom: 16 }}
+                    testID='diaper-logs'
                 />
             )}
 
