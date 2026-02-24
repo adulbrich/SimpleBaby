@@ -11,8 +11,9 @@ import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
-import { getActiveChildId, listChildren } from '@/library/local-store';
+import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
+import { getActiveChildId as getRemoteActiveChildId } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -29,7 +30,8 @@ export default function Profile() {
 
     const { isGuest, exitGuest, session } = useAuth();
 
-    const [guestChildName, setGuestChildName] = useState<string>('None');
+    const [guestChildName, setGuestChildName] = useState<string>('Loading...');
+    const [accountChildName, setAccountChildName] = useState<string>('Loading...');
 
     const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
     
@@ -60,7 +62,7 @@ export default function Profile() {
         const loadGuestChild = async () => {
             try {
                 if (!isGuest) return;
-                const activeId = await getActiveChildId();
+                const activeId = await getLocalActiveChildId();
                 if (!activeId) {
                     setGuestChildName("Guest Child");
                     return;
@@ -76,6 +78,23 @@ export default function Profile() {
         loadGuestChild();
     }, [isGuest]);
 
+    useEffect(() => {
+        const loadAccountChild = async () => {
+            try {
+                if (isGuest || !session) return;
+                const result = await getRemoteActiveChildId();
+                if (!result.success || !result.childName) {
+                    setAccountChildName("Child");
+                    return;
+                }
+                setAccountChildName(result.childName);
+            } catch {
+                setAccountChildName("Child");
+            }
+        };
+        loadAccountChild();
+    }, [isGuest, session]);
+
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
             <ScrollView>
@@ -85,7 +104,7 @@ export default function Profile() {
                             Active Child
                         </Text>
                         <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {isGuest ? guestChildName : session?.user.user_metadata?.activeChild}
+                            👶 {isGuest ? guestChildName : accountChildName}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
