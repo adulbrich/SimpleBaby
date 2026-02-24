@@ -35,7 +35,7 @@ export default function AddChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 h-[50%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
                                 Add a Child
@@ -50,7 +50,7 @@ export default function AddChildPopup(
                                     Child Name
                                 </Text>
                                 <TextInput
-                                    className='text-input'
+                                    className='text-input mb-4'
                                     placeholder='Enter a name'
                                     value={childName}
                                     onChangeText={onChildNameUpdate}
@@ -58,7 +58,7 @@ export default function AddChildPopup(
                                     keyboardType='default'
                                 />
                             </View>
-                            <View>
+                            <View  className='mb-4'>
                                 <Button
                                     text='Save New Child'
                                     action={handleSave}
