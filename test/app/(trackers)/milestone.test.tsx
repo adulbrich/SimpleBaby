@@ -61,13 +61,13 @@ jest.mock("expo-router", () => {
 });
 
 jest.mock("@/library/crypto", () => ({
-    encryptData: jest.fn(async (string) => `Encrypted: ${string}`)
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
 }));
 
 jest.mock("@/library/utils", () => {
     const getActiveChildId = jest.fn(async () => ({ success: true, childId: "test-child-id" }));
     return {
-        getActiveChildId: getActiveChildId
+        getActiveChildId: getActiveChildId,
     };
 });
 

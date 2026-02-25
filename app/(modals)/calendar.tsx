@@ -50,56 +50,51 @@ export default function CalendarModal() {
     }, [loadDay, selectedDate]);
 
     if (isGuest) {
-            return (
-                <>
-                    <View className='flex-1 bg-gray-50 p-4'>
-                        <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
-                        <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
-                    </View>
-                </>
-            );
-        }
+        return (
+            <View className='flex-1 bg-gray-50 p-4'>
+                <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
+                <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
+            </View>
+        );
+    }
     
     return (
-        <>
-            <View className='flex-1 bg-gray-50 p-4'>
-                <Calendar
-                    markedDates={markedDates}
-                    onDayPress={(day) => {
-                        const d = new Date(day.dateString + "T00:00:00");
-                        setSelectedDate(d);
-                        loadDay(d);
-                    }}
-                />
+        <View className='flex-1 bg-gray-50 p-4'>
+            <Calendar
+                markedDates={markedDates}
+                onDayPress={(day) => {
+                    const d = new Date(day.dateString + "T00:00:00");
+                    setSelectedDate(d);
+                    loadDay(d);
+                }}
+            />
 
-                <Text className="text-xl font-bold mt-4 mb-2">
-                    {format(selectedDate, "MMMM d, yyyy")}
-                </Text>
+            <Text className="text-xl font-bold mt-4 mb-2">
+                {format(selectedDate, "MMMM d, yyyy")}
+            </Text>
 
-                {loading ? (<ActivityIndicator size="large"/>)
-                : error ? (<Text className="text-red-600">{error}</Text>)
-                : logs.length === 0 ? (<Text className="text-gray-600 pb-5">No logs found for this day.</Text>)
-                : (
-                    <FlatList
-                        data={logs}
-                        keyExtractor={(item) => `${item.type}-${item.id}`}
-                        renderItem={({ item }) => (
-                        <View className="bg-white rounded-xl p-4 mb-3 shadow">
-                            <Text className="text-xs text-gray-500">
-                            {format(new Date(item.at), "h:mm a")}
-                            </Text>
+            {loading ? (<ActivityIndicator size="large"/>)
+            : error ? (<Text className="text-red-600">{error}</Text>)
+            : logs.length === 0 ? (<Text className="text-gray-600 pb-5">No logs found for this day.</Text>)
+            : (
+                <FlatList
+                    data={logs}
+                    keyExtractor={(item) => `${item.type}-${item.id}`}
+                    renderItem={({ item }) => (
+                    <View className="bg-white rounded-xl p-4 mb-3 shadow">
+                        <Text className="text-xs text-gray-500">
+                        {format(new Date(item.at), "h:mm a")}
+                        </Text>
 
-                            <Text className="text-base font-bold mt-1">{item.title}</Text>
+                        <Text className="text-base font-bold mt-1">{item.title}</Text>
 
-                            {!!item.details && (
-                            <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
-                            )}
-                        </View>
+                        {!!item.details && (
+                        <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
                         )}
-                    ></FlatList>
-                )
-            }
-            </View>
-        </>
+                    </View>
+                    )}
+                ></FlatList>
+            )}
+        </View>
     );
 }

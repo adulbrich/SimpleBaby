@@ -186,7 +186,7 @@ export default function Milestone() {
 				return { success: false, error };
 			}
 		} else {
-			const { data, error } = await supabase.from("milestone_logs").insert([
+			const { error } = await supabase.from("milestone_logs").insert([
 				{
 					child_id: childId,
 					category,
@@ -202,7 +202,7 @@ export default function Milestone() {
 				return { success: false, error };
 			}
 
-			return { success: true, data };
+			return { success: true };
 		}
 	};
 
@@ -370,15 +370,15 @@ export default function Milestone() {
 							)}
 
                         <View className="ml-4 mr-4 flex-row items-center justify-between">
-                        <Text className="feeding-module-label">Milestone Photo</Text>
-                        <TouchableOpacity
-                            className="rounded-full p-4 bg-red-100 items-center"
-                            onPress={pickPhoto}
-                            disabled={uploadingPhoto}
-                            testID='milestone-photo-button'
-                            >
-                            <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
-                        </TouchableOpacity>
+							<Text className="feeding-module-label">Milestone Photo</Text>
+							<TouchableOpacity
+								className="rounded-full p-4 bg-red-100 items-center"
+								onPress={pickPhoto}
+								disabled={uploadingPhoto}
+								testID='milestone-photo-button'
+								>
+								<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+							</TouchableOpacity>
                         </View>
 						{(photoName || photoUri) && (
 							<View className="flex flex-col" accessible>

@@ -18,12 +18,12 @@ jest.mock("@/library/supabase-client", () => {
     return ({
         from: () => ({
             insert: insert,
-        })
+        }),
     });
 });
 
 jest.mock("@/library/crypto", () => ({
-    encryptData: jest.fn(async (string) => `Encrypted: ${string}`)
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
 }));
 
 jest.mock("react-native", () => {
@@ -33,7 +33,7 @@ jest.mock("react-native", () => {
 });
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildId: jest.fn(async () => ({ success: true }))  // default case, should cause no immediate error handling
+    getActiveChildId: jest.fn(async () => ({ success: true })),  // default case, should cause no immediate error handling
 }));
 
 jest.mock("@/components/health-module.tsx", () => {
@@ -43,7 +43,7 @@ jest.mock("@/components/health-module.tsx", () => {
 });
 
 jest.mock("@/library/auth-provider", () => ({
-  useAuth: () => ({ isGuest: false }),
+    useAuth: () => ({ isGuest: false }),
 }));
 
 jest.mock("expo-crypto", () => ({}));
