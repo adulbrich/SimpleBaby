@@ -149,11 +149,11 @@ const DiaperLogsView: React.FC = () => {
                 <Text className="text-sm italic text-gray-500 mt-1">📝 {item.note}</Text>
             )}
             <View className="flex-row justify-end gap-3 mt-4">
-                <Pressable className="px-3 py-2 rounded-full bg-blue-100" testID='diaper-logs-edit-button'
+                <Pressable className="px-3 py-2 rounded-full bg-blue-100" testID={`diaper-logs-edit-button-${item.id}`}
                     onPress={() => { setEditingLog(item); setEditModalVisible(true); }}>
                     <Text className="text-blue-700">✏️ Edit</Text>
                 </Pressable>
-                <Pressable className="px-3 py-2 rounded-full bg-red-100" testID='diaper-logs-delete-button'
+                <Pressable className="px-3 py-2 rounded-full bg-red-100" testID={`diaper-logs-delete-button-${item.id}`}
                     onPress={() => handleDelete(item.id)}>
                     <Text className="text-red-700">🗑️ Delete</Text>
                 </Pressable>
@@ -203,6 +203,7 @@ const DiaperLogsView: React.FC = () => {
                                         prev ? { ...prev, consistency: text } : prev,
                                     )
                                 }
+                                testID='diaper-log-edit-consistency'
                             />
                             <Text className="text-sm text-gray-500 mb-1">Amount</Text>
                             <TextInput
@@ -213,6 +214,7 @@ const DiaperLogsView: React.FC = () => {
                                         prev ? { ...prev, amount: text } : prev,
                                     )
                                 }
+                                testID='diaper-log-edit-amount'
                             />
                             <Text className="text-sm text-gray-500 mb-1">Note</Text>
                             <TextInput
@@ -223,17 +225,20 @@ const DiaperLogsView: React.FC = () => {
                                         prev ? { ...prev, note: text } : prev,
                                     )
                                 }
+                                testID='diaper-log-edit-note'
                             />
                             <View className="flex-row justify-end gap-3">
                                 <TouchableOpacity
                                     className="bg-gray-200 rounded-full px-4 py-2"
                                     onPress={() => setEditModalVisible(false)}
+                                    testID='diaper-log-edit-cancel'
                                 >
                                     <Text>Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     className="bg-green-500 rounded-full px-4 py-2"
                                     onPress={handleSaveEdit}
+                                    testID='diaper-log-edit-save'
                                 >
                                     <Text className="text-white">Save</Text>
                                 </TouchableOpacity>
