@@ -57,7 +57,7 @@ export default function Sleep() {
 
 		const encryptedNote = note ? await encryptData(note) : null;
 
-		const { data, error } = await supabase.from("sleep_logs").insert([
+		const { error } = await supabase.from("sleep_logs").insert([
 			{
 				child_id: childId,
 				start_time: startTime.toISOString(),
@@ -72,7 +72,7 @@ export default function Sleep() {
 			return { success: false, error };
 		}
 
-		return { success: true, data };
+		return { success: true };
 	};
 
 	// Prepare and validate sleep log data before saving

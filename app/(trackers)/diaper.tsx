@@ -63,7 +63,7 @@ export default function Diaper() {
 					? { success: true }
 					: { success: false, error: "Failed to save diaper log locally." };
 			} else {
-                const { data, error } = await supabase.from("diaper_logs").insert([
+                const { error } = await supabase.from("diaper_logs").insert([
                     {
                         child_id: childId,
                         consistency: encryptedConsistency,
@@ -78,7 +78,7 @@ export default function Diaper() {
                     return { success: false, error };
                 }
 
-			    return { success: true, data };
+			    return { success: true };
             }
 
 			

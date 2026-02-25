@@ -16,7 +16,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 type AuthContextType = {
     session: Session | null
     loading: boolean
-    error: string | null
     isGuest: boolean;
     enterGuest: () => Promise<void | { error?: any }>
     exitGuest: () => Promise<void | { error?: any }>
@@ -44,14 +43,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const [session, setSession] = useState<Session | null>(null);
     const [isGuest, setIsGuest] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const enterGuest = async () => {
         try {
             await enterGuestMode();
             setIsGuest(true);
         } catch (err: any) {
-            setError(err.message);
             return { error: err };
         }
     };
@@ -61,7 +58,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
             await exitGuestMode();
             setIsGuest(false);
         } catch (err: any) {
-            setError(err.message);
             return { error: err };
         }
     };
@@ -77,7 +73,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
             setIsGuest(false);
             return { session: data.session };
         } catch (err: any) {
-            setError(err.message);
             return { error: err };
         }
     };
@@ -101,7 +96,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
             setIsGuest(false);
             return { session: data.session };
         } catch (err: any) {
-            setError(err.message);
             return { error: err };
         }
     };
@@ -109,22 +103,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         // 1) Check for an existing session when the provider mounts
         const init = async () => {
-        try {
-            const { data, error } = await supabase.auth.getSession();
-            if (error) throw error;
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                if (error) throw error;
 
-            if (data.session) {
-                setSession(data.session);
-                setIsGuest(false);
-            } else {
-                setSession(null);
-                setIsGuest(await isGuestMode());
+                if (data.session) {
+                    setSession(data.session);
+                    setIsGuest(false);
+                } else {
+                    setSession(null);
+                    setIsGuest(await isGuestMode());
+                }
+            } catch {
+                // do nothing
+            } finally {
+                setLoading(false);
             }
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
         };
 
         init();
@@ -145,14 +139,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
         () => ({
             session,
             loading,
-            error,
             isGuest,
             enterGuest,
             exitGuest,
             signIn,
             signUp,
         }),
-        [session, loading, error, isGuest],
+        [session, loading, isGuest],
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
