@@ -14,28 +14,40 @@ export const getActiveChildId = async () => {
         return { success: false, error: 'No authenticated user found' };
     }
 
-    // Get the active child name from user metadata
-    const activeChildName = user.user_metadata.activeChild;
+    // Retrieve active child ID and name from metadata
+    const activeChildId = user.user_metadata?.activeChildId;
+    const activeChildName = user.user_metadata?.activeChild;
 
-    if (!activeChildName) {
+    if (!activeChildId && !activeChildName) {
         return {
             success: false,
             error: 'No active child set in user metadata',
         };
     }
 
-    // Query the children table to get the child ID by name
-    const { data, error } = await supabase
+    const query = supabase
         .from('children')
-        .select('id')
-        .eq('name', activeChildName)
-        .eq('user_id', user.id)
-        .single();
+        .select('id, name')
+        .eq('user_id', user.id);
+
+    const { data, error } = activeChildId
+        ? await query.eq('id', activeChildId).single()
+        : await query.eq('name', activeChildName).single();
 
     if (error) {
         console.error('Error getting active child:', error);
         return { success: false, error };
     }
 
-    return { success: true, childId: data.id, childName: activeChildName };
+    let childName = data?.name;
+    if (childName?.includes('U2FsdGVkX1')) {
+        try {
+            const { decryptData } = await import('./crypto');
+            childName = await decryptData(childName);
+        } catch {
+            console.log("Could not decrypt child name.");
+        }
+    }
+
+    return { success: true, childId: data.id, childName };
 };

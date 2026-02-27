@@ -489,6 +489,9 @@ const HealthLogsView: React.FC = () => {
 									)
 								}
 							/>
+							<Text className="text-xs text-gray-400 mt-1">
+								Health log categories may not be updated after the log is created. Please delete this log and create a new one if you wish to update the category.
+							</Text>
 							<View className="flex-row justify-end gap-3 mt-4">
 								<TouchableOpacity
 									className="bg-gray-200 rounded-full px-4 py-2"
