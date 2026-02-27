@@ -63,7 +63,7 @@ const DiaperLogsView: React.FC = () => {
 		try {
 			if (isGuest) {
 				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child set (guest mode)");
+				if (!childId) throw new Error("No active child selected (guest mode)");
 
                 // get & sort diaper logs descendingly
 				const rows = await listRows<LocalDiaperRow>("diaper_logs");
