@@ -61,6 +61,13 @@ export default function MainTab() {
 			return;
 		}
 
+		//Checks if the name is only whitespace
+		if (childName.trim().length == 0) {
+			Alert.alert("Please enter a valid name!");
+			return;
+		}
+
+
 		const child = childName.charAt(0).toUpperCase() + childName.slice(1);
 
 		// GUEST MODE: local-only
