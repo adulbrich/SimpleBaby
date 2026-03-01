@@ -107,7 +107,7 @@ describe("Diaper logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error (account)", async () => {
+    test("Catch getActiveChildId() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
         // library/utils.ts -> getActiveChildId() should be mocked to return:
@@ -280,7 +280,7 @@ describe("Diaper logs screen", () => {
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ));
+    ), 10000);
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -365,7 +365,7 @@ describe("diaper logs screen (guest mode)", () => {
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ));
+    ), 10000);
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(

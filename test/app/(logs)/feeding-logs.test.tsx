@@ -109,7 +109,7 @@ describe("Feeding logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error (account)", async () => {
+    test("Catch getActiveChildId() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
         // library/utils.ts -> getActiveChildId() should be mocked to return:
