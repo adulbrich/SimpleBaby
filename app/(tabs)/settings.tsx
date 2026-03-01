@@ -13,6 +13,13 @@ export default function SettingScreen() {
                         Terms of Service
                     </Text>
                 </TouchableOpacity>
+				<TouchableOpacity className="p-4 gap-4 mb-1 bg-white"
+                    onPress={() => {
+                    router.push('/(modals)/privacypolicy');}}>
+                    <Text className="text-lg font-bold text-left">
+                        Privacy Policy
+                    </Text>
+                </TouchableOpacity>
                 <View className="p-4 gap-4 mb-1 bg-white">
                     <Text className="text-lg font-bold text-left">
                         Settings Name 2

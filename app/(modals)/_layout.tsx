@@ -41,6 +41,13 @@ export default function ModalsLayout() {
                     }}
                 />
 
+                <Stack.Screen
+                    name='privacypolicy'
+                    options={{
+                        headerTitle: 'Privacy Policy',
+                    }}
+                />
+
             </Stack>
         </>
     );

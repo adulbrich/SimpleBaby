@@ -5,7 +5,8 @@ import {
     View
 } from 'react-native';
 
-export default function TermsOfService() {
+
+export default function PrivacyPolicy() {
     
     return (
         <ScrollView>
