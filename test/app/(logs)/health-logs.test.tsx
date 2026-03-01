@@ -611,6 +611,7 @@ async function catchUpdateError(mockFailingEdit: () => void) {
     }
 }
 
+/* This may be used by tests awaiting github issue # 128
 async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: jest.Mock, idArgI: number) {
     render(<HealthLogsView/>);
     await screen.findByTestId("health-logs");  // wait for log list to render
@@ -673,6 +674,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             .toBe(log.id);
     }
 }
+*/
 
 async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     const log = TEST_LOGS[0];  // this test set up for a log with growth category
