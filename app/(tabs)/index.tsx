@@ -62,11 +62,10 @@ export default function MainTab() {
 		}
 
 		//Checks if the name is only whitespace
-		if (childName.trim().length == 0) {
+		if (childName.trim().length === 0) {
 			Alert.alert("Please enter a valid name!");
 			return;
 		}
-
 
 		const child = childName.charAt(0).toUpperCase() + childName.slice(1);
 

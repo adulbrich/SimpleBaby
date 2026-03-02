@@ -40,7 +40,7 @@ const SignUpScreen: React.FC = () => {
             return;
         }
 
-        if (firstName.trim().length == 0 || lastName.trim().length == 0) {
+        if (firstName.trim().length === 0 || lastName.trim().length === 0) {
             Alert.alert("Please enter a valid name!");
             return;
         }
