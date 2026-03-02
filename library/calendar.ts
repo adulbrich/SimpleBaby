@@ -1,4 +1,4 @@
-import { startOfDay, addDays } from "date-fns";
+import { startOfDay, startOfMonth, addDays, addMonths, format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { decryptData } from "@/library/crypto";
 
@@ -25,6 +25,10 @@ export type CalendarLog = {
     details?: string;
     raw: any;
 };
+
+function toYMD(d: Date) {
+    return format(d, "yyyy-MM-dd");
+}
 
 export async function fetchLogsForDay(childId: string, date: Date): Promise<CalendarLog[]> {
     const dayStart = startOfDay(date);
@@ -162,4 +166,76 @@ export async function fetchLogsForDay(childId: string, date: Date): Promise<Cale
 
     return [...sleepLogs, ...feedingLogs, ...diaperLogs, ...nursingLogs, ...healthLogs, ...milestoneLogs]
         .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+}
+
+export async function fetchDaysWithLogsForMonth(childId: string, monthDate: Date): Promise<Set<string>> {
+    const monthStart = startOfMonth(monthDate);
+    const monthEnd = addMonths(monthStart, 1);
+
+    const [
+        sleepRes,
+        feedingRes,
+        diaperRes,
+        nursingRes,
+        healthRes,
+        milestoneRes
+    ] = await Promise.all([
+        supabase
+            .from("sleep_logs")
+            .select("start_time")
+            .eq("child_id", childId)
+            .gte("start_time", monthStart.toISOString())
+            .lt("start_time", monthEnd.toISOString()),
+
+        supabase
+            .from("feeding_logs")
+            .select("feeding_time")
+            .eq("child_id", childId)
+            .gte("feeding_time", monthStart.toISOString())
+            .lt("feeding_time", monthEnd.toISOString()),
+
+        supabase
+            .from("diaper_logs")
+            .select("change_time")
+            .eq("child_id", childId)
+            .gte("change_time", monthStart.toISOString())
+            .lt("change_time", monthEnd.toISOString()),
+
+        supabase
+            .from("nursing_logs")
+            .select("logged_at")
+            .eq("child_id", childId)
+            .gte("logged_at", monthStart.toISOString())
+            .lt("logged_at", monthEnd.toISOString()),
+
+        supabase
+            .from("health_logs")
+            .select("date")
+            .eq("child_id", childId)
+            .gte("date", monthStart.toISOString())
+            .lt("date", monthEnd.toISOString()),
+
+        supabase
+            .from("milestone_logs")
+            .select("achieved_at")
+            .eq("child_id", childId)
+            .gte("achieved_at", monthStart.toISOString())
+            .lt("achieved_at", monthEnd.toISOString()),
+    ]);
+
+    const errors = [sleepRes.error, feedingRes.error, diaperRes.error, nursingRes.error, healthRes.error, milestoneRes.error].filter(Boolean);
+    if (errors.length) {
+        throw errors[0];
+    }
+
+    const days = new Set<string>();
+
+    for (const row of sleepRes.data ?? []) days.add(toYMD(new Date(row.start_time)));
+    for (const row of feedingRes.data ?? []) days.add(toYMD(new Date(row.feeding_time)));
+    for (const row of diaperRes.data ?? []) days.add(toYMD(new Date(row.change_time)));
+    for (const row of nursingRes.data ?? []) days.add(toYMD(new Date(row.logged_at)));
+    for (const row of healthRes.data ?? []) days.add(toYMD(new Date(row.date)));
+    for (const row of milestoneRes.data ?? []) days.add(toYMD(new Date(row.achieved_at)));
+
+    return days;
 }
