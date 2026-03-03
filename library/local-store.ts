@@ -29,8 +29,6 @@ type Child = {
 	created_at: string;
 };
 
-type StoredChild = Child;
-
 // uuidv4()
 // creates a random 128-bit identifier
 // used for creating a guest ID
@@ -83,7 +81,7 @@ export async function isGuestMode(): Promise<boolean> {
 // listChildren()
 // retrieves a list of children from local db in current guest account
 export async function listChildren(): Promise<Child[]> {
-	const children = await getJson<StoredChild[]>(KEYS.children, []);
+	const children = await getJson<Child[]>(KEYS.children, []);
 	return await Promise.all(
 		children.map(async (child) => {
 			if (!child.name.includes("U2FsdGVkX1")) {
@@ -107,10 +105,10 @@ export async function createChild(name: string): Promise<Child> {
 		throw new Error("Child name is required.");
 	}
 	try {
-		const children = await getJson<StoredChild[]>(KEYS.children, []);
+		const children = await getJson<Child[]>(KEYS.children, []);
 		const { encryptData } = await import("./crypto");
 		const encryptedName = await encryptData(name);
-		const child: StoredChild = {
+		const child: Child = {
 			id: uuidv4(),
 			name: encryptedName,
 			created_at: new Date().toISOString(),
