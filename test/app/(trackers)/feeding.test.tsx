@@ -22,12 +22,12 @@ jest.mock("@/library/supabase-client", () => {
     return ({
         from: () => ({
             insert: insert,
-        })
+        }),
     });
 });
 
 jest.mock("@/library/crypto", () => ({
-    encryptData: async (string: string) => `Encrypted: ${string}`
+    encryptData: async (string: string) => `Encrypted: ${string}`,
 }));
 
 jest.mock("react-native", () => {
@@ -57,7 +57,7 @@ jest.mock("@/components/feeding-category.tsx", () => {
 });
 
 jest.mock("@/library/auth-provider", () => ({
-  useAuth: () => ({ isGuest: false }),
+    useAuth: () => ({ isGuest: false }),
 }));
 
 jest.mock("expo-crypto", () => ({}));
