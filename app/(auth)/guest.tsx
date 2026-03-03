@@ -3,22 +3,18 @@ import { View, Text, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
+import { useAuth } from '@/library/auth-provider';
 
 export default function GuestScreen() {
-    const handleGuest = () => {
-        Alert.alert(
-            'Success',
-            'You are now in guest mode...not!',
-            [
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        router.dismiss();
-                    },
-                },
-            ],
-            { cancelable: false },
-        );
+    const { enterGuest } = useAuth();
+    
+    const handleGuest = async () => {
+        try {
+            await enterGuest();
+            router.replace('/(tabs)');
+        } catch (e: any) {
+            Alert.alert("Failed To Enter Guest Mode", e.message ?? "Guest mode could not be started. Please try again.");
+        }
     };
 
     const buttonTextClass = 'font-semibold';
@@ -66,7 +62,7 @@ export default function GuestScreen() {
             <View className='flex-col gap-2'>
                 <Button
                     text='Cancel'
-                    action={() => router.dismissAll()}
+                    action={() => router.back()}
                     textClass={buttonTextClass}
                     buttonClass='button-red'
                 />

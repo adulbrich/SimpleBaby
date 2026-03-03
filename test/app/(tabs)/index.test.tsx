@@ -37,6 +37,8 @@ jest.mock("expo-audio", () => ({
     useAudioPlayer: () => <></>
 }));
 
+jest.mock("expo-crypto", () => ({}));
+
 describe("Tracker screen", () => {
     test("Loads tracker option buttons", () => {
         render(<MainTab/>);

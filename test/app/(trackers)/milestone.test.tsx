@@ -65,7 +65,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => {
-    const getActiveChildId = jest.fn(async () => ({ success: true }));
+    const getActiveChildId = jest.fn(async () => ({ success: true, childId: "test-child-id" }));
     return {
         getActiveChildId: getActiveChildId
     };
@@ -77,10 +77,16 @@ jest.mock("react-native", () => {
     return module;
 });
 
+jest.mock("@/library/auth-provider", () => ({
+    useAuth: () => ({ isGuest: false }),
+}));
+
 // mock fetch()
 (global.fetch as any) = jest.fn(async () => ({
     arrayBuffer: async() => new ArrayBuffer(1),
 }));
+
+jest.mock("expo-crypto", () => ({}));
 
 /*
  *  setmilestoneInputs:
@@ -88,7 +94,7 @@ jest.mock("react-native", () => {
  *      Calls update handlers with provided inputs
  *      Sets other inputs by component testIDs
 */
-async function setmilestoneInputs({
+async function setMilestoneInputs({
     category,
     name,
     time,
@@ -218,14 +224,14 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote,
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote,
             photo: {uri: "x", fileName: testPhotoName}});
 
         // ensure all entered data is visible
         expect(screen.getByText(testCategory)).toBeTruthy();
         expect(screen.getByDisplayValue(testName)).toBeTruthy();
         expect(screen.getByText(testTime.toLocaleDateString())).toBeTruthy();
-        expect(screen.getByText(testPhotoName)).toBeTruthy();
+        expect(screen.getByText(`(${testPhotoName})`)).toBeTruthy();
         expect(screen.getByDisplayValue(testNote)).toBeTruthy();
 
         // submit log
@@ -268,16 +274,16 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // add image with no given name
-        await setmilestoneInputs({photo: {uri: testUri}});
+        await setMilestoneInputs({photo: {uri: testUri}});
 
         // ensure file path name is displayed on the screen
-        expect(screen.getByText(testFileName)).toBeTruthy();
+        expect(screen.getByText(`(${testFileName})`)).toBeTruthy();
 
         // add image with a given name
-        await setmilestoneInputs({photo: {uri: testUri, fileName: testName}});
+        await setMilestoneInputs({photo: {uri: testUri, fileName: testName}});
 
         // ensure file path name is displayed on the screen
-        expect(screen.getByText(testName)).toBeTruthy();
+        expect(screen.getByText(`(${testName})`)).toBeTruthy();
     });
             
     test("Catch getUser error", async () => {
@@ -291,7 +297,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -321,7 +327,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -351,7 +357,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
+        await setMilestoneInputs({ name: "test name", photo: {uri: "test URI"} });
 
         // submit log
         await userEvent.press(
@@ -484,7 +490,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
 
         // submit log
         await userEvent.press(
@@ -527,7 +533,7 @@ describe("Track milestone screen", () => {
         render(<Milestone/>);
 
         // fill in inputs
-        await setmilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
+        await setMilestoneInputs({category: testCategory, name: testName, time: testTime, note: testNote, photo: {uri: "x"}});
 
         // submit log
         await userEvent.press(
