@@ -61,6 +61,7 @@ export default function Health() {
 		note: "",
 	});
 	const [reset, setReset] = useState(0);
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	/**
@@ -237,17 +238,24 @@ export default function Health() {
 	 * Handles UI submit action for saving the health log.
 	 */
 	const handleSaveHealthLog = async () => {
-		const result = await saveHealthLog();
-		if (result.success) {
-			router.replace("/(tabs)");
-			Alert.alert("Success", "Health log saved successfully!");
-		} else if (result.error && !String(result.error).startsWith("Missing required")) {
-			const errorMessage = String(result.error);
-			if (errorMessage.startsWith("Failed to ")) {
-				Alert.alert("Error", errorMessage);
-			} else {
-				Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
+		if (isSaving) return;
+		
+		setIsSaving(true);
+		try {
+			const result = await saveHealthLog();
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Success", "Health log saved successfully!");
+			} else if (result.error && !String(result.error).startsWith("Missing required")) {
+				const errorMessage = String(result.error);
+				if (errorMessage.startsWith("Failed to ")) {
+					Alert.alert("Error", errorMessage);
+				} else {
+					Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
+				}
 			}
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
@@ -454,6 +462,7 @@ export default function Health() {
 							<TouchableOpacity
 								className="rounded-full p-4 bg-red-100 grow"
 								onPress={handleSaveHealthLog}
+								disabled={isSaving}
 								testID="health-save-log-button"
 							>
 								<Text>➕ Add to log</Text>

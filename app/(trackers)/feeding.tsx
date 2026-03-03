@@ -34,6 +34,7 @@ export default function Feeding() {
 	const [amount, setAmount] = useState("");
 	const [feedingTime, setFeedingTime] = useState(new Date());
 	const [note, setNote] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	// Function to create a new feeding log record into Supabase
@@ -126,13 +127,19 @@ export default function Feeding() {
 
 	// Validate input fields and trigger save action
 	const handleSaveFeedingLog = async () => {
+		if (isSaving) return;
 		if (category && itemName && amount) {
-			const result = await saveFeedingLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Feeding log saved successfully!");
-			} else {
-				Alert.alert(`Failed to save feeding log: ${result.error}`);
+			setIsSaving(true);
+			try {
+				const result = await saveFeedingLog();
+				if (result.success) {
+					router.replace("/(tabs)");
+					Alert.alert("Feeding log saved successfully!");
+				} else {
+					Alert.alert(`Failed to save feeding log: ${result.error}`);
+				}
+			} finally {
+				setIsSaving(false);
 			}
 		} else {
 			const missingFields = [];
@@ -214,6 +221,7 @@ export default function Feeding() {
 								className="rounded-full p-4 bg-red-100 grow"
 								onPress={handleSaveFeedingLog}
 								testID="feeding-save-log-button"
+								disabled={isSaving}
 							>
 								<Text>➕ Add to log</Text>
 							</TouchableOpacity>
