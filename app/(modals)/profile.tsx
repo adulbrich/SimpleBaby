@@ -31,6 +31,8 @@ export default function Profile() {
     const { isGuest, exitGuest, session } = useAuth();
 
     const [childName, setChildName] = useState<string>('Loading...');
+    const [displayName, setDisplayName] = useState<string>('');
+    const [displayEmail, setDisplayEmail] = useState<string>('');
 
     const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
 
@@ -87,6 +89,14 @@ export default function Profile() {
         loadChildName();
     }, [isGuest, session]);
 
+    useEffect(() => {
+        if (!session) {
+            return;
+        }
+        setDisplayName(`${session.user.user_metadata.firstName} ${session.user.user_metadata.lastName}`);
+        setDisplayEmail(session.user.user_metadata.email ?? '');
+    }, [session]);
+
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
             <ScrollView>
@@ -104,7 +114,7 @@ export default function Profile() {
                             👤 Name
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
-                            {isGuest ? "Guest" : `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`}
+                            {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
                     {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -141,7 +151,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {session?.user.user_metadata.email}
+                                {displayEmail}
                             </Text>
                         </TouchableOpacity>
                     </View>}

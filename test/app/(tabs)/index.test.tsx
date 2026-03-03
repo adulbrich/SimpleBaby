@@ -39,6 +39,10 @@ jest.mock("expo-audio", () => ({
 
 jest.mock("expo-crypto", () => ({}));
 
+jest.mock("@/library/crypto", () => ({
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
+}));
+
 describe("Tracker screen", () => {
     test("Loads tracker option buttons", () => {
         render(<MainTab/>);
