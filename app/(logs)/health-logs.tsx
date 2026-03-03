@@ -347,137 +347,135 @@ const HealthLogsView: React.FC = () => {
 							<Text className="text-xl font-bold mb-4">
 								Edit &apos;{editingLog?.category}&apos; Health Log
 							</Text>
-							{editingLog?.growth_length && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Length (cm)"
-									value={editingLog?.growth_length || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_length: text } : prev,
-										)
-									}
-								/>
+							{editingLog?.category === "Growth" && (
+								<>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Length (cm)"
+										value={editingLog.growth_length ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, growth_length: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Weight (kg)"
+										value={editingLog.growth_weight ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, growth_weight: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Head (cm)"
+										value={editingLog.growth_head ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, growth_head: text } : prev,
+											)
+										}
+									/>
+								</>
 							)}
-							{editingLog?.growth_weight && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Weight (kg)"
-									value={editingLog?.growth_weight || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_weight: text } : prev,
-										)
-									}
-								/>
+							{editingLog?.category === "Activity" && (
+								<>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Activity Type"
+										value={editingLog.activity_type ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, activity_type: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Activity Duration"
+										value={editingLog.activity_duration ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, activity_duration: text } : prev,
+											)
+										}
+									/>
+								</>
 							)}
-							{editingLog?.growth_head && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Head (cm)"
-									value={editingLog?.growth_head || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_head: text } : prev,
-										)
-									}
-								/>
+							{editingLog?.category === "Meds" && (
+								<>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Medication Name"
+										value={editingLog.meds_name ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, meds_name: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Medication Amount"
+										value={editingLog.meds_amount ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, meds_amount: text } : prev,
+											)
+										}
+									/>
+								</>
 							)}
-							{editingLog?.activity_type && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Activity Type"
-									value={editingLog?.activity_type || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, activity_type: text } : prev,
-										)
-									}
-								/>
+							{editingLog?.category === "Vaccine" && (
+								<>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Vaccine Name"
+										value={editingLog.vaccine_name ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, vaccine_name: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Vaccine Location"
+										value={editingLog.vaccine_location ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, vaccine_location: text } : prev,
+											)
+										}
+									/>
+								</>
 							)}
-							{editingLog?.activity_duration && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Activity Duration"
-									value={editingLog?.activity_duration || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, activity_duration: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.meds_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Medication Name"
-									value={editingLog?.meds_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, meds_name: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.meds_amount && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Medication Amount"
-									value={editingLog?.meds_amount || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, meds_amount: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.vaccine_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Vaccine Name"
-									value={editingLog?.vaccine_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, vaccine_name: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.vaccine_location && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Vaccine Location"
-									value={editingLog?.vaccine_location || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, vaccine_location: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.other_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Other Event Name"
-									value={editingLog?.other_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, other_name: text } : prev,
-										)
-									}
-								/>
-							)}
-							{editingLog?.other_description && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Other Event Description"
-									value={editingLog?.other_description || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, other_description: text } : prev,
-										)
-									}
-								/>
+							{editingLog?.category === "Other" && (
+								<>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Other Event Name"
+										value={editingLog.other_name ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, other_name: text } : prev,
+											)
+										}
+									/>
+									<TextInput
+										className="border mb-2 px-3 py-2"
+										placeholder="Other Event Description"
+										value={editingLog.other_description ?? ""}
+										onChangeText={(text) =>
+											setEditingLog((prev) =>
+												prev ? { ...prev, other_description: text } : prev,
+											)
+										}
+									/>
+								</>
 							)}
 							<TextInput
 								className="border mb-2 px-3 py-2"
