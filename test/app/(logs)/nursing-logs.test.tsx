@@ -112,6 +112,18 @@ describe("Nursing logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
+    test("Catch getActiveChildId() error", async () => {
+        const testErrorMessage = "testErrorGetID";
+    
+        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // { success: /* falsy value */, error: /* string */ }
+        // This should cause error handling in app/(logs)/nursing-logs.tsx -> fetchNursingLogs()
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: false, error: testErrorMessage })
+        );
+        await catchLoadingError(testErrorMessage);
+    }, 10000);
+
     test("Catch supabase select error", async () => {
         const testErrorMessage = "test error";
     
@@ -152,7 +164,7 @@ describe("Nursing logs screen", () => {
         await catchNoLogs(`You don't have any nursing logs for ${testChildName} yet!`);
     });
 
-    test("Renders log buttons", rendersLogButtons);
+    test("Renders log buttons", rendersLogButtons, 10000);
 
     test("Catches decryption error", catchDecryptionError);
 

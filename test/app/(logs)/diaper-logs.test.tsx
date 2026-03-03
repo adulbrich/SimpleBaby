@@ -107,6 +107,18 @@ describe("Diaper logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
+    test("Catch getActiveChildId() error", async () => {
+        const testErrorMessage = "testErrorGetID";
+    
+        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // { success: /* falsy value */, error: /* string */ }
+        // This should cause error handling in app/(logs)/diaper-logs.tsx -> fetchDiaperLogs()
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => ({ success: false, error: testErrorMessage })
+        );
+        await catchLoadingError(testErrorMessage);
+    });
+
     test("Catch supabase select error", async () => {
         const testErrorMessage = "test error";
     
