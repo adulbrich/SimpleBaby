@@ -51,7 +51,7 @@ export default function Feeding() {
 			const encryptedAmount = await encryptData(amount);
 			const encryptedNote = note ? await encryptData(note) : null;
 
-			const { data, error } = await supabase.from("feeding_logs").insert([
+			const { error } = await supabase.from("feeding_logs").insert([
 				{
 					child_id: childId,
 					category: encryptedCategory,
@@ -67,7 +67,7 @@ export default function Feeding() {
 				return { success: false, error };
 			}
 
-			return { success: true, data };
+			return { success: true };
 		} catch (err) {
 			console.error("❌ Encryption or insert failed:", err);
 			return { success: false, error: "Encryption or database error" };

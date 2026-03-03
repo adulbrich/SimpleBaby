@@ -77,6 +77,17 @@ export default function TabLayout() {
           header: () => <Header title="❓ About" topInset={insets.top}/>,
         }}
       />
+
+      
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => Icon(color, '⚙️'),
+          header: () => <Header title="⚙️ Settings" topInset={insets.top}/>,
+        }}
+      />
+
     </Tabs>
   );
 }

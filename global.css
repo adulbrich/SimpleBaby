@@ -175,3 +175,13 @@
 .tracker-icon {
     @apply text-[4.5rem] scale-100;
 }
+
+.tos-text {
+    margin-top: 2;
+    margin-bottom: 2;
+}
+
+.tos-heading {
+    font-size: 24;
+    color:rgb(48, 30, 99);
+}

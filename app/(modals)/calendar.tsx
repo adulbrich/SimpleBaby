@@ -1,8 +1,8 @@
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { Calendar } from "react-native-calendars";
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
-import { fetchLogsForDay, CalendarLog } from "@/library/calendar";
+import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
 import { getActiveChildId } from '@/library/utils';
 import { useAuth } from '@/library/auth-provider';
 
@@ -12,19 +12,33 @@ function toYMD(d: Date) {
 
 export default function CalendarModal() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [visibleMonth, setVisibleMonth] = useState<Date>(new Date());
+    const [daysWithLogs, setDaysWithLogs] = useState<Set<string>>(new Set());
     const [logs, setLogs] = useState<CalendarLog[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const dayRequestIdRef = useRef(0);
+    const monthRequestIdRef = useRef(0);
     const { isGuest } = useAuth();
 
     const markedDates = useMemo(() => {
-        const ymd = toYMD(selectedDate);
-        return {
-            [ymd]: { selected: true }
+        const marks: Record<string, any> = {};
+
+        for (const ymd of daysWithLogs) {
+            marks[ymd] = { marked: true };
+        }
+
+        const selectedYMD = toYMD(selectedDate);
+        marks[selectedYMD] = {
+            ...(marks[selectedYMD] ?? {}),
+            selected: true,
         };
-    }, [selectedDate]);
+
+        return marks;
+    }, [daysWithLogs, selectedDate]);
 
     const loadDay = useCallback(async (date: Date) => {
+        const requestId = ++dayRequestIdRef.current;
         setLoading(true);
         setError(null);
 
@@ -35,12 +49,18 @@ export default function CalendarModal() {
             }
             const childId = String(result.childId);
             const items = await fetchLogsForDay(childId, date);
-            setLogs(items);
+            if (requestId === dayRequestIdRef.current) {
+                setLogs(items);
+            }
         } catch (e: any) {
-            setError(e?.message ?? "Failed to load logs.");
-            setLogs([]);
+            if (requestId === dayRequestIdRef.current) {
+                setError(e?.message ?? "Failed to load logs.");
+                setLogs([]);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === dayRequestIdRef.current) {
+                setLoading(false);
+            }
         }
 
     }, []);
@@ -49,57 +69,74 @@ export default function CalendarModal() {
         loadDay(selectedDate);
     }, [loadDay, selectedDate]);
 
+    useEffect(() => {
+        (async () => {
+            const requestId = ++monthRequestIdRef.current;
+            try {
+                const result = await getActiveChildId();
+                if (!result?.success || !result.childId) return;
+
+                const childId = String(result.childId);
+                const days = await fetchDaysWithLogsForMonth(childId, visibleMonth);
+                if (requestId === monthRequestIdRef.current) {
+                    setDaysWithLogs(days);
+                }
+            } catch {
+                if (requestId === monthRequestIdRef.current) {
+                    setDaysWithLogs(new Set());
+                }
+            }
+        })();
+    }, [visibleMonth]);
+
     if (isGuest) {
-            return (
-                <>
-                    <View className='flex-1 bg-gray-50 p-4'>
-                        <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
-                        <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
-                    </View>
-                </>
-            );
-        }
+        return (
+            <View className='flex-1 bg-gray-50 p-4'>
+                <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
+                <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
+            </View>
+        );
+    }
     
     return (
-        <>
-            <View className='flex-1 bg-gray-50 p-4'>
-                <Calendar
-                    markedDates={markedDates}
-                    onDayPress={(day) => {
-                        const d = new Date(day.dateString + "T00:00:00");
-                        setSelectedDate(d);
-                        loadDay(d);
-                    }}
-                />
+        <View className='flex-1 bg-gray-50 p-4'>
+            <Calendar
+                markedDates={markedDates}
+                onDayPress={(day) => {
+                    const d = new Date(day.dateString + "T00:00:00");
+                    setSelectedDate(d);
+                }}
+                onMonthChange={(m) => {
+                    setVisibleMonth(new Date(m.dateString + "T00:00:00"));
+                }}
+            />
 
-                <Text className="text-xl font-bold mt-4 mb-2">
-                    {format(selectedDate, "MMMM d, yyyy")}
-                </Text>
+            <Text className="text-xl font-bold mt-4 mb-2">
+                {format(selectedDate, "MMMM d, yyyy")}
+            </Text>
 
-                {loading ? (<ActivityIndicator size="large"/>)
-                : error ? (<Text className="text-red-600">{error}</Text>)
-                : logs.length === 0 ? (<Text className="text-gray-600 pb-5">No logs found for this day.</Text>)
-                : (
-                    <FlatList
-                        data={logs}
-                        keyExtractor={(item) => `${item.type}-${item.id}`}
-                        renderItem={({ item }) => (
-                        <View className="bg-white rounded-xl p-4 mb-3 shadow">
-                            <Text className="text-xs text-gray-500">
-                            {format(new Date(item.at), "h:mm a")}
-                            </Text>
+            {loading ? (<ActivityIndicator size="large"/>)
+            : error ? (<Text className="text-red-600">{error}</Text>)
+            : logs.length === 0 ? (<Text className="text-gray-600 pb-5">No logs found for this day.</Text>)
+            : (
+                <FlatList
+                    data={logs}
+                    keyExtractor={(item) => `${item.type}-${item.id}`}
+                    renderItem={({ item }) => (
+                    <View className="bg-white rounded-xl p-4 mb-3 shadow">
+                        <Text className="text-xs text-gray-500">
+                        {format(new Date(item.at), "h:mm a")}
+                        </Text>
 
-                            <Text className="text-base font-bold mt-1">{item.title}</Text>
+                        <Text className="text-base font-bold mt-1">{item.title}</Text>
 
-                            {!!item.details && (
-                            <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
-                            )}
-                        </View>
+                        {!!item.details && (
+                        <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
                         )}
-                    ></FlatList>
-                )
-            }
-            </View>
-        </>
+                    </View>
+                    )}
+                ></FlatList>
+            )}
+        </View>
     );
 }
