@@ -30,11 +30,10 @@ export default function Profile() {
 
     const { isGuest, exitGuest, session } = useAuth();
 
-    const [guestChildName, setGuestChildName] = useState<string>('Loading...');
-    const [accountChildName, setAccountChildName] = useState<string>('Loading...');
+    const [childName, setChildName] = useState<string>('Loading...');
 
     const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
-    
+
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
         try {
@@ -49,7 +48,7 @@ export default function Profile() {
 
             // Signed-in session sign-out: Supabase sign out
             const { error } = await supabase.auth.signOut();
-            
+
             if (error) throw error;
             router.replace("/");
 
@@ -59,40 +58,33 @@ export default function Profile() {
     };
 
     useEffect(() => {
-        const loadGuestChild = async () => {
+        const loadChildName = async () => {
             try {
-                if (!isGuest) return;
-                const activeId = await getLocalActiveChildId();
-                if (!activeId) {
-                    setGuestChildName("Guest Child");
-                    return;
+                if (isGuest) {
+                    const activeId = await getLocalActiveChildId();
+                    if (!activeId) { 
+                        setChildName("Guest Child"); return; 
+                    }
+                    const children = await listChildren();
+                    const activeChild = children.find(c => c.id === activeId);
+                    setChildName(activeChild?.name ?? 'Guest Child');
+                } else if (session) {
+                    const result = await getRemoteActiveChildId();
+                    if (!result.success || !result.childName) { 
+                        setChildName("Child"); return; 
+                    }
+                    setChildName(result.childName);
                 }
-                const children = await listChildren();
-                const activeChild = children.find(c => c.id === activeId);
-                setGuestChildName(activeChild?.name ?? 'Guest Child');
             } catch {
-                Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
+                if (isGuest) {
+                    Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
+                } else {
+                    setChildName("Child");
+                }
             }
         };
 
-        loadGuestChild();
-    }, [isGuest]);
-
-    useEffect(() => {
-        const loadAccountChild = async () => {
-            try {
-                if (isGuest || !session) return;
-                const result = await getRemoteActiveChildId();
-                if (!result.success || !result.childName) {
-                    setAccountChildName("Child");
-                    return;
-                }
-                setAccountChildName(result.childName);
-            } catch {
-                setAccountChildName("Child");
-            }
-        };
-        loadAccountChild();
+        loadChildName();
     }, [isGuest, session]);
 
     return (
@@ -104,7 +96,7 @@ export default function Profile() {
                             Active Child
                         </Text>
                         <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {isGuest ? guestChildName : accountChildName}
+                            👶 {childName}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>

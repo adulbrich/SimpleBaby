@@ -18,6 +18,7 @@ import {
 	createChild,
 	getActiveChildId,
 } from "@/library/local-store";
+import { encryptData } from "@/library/crypto";
 
 export default function MainTab() {
 	type Button = {
@@ -82,7 +83,6 @@ export default function MainTab() {
 				}
 
 				// Insert child into the database
-				const { encryptData } = await import("@/library/crypto");
 				const encryptedChildName = await encryptData(child);
 				const { data, error } = await supabase
 					.from("children")
