@@ -236,12 +236,14 @@ const SleepLogsView: React.FC = () => {
 						setEditingLog(item);
 						setEditModalVisible(true);
 					}}
+					testID={`sleep-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
 				</Pressable>
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					testID={`sleep-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
 				</Pressable>
@@ -255,7 +257,7 @@ const SleepLogsView: React.FC = () => {
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center">Error: {error}</Text>
+				<Text className="text-red-600 text-center" testID="sleep-logs-loading-error">Error: {error}</Text>
 			) : sleepLogs.length === 0 ? (
 				<Text>
 					You don&apos;t have any sleep logs
@@ -267,6 +269,7 @@ const SleepLogsView: React.FC = () => {
 					renderItem={renderSleepLogItem}
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{ paddingBottom: 16 }}
+					testID="sleep-logs"
 				/>
 			)}
 
@@ -300,6 +303,7 @@ const SleepLogsView: React.FC = () => {
 										prev ? { ...prev, start_time: text } : prev,
 									)
 								}
+								testID="sleep-log-edit-start-time"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">End Time</Text>
 							<TextInput
@@ -310,6 +314,7 @@ const SleepLogsView: React.FC = () => {
 										prev ? { ...prev, end_time: text } : prev,
 									)
 								}
+								testID="sleep-log-edit-end-time"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">Duration</Text>
 							<TextInput
@@ -320,6 +325,7 @@ const SleepLogsView: React.FC = () => {
 										prev ? { ...prev, duration: text } : prev,
 									)
 								}
+								testID="sleep-log-edit-duration"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">Note</Text>
 							<TextInput
@@ -330,17 +336,20 @@ const SleepLogsView: React.FC = () => {
 										prev ? { ...prev, note: text } : prev,
 									)
 								}
+								testID="sleep-log-edit-note"
 							/>
 							<View className="flex-row justify-end gap-3">
 								<TouchableOpacity
 									className="bg-gray-200 rounded-full px-4 py-2"
 									onPress={() => setEditModalVisible(false)}
+									testID="sleep-log-edit-cancel"
 								>
 									<Text>Cancel</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									className="bg-green-500 rounded-full px-4 py-2"
 									onPress={handleSaveEdit}
+									testID="sleep-log-edit-save"
 								>
 									<Text className="text-white">Save</Text>
 								</TouchableOpacity>

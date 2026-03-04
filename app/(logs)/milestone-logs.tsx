@@ -240,10 +240,7 @@ const MilestoneLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("milestone_logs", editingLog.id, patch);
 				if (!success) {
-					Alert.alert(
-						"Update error",
-						"Failed to update milestone (Guest Mode).",
-					);
+					Alert.alert("Failed to update log");
 					return;
 				}
 				await fetchMilestoneLogs();
@@ -256,7 +253,7 @@ const MilestoneLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Error updating milestone", error.message);
+					Alert.alert("Failed to update log");
                     return;
                 }
 
@@ -264,14 +261,15 @@ const MilestoneLogsView: React.FC = () => {
                 setEditModalVisible(false);
             }
 		} catch (err) {
-			Alert.alert("Update error", String(err));
+			console.error("❌ Encryption or update error:", err);
+			Alert.alert("Something went wrong during save.");
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		Alert.alert(
 			"Delete Entry",
-			"Are you sure you want to delete this milestone?",
+			"Are you sure you want to delete this log?",
 			[
 				{ text: "Cancel", style: "cancel" },
 				{
@@ -281,7 +279,7 @@ const MilestoneLogsView: React.FC = () => {
 						if (isGuest) {
 							const success = await deleteRow("milestone_logs", id);
 							if (!success) {
-								Alert.alert("Error deleting milestone (Guest Mode)");
+								Alert.alert("Error deleting log");
 								return;
 							}
 							setMilestoneLogs((prev) => prev.filter((m) => m.id !== id));
@@ -292,7 +290,7 @@ const MilestoneLogsView: React.FC = () => {
                                 .delete()
                                 .eq("id", id);
                             if (error) {
-                                Alert.alert("Error deleting milestone", error.message);
+                                Alert.alert("Error deleting log");
                                 return;
                             }
                             setMilestoneLogs((prev) => prev.filter((log) => log.id !== id));
@@ -346,6 +344,7 @@ const MilestoneLogsView: React.FC = () => {
 					<Pressable
 						className="px-3 py-2 rounded-full bg-blue-100"
 						onPress={() => openEditModal(item)}
+						testID={`milestone-logs-edit-button-${item.id}`}
 					>
 						<Text className="text-blue-700">✏️ Edit</Text>
 					</Pressable>
@@ -353,6 +352,7 @@ const MilestoneLogsView: React.FC = () => {
 					<Pressable
 						className="px-3 py-2 rounded-full bg-red-100"
 						onPress={() => handleDelete(item.id)}
+						testID={`milestone-logs-delete-button-${item.id}`}
 					>
 						<Text className="text-red-700">🗑️ Delete</Text>
 					</Pressable>
@@ -368,7 +368,7 @@ const MilestoneLogsView: React.FC = () => {
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center">Error: {error}</Text>
+				<Text className="text-red-600 text-center" testID="milestone-logs-loading-error">Error: {error}</Text>
 			) : milestoneLogs.length === 0 ? (
 				<Text>
 					You don&apos;t have any milestone logs
@@ -382,6 +382,7 @@ const MilestoneLogsView: React.FC = () => {
 					contentContainerStyle={{ paddingBottom: 16 }}
 					refreshing={loading}
 					onRefresh={fetchMilestoneLogs}
+					testID="milestone-logs"
 				/>
 			)}
 
@@ -420,6 +421,7 @@ const MilestoneLogsView: React.FC = () => {
 											prev ? { ...prev, title: text } : prev,
 										)
 									}
+									testID="milestone-log-edit-title"
 								/>
 							</View>
 
@@ -436,6 +438,7 @@ const MilestoneLogsView: React.FC = () => {
 												: prev,
 										)
 									}
+									testID="milestone-log-edit-category"
 								/>
 								<Text className="text-xs text-gray-400 mt-1">
 									Must enter: Cognitive, Social, Motor, Language, or Other.
@@ -486,6 +489,7 @@ const MilestoneLogsView: React.FC = () => {
 										)
 									}
 									multiline
+									testID="milestone-log-edit-note"
 								/>
 							</View>
 
@@ -500,12 +504,14 @@ const MilestoneLogsView: React.FC = () => {
 								<TouchableOpacity
 									className="bg-gray-200 rounded-full px-4 py-2"
 									onPress={() => setEditModalVisible(false)}
+									testID="milestone-log-edit-cancel"
 								>
 									<Text>Cancel</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									className="bg-green-500 rounded-full px-4 py-2"
 									onPress={handleSaveEdit}
+									testID="milestone-log-edit-save"
 								>
 									<Text className="text-white">Save</Text>
 								</TouchableOpacity>

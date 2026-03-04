@@ -52,8 +52,8 @@ const NursingLogsView: React.FC = () => {
 		if (!value || !value.includes("U2FsdGVkX1")) return value || "";
 		try {
 			return await decryptData(value);
-		} catch {
-			return "[Decryption Failed]";
+		} catch (err) {
+			return `[Decryption Failed]: ${err}`;
 		}
 	};
 
@@ -175,7 +175,7 @@ const NursingLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("nursing_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Error updating log");
+					Alert.alert("Failed to update log");
 					return;
 				}
 
@@ -189,15 +189,15 @@ const NursingLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Error updating log");
+                    Alert.alert("Failed to update log");
                     return;
                 }
 
                 await fetchNursingLogs();
                 setEditModalVisible(false);
             }
-		} catch (err) {
-			Alert.alert(`Encryption or update error: ${err}`);
+		} catch {
+			Alert.alert("Something went wrong during save.");
 		}
 	};
 
@@ -270,12 +270,14 @@ const NursingLogsView: React.FC = () => {
 						setEditingLog(item);
 						setEditModalVisible(true);
 					}}
+					testID={`nursing-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
 				</Pressable>
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					testID={`nursing-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
 				</Pressable>
@@ -289,7 +291,7 @@ const NursingLogsView: React.FC = () => {
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center">Error: {error}</Text>
+				<Text className="text-red-600 text-center" testID="nursing-logs-loading-error">Error: {error}</Text>
 			) : nursingLogs.length === 0 ? (
 				<Text>
 					You don&apos;t have any nursing logs
@@ -301,6 +303,7 @@ const NursingLogsView: React.FC = () => {
 					renderItem={renderNursingLogItem}
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{ paddingBottom: 16 }}
+					testID="nursing-logs"
 				/>
 			)}
 
@@ -346,6 +349,7 @@ const NursingLogsView: React.FC = () => {
 												prev ? { ...prev, [field]: text } : prev,
 											)
 										}
+										testID={`nursing-log-edit-${field.replace("_", "-")}`}
 									/>
 								</View>
 							))}
@@ -354,12 +358,14 @@ const NursingLogsView: React.FC = () => {
 								<TouchableOpacity
 									className="bg-gray-200 rounded-full px-4 py-2"
 									onPress={() => setEditModalVisible(false)}
+									testID="nursing-log-edit-cancel"
 								>
 									<Text>Cancel</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									className="bg-green-500 rounded-full px-4 py-2"
 									onPress={handleSaveEdit}
+									testID="nursing-log-edit-save"
 								>
 									<Text className="text-white">Save</Text>
 								</TouchableOpacity>
