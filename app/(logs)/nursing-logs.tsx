@@ -140,6 +140,27 @@ const NursingLogsView: React.FC = () => {
 
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
+
+		const errorFields = [];
+        const durationRegex = /^\d{2}:\d{2}:\d{2}$/;
+        if (editingLog.left_duration && !durationRegex.test(editingLog.left_duration)) {
+            errorFields.push("Left duration must be in HH:MM:SS format.");
+        }
+        if (editingLog.right_duration && !durationRegex.test(editingLog.right_duration)) {
+            errorFields.push("Right duration must be in HH:MM:SS format.");
+        }
+        if (editingLog.left_amount && isNaN(Number(editingLog.left_amount))) {
+            errorFields.push("Left amount must be a number");
+        }
+        if (editingLog.right_amount && isNaN(Number(editingLog.right_amount))) {
+            errorFields.push("Right amount must be a number.");
+        }
+
+		if (errorFields.length !== 0) {
+			Alert.alert("Invalid Format", `Please fix the following errors:\n\n${errorFields.join("\n\n")}`);
+			return;
+		}
+
 		try {
 			const updated = {
 				left_duration: editingLog.left_duration
