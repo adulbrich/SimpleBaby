@@ -25,6 +25,7 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
 
 interface DiaperLog {
 	id: string;
@@ -173,6 +174,7 @@ const DiaperLogsView: React.FC = () => {
 		try {
 			const { id, consistency, amount, note } = editingLog;
 
+			console.log("encrypting...", id, consistency, amount, note)
 			const encryptedConsistency = await encryptData(consistency);
 			const encryptedAmount = await encryptData(amount);
 			const encryptedNote = note ? await encryptData(note) : null;
@@ -192,6 +194,7 @@ const DiaperLogsView: React.FC = () => {
 				setEditModalVisible(false);
 				return;
 			} else {
+				console.log("saving to supabase")
                 const { error } = await supabase
                     .from("diaper_logs")
                     .update({
@@ -275,80 +278,32 @@ const DiaperLogsView: React.FC = () => {
 			)}
 
 			{/* Edit Modal */}
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Diaper Log</Text>
-							<Text className="text-sm text-gray-500 mb-1">Consistency</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.consistency}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, consistency: text } : prev,
-									)
-								}
-								testID="diaper-log-edit-consistency"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Amount</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.amount}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, amount: text } : prev,
-									)
-								}
-								testID="diaper-log-edit-amount"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Note</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-6"
-								value={editingLog?.note || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, note: text } : prev,
-									)
-								}
-								testID="diaper-log-edit-note"
-							/>
-							<View className="flex-row justify-end gap-3">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="diaper-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="diaper-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Diaper Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					consistency: {
+						title: "Consistency",
+						type: "category",
+						categories: ["Wet", "Dry", "Mixed"],
+						value: editingLog?.consistency,
+					},
+					amount: {
+						title: "Amount",
+						type: "category",
+						categories: ["SM", "MD", "LG"],
+						value: editingLog?.amount,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+				}}
+			/>
 		</View>
 	);
 };
