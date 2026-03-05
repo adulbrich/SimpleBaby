@@ -5,13 +5,7 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
 	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -174,7 +168,6 @@ const DiaperLogsView: React.FC = () => {
 		try {
 			const { id, consistency, amount, note } = editingLog;
 
-			console.log("encrypting...", id, consistency, amount, note)
 			const encryptedConsistency = await encryptData(consistency);
 			const encryptedAmount = await encryptData(amount);
 			const encryptedNote = note ? await encryptData(note) : null;
@@ -194,7 +187,6 @@ const DiaperLogsView: React.FC = () => {
 				setEditModalVisible(false);
 				return;
 			} else {
-				console.log("saving to supabase")
                 const { error } = await supabase
                     .from("diaper_logs")
                     .update({
