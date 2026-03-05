@@ -40,6 +40,7 @@ export default function Milestone() {
 	const [photoName, setPhotoName] = useState<string | null>(null);
 	const [uploadingPhoto, setUploadingPhoto] = useState(false);
 	const [note, setNote] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	const showDatePickerModal = () => {
@@ -253,7 +254,10 @@ export default function Milestone() {
 	 * Navigates back to the main tab screen on success.
 	 */
 	const handleSaveMilestoneLog = async () => {
+		if (isSaving) return;
+		
 		if (name && milestoneDate) {
+			setIsSaving(true);
 			const result = await saveMilestoneLog();
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -261,6 +265,7 @@ export default function Milestone() {
 			} else {
 				Alert.alert(`Failed to save milestone log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!name) missingFields.push("name");
@@ -425,6 +430,7 @@ export default function Milestone() {
 						<TouchableOpacity
 							className="rounded-full p-4 bg-red-100 grow"
 							onPress={handleSaveMilestoneLog}
+							disabled={isSaving}
 							testID="milestone-save-log-button"
 						>
 							<Text>➕ Add to log</Text>
