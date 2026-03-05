@@ -128,17 +128,14 @@ export default function Diaper() {
 		if (isSaving) return;
 		if (consistency && amount) {
 			setIsSaving(true);
-			try {
-				const result = await saveDiaperLog();
-				if (result.success) {
-					router.replace("/(tabs)");
-					Alert.alert("Diaper log saved successfully!");
-				} else {
-					Alert.alert(`Failed to save diaper log: ${result.error}`);
-				}
-			} finally {
-				setIsSaving(false);
+			const result = await saveDiaperLog();
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Diaper log saved successfully!");
+			} else {
+				Alert.alert(`Failed to save diaper log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!consistency) missingFields.push("consistency");

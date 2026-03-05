@@ -149,17 +149,14 @@ export default function Nursing() {
 			rightAmount.trim() !== ""
 		) {
 			setIsSaving(true);
-			try {
-				const result = await saveNursingLog();
-				if (result.success) {
-					router.replace("/(tabs)");
-					Alert.alert("Nursing log saved successfully!");
-				} else {
-					Alert.alert(`Failed to save nursing log: ${result.error}`);
-				}
-			} finally {
-				setIsSaving(false);
+			const result = await saveNursingLog();
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Nursing log saved successfully!");
+			} else {
+				Alert.alert(`Failed to save nursing log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (leftDuration === "00:00:00" || rightDuration === "00:00:00")

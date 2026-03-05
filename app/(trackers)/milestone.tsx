@@ -258,17 +258,14 @@ export default function Milestone() {
 		
 		if (name && milestoneDate) {
 			setIsSaving(true);
-			try {
-				const result = await saveMilestoneLog();
-				if (result.success) {
-					router.replace("/(tabs)");
-					Alert.alert("Milestone log saved successfully!");
-				} else {
-					Alert.alert(`Failed to save milestone log: ${result.error}`);
-				}
-			} finally {
-				setIsSaving(false);
+			const result = await saveMilestoneLog();
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Milestone log saved successfully!");
+			} else {
+				Alert.alert(`Failed to save milestone log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!name) missingFields.push("name");

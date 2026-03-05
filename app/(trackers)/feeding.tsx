@@ -130,17 +130,14 @@ export default function Feeding() {
 		if (isSaving) return;
 		if (category && itemName && amount) {
 			setIsSaving(true);
-			try {
-				const result = await saveFeedingLog();
-				if (result.success) {
-					router.replace("/(tabs)");
-					Alert.alert("Feeding log saved successfully!");
-				} else {
-					Alert.alert(`Failed to save feeding log: ${result.error}`);
-				}
-			} finally {
-				setIsSaving(false);
+			const result = await saveFeedingLog();
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Feeding log saved successfully!");
+			} else {
+				Alert.alert(`Failed to save feeding log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!category) missingFields.push("category");

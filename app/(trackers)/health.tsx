@@ -241,22 +241,19 @@ export default function Health() {
 		if (isSaving) return;
 		
 		setIsSaving(true);
-		try {
-			const result = await saveHealthLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Success", "Health log saved successfully!");
-			} else if (result.error && !String(result.error).startsWith("Missing required")) {
-				const errorMessage = String(result.error);
-				if (errorMessage.startsWith("Failed to ")) {
-					Alert.alert("Error", errorMessage);
-				} else {
-					Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
-				}
+		const result = await saveHealthLog();
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Success", "Health log saved successfully!");
+		} else if (result.error && !String(result.error).startsWith("Missing required")) {
+			const errorMessage = String(result.error);
+			if (errorMessage.startsWith("Failed to ")) {
+				Alert.alert("Error", errorMessage);
+			} else {
+				Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
 			}
-		} finally {
-			setIsSaving(false);
 		}
+		setIsSaving(false);
 	};
 
 	// Update date in state when changed

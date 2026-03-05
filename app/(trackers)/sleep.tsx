@@ -154,17 +154,14 @@ export default function Sleep() {
 
 		if (stopwatchTime && stopwatchTime !== "00:00:00") {
 			setIsSaving(true);
-			try {
-				const result = await saveSleepLog(stopwatchTime, null, null, note);
-				if (result.success) {
-					router.replace("/(tabs)");
-					Alert.alert("Sleep log saved successfully!");
-				} else {
-					Alert.alert(`Failed to save sleep log: ${result.error}`);
-				}
-			} finally {
-				setIsSaving(false);
+			const result = await saveSleepLog(stopwatchTime, null, null, note);
+			if (result.success) {
+				router.replace("/(tabs)");
+				Alert.alert("Sleep log saved successfully!");
+			} else {
+				Alert.alert(`Failed to save sleep log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else if (startTime && endTime) {
 			if (endTime.getTime() <= startTime.getTime()) {
 				Alert.alert(
