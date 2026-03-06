@@ -332,14 +332,12 @@ describe("Health logs screen", () => {
         )
     ));
 
-    /* This test awaiting github issue # 128
     test("Updates remotely stored logs", async () => updateRemoteLogs(
         (supabase.from("").update as unknown as jest.Mock).mockClear(),
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ), 10000);
-    */
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -420,20 +418,18 @@ describe("health logs screen (guest mode)", () => {
         )
     ));
 
-    /*  This test awaiting github issue # 128
     test("Updates remotely stored logs", async () => updateRemoteLogs(
         (updateRow as jest.Mock).mockClear(),
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ), 10000);
-    */
+    ));
 
-    test("Updates displayed logs", async () => null/* updateDisplayedLogs((newLogs) => {
+    test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(
             async () => newLogs
         );
-    }) */);
+    }));
 });
 
 
@@ -607,7 +603,6 @@ async function catchUpdateError(mockFailingEdit: () => void) {
     }
 }
 
-/* This may be used by tests awaiting github issue # 128
 async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: jest.Mock, idArgI: number) {
     render(<HealthLogsView/>);
     await screen.findByTestId("health-logs");  // wait for log list to render
@@ -617,21 +612,21 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const editFields = [
             log.note ? "note" : null,
             // growth category values
-            log.test_category === "growth" ? "growth-head" : null,
-            log.test_category === "growth" ? "growth-length" : null,
-            log.test_category === "growth" ? "growth-weight" : null,
+            log.test_category === "growth" ? "growth_head" : null,
+            log.test_category === "growth" ? "growth_length" : null,
+            log.test_category === "growth" ? "growth_weight" : null,
             // activity category values
-            log.test_category === "activity" ? "activity-type" : null,
-            log.test_category === "activity" ? "activity-duration" : null,
+            log.test_category === "activity" ? "activity_type" : null,
+            log.test_category === "activity" ? "activity_duration" : null,
             // meds category values
-            log.test_category === "meds" ? "meds-name" : null,
-            log.test_category === "meds" ? "meds-amount" : null,
+            log.test_category === "meds" ? "meds_name" : null,
+            log.test_category === "meds" ? "meds_amount" : null,
             // vaccine category values
-            log.test_category === "vaccine" ? "vaccine-name" : null,
-            log.test_category === "vaccine" ? "vaccine-location" : null,
+            log.test_category === "vaccine" ? "vaccine_name" : null,
+            log.test_category === "vaccine" ? "vaccine_location" : null,
             // other category values
-            log.test_category === "other" ? "other-name" : null,
-            log.test_category === "other" ? "other-description" : null,
+            log.test_category === "other" ? "other_name" : null,
+            log.test_category === "other" ? "other_description" : null,
         ].filter(value => value !== null);  // remove null values
 
         // clear .mock.calls array each loop
@@ -642,34 +637,41 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         await userEvent.press(
             screen.getByTestId(`health-logs-edit-button-${log.id}`)
         );
+                
+        // retrieve setLog callback from <EditingLogPopup/>
+        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
         
-        // clear fields, then type new values
-        for (const field of editFields) {
-            const editedField = `edited ${field} ${log.id}`;
-            await userEvent.clear(screen.getByTestId(`health-log-edit-${field}`));
-            await userEvent.type(
-                screen.getByTestId(`health-log-edit-${field}`),
-                editedField
-            );
-        }
+        // clear set new field values from <EditLogPopup/>
+        const editedFields = Object.fromEntries(
+            editFields.map(field => (
+                [field, `edited ${field} ${log.id}`]
+            ))
+        );
+        await act(async () =>
+            setLog((prev: object) => ({
+                ...prev,
+                ...editedFields,
+            }))
+        );
 
         // submit edit
         const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
         await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
-        expect(dataMock.mock.calls[0][dataArgI])
-            .toEqual(Object.fromEntries(  // loose comparison for objects
-                editFields.map(field => (
-                    [field.replace("-", "_"), `edited ${field} ${log.id}`]
-                ))
-            ));
+        const submitedData = dataMock.mock.calls[0][dataArgI];
+        for (const [field, submittedValue] of Object.entries(submitedData)) {
+            if (editFields.includes(field)) {
+                expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
+            } else {
+                expect(submittedValue).toBe(null);
+            }
+        }
         // Ensure mock was called with correct id
         expect(idMock.mock.calls[0][idArgI])
             .toBe(log.id);
     }
 }
-*/
 
 async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     const log = TEST_LOGS[0];  // this test set up for a log with growth category
@@ -700,14 +702,16 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
 
-    // ensure new values are on the page...
-    expect(screen.getByText(await decryptData(editedLog.growth_head), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.growth_length), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.growth_weight), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
-    // ...and that the previous values are not
-    expect(async () => screen.getByText(await decryptData(log.growth_head as string), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.growth_length as string), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.growth_weight as string), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    await act(async () => {
+        // ensure new values are on the page...
+        expect(screen.getByText(await decryptData(editedLog.growth_head), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.growth_length), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.growth_weight), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
+        // ...and that the previous values are not
+        expect(async () => screen.getByText(await decryptData(log.growth_head as string), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.growth_length as string), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.growth_weight as string), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    });
 }

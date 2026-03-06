@@ -284,7 +284,7 @@ describe("Nursing logs screen", () => {
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -370,7 +370,7 @@ describe("nursing logs screen (guest mode)", () => {
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(
@@ -548,7 +548,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         // retrieve setLog callback from <EditingLogPopup/>
         const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
         
-        // clear fields, then type new values
+        // clear set new field values from <EditLogPopup/>
         await act(async () =>
             setLog((prev: object) => ({
                 ...prev,
@@ -611,16 +611,18 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
 
-    // ensure new values are on the page...
-    expect(screen.getByText(await decryptData(editedLog.left_amount), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.right_amount), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.left_duration), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.right_duration), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
-    // ...and that the previous values are not
-    expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    await act(async () => {
+        // ensure new values are on the page...
+        expect(screen.getByText(await decryptData(editedLog.left_amount), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.right_amount), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.left_duration), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.right_duration), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
+        // ...and that the previous values are not
+        expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    });
 }
