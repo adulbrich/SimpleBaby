@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     KeyboardAvoidingView,
     Modal,
@@ -9,6 +10,10 @@ import {
     View,
 } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
+import { format } from "date-fns";
+import DateTimePicker, {
+	DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 
 type editFieldText = {
@@ -21,12 +26,26 @@ type editFieldCategory = {
     title: string;
     type: "category";
     categories: string[];
-    value: string;
+    value: string | null;
+};
+
+type editFieldDateTime = {
+    title: string;
+    type: "date" | "time";
+    value: Date;
+};
+
+type editFieldImage = {
+    title: string;
+    type: "image";
+    value: string | null;
 };
 
 type editField =
     | editFieldText
-    | editFieldCategory;
+    | editFieldCategory
+    | editFieldDateTime
+    | editFieldImage;
 
 
 export default function EditLogPopup({
@@ -36,6 +55,7 @@ export default function EditLogPopup({
     editingLog,
     setLog,
     handleSubmit,
+    testID,
 } : {
     popupVisible: boolean;
     hidePopup: () => void;
@@ -43,7 +63,12 @@ export default function EditLogPopup({
     editingLog: Record<string, editField> | null;
     setLog: (updater: (prev: any) => any) => void;
     handleSubmit: () => void;
+    testID?: string;
 }) {
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [datePickerField, setDatePickerField] = useState("");
+    const [datePickerData, setDatePickerData] = useState<editFieldDateTime|null>(null);
 
     // renderCategoryInput - dropdown of specific categories that the user can choose from
     const renderCategoryInput = (fieldKey: string, fieldInfo: editFieldCategory) => (
@@ -57,31 +82,77 @@ export default function EditLogPopup({
                 labelField={ "item" }
                 valueField={ "item" }
                 onChange={({ item }) =>
-                    setLog((prev) => {
-                        if (!prev) return prev;
-                        const updatedLog = { ...prev };
-                        (updatedLog as Record<string, any>)[fieldKey] = item;
-                        return updatedLog;
-                    })
+                    setLog((prev) => 
+                        prev ? { ...prev, [fieldKey]: item } : prev,
+                    )
                 }
             />
         </View>
     );
     
     // renderTextInput - open text field for the user to type into
-    const renderTextInput = (fieldKey: string, fieldInfo: editField) => (
+    const renderTextInput = (fieldKey: string, fieldInfo: editFieldText) => (
         <TextInput
             className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
             value={fieldInfo.value ? fieldInfo.value : ""}
             onChangeText={(text) =>
-                setLog((prev) => {
-                    if (!prev) return prev;
-                    const updatedLog = { ...prev };
-                    (updatedLog as Record<string, any>)[fieldKey] = text;
-                    return updatedLog;
-                })
+                setLog((prev) => 
+					prev ? { ...prev, [fieldKey]: text } : prev,
+                )
             }
         />
+    );
+    
+    // renderTextInput - open text field for the user to type into
+    const renderDateInput = (fieldKey: string, fieldInfo: editFieldDateTime) => (
+        <View className="mb-3">
+            <TouchableOpacity
+                className="border border-gray-300 rounded-xl px-3 py-3"
+                onPress={() => {
+                    setShowDatePicker(true);
+                    setDatePickerField(fieldKey);
+                    setDatePickerData(fieldInfo);
+                }}
+            >
+                <Text>{format(fieldInfo.value, fieldInfo.type === "date" ? "MMM dd, yyyy" : "hh:mm a")}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && datePickerData && (
+                <DateTimePicker
+                    value={new Date(datePickerData.value)}
+                    mode={datePickerData.type}
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={(event: DateTimePickerEvent, selected?: Date) => {
+                            if (selected && event.type !== "dismissed") {
+                                setLog((prev) => 
+                                    prev ? { ...prev, [datePickerField]: selected } : prev,
+                                );
+                            }
+                            setShowDatePicker(false);
+                    }}
+                />
+            )}
+
+            {Platform.OS === "ios" && showDatePicker && (
+                <View className="mt-2 items-end">
+                    <TouchableOpacity
+                        className="bg-gray-200 rounded-full px-4 py-2"
+                        onPress={() => setShowDatePicker(false)}
+                    >
+                        <Text>Done</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+        </View>
+    );
+    
+    // renderTextInput - open text field for the user to type into
+    const renderImageInput = (fieldKey: string, fieldInfo: editFieldImage) => (
+        <Text className="text-xs text-gray-400 mt-1 mb-1">
+            Photos cannot be edited/updated yet in this menu. This feature
+            will be added in a later release. For now, please create a new
+            log.
+        </Text>
     );
 
     const renderInput = (fieldKey: string, fieldInfo: editField) => (
@@ -92,6 +163,10 @@ export default function EditLogPopup({
                     renderCategoryInput(fieldKey, fieldInfo)
                 ) : fieldInfo.type === "text" ? (
                     renderTextInput(fieldKey, fieldInfo)
+                ) : fieldInfo.type === "date" || fieldInfo.type === "time" ? (
+                    renderDateInput(fieldKey, fieldInfo)
+                ) : fieldInfo.type === "image" ? (
+                    renderImageInput(fieldKey, fieldInfo)
                 ) : undefined
             }
         </View>
@@ -104,6 +179,7 @@ export default function EditLogPopup({
             animationType="slide"
             transparent={true}
             onRequestClose={hidePopup}
+            testID={testID}
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}

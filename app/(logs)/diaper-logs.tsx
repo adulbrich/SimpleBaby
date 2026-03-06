@@ -295,6 +295,7 @@ const DiaperLogsView: React.FC = () => {
 						value: editingLog?.note,
 					},
 				}}
+				testID="diaper-logs-edit-popup"
 			/>
 		</View>
 	);
