@@ -213,7 +213,7 @@ describe("Sleep logs screen", () => {
         // ensure popup is in DOM
         expect(screen.getByTestId("sleep-logs-edit-popup")).toBeTruthy();
         // Ensure popup has been shown
-        expect((EditLogPopup as jest.Mock).mock.calls.at(-1)[0].popupVisible).toBe(true);
+        expect((EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].popupVisible).toBe(true);
     });
 
     test("Passes current values to edit log pop-up", async () => {
@@ -227,7 +227,7 @@ describe("Sleep logs screen", () => {
             );
                         
             // retrieve current editingLog from <EditingLogPopup/>
-            const editingLog = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].editingLog;
+            const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
             
             // check field values
             expect(editingLog.start_time.value.toISOString()).toBe(log.start_time);
@@ -260,7 +260,7 @@ describe("Sleep logs screen", () => {
             );
             
             // submit edit
-            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].handleSubmit;
+            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
             await act(async () => submitCallback());
 
             // Alert.alert called by sleep-logs.tsx -> handleSaveEdit()
@@ -509,7 +509,7 @@ async function catchUpdateError(mockFailingEdit: () => void) {
         );
 
         // submit edit
-        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].handleSubmit;
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
         await act(async () => submitCallback());
 
         // Alert.alert called by sleep-logs.tsx -> handleSaveEdit()
@@ -538,7 +538,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         );
         
         // retrieve setLog callback from <EditingLogPopup/>
-        const setLog = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].setLog;
+        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
         
         // clear fields, then type new values
         await act(async () =>
@@ -552,7 +552,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         );
 
         // submit edit
-        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].handleSubmit;
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
         await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
@@ -595,7 +595,7 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     mockFetchLogs(updatedLogs);
 
     // submit edit
-    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.at(-1)[0].handleSubmit;
+    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
 
     // ensure new values are on the page...
