@@ -12,6 +12,7 @@ import {
 	deleteRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -32,6 +33,11 @@ jest.mock("@/library/supabase-client", () => {
             update: updateData,
         }),
     });
+});
+
+jest.mock("@/components/edit-log-popup", () => {
+    const View = jest.requireActual("react-native").View;
+    return jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
 });
 
 jest.mock("@/library/crypto", () => ({
@@ -108,6 +114,7 @@ describe("Nursing logs screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear();
         (supabase.from("").update as unknown as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -206,20 +213,14 @@ describe("Nursing logs screen", () => {
         await userEvent.press(
             screen.getByTestId(`nursing-logs-edit-button-${TEST_LOGS[0].id}`)
         );
-        
-        // edit fields
-        expect(screen.getByTestId("nursing-log-edit-left-amount")).toBeTruthy();
-        expect(screen.getByTestId("nursing-log-edit-right-amount")).toBeTruthy();
-        expect(screen.getByTestId("nursing-log-edit-left-duration")).toBeTruthy();
-        expect(screen.getByTestId("nursing-log-edit-right-duration")).toBeTruthy();
-        expect(screen.getByTestId("nursing-log-edit-note")).toBeTruthy();
-
-        // edit buttons
-        expect(screen.getByTestId("nursing-log-edit-cancel")).toBeTruthy();
-        expect(screen.getByTestId("nursing-log-edit-save")).toBeTruthy();
+                        
+        // ensure popup is in DOM
+        expect(screen.getByTestId("nursing-logs-edit-popup")).toBeTruthy();
+        // Ensure popup has been shown
+        expect((EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].popupVisible).toBe(true);
     });
 
-    test("Pre-populates edit log fields", async () => {
+    test("Passes current values to edit log pop-up", async () => {
         render(<NursingLogsView/>);
         await screen.findByTestId("nursing-logs");  // wait for log list to render
 
@@ -228,23 +229,16 @@ describe("Nursing logs screen", () => {
             await userEvent.press(
                 screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
             );
+                        
+            // retrieve current editingLog from <EditingLogPopup/>
+            const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
             
             // check field values
-            expect(screen.getByTestId("nursing-log-edit-left-amount")._fiber.pendingProps.value)  // find category input and extract the value
-                .toBe(await decryptData(log.left_amount));
-            expect(screen.getByTestId("nursing-log-edit-right-amount")._fiber.pendingProps.value)  // find item input and extract the value
-                .toBe(await decryptData(log.right_amount));
-            expect(screen.getByTestId("nursing-log-edit-left-duration")._fiber.pendingProps.value)  // find amount input and extract the value
-                .toBe(await decryptData(log.left_duration));
-            expect(screen.getByTestId("nursing-log-edit-right-duration")._fiber.pendingProps.value)  // find amount input and extract the value
-                .toBe(await decryptData(log.right_duration));
-            expect(screen.getByTestId("nursing-log-edit-note")._fiber.pendingProps.value)  // find note input and extract the value
-                .toBe(await decryptData(log.note));
-
-            // close edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`nursing-log-edit-cancel`)
-            );
+            expect(editingLog.left_amount.value).toBe(await decryptData(log.left_amount));
+            expect(editingLog.right_amount.value).toBe(await decryptData(log.right_amount));
+            expect(editingLog.left_duration.value).toBe(await decryptData(log.left_duration));
+            expect(editingLog.right_duration.value).toBe(await decryptData(log.right_duration));
+            expect(editingLog.note.value).toBe(await decryptData(log.note));
         }
     });
 
@@ -267,9 +261,8 @@ describe("Nursing logs screen", () => {
             );
             
             // submit edit
-            await userEvent.press(
-                screen.getByTestId("nursing-log-edit-save")
-            );
+            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+            await act(async () => submitCallback());
 
             // Alert.alert called by nursing-logs.tsx -> handleSaveEdit()
             expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Something went wrong during save.");
@@ -291,7 +284,7 @@ describe("Nursing logs screen", () => {
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -311,6 +304,7 @@ describe("nursing logs screen (guest mode)", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -376,7 +370,7 @@ describe("nursing logs screen (guest mode)", () => {
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(
@@ -522,9 +516,8 @@ async function catchUpdateError(mockFailingEdit: () => void) {
         );
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("nursing-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Alert.alert called by nursing-logs.tsx -> handleSaveEdit()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Failed to update log");
@@ -552,37 +545,24 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
         );
         
-        // clear fields, then type new values
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-left-amount"));
-        await userEvent.type(
-            screen.getByTestId("nursing-log-edit-left-amount"),
-            editedLeftAmount
-        );
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-right-amount"));
-        await userEvent.type(
-            screen.getByTestId("nursing-log-edit-right-amount"),
-            editedRightAmount
-        );
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
-        await userEvent.type(
-            screen.getByTestId("nursing-log-edit-left-duration"),
-            editedLeftDuration
-        );
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
-        await userEvent.type(
-            screen.getByTestId("nursing-log-edit-right-duration"),
-            editedRightDuration
-        );
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-note"));
-        await userEvent.type(
-            screen.getByTestId("nursing-log-edit-note"),
-            editedNote
+        // retrieve setLog callback from <EditingLogPopup/>
+        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
+        
+        // clear set new field values from <EditLogPopup/>
+        await act(async () =>
+            setLog((prev: object) => ({
+                ...prev,
+                left_duration: editedLeftDuration,
+                right_duration: editedRightDuration,
+                left_amount: editedLeftAmount,
+                right_amount: editedRightAmount,
+                note: editedNote,
+            }))
         );
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("nursing-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
         expect(dataMock.mock.calls[0][dataArgI])
@@ -628,20 +608,21 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     mockFetchLogs(updatedLogs);
 
     // submit edit
-    await userEvent.press(
-        screen.getByTestId("nursing-log-edit-save")
-    );
+    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+    await act(async () => submitCallback());
 
-    // ensure new values are on the page...
-    expect(screen.getByText(await decryptData(editedLog.left_amount), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.right_amount), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.left_duration), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.right_duration), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
-    // ...and that the previous values are not
-    expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    await act(async () => {
+        // ensure new values are on the page...
+        expect(screen.getByText(await decryptData(editedLog.left_amount), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.right_amount), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.left_duration), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.right_duration), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
+        // ...and that the previous values are not
+        expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    });
 }
