@@ -13,11 +13,9 @@ import { View, Text, TouchableOpacity, Platform } from 'react-native';
  */
 export default function ManualEntry({
     onDatesUpdate,
-    resetSignal,
     testID
 }: {
     onDatesUpdate?: (startDate: Date, endDate: Date) => void,
-    resetSignal?: number
     testID?: string
 }) {
     const [startDate, setStartDate] = useState(new Date());
@@ -30,19 +28,6 @@ export default function ManualEntry({
     useEffect(() => {
         onDatesUpdate?.(startDate, endDate);
     }, [startDate, endDate, onDatesUpdate]);
-
-    // reset the date when the reset button is pressed
-    useEffect(() => {
-        if (resetSignal === undefined) {
-            return;
-        }
-
-        const now = new Date();
-        setStartDate(now);
-        setEndDate(now);
-
-        onDatesUpdate?.(now, now);
-    }, [onDatesUpdate, resetSignal]);
 
     // Handles date change from picker, updates corresponding time, hides iOS picker
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {

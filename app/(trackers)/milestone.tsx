@@ -40,6 +40,7 @@ export default function Milestone() {
 	const [photoName, setPhotoName] = useState<string | null>(null);
 	const [uploadingPhoto, setUploadingPhoto] = useState(false);
 	const [note, setNote] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	const showDatePickerModal = () => {
@@ -186,7 +187,7 @@ export default function Milestone() {
 				return { success: false, error };
 			}
 		} else {
-			const { data, error } = await supabase.from("milestone_logs").insert([
+			const { error } = await supabase.from("milestone_logs").insert([
 				{
 					child_id: childId,
 					category,
@@ -202,7 +203,7 @@ export default function Milestone() {
 				return { success: false, error };
 			}
 
-			return { success: true, data };
+			return { success: true };
 		}
 	};
 
@@ -253,7 +254,10 @@ export default function Milestone() {
 	 * Navigates back to the main tab screen on success.
 	 */
 	const handleSaveMilestoneLog = async () => {
+		if (isSaving) return;
+		
 		if (name && milestoneDate) {
+			setIsSaving(true);
 			const result = await saveMilestoneLog();
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -261,6 +265,7 @@ export default function Milestone() {
 			} else {
 				Alert.alert(`Failed to save milestone log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!name) missingFields.push("name");
@@ -370,15 +375,15 @@ export default function Milestone() {
 							)}
 
                         <View className="ml-4 mr-4 flex-row items-center justify-between">
-                        <Text className="feeding-module-label">Milestone Photo</Text>
-                        <TouchableOpacity
-                            className="rounded-full p-4 bg-red-100 items-center"
-                            onPress={pickPhoto}
-                            disabled={uploadingPhoto}
-                            testID='milestone-photo-button'
-                            >
-                            <Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
-                        </TouchableOpacity>
+							<Text className="feeding-module-label">Milestone Photo</Text>
+							<TouchableOpacity
+								className="rounded-full p-4 bg-red-100 items-center"
+								onPress={pickPhoto}
+								disabled={uploadingPhoto}
+								testID='milestone-photo-button'
+								>
+								<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+							</TouchableOpacity>
                         </View>
 						{(photoName || photoUri) && (
 							<View className="flex flex-col" accessible>
@@ -425,6 +430,7 @@ export default function Milestone() {
 						<TouchableOpacity
 							className="rounded-full p-4 bg-red-100 grow"
 							onPress={handleSaveMilestoneLog}
+							disabled={isSaving}
 							testID="milestone-save-log-button"
 						>
 							<Text>➕ Add to log</Text>

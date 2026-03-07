@@ -61,6 +61,7 @@ export default function Health() {
 		note: "",
 	});
 	const [reset, setReset] = useState(0);
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	/**
@@ -79,12 +80,12 @@ export default function Health() {
 				return { success: false, error };
 			}
 		} else {
-			const { data, error } = await supabase.from("health_logs").insert([log]);
+			const { error } = await supabase.from("health_logs").insert([log]);
 			if (error) {
 				console.error("Error creating health log:", error);
 				return { success: false, error };
 			}
-			return { success: true, data };
+			return { success: true };
 		}
 	};
 
@@ -237,6 +238,9 @@ export default function Health() {
 	 * Handles UI submit action for saving the health log.
 	 */
 	const handleSaveHealthLog = async () => {
+		if (isSaving) return;
+		
+		setIsSaving(true);
 		const result = await saveHealthLog();
 		if (result.success) {
 			router.replace("/(tabs)");
@@ -249,6 +253,7 @@ export default function Health() {
 				Alert.alert("Error", `Failed to save health log: ${errorMessage}`);
 			}
 		}
+		setIsSaving(false);
 	};
 
 	// Update date in state when changed
@@ -454,6 +459,7 @@ export default function Health() {
 							<TouchableOpacity
 								className="rounded-full p-4 bg-red-100 grow"
 								onPress={handleSaveHealthLog}
+								disabled={isSaving}
 								testID="health-save-log-button"
 							>
 								<Text>➕ Add to log</Text>
