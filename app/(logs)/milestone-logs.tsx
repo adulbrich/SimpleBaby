@@ -63,6 +63,7 @@ const MilestoneLogsView: React.FC = () => {
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<MilestoneLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const [photoSignedUrls, setPhotoSignedUrls] = useState<
 		Record<string, string>
 	>({});
@@ -267,11 +268,12 @@ const MilestoneLogsView: React.FC = () => {
 	};
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert(
 			"Delete Entry",
 			"Are you sure you want to delete this log?",
 			[
-				{ text: "Cancel", style: "cancel" },
+				{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 				{
 					text: "Delete",
 					style: "destructive",
@@ -295,6 +297,7 @@ const MilestoneLogsView: React.FC = () => {
                             }
                             setMilestoneLogs((prev) => prev.filter((log) => log.id !== id));
                         }
+						setDeleteAlertVisible(false);
 					},
 				},
 			],
@@ -343,7 +346,11 @@ const MilestoneLogsView: React.FC = () => {
 				<View className="flex-row justify-end gap-3 mt-4">
 					<Pressable
 						className="px-3 py-2 rounded-full bg-blue-100"
-						onPress={() => openEditModal(item)}
+						onPress={() => {
+							setEditModalVisible(true); 
+							openEditModal(item);
+						}}
+						disabled={deleteAlertVisible}
 						testID={`milestone-logs-edit-button-${item.id}`}
 					>
 						<Text className="text-blue-700">✏️ Edit</Text>
@@ -352,6 +359,7 @@ const MilestoneLogsView: React.FC = () => {
 					<Pressable
 						className="px-3 py-2 rounded-full bg-red-100"
 						onPress={() => handleDelete(item.id)}
+						disabled={editModalVisible}
 						testID={`milestone-logs-delete-button-${item.id}`}
 					>
 						<Text className="text-red-700">🗑️ Delete</Text>
