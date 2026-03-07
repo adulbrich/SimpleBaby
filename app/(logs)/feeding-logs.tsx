@@ -44,6 +44,7 @@ const FeedingLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
@@ -144,8 +145,9 @@ const FeedingLogsView: React.FC = () => {
 	}, [fetchFeedingLogs]);
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -171,6 +173,7 @@ const FeedingLogsView: React.FC = () => {
 
 						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 					}
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -251,9 +254,10 @@ const FeedingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`feeding-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -261,6 +265,7 @@ const FeedingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`feeding-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
