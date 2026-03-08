@@ -65,7 +65,8 @@ export default function Profile() {
                 if (isGuest) {
                     const activeId = await getLocalActiveChildId();
                     if (!activeId) { 
-                        setChildName("Guest Child"); return; 
+                        setChildName("Guest Child");
+                        return; 
                     }
                     const children = await listChildren();
                     const activeChild = children.find(c => c.id === activeId);
@@ -73,7 +74,9 @@ export default function Profile() {
                 } else if (session) {
                     const result = await getRemoteActiveChildId();
                     if (!result.success || !result.childName) { 
-                        setChildName("Child"); return; 
+                        Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
+                        setChildName("ERROR");
+                        return; 
                     }
                     setChildName(result.childName);
                 }
@@ -81,6 +84,7 @@ export default function Profile() {
                 if (isGuest) {
                     Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
                 } else {
+                    Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
                     setChildName("Child");
                 }
             }

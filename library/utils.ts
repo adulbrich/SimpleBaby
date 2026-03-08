@@ -1,4 +1,5 @@
 import supabase from './supabase-client';
+import { decryptData } from './crypto';
 
 export function capitalize(text: string) {
     return text.charAt(0).toUpperCase() + text.slice(1);
@@ -42,10 +43,10 @@ export const getActiveChildId = async () => {
     let childName = data?.name;
     if (childName?.includes('U2FsdGVkX1')) {
         try {
-            const { decryptData } = await import('./crypto');
             childName = await decryptData(childName);
         } catch {
-            console.log("Could not decrypt child name.");
+            console.error("Could not decrypt child name.");
+            return { success: false };
         }
     }
 

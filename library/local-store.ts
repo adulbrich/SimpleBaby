@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
+import { encryptData, decryptData } from "./crypto";
 
 type TableName =
 	| "feeding_logs"
@@ -88,7 +89,6 @@ export async function listChildren(): Promise<Child[]> {
 				return child;
 			}
 			try {
-				const { decryptData } = await import("./crypto");
 				const decryptedName = await decryptData(child.name);
 				return { ...child, name: decryptedName };
 			} catch {
@@ -100,13 +100,12 @@ export async function listChildren(): Promise<Child[]> {
 
 // createChild()
 // creates a child object and adds it to the local db
-export async function createChild(name: string): Promise<Child> {
+export async function createChild(name: string) {
 	if (!name.trim()) {
 		throw new Error("Child name is required.");
 	}
 	try {
 		const children = await getJson<Child[]>(KEYS.children, []);
-		const { encryptData } = await import("./crypto");
 		const encryptedName = await encryptData(name);
 		const child: Child = {
 			id: uuidv4(),
@@ -119,7 +118,6 @@ export async function createChild(name: string): Promise<Child> {
 		if (!active) {
 			await setActiveChildId(child.id);
 		}
-		return { ...child, name };
 	} catch (error) {
 		console.error("Failed to create child in local storage:", error);
 		throw new Error("Unable to save child data locally.");
