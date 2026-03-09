@@ -22,6 +22,12 @@ jest.mock("@/library/supabase-client", () => {
 });
 
 
+jest.mock("@/library/crypto", () => ({
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
+    decryptData: jest.fn(async (string) => string ? `Decrypted: ${string}` : ""),
+}));
+
+
 describe("Utils: getActiveChildId", () => {
 
     test("Catches no active user", async () => {
