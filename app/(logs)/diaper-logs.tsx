@@ -31,7 +31,7 @@ interface DiaperLog {
 	child_id: string;
 	consistency: string;
 	amount: string;
-	logged_at: string;
+	change_time: string;
 	note: string | null;
 }
 
@@ -107,7 +107,7 @@ const DiaperLogsView: React.FC = () => {
                     .from("diaper_logs")
                     .select("*")
                     .eq("child_id", childId)
-                    .order("logged_at", { ascending: false });
+                    .order("change_time", { ascending: false });
 
                 if (error) throw error;
 
@@ -218,10 +218,10 @@ const DiaperLogsView: React.FC = () => {
 	const renderDiaperLogItem = ({ item }: { item: DiaperLog }) => (
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.logged_at), "MMM dd, yyyy")}
+				{format(new Date(item.change_time), "MMM dd, yyyy")}
 			</Text>
 			<Text className="text-base mb-1">
-				{format(new Date(item.logged_at), "h:mm a")}
+				{format(new Date(item.change_time), "h:mm a")}
 			</Text>
 			<Text className="text-base mb-1">Consistency: {item.consistency}</Text>
 			<Text className="text-base mb-1">Size: {item.amount}</Text>
