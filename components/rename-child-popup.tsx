@@ -38,38 +38,32 @@ export default function RenameChildPopup(
                     className='grow items-center justify-center'
                 >
                     <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
-                        <View className='mb-5'>
-                            <Text className='subheading font-bold mb-6'>
-                                Rename Child
-                            </Text>
-                            <Text className='subtitle'>
-                                Please enter a new name{originalName ? ` for ${originalName}` : ""}:
-                            </Text>
-                        </View>
+                        <Text className='subheading font-bold mb-6'>
+                            Rename Child
+                        </Text>
+                        <Text className='subtitle'>
+                            Please enter a new name{originalName ? ` for ${originalName}` : ""}:
+                        </Text>
                         <TextInput
-                            className='text-input'
+                            className='text-input mt-5'
                             placeholder='Enter a name'
                             value={childName}
                             onChangeText={onChildNameUpdate}
                             autoCapitalize='none'
                             keyboardType='default'
                         />
-                        <View>
-                            <Button
-                                text='Rename Child'
-                                action={handleSave}
-                                textClass='font-bold'
-                                buttonClass='button-normal mb-3 mt-3'
-                            />
-                        </View>
-                        <View>
-                            <Button
-                                text='Cancel'
-                                action={handleCancel}
-                                textClass='font-bold'
-                                buttonClass='bg-red-600 border-gray-500'
-                            />
-                        </View>
+                        <Button
+                            text='Rename Child'
+                            action={handleSave}
+                            textClass='font-bold'
+                            buttonClass='button-normal mb-3 mt-3'
+                        />
+                        <Button
+                            text='Cancel'
+                            action={handleCancel}
+                            textClass='font-bold'
+                            buttonClass='bg-red-600 border-gray-500'
+                        />
                     </View>
                 </BlurView>
             </TouchableWithoutFeedback>

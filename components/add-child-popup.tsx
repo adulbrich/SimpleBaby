@@ -44,35 +44,29 @@ export default function AddChildPopup(
                                 Please enter the name of the child you would like to add:
                             </Text>
                         </View>
-                        <View>
-                            <Text className='text font-bold mb-1'>
-                                Child Name
-                            </Text>
-                            <TextInput
-                                className='text-input'
-                                placeholder='Enter a name'
-                                value={childName}
-                                onChangeText={onChildNameUpdate}
-                                autoCapitalize='none'
-                                keyboardType='default'
-                            />
-                        </View>
-                        <View>
-                            <Button
-                                text='Save New Child'
-                                action={handleSave}
-                                textClass='font-bold'
-                                buttonClass='button-normal mb-3 mt-3'
-                            />
-                        </View>
-                        <View>
-                            <Button
-                                text='Cancel'
-                                action={handleCancel}
-                                textClass='font-bold'
-                                buttonClass='bg-red-600 border-gray-500'
-                            />
-                        </View>
+                        <Text className='text font-bold mb-1'>
+                            Child Name
+                        </Text>
+                        <TextInput
+                            className='text-input mb-4'
+                            placeholder='Enter a name'
+                            value={childName}
+                            onChangeText={onChildNameUpdate}
+                            autoCapitalize='none'
+                            keyboardType='default'
+                        />
+                        <Button
+                            text='Save New Child'
+                            action={handleSave}
+                            textClass='font-bold'
+                            buttonClass='button-normal mb-4'
+                        />
+                        <Button
+                            text='Cancel'
+                            action={handleCancel}
+                            textClass='font-bold'
+                            buttonClass='bg-red-600 border-gray-500'
+                        />
                     </View>
                 </BlurView>
             </TouchableWithoutFeedback>

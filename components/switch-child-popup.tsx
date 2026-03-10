@@ -68,14 +68,12 @@ export default function SwitchChildPopup(
                                 buttonClass='button-normal mb-3 mt-3'
                             />
                             { !hideCancelButton &&
-                                <View>
-                                    <Button
-                                        text='Cancel'
-                                        action={handleCancel}
-                                        textClass='font-bold'
-                                        buttonClass='bg-red-600 border-gray-500'
-                                    />
-                                </View>
+                                <Button
+                                    text='Cancel'
+                                    action={handleCancel}
+                                    textClass='font-bold'
+                                    buttonClass='bg-red-600 border-gray-500'
+                                />
                             }
                     </View>
                 </BlurView>
