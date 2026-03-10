@@ -45,7 +45,7 @@ export default function SwitchChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 h-[60%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
                                 Select Child
@@ -54,20 +54,19 @@ export default function SwitchChildPopup(
                                 Select a child to switch to:
                             </Text>
                         </View>
-                        <View className='justify-between'>
-                            <View className='h-[50%]'>
+                            <View className='max-h-[40%]'>
                                 <ListSelect
                                     items={childNames}
                                     selected={selected}
                                     onSelect={setSelected}
                                 />
                             </View>
-                                <Button
-                                    text='Select'
-                                    action={() => handleSwitch(selected)}
-                                    textClass='font-bold'
-                                    buttonClass='button-normal mb-2'
-                                />
+                            <Button
+                                text='Select'
+                                action={() => handleSwitch(selected)}
+                                textClass='font-bold'
+                                buttonClass='button-normal mb-3 mt-3'
+                            />
                             { !hideCancelButton &&
                                 <View>
                                     <Button
@@ -78,7 +77,6 @@ export default function SwitchChildPopup(
                                     />
                                 </View>
                             }
-                        </View>
                     </View>
                 </BlurView>
             </TouchableWithoutFeedback>

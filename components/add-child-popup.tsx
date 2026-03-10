@@ -35,7 +35,7 @@ export default function AddChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 h-[50%] w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
                                 Add a Child
@@ -44,36 +44,34 @@ export default function AddChildPopup(
                                 Please enter the name of the child you would like to add:
                             </Text>
                         </View>
-                        <View className='grow justify-between'>
-                            <View>
-                                <Text className='text font-bold mb-1'>
-                                    Child Name
-                                </Text>
-                                <TextInput
-                                    className='text-input'
-                                    placeholder='Enter a name'
-                                    value={childName}
-                                    onChangeText={onChildNameUpdate}
-                                    autoCapitalize='none'
-                                    keyboardType='default'
-                                />
-                            </View>
-                            <View>
-                                <Button
-                                    text='Save New Child'
-                                    action={handleSave}
-                                    textClass='font-bold'
-                                    buttonClass='button-normal'
-                                />
-                            </View>
-                            <View>
-                                <Button
-                                    text='Cancel'
-                                    action={handleCancel}
-                                    textClass='font-bold'
-                                    buttonClass='bg-red-600 border-gray-500'
-                                />
-                            </View>
+                        <View>
+                            <Text className='text font-bold mb-1'>
+                                Child Name
+                            </Text>
+                            <TextInput
+                                className='text-input'
+                                placeholder='Enter a name'
+                                value={childName}
+                                onChangeText={onChildNameUpdate}
+                                autoCapitalize='none'
+                                keyboardType='default'
+                            />
+                        </View>
+                        <View>
+                            <Button
+                                text='Save New Child'
+                                action={handleSave}
+                                textClass='font-bold'
+                                buttonClass='button-normal mb-3 mt-3'
+                            />
+                        </View>
+                        <View>
+                            <Button
+                                text='Cancel'
+                                action={handleCancel}
+                                textClass='font-bold'
+                                buttonClass='bg-red-600 border-gray-500'
+                            />
                         </View>
                     </View>
                 </BlurView>
