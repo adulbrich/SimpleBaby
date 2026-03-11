@@ -12,13 +12,13 @@ jest.mock("@/library/supabase-client", () => {
     const insert = jest.fn(async () => ({ error: false }));
     return {
         from: () => ({
-            insert: insert
-        })
+            insert: insert,
+        }),
     };
 });
 
 jest.mock("@/library/crypto", () =>({
-    encryptData: jest.fn(async (string) => `Encrypted: ${string}`)
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
 }));
 
 jest.mock("expo-router", () => {
@@ -39,7 +39,7 @@ jest.mock("react-native", () => {
 jest.mock("@/library/utils", () => {
     const getActiveChildId = jest.fn(async () => ({ success: true }));
     return {
-        getActiveChildId: getActiveChildId
+        getActiveChildId: getActiveChildId,
     };
 });
 
@@ -48,6 +48,13 @@ jest.mock("@/components/nursing-stopwatch.tsx", () => {
     const NursingStopwatchMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
     return NursingStopwatchMock;
 });
+
+jest.mock("@/library/auth-provider", () => ({
+    useAuth: () => ({ isGuest: false }),
+}));
+
+jest.mock("expo-crypto", () => ({}));
+
 
 /*
  *  setNursingInputs:

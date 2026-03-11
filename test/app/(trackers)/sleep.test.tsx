@@ -18,13 +18,13 @@ jest.mock("@/library/supabase-client", () => {
     const insert = jest.fn(async () => ({ error: false }));
     return {
         from: () => ({
-            insert: insert
-        })
+            insert: insert,
+        }),
     };
 });
 
 jest.mock("@/library/crypto", () =>({
-    encryptData: async () => ""
+    encryptData: async () => "",
 }));
 
 jest.mock("react-native", () => {
@@ -36,7 +36,7 @@ jest.mock("react-native", () => {
 jest.mock("@/library/utils", () => {
     const getActiveChildId = jest.fn(async () => ({ success: true }));
     return {
-        getActiveChildId: getActiveChildId
+        getActiveChildId: getActiveChildId,
     };
 });
 
@@ -51,6 +51,13 @@ jest.mock("@/components/manual-entry-sleep.tsx", () => {
     const ManualInputsMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
     return ManualInputsMock;
 });
+
+jest.mock("@/library/auth-provider", () => ({
+    useAuth: () => ({ isGuest: false }),
+}));
+
+jest.mock("expo-crypto", () => ({}));
+
 
 /*
  *  setSleepInputs:

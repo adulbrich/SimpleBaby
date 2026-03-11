@@ -8,14 +8,15 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
-import { signOut } from '@/library/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
 import AddChildPopup from '@/components/add-child-popup';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import { getChildNames, saveNewChild } from '@/library/utils';
+import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
+import { getActiveChildId as getRemoteActiveChildId } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -29,8 +30,8 @@ const alertSound = require('../../assets/sounds/ui-pop.mp3');
 export default function Profile() {
 
     const player = useAudioPlayer(alertSound);
-
-    const { session } = useAuth();
+    
+    const { isGuest, exitGuest, session } = useAuth();
 
     const [showAddChild, setShowAddChild] = useState(false);
     const [showSwitchChild, setShowSwitchChild] = useState(false);
@@ -38,16 +39,33 @@ export default function Profile() {
     const [childNames, setChildNames] = useState<string[]>([]);
     const [loadingNames, setLoadingNames] = useState(true);
     const [namesError, setNamesError] = useState<string | null>(null);
-    
+
+    const [childName, setChildName] = useState<string>('Loading...');
+    const [displayName, setDisplayName] = useState<string>('');
+    const [displayEmail, setDisplayEmail] = useState<string>('');
+
+    const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
+
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
-        const { error } = await signOut();
-        if (error) {
-            console.error('Error signing out:', error);
-        } else {
-            console.log('Signed out successfully');
-            router.dismissAll();
-            router.replace('/');
+        try {
+            if (isGuest) {
+                // Guest sign-out: leave guest mode (local-only)
+                await exitGuest();
+
+                // Send them back to auth entry
+                router.replace("/");
+                return;
+            }
+
+            // Signed-in session sign-out: Supabase sign out
+            const { error } = await supabase.auth.signOut();
+
+            if (error) throw error;
+            router.replace("/");
+
+        } catch (e: any) {
+            Alert.alert("Sign out failed", e?.message ?? "Please try again.");
         }
     };
 
@@ -105,6 +123,48 @@ export default function Profile() {
             setLoadingNames(false);
         };
     };
+    
+    useEffect(() => {
+        const loadChildName = async () => {
+            try {
+                if (isGuest) {
+                    const activeId = await getLocalActiveChildId();
+                    if (!activeId) { 
+                        setChildName("Guest Child");
+                        return; 
+                    }
+                    const children = await listChildren();
+                    const activeChild = children.find(c => c.id === activeId);
+                    setChildName(activeChild?.name ?? 'Guest Child');
+                } else if (session) {
+                    const result = await getRemoteActiveChildId();
+                    if (!result.success || !result.childName) { 
+                        Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
+                        setChildName("ERROR");
+                        return; 
+                    }
+                    setChildName(result.childName);
+                }
+            } catch {
+                if (isGuest) {
+                    Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
+                } else {
+                    Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
+                    setChildName("Child");
+                }
+            }
+        };
+
+        loadChildName();
+    }, [isGuest, session]);
+
+    useEffect(() => {
+        if (!session) {
+            return;
+        }
+        setDisplayName(`${session.user.user_metadata.firstName} ${session.user.user_metadata.lastName}`);
+        setDisplayEmail(session.user.user_metadata.email ?? '');
+    }, [session]);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -114,13 +174,21 @@ export default function Profile() {
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Active Child
                         </Text>
-                        <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
+                        { isGuest ? (
                             <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                                👶 {session?.user.user_metadata?.activeChild}
+                                👶 {childName}
                             </Text>
-                        </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
+                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                    👶 {childName}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
-                    { loadingNames ? (
+                    { isGuest ? (
+                        undefined
+                    ) : loadingNames ? (
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
                                 Loading Child Profiles...
@@ -145,7 +213,7 @@ export default function Profile() {
                             </View>
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity
+                    {!isGuest && <TouchableOpacity
                         onPress={() => setShowAddChild(true)}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
@@ -153,17 +221,16 @@ export default function Profile() {
                                 ✚ Add Child
                             </Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👤 Name
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
-                            {session?.user.user_metadata.firstName}{' '}
-                            {session?.user.user_metadata.lastName}
+                            {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👪 Caretakers
                         </Text>
@@ -179,8 +246,8 @@ export default function Profile() {
                                 Manage
                             </Text>
                         </TouchableOpacity>
-                    </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    </View>}
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             📧 Email
                         </Text>
@@ -197,11 +264,11 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {session?.user.user_metadata.email}
+                                {displayEmail}
                             </Text>
                         </TouchableOpacity>
-                    </View>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    </View>}
+                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             🔑 Password
                         </Text>
@@ -217,7 +284,7 @@ export default function Profile() {
                                 Change my password
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </View>}
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             🤖 App Version
@@ -238,9 +305,9 @@ export default function Profile() {
                 </View>
             </ScrollView>
             <View className='pt-4'>
-                {session && (
+                {(session || isGuest) && (
                     <Button
-                        text='Sign Out'
+                        text={signOutLabel}
                         action={handleSignOut}
                         buttonClass='bg-red-600 border-gray-500'
                         textClass='font-bold dark:text-white'

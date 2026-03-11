@@ -40,6 +40,19 @@ export default function ModalsLayout() {
                         headerTitle: 'Active Child',
                     }}
                 />
+                <Stack.Screen
+                    name='tos'
+                    options={{
+                        headerTitle: 'Terms of Service',
+                    }}
+                />
+                <Stack.Screen
+                    name='privacypolicy'
+                    options={{
+                        headerTitle: 'Privacy Policy',
+                    }}
+                />
+
             </Stack>
         </>
     );

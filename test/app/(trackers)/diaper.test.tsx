@@ -12,12 +12,12 @@ jest.mock("@/library/supabase-client", () => {
     return ({
         from: () => ({
             insert: insert,
-        })
+        }),
     });
 });
 
 jest.mock("@/library/crypto", () => ({
-    encryptData: jest.fn(async (string) => `Encrypted: ${string}`)
+    encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
 }));
 
 jest.mock("expo-router", () => {
@@ -38,7 +38,7 @@ jest.mock("react-native", () => {
 jest.mock("@/library/utils", () => {
     const getActiveChildId = jest.fn(async () => ({ success: true }));
     return {
-        getActiveChildId: getActiveChildId
+        getActiveChildId: getActiveChildId,
     };
 });
 
@@ -47,6 +47,12 @@ jest.mock("@/components/diaper-module.tsx", () => {
     const DiaperModuleMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
     return DiaperModuleMock;
 });
+
+jest.mock("@/library/auth-provider", () => ({
+    useAuth: () => ({ isGuest: false }),
+}));
+
+jest.mock("expo-crypto", () => ({}));
 
 /*
  *  setDiaperInputs:
