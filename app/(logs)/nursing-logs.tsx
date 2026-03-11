@@ -297,12 +297,12 @@ const NursingLogsView: React.FC = () => {
 				editingLog={editingLog && {
 					left_duration: {
 						title: "Left Duration",
-						type: "text",
+						type: "duration",
 						value: editingLog?.left_duration,
 					},
 					right_duration: {
 						title: "Right Duration",
-						type: "text",
+						type: "duration",
 						value: editingLog?.right_duration,
 					},
 					left_amount: {

@@ -146,7 +146,7 @@ const MilestoneLogsView: React.FC = () => {
 				(data || []).map(async (entry) => ({
 					...entry,
 					title: await safeDecrypt(entry.title),
-					achieved_at: new Date(entry.achieved_at),  // convert achieved_at field from string to date
+					achieved_at: new Date(entry.achieved_at),
 					note: entry.note ? await safeDecrypt(entry.note) : "",
 				})),
 			);

@@ -292,7 +292,7 @@ const SleepLogsView: React.FC = () => {
 					},
 					duration: {
 						title: "Duration",
-						type: "text",
+						type: "duration",
 						value: editingLog?.duration,
 					},
 					note:  {
