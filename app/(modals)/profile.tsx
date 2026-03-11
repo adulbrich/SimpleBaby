@@ -13,10 +13,9 @@ import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
 import AddChildPopup from '@/components/add-child-popup';
 import SwitchChildPopup from '@/components/switch-child-popup';
-import { getChildNames, saveNewChild } from '@/library/utils';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildId as getRemoteActiveChildId } from '@/library/utils';
+import { getActiveChildId as getRemoteActiveChildId, getChildNames, saveNewChild } from '@/library/utils';
 
 /**
  * Profile Screen
