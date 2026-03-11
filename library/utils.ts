@@ -49,7 +49,20 @@ export const saveNewChild = async (childName: string) => {
         throw new Error('User not found.');
     }
 
-    let child = childName.charAt(0).toUpperCase() + childName.slice(1);
+    const child = childName.charAt(0).toUpperCase() + childName.slice(1);
+
+    // make sure that the user does not already have any other children with the new name
+    const { data: nameData, error: getNameError } = await supabase
+        .from("children")
+        .select("id")
+        .eq("user_id", userId)  // filter by userID
+        .eq("name", child);  // and by new child name
+    if (getNameError) {
+        throw new Error("Unable to check name availability.");
+    }
+    if (nameData.length > 0) {
+        throw new Error("Child name already exists.");
+    }
 
     // Insert child into the database
     const { error } = await supabase
@@ -121,16 +134,29 @@ export async function updateChildName(oldChildName: string, newChildName: string
     }
 
     // get child id
-    const { data, error: getError } = await supabase
+    const { data: idData, error: getIdError } = await supabase
         .from("children")
         .select("id")
         .eq("user_id", userId)  // filter by userID
         .eq("name", oldChildName)  // and by child name
         .single();  // restrict to one row
-    if (getError) {
+    if (getIdError) {
         throw new Error("Failed to find child ID.");
     }
-    const childID: string = String(data.id);  // ensure id field is a string
+    const childID: string = String(idData.id);  // ensure id field is a string
+
+    // make sure that the user does not already have any other children with the new name
+    const { data: nameData, error: getNameError } = await supabase
+        .from("children")
+        .select("id")
+        .eq("user_id", userId)  // filter by userID
+        .eq("name", newChildName);  // and by new child name
+    if (getNameError) {
+        throw new Error("Unable to check name availability.");
+    }
+    if (nameData.length > 0) {
+        throw new Error("Child name already exists.");
+    }
 
     const { error } = await supabase
         .from("children")

@@ -70,7 +70,7 @@ export default function ActiveChild() {
                 setChildNames(otherNames);
                 // show selection pop up for the user to select a new child
                 setShowSelectChild(true);
-            } else if (otherNames.length == 1) {
+            } else if (otherNames.length === 1) {
                 // Update user session metadata with the active child as the user's (only) other child
                 await supabase.auth.updateUser({
                     data: { activeChild: otherNames[0] },
