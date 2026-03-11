@@ -65,11 +65,18 @@ export default function ActiveChild() {
             await deleteChild(session?.user.user_metadata?.activeChild);  // delete the current child
 
             const otherNames = names.filter(name => name !== session?.user.user_metadata?.activeChild);
-            if (otherNames.length > 0) {
+            if (otherNames.length > 1) {
                 // store names to display to user
                 setChildNames(otherNames);
                 // show selection pop up for the user to select a new child
                 setShowSelectChild(true);
+            } else if (otherNames.length == 1) {
+                // Update user session metadata with the active child as the user's (only) other child
+                await supabase.auth.updateUser({
+                    data: { activeChild: otherNames[0] },
+                });
+                // send the user back to the profile page
+                router.dismissTo("/(modals)/profile");
             } else {
                 // the user has no other child accounts
                 router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
@@ -220,7 +227,7 @@ export default function ActiveChild() {
             <SwitchChildPopup
                 visible={showSelectChild}
                 childNames={childNames}
-                currentChild={session?.user.user_metadata?.activeChild}
+                currentChild={childNames[0]}
                 hideCancelButton={true}
                 handleSwitch={handleSelectChild}
                 handleCancel={handleCancelSelectChild}

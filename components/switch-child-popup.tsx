@@ -54,7 +54,7 @@ export default function SwitchChildPopup(
                                 Select a child to switch to:
                             </Text>
                         </View>
-                            <View className='max-h-[40%]'>
+                            <View className='max-h-[20em]'>
                                 <ListSelect
                                     items={childNames}
                                     selected={selected}

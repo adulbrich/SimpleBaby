@@ -58,10 +58,10 @@ export default function Profile() {
         }
 
         try {
-            saveNewChild(newChildName);  // try to save new child
+            await saveNewChild(newChildName);  // try to save new child
             setShowAddChild(false);  // Close modal if successful
             setNewChildName("");  // reset child name
-            fetchChildNames();  // reload child names for switching
+            await fetchChildNames();  // reload child names for switching
         } catch (error: any) {
             Alert.alert(
                 'Error',
