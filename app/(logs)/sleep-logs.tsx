@@ -181,7 +181,7 @@ const SleepLogsView: React.FC = () => {
 
 				if (!success) {
 					Alert.alert("Failed to update log",
-						 "Please ensure that sleep start time is before sleep end time");
+						 "Please ensure that sleep start time is before sleep end time.");
 					return;
 				}
 
@@ -201,7 +201,7 @@ const SleepLogsView: React.FC = () => {
 
 				if (error) {
 					Alert.alert("Failed to update log",
-						 "Please ensure that sleep start time is before sleep end time");
+						 "Please ensure that sleep start time is before sleep end time.");
 					return;
 				}
 
