@@ -26,7 +26,7 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
-import stringLib from "../../assets/stringLibrary.json"
+import stringLib from "../../assets/stringLibrary.json";
 
 interface NursingLog {
 	id: string;
