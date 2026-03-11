@@ -242,7 +242,7 @@ const MilestoneLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("milestone_logs", editingLog.id, patch);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchMilestoneLogs();
@@ -255,7 +255,7 @@ const MilestoneLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 

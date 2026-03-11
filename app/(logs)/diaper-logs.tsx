@@ -186,7 +186,7 @@ const DiaperLogsView: React.FC = () => {
 					note: encryptedNote,
 				});
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -204,7 +204,7 @@ const DiaperLogsView: React.FC = () => {
                     .eq("id", id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 

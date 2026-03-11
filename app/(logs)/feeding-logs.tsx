@@ -197,7 +197,7 @@ const FeedingLogsView: React.FC = () => {
 					note: encryptedNote,
 				});
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -216,7 +216,7 @@ const FeedingLogsView: React.FC = () => {
 					.eq("id", id);
 
 				if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 

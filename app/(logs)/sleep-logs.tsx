@@ -182,7 +182,7 @@ const SleepLogsView: React.FC = () => {
 				});
 
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -201,7 +201,7 @@ const SleepLogsView: React.FC = () => {
 					.eq("id", editingLog.id);
 
 				if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 

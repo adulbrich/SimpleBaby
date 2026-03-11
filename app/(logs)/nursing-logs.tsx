@@ -162,7 +162,7 @@ const NursingLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("nursing_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -176,7 +176,7 @@ const NursingLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 

@@ -207,7 +207,7 @@ const HealthLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("health_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchHealthLogs();
@@ -219,7 +219,7 @@ const HealthLogsView: React.FC = () => {
 				.eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
                 await fetchHealthLogs();
