@@ -26,6 +26,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json"
+
 interface DiaperLog {
 	id: string;
 	child_id: string;
@@ -137,7 +139,7 @@ const DiaperLogsView: React.FC = () => {
 	}, [fetchDiaperLogs]);
 
 	const handleDelete = async (id: string) => {
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel" },
 			{
 				text: "Delete",

@@ -30,6 +30,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json"
+
 type MilestoneCategory =
 	| "Motor"
 	| "Language"
@@ -269,7 +271,7 @@ const MilestoneLogsView: React.FC = () => {
 	const handleDelete = async (id: string) => {
 		Alert.alert(
 			"Delete Entry",
-			"Are you sure you want to delete this log?",
+			stringLib.warnings.logDeletionConfirmation,
 			[
 				{ text: "Cancel", style: "cancel" },
 				{
