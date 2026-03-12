@@ -225,7 +225,7 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 ## Basic Architecture
 
 
-![Simple Baby Deployment Diagram](/Deployment-Diagram.png)
+![Simple Baby Deployment Diagram](/SimpleBaby-UML-Diagram.png)
 
 **Flow:**
 1.  The Expo app on the user's device makes API calls (REST, GraphQL, Auth, Storage) to the Supabase instance.
@@ -233,7 +233,7 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 3.  Data is stored in and retrieved from the PostgreSQL database.
 4.  Files (e.g., for milestones) are handled by the S3-compatible Storage service.
 5.  Realtime updates (when implemented) would use Supabase Realtime.
-6.  Inbucket captures emails sent by Supabase Auth for testing (like confirmation emails, password resets).
+6.  Inbucket captures emails sent by Supabase Auth for testing (like confirmation emails, password resets) when implemented.
 
 
 ## Known Issues and Future Enhancements List

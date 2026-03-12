@@ -11,8 +11,9 @@ import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
-import { getActiveChildId, listChildren } from '@/library/local-store';
+import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
+import { getActiveChildId as getRemoteActiveChildId } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -29,10 +30,12 @@ export default function Profile() {
 
     const { isGuest, exitGuest, session } = useAuth();
 
-    const [guestChildName, setGuestChildName] = useState<string>('None');
+    const [childName, setChildName] = useState<string>('Loading...');
+    const [displayName, setDisplayName] = useState<string>('');
+    const [displayEmail, setDisplayEmail] = useState<string>('');
 
     const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
-    
+
     // Handles user sign-out and route reset
     const handleSignOut = async () => {
         try {
@@ -47,7 +50,7 @@ export default function Profile() {
 
             // Signed-in session sign-out: Supabase sign out
             const { error } = await supabase.auth.signOut();
-            
+
             if (error) throw error;
             router.replace("/");
 
@@ -57,24 +60,46 @@ export default function Profile() {
     };
 
     useEffect(() => {
-        const loadGuestChild = async () => {
+        const loadChildName = async () => {
             try {
-                if (!isGuest) return;
-                const activeId = await getActiveChildId();
-                if (!activeId) {
-                    setGuestChildName("Guest Child");
-                    return;
+                if (isGuest) {
+                    const activeId = await getLocalActiveChildId();
+                    if (!activeId) { 
+                        setChildName("Guest Child");
+                        return; 
+                    }
+                    const children = await listChildren();
+                    const activeChild = children.find(c => c.id === activeId);
+                    setChildName(activeChild?.name ?? 'Guest Child');
+                } else if (session) {
+                    const result = await getRemoteActiveChildId();
+                    if (!result.success || !result.childName) { 
+                        Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
+                        setChildName("ERROR");
+                        return; 
+                    }
+                    setChildName(result.childName);
                 }
-                const children = await listChildren();
-                const activeChild = children.find(c => c.id === activeId);
-                setGuestChildName(activeChild?.name ?? 'Guest Child');
             } catch {
-                Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
+                if (isGuest) {
+                    Alert.alert("Could Not Retrieve Guest Mode Child", "Could not load the child. Please try again.");
+                } else {
+                    Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
+                    setChildName("Child");
+                }
             }
         };
 
-        loadGuestChild();
-    }, [isGuest]);
+        loadChildName();
+    }, [isGuest, session]);
+
+    useEffect(() => {
+        if (!session) {
+            return;
+        }
+        setDisplayName(`${session.user.user_metadata.firstName} ${session.user.user_metadata.lastName}`);
+        setDisplayEmail(session.user.user_metadata.email ?? '');
+    }, [session]);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -85,7 +110,7 @@ export default function Profile() {
                             Active Child
                         </Text>
                         <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {isGuest ? guestChildName : session?.user.user_metadata?.activeChild}
+                            👶 {childName}
                         </Text>
                     </View>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -93,7 +118,7 @@ export default function Profile() {
                             👤 Name
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
-                            {isGuest ? "Guest" : `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`}
+                            {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
                     {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
@@ -130,7 +155,7 @@ export default function Profile() {
                             }
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
-                                {session?.user.user_metadata.email}
+                                {displayEmail}
                             </Text>
                         </TouchableOpacity>
                     </View>}

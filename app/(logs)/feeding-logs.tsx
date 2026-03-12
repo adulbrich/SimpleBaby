@@ -44,6 +44,7 @@ const FeedingLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
@@ -144,8 +145,9 @@ const FeedingLogsView: React.FC = () => {
 	}, [fetchFeedingLogs]);
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -171,6 +173,7 @@ const FeedingLogsView: React.FC = () => {
 
 						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 					}
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -251,15 +254,19 @@ const FeedingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
+					testID={`feeding-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
 				</Pressable>
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
+					testID={`feeding-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
 				</Pressable>
@@ -273,7 +280,7 @@ const FeedingLogsView: React.FC = () => {
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center">Error: {error}</Text>
+				<Text className="text-red-600 text-center" testID="feeding-logs-loading-error">Error: {error}</Text>
 			) : feedingLogs.length === 0 ? (
 				<Text>
 					You don&apos;t have any feeding logs
@@ -285,6 +292,7 @@ const FeedingLogsView: React.FC = () => {
 					renderItem={renderFeedingLogItem}
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{ paddingBottom: 16 }}
+					testID="feeding-logs"
 				/>
 			)}
 
@@ -318,6 +326,7 @@ const FeedingLogsView: React.FC = () => {
 										prev ? { ...prev, category: text } : prev,
 									)
 								}
+								testID="feeding-log-edit-category"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">Item</Text>
 							<TextInput
@@ -328,6 +337,7 @@ const FeedingLogsView: React.FC = () => {
 										prev ? { ...prev, item_name: text } : prev,
 									)
 								}
+								testID="feeding-log-edit-item"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">Amount</Text>
 							<TextInput
@@ -338,6 +348,7 @@ const FeedingLogsView: React.FC = () => {
 										prev ? { ...prev, amount: text } : prev,
 									)
 								}
+								testID="feeding-log-edit-amount"
 							/>
 							<Text className="text-sm text-gray-500 mb-1">Note</Text>
 							<TextInput
@@ -348,17 +359,20 @@ const FeedingLogsView: React.FC = () => {
 										prev ? { ...prev, note: text } : prev,
 									)
 								}
+								testID="feeding-log-edit-note"
 							/>
 							<View className="flex-row justify-end gap-3">
 								<TouchableOpacity
 									className="bg-gray-200 rounded-full px-4 py-2"
 									onPress={() => setEditModalVisible(false)}
+									testID="feeding-log-edit-cancel"
 								>
 									<Text>Cancel</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									className="bg-green-500 rounded-full px-4 py-2"
 									onPress={handleSaveEdit}
+									testID="feeding-log-edit-save"
 								>
 									<Text className="text-white">Save</Text>
 								</TouchableOpacity>

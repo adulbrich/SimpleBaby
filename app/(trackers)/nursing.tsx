@@ -33,6 +33,7 @@ export default function Nursing() {
 	const [rightAmount, setRightAmount] = useState("");
 	const [note, setNote] = useState("");
 	const [reset, setReset] = useState<number>(0);
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	// Insert a new nursing log entry into Supabase
@@ -138,6 +139,8 @@ export default function Nursing() {
 
 	// Validate input, then call save
 	const handleSaveNursingLog = async () => {
+		if (isSaving) return;
+		
 		// Prevent logging if all fields are empty
 		if (
 			leftDuration !== "00:00:00" ||
@@ -145,6 +148,7 @@ export default function Nursing() {
 			leftAmount.trim() !== "" ||
 			rightAmount.trim() !== ""
 		) {
+			setIsSaving(true);
 			const result = await saveNursingLog();
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -152,6 +156,7 @@ export default function Nursing() {
 			} else {
 				Alert.alert(`Failed to save nursing log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (leftDuration === "00:00:00" || rightDuration === "00:00:00")
@@ -266,6 +271,7 @@ export default function Nursing() {
 						<TouchableOpacity
 							className="rounded-full p-4 bg-red-100 grow"
 							onPress={handleSaveNursingLog}
+							disabled={isSaving}
 							testID="nursing-save-log-button"
 						>
 							<Text>➕ Add to log</Text>

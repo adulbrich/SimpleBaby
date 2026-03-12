@@ -18,6 +18,7 @@ import {
 	createChild,
 	getActiveChildId,
 } from "@/library/local-store";
+import { encryptData } from "@/library/crypto";
 
 export default function MainTab() {
 	type Button = {
@@ -61,6 +62,12 @@ export default function MainTab() {
 			return;
 		}
 
+		//Checks if the name is only whitespace
+		if (childName.trim().length === 0) {
+			Alert.alert("Please enter a valid name!");
+			return;
+		}
+
 		const child = childName.charAt(0).toUpperCase() + childName.slice(1);
 
 		// GUEST MODE: local-only
@@ -82,9 +89,10 @@ export default function MainTab() {
 				}
 
 				// Insert child into the database
-				const { error } = await supabase
+				const encryptedChildName = await encryptData(child);
+				const { data, error } = await supabase
 					.from("children")
-					.insert([{ user_id: userId, name: child }])
+					.insert([{ user_id: userId, name: encryptedChildName }])
 					.select("id")
 					.single();
 
@@ -92,9 +100,9 @@ export default function MainTab() {
 					throw error;
 				}
 
-				// Update user session metadata with the active child
+				// Update user session metadata with the active child ID
 				await supabase.auth.updateUser({
-					data: { activeChild: child },
+					data: { activeChildId: data.id },
 				});
 
 				setChildState(false); // Close modal
@@ -122,8 +130,11 @@ export default function MainTab() {
 					setChildState(false);
 					return;
 				}
-				const activeChild = session.user.user_metadata?.activeChild;
-				setChildState(!activeChild);
+
+				// Show new child modal when either activeChildId or legacyChild metadata are non-existent
+				const activeChildId = session.user.user_metadata?.activeChildId;
+				const legacyActiveChild = session.user.user_metadata?.activeChild;
+				setChildState(!(activeChildId || legacyActiveChild));
 			}
 		};
 
