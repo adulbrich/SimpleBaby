@@ -99,7 +99,7 @@ export default function EditLogPopup({
         if (val.length > 7 && val[7] === ":") val = `${val.slice(0, 6)}0`;
         val = val.slice(0, 8);
         return val;
-    }
+    };
 
     // renderCategoryInput - dropdown of specific categories that the user can choose from
     const renderCategoryInput = (fieldKey: string, fieldInfo: editFieldCategory) => (

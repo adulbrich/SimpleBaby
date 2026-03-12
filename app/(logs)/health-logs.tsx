@@ -408,6 +408,7 @@ const HealthLogsView: React.FC = () => {
 						value: editingLog?.note,
 					},
 					category:  {
+						title: undefined,
 						type: "insert",
 						value: (
 							<Text className="text-xs text-gray-400 mt-1">

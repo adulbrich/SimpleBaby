@@ -42,7 +42,7 @@ jest.mock("@/components/edit-log-popup", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
-    decryptData: jest.fn(async (string) => string ? `Decrypted: ${string}` : ""),
+    decryptData: jest.fn(async (string) => string ? string.slice(0, string.length - " U2FsdGVkX1".length) : ""),
 }));
 
 jest.mock("@/library/utils", () => ({
@@ -74,8 +74,8 @@ const TEST_LOGS = [{
     child_id: TEST_CHILD_ID,
     left_amount: "test left amount 1 U2FsdGVkX1",
     right_amount: "test right amount 1 U2FsdGVkX1",
-    left_duration: "test left duration 1 U2FsdGVkX1",
-    right_duration: "test right duration 1 U2FsdGVkX1",
+    left_duration: "01:02:03 U2FsdGVkX1",
+    right_duration: "02:03:04 U2FsdGVkX1",
     logged_at: (new Date(NOW)).toISOString(),
     note: "test note 1 U2FsdGVkX1",
 }, {
@@ -83,8 +83,8 @@ const TEST_LOGS = [{
     child_id: TEST_CHILD_ID,
     left_amount: "test left amount 2 U2FsdGVkX1",
     right_amount: "test right amount 2 U2FsdGVkX1",
-    left_duration: "test left duration 2 U2FsdGVkX1",
-    right_duration: "test right duration 2 U2FsdGVkX1",
+    left_duration: "03:04:05 U2FsdGVkX1",
+    right_duration: "04:05:06 U2FsdGVkX1",
     logged_at: (new Date(NOW - 2*24*60*60*1000 - 60*1000)).toISOString(),
     note: "",
 }];
@@ -259,10 +259,6 @@ describe("Nursing logs screen", () => {
             await userEvent.press(
                 screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
             );
-
-            // clear duration fields so validation passes 
-            await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
-            await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
 
             // submit edit
             const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
@@ -519,10 +515,6 @@ async function catchUpdateError(mockFailingEdit: () => void) {
             screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
         );
 
-        // clear duration fields so validation passes 
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
-        await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
-
         // submit edit
         const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
         await act(async () => submitCallback());
@@ -540,8 +532,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
     for (const log of TEST_LOGS) {
         const editedLeftAmount = `edited left amount ${log.id}`;
         const editedRightAmount = `edited right amount ${log.id}`;
-        const editedLeftDuration = "01:02:03";
-        const editedRightDuration = "04:05:06";
+        const editedLeftDuration = "03:02:01";
+        const editedRightDuration = "06:05:04";
         const editedNote = `edited note ${log.id}`;
 
         // clear .mock.calls array each loop
@@ -595,8 +587,8 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
         child_id: "test child id",
         left_amount: "edited left amount U2FsdGVkX1",
         right_amount: "edited right amount U2FsdGVkX1",
-        left_duration: "edited left duration U2FsdGVkX1",
-        right_duration: "edited right duration U2FsdGVkX1",
+        left_duration: "03:02:01",
+        right_duration: "06:05:04",
         logged_at: (new Date(NOW - 4*24*60*60*1000 - 6*60*1000)).toISOString(),
         note: "edited note U2FsdGVkX1",
     };
@@ -611,10 +603,6 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     await userEvent.press(
         screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
     );
-
-    // clear duration fields so validation passes 
-    await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
-    await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
 
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);
