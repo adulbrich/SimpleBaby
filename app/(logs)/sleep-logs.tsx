@@ -169,6 +169,12 @@ const SleepLogsView: React.FC = () => {
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
 
+		if (editingLog.duration!.trim().length === 0) {
+			Alert.alert("Failed to update log",
+						 "Please ensure that the duration is valid.");
+			return;
+		}
+
 		try {
 			const encryptedNote = editingLog.note
 				? await encryptData(editingLog.note)

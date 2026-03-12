@@ -185,6 +185,11 @@ const FeedingLogsView: React.FC = () => {
 		try {
 			const { id, category, item_name, amount, note } = editingLog;
 
+			if (item_name.trim().length === 0 || amount.trim().length === 0) {
+				Alert.alert("Failed to update log", "Please ensure the item name and/or amount are valid.");
+				return;
+			}
+
 			const encryptedCategory = await encryptData(category);
 			const encryptedItemName = await encryptData(item_name);
 			const encryptedAmount = await encryptData(amount);
