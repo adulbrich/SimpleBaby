@@ -52,7 +52,7 @@ const SignUpScreen: React.FC = () => {
             const { error } = await signUp(email, password, firstName, lastName);
             if (error) {
                 const message = error.message ?? "";
-                if (message.includes("already")) {
+                if (message === "User already registered") {
                     Alert.alert(
                        "Sign Up Error",
                        "That email is already in use. Please try again." 
