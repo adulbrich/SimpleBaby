@@ -268,9 +268,9 @@ const HealthLogsView: React.FC = () => {
 			<Text className="text-base">
 				{format(new Date(item.date), "MMM dd, yyyy")}
 			</Text>
-			{item.growth_length && <Text>Length: {item.growth_length} cm</Text>}
-			{item.growth_weight && <Text>Weight: {item.growth_weight} kg</Text>}
-			{item.growth_head && <Text>Head: {item.growth_head} cm</Text>}
+			{item.growth_length && <Text>Length: {item.growth_length}</Text>}
+			{item.growth_weight && <Text>Weight: {item.growth_weight}</Text>}
+			{item.growth_head && <Text>Head: {item.growth_head}</Text>}
 			{item.activity_type && <Text>Activity: {item.activity_type}</Text>}
 			{item.activity_duration && (
 				<Text>Duration: {item.activity_duration}</Text>
