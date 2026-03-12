@@ -60,7 +60,7 @@ const SignUpScreen: React.FC = () => {
                 } else {
                     Alert.alert(
                         "Sign Up Error",
-                        error.message || "An error occurred during sign up. Please check your email and password.",
+                        error.message || "An unknown error occurred during sign up.",
                     );
                 }
             } else {
