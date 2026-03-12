@@ -5,13 +5,7 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
 	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -25,6 +19,7 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -298,91 +293,38 @@ const FeedingLogsView: React.FC = () => {
 				/>
 			)}
 
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Feeding Log</Text>
-							<Text className="text-sm text-gray-500 mb-1">Category</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.category}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, category: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-category"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Item</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.item_name}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, item_name: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-item"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Amount</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.amount}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, amount: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-amount"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Note</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-6"
-								value={editingLog?.note || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, note: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-note"
-							/>
-							<View className="flex-row justify-end gap-3">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="feeding-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="feeding-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			{/* Edit Modal */}
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Feeding Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					category: {
+						title: "Category",
+						type: "category",
+						categories: ["Liquid", "Solid", "Soft"],
+						value: editingLog?.category,
+					},
+					item_name: {
+						title: "Item",
+						type: "text",
+						value: editingLog?.item_name,
+					},
+					amount: {
+						title: "Amount",
+						type: "text",
+						value: editingLog?.amount,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+				}}
+				testID="feeding-logs-edit-popup"
+			/>
 		</View>
 	);
 };

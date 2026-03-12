@@ -5,13 +5,7 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
 	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -25,6 +19,7 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -315,72 +310,41 @@ const NursingLogsView: React.FC = () => {
 			)}
 
 			{/* Edit Modal */}
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Nursing Log</Text>
-
-							{[
-								"left_duration",
-								"right_duration",
-								"left_amount",
-								"right_amount",
-								"note",
-							].map((field, idx) => (
-								<View key={idx} className="mb-3">
-									<Text className="text-sm text-gray-500 mb-1 capitalize">
-										{field.replace("_", " ")}
-									</Text>
-									<TextInput
-										className="border border-gray-300 rounded-xl px-3 py-2"
-										value={editingLog?.[field as keyof NursingLog] || ""}
-										onChangeText={(text) =>
-											setEditingLog((prev) =>
-												prev ? { ...prev, [field]: text } : prev,
-											)
-										}
-										testID={`nursing-log-edit-${field.replace("_", "-")}`}
-									/>
-								</View>
-							))}
-
-							<View className="flex-row justify-end gap-3 mt-4">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="nursing-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="nursing-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Nursing Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					left_duration: {
+						title: "Left Duration",
+						type: "duration",
+						value: editingLog?.left_duration,
+					},
+					right_duration: {
+						title: "Right Duration",
+						type: "duration",
+						value: editingLog?.right_duration,
+					},
+					left_amount: {
+						title: "Left Amount",
+						type: "text",
+						value: editingLog?.left_amount,
+					},
+					right_amount: {
+						title: "Right Amount",
+						type: "text",
+						value: editingLog?.right_amount,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+				}}
+				testID="nursing-logs-edit-popup"
+			/>
 		</View>
 	);
 };
