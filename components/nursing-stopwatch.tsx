@@ -20,7 +20,7 @@ export default function NursingStopwatch({
     const [rightTime, setRightTime] = useState(0);
     const [leftRunning, setLeftRunning] = useState(false);
     const [rightRunning, setRightRunning] = useState(false);
-    const [activeSide, setActiveSide] = useState('left');
+    const [activeSide, setActiveSide] = useState<'left'|'right'>('left');
     const leftIntervalRef = useRef<any>(null);
     const rightIntervalRef = useRef<any>(null);
 
@@ -151,22 +151,25 @@ export default function NursingStopwatch({
                 </View>
             </View>
             <View className='stopwatch-secondary'>
+                { (activeSide === "left" && leftRunning) || (activeSide && rightRunning) ? (
+                    <TouchableOpacity
+                        className='stopwatch-button-stop dark:bg-[#f1efd2]'
+                        onPress={() => toggleRunning(false)}
+                        testID='nursing-stopwatch-stop'
+                    >
+                        <Text className='stopwatch-button-text'>Stop</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        className='stopwatch-button-start dark:bg-[#d2f1e0]'
+                        onPress={() => toggleRunning(true)}
+                        testID='nursing-stopwatch-start'
+                    >
+                        <Text className='stopwatch-button-text'>Start</Text>
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#d2f1e0]'
-                    onPress={() => toggleRunning(true)}
-                    testID='nursing-stopwatch-start'
-                >
-                    <Text className='stopwatch-button-text'>Start</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#f1efd2]'
-                    onPress={() => toggleRunning(false)}
-                    testID='nursing-stopwatch-stop'
-                >
-                    <Text className='stopwatch-button-text'>Stop</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#f1d2d2]'
+                    className='stopwatch-button-reset dark:bg-[#f1d2d2]'
                     onPress={reset}
                     testID='nursing-stopwatch-reset'
                 >
