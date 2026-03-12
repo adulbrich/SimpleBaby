@@ -30,6 +30,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 type MilestoneCategory =
 	| "Motor"
 	| "Language"
@@ -241,7 +243,7 @@ const MilestoneLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("milestone_logs", editingLog.id, patch);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchMilestoneLogs();
@@ -254,7 +256,7 @@ const MilestoneLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 
@@ -271,7 +273,7 @@ const MilestoneLogsView: React.FC = () => {
 		setDeleteAlertVisible(true);
 		Alert.alert(
 			"Delete Entry",
-			"Are you sure you want to delete this log?",
+			stringLib.warnings.logDeletionConfirmation,
 			[
 				{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 				{

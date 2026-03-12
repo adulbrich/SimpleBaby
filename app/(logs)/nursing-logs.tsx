@@ -26,6 +26,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 interface NursingLog {
 	id: string;
 	child_id: string;
@@ -176,7 +178,7 @@ const NursingLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("nursing_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -190,7 +192,7 @@ const NursingLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 
@@ -204,7 +206,7 @@ const NursingLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",

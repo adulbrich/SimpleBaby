@@ -1,0 +1,9 @@
+{
+    "errors": {
+        "logUpdateFailure": "Failed to update log"
+    },
+
+    "warnings": {
+        "logDeletionConfirmation": "Are you sure you want to delete this log?"
+    }
+}

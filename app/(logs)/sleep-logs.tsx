@@ -26,6 +26,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 interface SleepLog {
 	id: string;
 	child_id: string;
@@ -135,7 +137,7 @@ const SleepLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",

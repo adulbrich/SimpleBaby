@@ -26,6 +26,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 interface HealthLog {
 	id: string;
 	child_id: string;
@@ -206,7 +208,7 @@ const HealthLogsView: React.FC = () => {
 			if (isGuest) {
 				const success = await updateRow("health_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchHealthLogs();
@@ -218,7 +220,7 @@ const HealthLogsView: React.FC = () => {
 				.eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
                 await fetchHealthLogs();
@@ -232,7 +234,7 @@ const HealthLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",

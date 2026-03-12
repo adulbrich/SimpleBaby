@@ -26,6 +26,8 @@ import {
 	LocalRow,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 interface FeedingLog {
 	id: string;
 	child_id: string;
@@ -146,7 +148,7 @@ const FeedingLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
@@ -198,7 +200,7 @@ const FeedingLogsView: React.FC = () => {
 					note: encryptedNote,
 				});
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -217,7 +219,7 @@ const FeedingLogsView: React.FC = () => {
 					.eq("id", id);
 
 				if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
