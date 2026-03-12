@@ -47,6 +47,7 @@ const NursingLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<NursingLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
@@ -142,6 +143,21 @@ const NursingLogsView: React.FC = () => {
 
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
+
+		const errorFields = [];
+        const durationRegex = /^\d{2}:\d{2}:\d{2}$/;
+        if (editingLog.left_duration && !durationRegex.test(editingLog.left_duration)) {
+            errorFields.push("Left duration must be in HH:MM:SS format.");
+        }
+        if (editingLog.right_duration && !durationRegex.test(editingLog.right_duration)) {
+            errorFields.push("Right duration must be in HH:MM:SS format.");
+        }
+
+		if (errorFields.length !== 0) {
+			Alert.alert("Invalid Format", `Please fix the following errors:\n\n${errorFields.join("\n\n")}`);
+			return;
+		}
+
 		try {
 			const updated = {
 				left_duration: editingLog.left_duration
@@ -189,8 +205,9 @@ const NursingLogsView: React.FC = () => {
 	};
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -214,6 +231,7 @@ const NursingLogsView: React.FC = () => {
                         }
                         setNursingLogs((prev) => prev.filter((log) => log.id !== id));
                     }
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -254,9 +272,10 @@ const NursingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`nursing-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -264,6 +283,7 @@ const NursingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`nursing-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>

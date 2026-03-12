@@ -56,10 +56,18 @@ const SignUpScreen: React.FC = () => {
             // Call the signUp function from your auth provider
             const { error } = await signUp(email, password, firstName, lastName);
             if (error) {
-                Alert.alert(
-                    'Sign Up Error',
-                    error.message || 'An error occurred during sign up.',
-                );
+                const message = error.message ?? "";
+                if (message === "User already registered") {
+                    Alert.alert(
+                       "Sign Up Error",
+                       "That email is already in use. Please try again." 
+                    );
+                } else {
+                    Alert.alert(
+                        "Sign Up Error",
+                        error.message || "An unknown error occurred during sign up.",
+                    );
+                }
             } else {
                 // if successful, sign in automatically
                 setLoading(true);
