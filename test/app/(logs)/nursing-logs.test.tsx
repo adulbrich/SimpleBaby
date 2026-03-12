@@ -259,7 +259,11 @@ describe("Nursing logs screen", () => {
             await userEvent.press(
                 screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
             );
-            
+
+            // clear duration fields so validation passes 
+            await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
+            await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
+
             // submit edit
             const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
             await act(async () => submitCallback());
@@ -515,6 +519,10 @@ async function catchUpdateError(mockFailingEdit: () => void) {
             screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
         );
 
+        // clear duration fields so validation passes 
+        await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
+        await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
+
         // submit edit
         const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
         await act(async () => submitCallback());
@@ -532,8 +540,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
     for (const log of TEST_LOGS) {
         const editedLeftAmount = `edited left amount ${log.id}`;
         const editedRightAmount = `edited right amount ${log.id}`;
-        const editedLeftDuration = `edited left duration ${log.id}`;
-        const editedRightDuration = `edited right duration ${log.id}`;
+        const editedLeftDuration = "01:02:03";
+        const editedRightDuration = "04:05:06";
         const editedNote = `edited note ${log.id}`;
 
         // clear .mock.calls array each loop
@@ -603,6 +611,10 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     await userEvent.press(
         screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
     );
+
+    // clear duration fields so validation passes 
+    await userEvent.clear(screen.getByTestId("nursing-log-edit-left-duration"));
+    await userEvent.clear(screen.getByTestId("nursing-log-edit-right-duration"));
 
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);

@@ -49,6 +49,7 @@ const HealthLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<HealthLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
@@ -225,8 +226,9 @@ const HealthLogsView: React.FC = () => {
 	};
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -249,6 +251,7 @@ const HealthLogsView: React.FC = () => {
                         }
                         setLogs((prev) => prev.filter((log) => log.id !== id));
                     }
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -260,9 +263,9 @@ const HealthLogsView: React.FC = () => {
 			<Text className="text-base">
 				{format(new Date(item.date), "MMM dd, yyyy")}
 			</Text>
-			{item.growth_length && <Text>Length: {item.growth_length} cm</Text>}
-			{item.growth_weight && <Text>Weight: {item.growth_weight} kg</Text>}
-			{item.growth_head && <Text>Head: {item.growth_head} cm</Text>}
+			{item.growth_length && <Text>Length: {item.growth_length}</Text>}
+			{item.growth_weight && <Text>Weight: {item.growth_weight}</Text>}
+			{item.growth_head && <Text>Head: {item.growth_head}</Text>}
 			{item.activity_type && <Text>Activity: {item.activity_type}</Text>}
 			{item.activity_duration && (
 				<Text>Duration: {item.activity_duration}</Text>
@@ -282,9 +285,10 @@ const HealthLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`health-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -292,6 +296,7 @@ const HealthLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`health-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
@@ -401,6 +406,14 @@ const HealthLogsView: React.FC = () => {
 						title: "Note",
 						type: "text",
 						value: editingLog?.note,
+					},
+					category:  {
+						type: "insert",
+						value: (
+							<Text className="text-xs text-gray-400 mt-1">
+								Health log categories may not be updated after the log is created. Please delete this log and create a new one if you wish to update the category.
+							</Text>
+						),
 					},
 				}}
 				testID="health-logs-edit-popup"

@@ -29,6 +29,7 @@ export default function Sleep() {
 	const [stopwatchTime, setStopwatchTime] = useState("00:00:00");
 	const [note, setNote] = useState("");
 	const [reset, setReset] = useState<number>(0);
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	// Update manual entry times
@@ -149,7 +150,10 @@ export default function Sleep() {
 
 	// Handle UI logic for saving a sleep entry depending on method
 	const handleSaveSleepLog = async () => {
+		if (isSaving) return;
+
 		if (stopwatchTime && stopwatchTime !== "00:00:00") {
+			setIsSaving(true);
 			const result = await saveSleepLog(stopwatchTime, null, null, note);
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -157,6 +161,7 @@ export default function Sleep() {
 			} else {
 				Alert.alert(`Failed to save sleep log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else if (startTime && endTime) {
 			if (endTime.getTime() <= startTime.getTime()) {
 				Alert.alert(
@@ -246,6 +251,7 @@ export default function Sleep() {
 							<TouchableOpacity
 								className="rounded-full p-4 bg-red-100 grow"
 								onPress={handleSaveSleepLog}
+								disabled={isSaving}
 								testID="sleep-save-log-button"
 							>
 								<Text>➕ Add to log</Text>

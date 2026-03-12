@@ -32,6 +32,7 @@ export default function Diaper() {
 	const [changeTime, setChangeTime] = useState(new Date());
 	const [note, setNote] = useState("");
 	const [reset, setReset] = useState<number>(0);
+	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
 	/**
@@ -124,7 +125,9 @@ export default function Diaper() {
 
 	// Validate and handle the save action with alerts based on the result
 	const handleSaveDiaperLog = async () => {
+		if (isSaving) return;
 		if (consistency && amount) {
+			setIsSaving(true);
 			const result = await saveDiaperLog();
 			if (result.success) {
 				router.replace("/(tabs)");
@@ -132,6 +135,7 @@ export default function Diaper() {
 			} else {
 				Alert.alert(`Failed to save diaper log: ${result.error}`);
 			}
+			setIsSaving(false);
 		} else {
 			const missingFields = [];
 			if (!consistency) missingFields.push("consistency");
@@ -208,6 +212,7 @@ export default function Diaper() {
 							className="rounded-full p-4 bg-red-100 grow"
 							onPress={handleSaveDiaperLog}
 							testID="diaper-save-log-button"
+							disabled={isSaving}
 						>
 							<Text>➕ Add to log</Text>
 						</TouchableOpacity>

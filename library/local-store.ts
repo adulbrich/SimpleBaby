@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
+import { encryptData, decryptData } from "./crypto";
 
 type TableName =
 	| "feeding_logs"
@@ -81,20 +82,34 @@ export async function isGuestMode(): Promise<boolean> {
 // listChildren()
 // retrieves a list of children from local db in current guest account
 export async function listChildren(): Promise<Child[]> {
-	return await getJson<Child[]>(KEYS.children, []);
+	const children = await getJson<Child[]>(KEYS.children, []);
+	return await Promise.all(
+		children.map(async (child) => {
+			if (!child.name.includes("U2FsdGVkX1")) {
+				return child;
+			}
+			try {
+				const decryptedName = await decryptData(child.name);
+				return { ...child, name: decryptedName };
+			} catch {
+				return child;
+			}
+		}),
+	);
 }
 
 // createChild()
 // creates a child object and adds it to the local db
-export async function createChild(name: string): Promise<Child> {
+export async function createChild(name: string) {
 	if (!name.trim()) {
 		throw new Error("Child name is required.");
 	}
 	try {
-		const children = await listChildren();
+		const children = await getJson<Child[]>(KEYS.children, []);
+		const encryptedName = await encryptData(name);
 		const child: Child = {
 			id: uuidv4(),
-			name,
+			name: encryptedName,
 			created_at: new Date().toISOString(),
 		};
 		children.push(child);
@@ -103,7 +118,6 @@ export async function createChild(name: string): Promise<Child> {
 		if (!active) {
 			await setActiveChildId(child.id);
 		}
-		return child;
 	} catch (error) {
 		console.error("Failed to create child in local storage:", error);
 		throw new Error("Unable to save child data locally.");

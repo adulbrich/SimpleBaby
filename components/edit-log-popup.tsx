@@ -47,12 +47,19 @@ type editFieldImage = {
     value: string | null;
 };
 
+type insert = {
+    title: string | undefined;
+    type: "insert";
+    value: React.JSX.Element;
+};
+
 type editField =
     | editFieldText
     | editFieldCategory
     | editFieldDateTime
     | editFieldDuration
-    | editFieldImage;
+    | editFieldImage
+    | insert;
 
 
 export default function EditLogPopup({
@@ -208,10 +215,13 @@ export default function EditLogPopup({
             log.
         </Text>
     );
+    
+    // renderTextInput - open text field for the user to type into
+    const renderInsert = (fieldInfo: insert) => fieldInfo.value;
 
     const renderInput = (fieldKey: string, fieldInfo: editField) => (
         <View key={fieldKey}>
-            <Text className="text-sm text-gray-500 mb-1">{fieldInfo.title}</Text>
+            {fieldInfo.title && <Text className="text-sm text-gray-500 mb-1">{fieldInfo.title}</Text>}
             {
                 fieldInfo.type === "category" ? (
                     renderCategoryInput(fieldKey, fieldInfo)
@@ -223,6 +233,8 @@ export default function EditLogPopup({
                     renderDurationInput(fieldKey, fieldInfo)
                 ) : fieldInfo.type === "image" ? (
                     renderImageInput(fieldKey, fieldInfo)
+                ) : fieldInfo.type === "insert" ? (
+                    renderInsert(fieldInfo)
                 ) : undefined
             }
         </View>

@@ -26,7 +26,7 @@ interface DiaperLog {
 	child_id: string;
 	consistency: string;
 	amount: string;
-	logged_at: string;
+	change_time: string;
 	note: string | null;
 }
 
@@ -39,6 +39,7 @@ const DiaperLogsView: React.FC = () => {
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<DiaperLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 
 	const safeDecrypt = async (value: string | null): Promise<string> => {
@@ -102,7 +103,7 @@ const DiaperLogsView: React.FC = () => {
                     .from("diaper_logs")
                     .select("*")
                     .eq("child_id", childId)
-                    .order("logged_at", { ascending: false });
+                    .order("change_time", { ascending: false });
 
                 if (error) throw error;
 
@@ -132,8 +133,9 @@ const DiaperLogsView: React.FC = () => {
 	}, [fetchDiaperLogs]);
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -157,6 +159,7 @@ const DiaperLogsView: React.FC = () => {
                         }
                         setDiaperLogs((prev) => prev.filter((log) => log.id !== id));
                     }
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -213,10 +216,10 @@ const DiaperLogsView: React.FC = () => {
 	const renderDiaperLogItem = ({ item }: { item: DiaperLog }) => (
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.logged_at), "MMM dd, yyyy")}
+				{format(new Date(item.change_time), "MMM dd, yyyy")}
 			</Text>
 			<Text className="text-base mb-1">
-				{format(new Date(item.logged_at), "h:mm a")}
+				{format(new Date(item.change_time), "h:mm a")}
 			</Text>
 			<Text className="text-base mb-1">Consistency: {item.consistency}</Text>
 			<Text className="text-base mb-1">Size: {item.amount}</Text>
@@ -229,9 +232,10 @@ const DiaperLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`diaper-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -239,6 +243,7 @@ const DiaperLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`diaper-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>

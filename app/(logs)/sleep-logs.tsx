@@ -38,6 +38,7 @@ const SleepLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<SleepLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 	const { isGuest } = useAuth();
 
@@ -132,8 +133,9 @@ const SleepLogsView: React.FC = () => {
 	}, [fetchSleepLogs]);
 
 	const handleDelete = async (id: string) => {
+		setDeleteAlertVisible(true);
 		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -157,6 +159,7 @@ const SleepLogsView: React.FC = () => {
 						}
 						setSleepLogs((prev) => prev.filter((log) => log.id !== id));
 					}
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -179,7 +182,8 @@ const SleepLogsView: React.FC = () => {
 				});
 
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert("Failed to update log",
+						 "Please ensure that sleep start time is before sleep end time.");
 					return;
 				}
 
@@ -198,7 +202,8 @@ const SleepLogsView: React.FC = () => {
 					.eq("id", editingLog.id);
 
 				if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert("Failed to update log",
+						 "Please ensure that sleep start time is before sleep end time.");
 					return;
 				}
 
@@ -232,9 +237,10 @@ const SleepLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`sleep-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -242,6 +248,7 @@ const SleepLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`sleep-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>

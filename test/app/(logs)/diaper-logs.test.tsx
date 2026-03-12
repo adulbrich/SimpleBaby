@@ -73,14 +73,14 @@ const TEST_LOGS = [{
     child_id: TEST_CHILD_ID,
     consistency: "test consistency 1 U2FsdGVkX1",
     amount: "test amount 1 U2FsdGVkX1",
-    logged_at: (new Date()).toISOString(),
+    change_time: (new Date()).toISOString(),
     note: "test note 1 U2FsdGVkX1",
 }, {
     id: "test log id 2",
     child_id: TEST_CHILD_ID,
     consistency: "test consistency 2 U2FsdGVkX1",
     amount: "test amount 2 U2FsdGVkX1",
-    logged_at: (new Date("1 Jan 2000")).toISOString(),
+    change_time: (new Date("1 Jan 2000")).toISOString(),
     note: "",
 }];
 
@@ -428,8 +428,8 @@ async function rendersLogs() {
     await screen.findByTestId("diaper-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        expect(screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toBeTruthy();
+        expect(screen.getByText(format(new Date(log.change_time), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
+        expect(screen.getByText(format(new Date(log.change_time), 'h:mm a'), {exact: false})).toBeTruthy();
         expect(screen.getByText(await decryptData(log.consistency), {exact: false})).toBeTruthy();
         expect(screen.getByText(await decryptData(log.amount), {exact: false})).toBeTruthy();
         if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
@@ -464,8 +464,8 @@ async function deletesLog() {
 
     for (const log of TEST_LOGS) {
         // ensure log is still present
-        expect(screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toBeTruthy();
+        expect(screen.getByText(format(new Date(log.change_time), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
+        expect(screen.getByText(format(new Date(log.change_time), 'h:mm a'), {exact: false})).toBeTruthy();
         expect(screen.getByText(await decryptData(log.consistency), {exact: false})).toBeTruthy();
         expect(screen.getByText(await decryptData(log.amount), {exact: false})).toBeTruthy();
         if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
@@ -479,8 +479,8 @@ async function deletesLog() {
         await act(deleteHandler);  // call delete handler (user confirms delete)
 
         // confirm all log details are no longer present
-        expect(() => screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toThrow();
-        expect(() => screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toThrow();
+        expect(() => screen.getByText(format(new Date(log.change_time), 'MMM dd, yyyy'), {exact: false})).toThrow();
+        expect(() => screen.getByText(format(new Date(log.change_time), 'h:mm a'), {exact: false})).toThrow();
         expect(async () => screen.getByText(await decryptData(log.consistency), {exact: false})).rejects.toThrow();
         expect(async () => screen.getByText(await decryptData(log.amount), {exact: false})).rejects.toThrow();
         expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
@@ -568,7 +568,7 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
         child_id: "test child id",
         consistency: "edited consistency U2FsdGVkX1",
         amount: "edited amount U2FsdGVkX1",
-        logged_at: (new Date()).toISOString(),
+        change_time: (new Date()).toISOString(),
         note: "edited note U2FsdGVkX1",
     };
     const updatedLogs = [editedLog].concat(  // join new edited log
