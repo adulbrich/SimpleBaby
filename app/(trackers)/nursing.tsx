@@ -85,13 +85,13 @@ export default function Nursing() {
 			}
 
 			try {
-				const normalizedLeftAmount =
-					leftAmount.trim() === "" ? "0" : leftAmount.trim();
-				const normalizedRightAmount =
-					rightAmount.trim() === "" ? "0" : rightAmount.trim();
+				const normalizedLeftDuration = leftDuration === "00:00:00" ? "" : leftDuration;
+				const normalizedRightDuration = rightDuration === "00:00:00" ? "" : rightDuration;
+				const normalizedLeftAmount = leftAmount.trim();
+				const normalizedRightAmount = rightAmount.trim();
 
-				const encryptedLeftDuration = await encryptData(leftDuration);
-				const encryptedRightDuration = await encryptData(rightDuration);
+				const encryptedLeftDuration = await encryptData(normalizedLeftDuration);
+				const encryptedRightDuration = await encryptData(normalizedRightDuration);
 				const encryptedLeftAmount = await encryptData(normalizedLeftAmount);
 				const encryptedRightAmount = await encryptData(normalizedRightAmount);
 				const encryptedNote = note ? await encryptData(note) : null;

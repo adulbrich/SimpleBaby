@@ -240,20 +240,20 @@ const NursingLogsView: React.FC = () => {
 			<Text className="text-base mb-1">
 				Time Logged: {format(new Date(item.logged_at), "h:mm a")}
 			</Text>
-			{item.left_duration && (
+			{item.left_duration !== "00:00:00" && (
 				<Text className="text-base mb-1">
 					Left Duration: {item.left_duration}
 				</Text>
 			)}
-			{item.right_duration && (
+			{item.right_duration !== "00:00:00" && (
 				<Text className="text-base mb-1">
 					Right Duration: {item.right_duration}
 				</Text>
 			)}
-			{item.left_amount && (
+			{item.left_amount !== "0" && (
 				<Text className="text-base mb-1">Left Amount: {item.left_amount}</Text>
 			)}
-			{item.right_amount && (
+			{item.right_amount !== "0" && (
 				<Text className="text-base mb-1">
 					Right Amount: {item.right_amount}
 				</Text>
