@@ -28,7 +28,7 @@ interface DiaperLog {
 	child_id: string;
 	consistency: string;
 	amount: string;
-	change_time: string;
+	change_time: Date;
 	note: string | null;
 }
 
@@ -78,6 +78,7 @@ const DiaperLogsView: React.FC = () => {
 						...entry,
 						consistency: await safeDecrypt(entry.consistency),
 						amount: await safeDecrypt(entry.amount),
+						change_time: new Date(entry.change_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -114,6 +115,7 @@ const DiaperLogsView: React.FC = () => {
                         ...entry,
                         consistency: await safeDecrypt(entry.consistency),
                         amount: await safeDecrypt(entry.amount),
+						change_time: new Date(entry.change_time),
                         note: entry.note ? await safeDecrypt(entry.note) : "",
                     })),
                 );
@@ -171,7 +173,7 @@ const DiaperLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, consistency, amount, note } = editingLog;
+			const { id, consistency, amount, change_time, note } = editingLog;
 
 			const encryptedConsistency = await encryptData(consistency);
 			const encryptedAmount = await encryptData(amount);
@@ -181,6 +183,7 @@ const DiaperLogsView: React.FC = () => {
 				const success = await updateRow("diaper_logs", id, {
 					consistency: encryptedConsistency,
 					amount: encryptedAmount,
+					change_time: change_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -197,6 +200,7 @@ const DiaperLogsView: React.FC = () => {
                     .update({
                         consistency: encryptedConsistency,
                         amount: encryptedAmount,
+						change_time: change_time.toISOString(),
                         note: encryptedNote,
                     })
                     .eq("id", id);
@@ -218,10 +222,10 @@ const DiaperLogsView: React.FC = () => {
 	const renderDiaperLogItem = ({ item }: { item: DiaperLog }) => (
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.change_time), "MMM dd, yyyy")}
+				{format(item.change_time, "MMM dd, yyyy")}
 			</Text>
 			<Text className="text-base mb-1">
-				{format(new Date(item.change_time), "h:mm a")}
+				{format(item.change_time, "h:mm a")}
 			</Text>
 			<Text className="text-base mb-1">Consistency: {item.consistency}</Text>
 			<Text className="text-base mb-1">Size: {item.amount}</Text>
@@ -295,6 +299,11 @@ const DiaperLogsView: React.FC = () => {
 						type: "category",
 						categories: ["SM", "MD", "LG"],
 						value: editingLog?.amount,
+					},
+					change_time: {
+						title: "Change Time",
+						type: "time",
+						value: editingLog?.change_time,
 					},
 					note:  {
 						title: "Note",
