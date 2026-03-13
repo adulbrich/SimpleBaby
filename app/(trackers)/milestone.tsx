@@ -318,7 +318,7 @@ export default function Milestone() {
 						className={`gap-6 transition-all duration-300 ${
 							isTyping ? "-translate-y-[40%]" : "translate-y-0"
 						}`}
-					>
+					></View>
 
 					<MilestoneCategory
 						category={category}
@@ -442,7 +442,6 @@ export default function Milestone() {
 						>
 							<Text>🗑️ Reset fields</Text>
 						</TouchableOpacity>
-					</View>
 					</View>
 				</ScrollView>
 			</View>
