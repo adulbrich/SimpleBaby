@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -223,7 +223,7 @@ export default function Milestone() {
 			}
 			if (photoUri) photoPath = photoUri; // in guest mode: store the local URI directly
 		} else {
-			const result = await getActiveChildId();
+			const result = await getActiveChildData();
 			if (!result?.success || !result.childId) {
 				Alert.alert(`Error: ${result?.error}`);
 				return { success: false, error: result?.error };
@@ -318,7 +318,7 @@ export default function Milestone() {
 						className={`gap-6 transition-all duration-300 ${
 							isTyping ? "-translate-y-[40%]" : "translate-y-0"
 						}`}
-					></View>
+					>
 
 					<MilestoneCategory
 						category={category}
@@ -442,6 +442,7 @@ export default function Milestone() {
 						>
 							<Text>🗑️ Reset fields</Text>
 						</TouchableOpacity>
+					</View>
 					</View>
 				</ScrollView>
 			</View>

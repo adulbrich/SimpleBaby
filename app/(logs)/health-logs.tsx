@@ -7,7 +7,7 @@ import {
 	Alert,
 	Pressable,
 } from "react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from "date-fns";
@@ -107,7 +107,7 @@ const HealthLogsView: React.FC = () => {
                     childId,
                     childName,
                     error: childError,
-                } = await getActiveChildId();
+                } = await getActiveChildData();
                 if (!success || !childId) {
                     throw new Error(
                         typeof childError === "string"

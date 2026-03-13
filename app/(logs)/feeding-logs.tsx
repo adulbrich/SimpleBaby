@@ -8,7 +8,7 @@ import {
 	Pressable,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { encryptData, decryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -96,7 +96,7 @@ const FeedingLogsView: React.FC = () => {
 					childId,
 					childName,
 					error: childError,
-				} = await getActiveChildId();
+				} = await getActiveChildData();
 				if (!success || !childId) {
 					throw new Error(
 						typeof childError === "string"
