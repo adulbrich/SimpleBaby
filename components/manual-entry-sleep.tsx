@@ -5,6 +5,7 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 
+import stringLib from "../assets/stringLibrary.json";
 
 /**
  * ManualEntry component allows users to pick start and end times manually.
@@ -78,7 +79,7 @@ export default function ManualEntry({
         <View className='manual-primary' testID={testID}>
             <View className='items-start relative bottom-5 left-3'>
                 <Text className='bg-gray-200 p-3 rounded-xl font'>
-                    Manual Entry
+                    {stringLib.uiLabels.manuelEntryLabel}
                 </Text>
             </View>
             <View className='manual-secondary p-4 pt-0 flex-col gap-4'>

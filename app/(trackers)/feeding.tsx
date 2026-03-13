@@ -23,6 +23,8 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
 
@@ -148,7 +150,7 @@ export default function Feeding() {
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Feeding log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -195,7 +197,7 @@ export default function Feeding() {
 								testID="feeding-note"
 							>
 								<Text className="bg-gray-200 p-3 rounded-xl font">
-									Add a note
+									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
 							<View className="p-4 pt-9 bg-white rounded-xl z-0">
