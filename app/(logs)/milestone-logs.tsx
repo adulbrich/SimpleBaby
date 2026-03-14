@@ -184,11 +184,6 @@ const MilestoneLogsView: React.FC = () => {
 		fetchMilestoneLogs();
 	}, [fetchMilestoneLogs]);
 
-	const openEditModal = (log: MilestoneLog) => {
-		setEditingLog(log);
-		setEditModalVisible(true);
-	};
-
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
 

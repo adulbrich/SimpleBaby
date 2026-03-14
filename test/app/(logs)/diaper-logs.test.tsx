@@ -1,5 +1,5 @@
 import DiaperLogsView from "@/app/(logs)/diaper-logs";
-import { render, screen, userEvent, act } from "@testing-library/react-native";
+import { render, screen, act } from "@testing-library/react-native";
 import { getActiveChildId } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
@@ -181,7 +181,7 @@ describe("Diaper logs screen", () => {
         await catchNoLogs(`You don't have any diaper logs for ${testChildName} yet!`);
     });
 
-    test("Renders log buttons", rendersLogButtons);
+    test("Renders log buttons", rendersLogItems);
 
     test("Catches decryption error", catchDecryptionError);
 
@@ -340,7 +340,7 @@ describe("diaper logs screen (guest mode)", () => {
         await catchNoLogs("You don't have any diaper logs yet!");
     });
 
-    test("Renders log buttons (guest)", rendersLogButtons);
+    test("Renders log buttons (guest)", rendersLogItems);
 
     test("Catches decryption error (guest)", catchDecryptionError);
 
@@ -404,7 +404,7 @@ async function catchNoLogs(message: string) {
     expect(await screen.findByText(message)).toBeTruthy();
 }
 
-async function rendersLogButtons() {
+async function rendersLogItems() {
     render(<DiaperLogsView/>);
     await screen.findByTestId("diaper-logs");  // wait for log list to render
 
@@ -431,7 +431,7 @@ async function catchDecryptionError() {
     const logItemProps = logItems.find(call => call[0].id === TEST_LOGS[0].id)[0];
     const displayValues = logItemProps.logData.map((item: any) => item.value);
 
-    expect(displayValues.includes(`[Decryption Failed]: ${testError}`, {exact: false})).toBeTruthy();
+    expect(displayValues.includes(`[Decryption Failed]: ${testError}`)).toBeTruthy();
 }
 
 async function rendersLogs() {
@@ -443,11 +443,11 @@ async function rendersLogs() {
         const logItemProps = logItems.find(call => call[0].id === log.id)[0];
         const displayValues = logItemProps.logData.map((item: any) => item.value);
         
-        expect(displayValues.includes(format(new Date(log.change_time), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
-        expect(displayValues.includes(format(new Date(log.change_time), 'h:mm a'), {exact: false})).toBeTruthy();
-        expect(displayValues.includes(await decryptData(log.consistency), {exact: false})).toBeTruthy();
-        expect(displayValues.includes(await decryptData(log.amount), {exact: false})).toBeTruthy();
-        if (log.note) expect(displayValues.includes(await decryptData(log.note), {exact: false})).toBeTruthy();
+        expect(displayValues.includes(format(new Date(log.change_time), 'MMM dd, yyyy'))).toBeTruthy();
+        expect(displayValues.includes(format(new Date(log.change_time), 'h:mm a'))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.consistency))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.amount))).toBeTruthy();
+        if (log.note) expect(displayValues.includes(await decryptData(log.note))).toBeTruthy();
     }
 }
 
