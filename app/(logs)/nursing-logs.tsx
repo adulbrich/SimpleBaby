@@ -5,7 +5,6 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -22,6 +21,7 @@ import {
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface NursingLog {
 	id: string;
@@ -67,7 +67,7 @@ const NursingLogsView: React.FC = () => {
 					.filter((r) => r.child_id === childId)
 					.sort(
 						(a, b) =>
-							new Date(b.logged_at).getTime() - 
+							new Date(b.logged_at).getTime() -
                             new Date(a.logged_at).getTime(),
 					);
 
@@ -233,58 +233,28 @@ const NursingLogsView: React.FC = () => {
 	};
 
 	const renderNursingLogItem = ({ item }: { item: NursingLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.logged_at), "MMM dd, yyyy")}
-			</Text>
-			<Text className="text-base mb-1">
-				Time Logged: {format(new Date(item.logged_at), "h:mm a")}
-			</Text>
-			{item.left_duration !== "00:00:00" && (
-				<Text className="text-base mb-1">
-					Left Duration: {item.left_duration}
-				</Text>
-			)}
-			{item.right_duration !== "00:00:00" && (
-				<Text className="text-base mb-1">
-					Right Duration: {item.right_duration}
-				</Text>
-			)}
-			{item.left_amount !== "0" && (
-				<Text className="text-base mb-1">Left Amount: {item.left_amount}</Text>
-			)}
-			{item.right_amount !== "0" && (
-				<Text className="text-base mb-1">
-					Right Amount: {item.right_amount}
-				</Text>
-			)}
-			{item.note && (
-				<Text className="text-sm italic text-gray-500 mt-1">
-					📝 {item.note}
-				</Text>
-			)}
-			<View className="flex-row justify-end gap-3 mt-4">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`nursing-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`nursing-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: format(new Date(item.logged_at), "MMM dd, yyyy") },
+				{ type: "item", label: "Time Logged", value: format(new Date(item.logged_at), "h:mm a") },
+				(item.left_duration !== "00:00:00") && item.left_duration &&
+					{ type: "item", label: "Left Duration", value: item.left_duration },
+				(item.right_duration !== "00:00:00") && item.right_duration &&
+					{ type: "item", label: "Right Duration", value: item.right_duration },
+				(item.left_amount !== "0") && item.left_amount &&
+					{ type: "item", label: "Left Amount", value: item.left_amount },
+				(item.right_amount !== "0") && item.right_amount &&
+					{ type: "item", label: "Right Amount", value: item.right_amount },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (

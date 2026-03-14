@@ -5,7 +5,6 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -22,6 +21,7 @@ import {
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface DiaperLog {
 	id: string;
@@ -216,42 +216,22 @@ const DiaperLogsView: React.FC = () => {
 	};
 
 	const renderDiaperLogItem = ({ item }: { item: DiaperLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.change_time), "MMM dd, yyyy")}
-			</Text>
-			<Text className="text-base mb-1">
-				{format(new Date(item.change_time), "h:mm a")}
-			</Text>
-			<Text className="text-base mb-1">Consistency: {item.consistency}</Text>
-			<Text className="text-base mb-1">Size: {item.amount}</Text>
-			{item.note && (
-				<Text className="text-sm italic text-gray-500 mt-1">
-					📝 {item.note}
-				</Text>
-			)}
-			<View className="flex-row justify-end gap-3 mt-4">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`diaper-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`diaper-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: format(new Date(item.change_time), "MMM dd, yyyy") },
+				{ type: "text", value: format(new Date(item.change_time), "h:mm a") },
+				{ type: "item", label: "Consistency", value: item.consistency },
+				{ type: "item", label: "Size", value: item.amount },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (

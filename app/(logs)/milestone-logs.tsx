@@ -2,11 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
 	View,
 	Text,
-	Image,
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildId } from "@/library/utils";
@@ -23,6 +21,7 @@ import {
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 type MilestoneCategory =
 	| "Motor"
@@ -289,63 +288,24 @@ const MilestoneLogsView: React.FC = () => {
 		const hasValidDate = !isNaN(item.achieved_at.getTime());
 
 		return (
-			<View className="bg-white rounded-xl p-4 mb-4 shadow">
-				<Text className="text-lg font-bold mb-2">{item.title}</Text>
-
-				<Text className="text-sm text-gray-500 mb-2">
-					{item.category ?? "Other"}
-				</Text>
-
-				<Text className="text-base mb-1">
-					Date:{" "}
-					{hasValidDate ? format(item.achieved_at, "MMM dd, yyyy") : "[unable to retrieve date]"}
-				</Text>
-
-				{item.note ? (
-					<Text className="text-sm italic text-gray-500 mt-2">
-						📝 {item.note}
-					</Text>
-				) : null}
-
-				{photoSignedUrls[item.id] ? (
-					<Image
-						source={{ uri: photoSignedUrls[item.id] }}
-						style={{
-							width: "100%",
-							height: 220,
-							borderRadius: 12,
-							marginTop: 12,
-						}}
-						resizeMode="cover"
-						onError={(e) =>
-							console.log("❌ Image Failed to Load:", item.id, e.nativeEvent)
-						}
-					/>
-				) : null}
-
-				<View className="flex-row justify-end gap-3 mt-4">
-					<Pressable
-						className="px-3 py-2 rounded-full bg-blue-100"
-						onPress={() => {
-							setEditModalVisible(true); 
-							openEditModal(item);
-						}}
-						disabled={deleteAlertVisible}
-						testID={`milestone-logs-edit-button-${item.id}`}
-					>
-						<Text className="text-blue-700">✏️ Edit</Text>
-					</Pressable>
-
-					<Pressable
-						className="px-3 py-2 rounded-full bg-red-100"
-						onPress={() => handleDelete(item.id)}
-						disabled={editModalVisible}
-						testID={`milestone-logs-delete-button-${item.id}`}
-					>
-						<Text className="text-red-700">🗑️ Delete</Text>
-					</Pressable>
-				</View>
-			</View>
+			<LogItem
+				id={item.id}
+				onEdit={() => {
+					setEditModalVisible(true);
+					setEditingLog(item);
+				}}
+				onDelete={() => handleDelete(item.id)}
+				buttonsDisabled={editModalVisible || deleteAlertVisible}
+				logData={[
+					{ type: "title", value: item.title },
+					{ type: "text", value: item.category ?? "Other" },
+					{ type: "item", label: "Date", value:
+						hasValidDate ? format(item.achieved_at, "MMM dd, yyyy") : "[unable to retrieve date]"
+					},
+					{ type: "note", value: item.note},
+					{ type: "image", uri: photoSignedUrls[item.id] },
+				]}
+			/>
 		);
 	};
 
