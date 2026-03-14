@@ -596,13 +596,16 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);
 
+    // clear the calls of <LogItem/> to track which items are re-rendered from this point onwards
+    (LogItem as jest.Mock).mockClear();
+
     // submit edit
     const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
 
     await act(async () => {
         const logItems = (LogItem as jest.Mock).mock.calls;
-        const logItemProps = logItems.findLast(call => call[0].id === log.id)[0];
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
         const displayValues = logItemProps.logData.map((item: any) => item.value);
         // ensure new values were passed...
         expect(displayValues.includes(format(editedLog.start_time, "MMM dd, yyyy"))).toBeTruthy();

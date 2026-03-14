@@ -592,7 +592,7 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
 
     await act(async () => {
         const logItems = (LogItem as jest.Mock).mock.calls;
-        const logItemProps = logItems.findLast(call => call[0].id === log.id)[0];
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
         const displayValues = logItemProps.logData.map((item: any) => item.value);
         // ensure new values were passed...
         expect(displayValues.includes(await decryptData(editedLog.title))).toBeTruthy();
