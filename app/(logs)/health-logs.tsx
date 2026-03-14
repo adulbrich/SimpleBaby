@@ -27,7 +27,7 @@ interface HealthLog {
 	id: string;
 	child_id: string;
 	category: string;
-	date: string;
+	date: Date;
 	growth_length: string | null;
 	growth_weight: string | null;
 	growth_head: string | null;
@@ -97,6 +97,7 @@ const HealthLogsView: React.FC = () => {
 						vaccine_location: await safeDecrypt(entry.vaccine_location),
 						other_name: await safeDecrypt(entry.other_name),
 						other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
 						note: await safeDecrypt(entry.note),
 					})),
 				);
@@ -142,6 +143,7 @@ const HealthLogsView: React.FC = () => {
                         vaccine_location: await safeDecrypt(entry.vaccine_location),
                         other_name: await safeDecrypt(entry.other_name),
                         other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
                         note: await safeDecrypt(entry.note),
                     })),
                 );
@@ -197,6 +199,7 @@ const HealthLogsView: React.FC = () => {
 				other_description: editingLog.other_description
 					? await encryptData(editingLog.other_description)
 					: null,
+				date: editingLog.date.toISOString(),
 				note: editingLog.note ? await encryptData(editingLog.note) : null,
 			};
 
@@ -263,7 +266,7 @@ const HealthLogsView: React.FC = () => {
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-1">{item.category}</Text>
 			<Text className="text-base">
-				{format(new Date(item.date), "MMM dd, yyyy")}
+				{format(item.date, "MMM dd, yyyy")}
 			</Text>
 			{item.growth_length && <Text>Length: {item.growth_length}</Text>}
 			{item.growth_weight && <Text>Weight: {item.growth_weight}</Text>}
@@ -403,7 +406,12 @@ const HealthLogsView: React.FC = () => {
 						value: editingLog?.other_description,
 					}},
 
-					// Note input, displayed for all categories
+					// Date & note input displayed for all categories
+					date:  {
+						title: "Date",
+						type: "date",
+						value: editingLog?.date,
+					},
 					note:  {
 						title: "Note",
 						type: "text",

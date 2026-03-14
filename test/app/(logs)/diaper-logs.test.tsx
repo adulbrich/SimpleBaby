@@ -520,6 +520,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const editedConsistency = `edited consistency ${log.id}`;
         const editedAmount = `edited amount ${log.id}`;
         const editedNote = `edited note ${log.id}`;
+        const editedTime = new Date((new Date(log.change_time)).getTime() - 74*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -539,6 +540,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
                 ...prev,
                 consistency: editedConsistency,
                 amount: editedAmount,
+                change_time: editedTime,
                 note: editedNote,
             }))
         );
@@ -552,6 +554,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             .toEqual({  // loose comparison for objects
                 consistency: await encryptData(editedConsistency),
                 amount: await encryptData(editedAmount),
+                change_time: editedTime.toISOString(),
                 note: await encryptData(editedNote),
             });
         // Ensure mock was called with correct id

@@ -611,6 +611,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
 
         const editFields = [
             log.note ? "note" : null,
+            "date",
             // growth category values
             log.test_category === "growth" ? "growth_head" : null,
             log.test_category === "growth" ? "growth_length" : null,
@@ -628,6 +629,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             log.test_category === "other" ? "other_name" : null,
             log.test_category === "other" ? "other_description" : null,
         ].filter(value => value !== null);  // remove null values
+        const editedDate = new Date((new Date(log.date)).getTime() + 5*24*60*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -644,7 +646,10 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         // clear set new field values from <EditLogPopup/>
         const editedFields = Object.fromEntries(
             editFields.map(field => (
-                [field, `edited ${field} ${log.id}`]
+                field === "date" ?
+                    [field, editedDate]
+                :
+                    [field, `edited ${field} ${log.id}`]
             ))
         );
         await act(async () =>
@@ -662,7 +667,11 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const submitedData = dataMock.mock.calls[0][dataArgI];
         for (const [field, submittedValue] of Object.entries(submitedData)) {
             if (editFields.includes(field)) {
-                expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
+                if (field === "date") {
+                    expect(submittedValue).toBe(editedDate.toISOString());
+                } else {
+                    expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
+                }
             } else {
                 expect(submittedValue).toBe(null);
             }

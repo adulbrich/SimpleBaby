@@ -29,7 +29,7 @@ interface FeedingLog {
 	category: string;
 	item_name: string;
 	amount: string;
-	feeding_time: string;
+	feeding_time: Date;
 	note: string | null;
 }
 
@@ -84,6 +84,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -121,6 +122,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -180,7 +182,7 @@ const FeedingLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, category, item_name, amount, note } = editingLog;
+			const { id, category, item_name, amount, feeding_time, note } = editingLog;
 
 			const encryptedCategory = await encryptData(category);
 			const encryptedItemName = await encryptData(item_name);
@@ -192,6 +194,7 @@ const FeedingLogsView: React.FC = () => {
 					category: encryptedCategory,
 					item_name: encryptedItemName,
 					amount: encryptedAmount,
+					feeding_time: feeding_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -209,6 +212,7 @@ const FeedingLogsView: React.FC = () => {
 						category: encryptedCategory,
 						item_name: encryptedItemName,
 						amount: encryptedAmount,
+						feeding_time: feeding_time.toISOString(),
 						note: encryptedNote,
 					})
 					.eq("id", id);
@@ -234,10 +238,10 @@ const FeedingLogsView: React.FC = () => {
 	const renderFeedingLogItem = ({ item }: { item: FeedingLog }) => (
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.feeding_time), "MMM dd, yyyy")}
+				{format(item.feeding_time, "MMM dd, yyyy")}
 			</Text>
 			<Text className="text-base mb-1">
-				{format(new Date(item.feeding_time), "h:mm a")}
+				{format(item.feeding_time, "h:mm a")}
 			</Text>
 			<Text className="text-base mb-1">Category: {item.category}</Text>
 			<Text className="text-base mb-1">Item: {item.item_name}</Text>
@@ -316,6 +320,11 @@ const FeedingLogsView: React.FC = () => {
 						title: "Amount",
 						type: "text",
 						value: editingLog?.amount,
+					},
+					feeding_time: {
+						title: "Meal Time",
+						type: "time",
+						value: editingLog?.feeding_time,
 					},
 					note:  {
 						title: "Note",
