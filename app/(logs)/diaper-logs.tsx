@@ -7,7 +7,7 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { encryptData, decryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -28,7 +28,7 @@ interface DiaperLog {
 	child_id: string;
 	consistency: string;
 	amount: string;
-	change_time: string;
+	change_time: Date;
 	note: string | null;
 }
 
@@ -78,6 +78,7 @@ const DiaperLogsView: React.FC = () => {
 						...entry,
 						consistency: await safeDecrypt(entry.consistency),
 						amount: await safeDecrypt(entry.amount),
+						change_time: new Date(entry.change_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -90,7 +91,7 @@ const DiaperLogsView: React.FC = () => {
 				    childId,
 				    childName,
 				    error: childError,
-			    } = await getActiveChildId();
+			    } = await getActiveChildData();
                 if (!success || !childId) {
                     throw new Error(
                         typeof childError === "string"
@@ -114,6 +115,7 @@ const DiaperLogsView: React.FC = () => {
                         ...entry,
                         consistency: await safeDecrypt(entry.consistency),
                         amount: await safeDecrypt(entry.amount),
+						change_time: new Date(entry.change_time),
                         note: entry.note ? await safeDecrypt(entry.note) : "",
                     })),
                 );
@@ -171,7 +173,7 @@ const DiaperLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, consistency, amount, note } = editingLog;
+			const { id, consistency, amount, change_time, note } = editingLog;
 
 			const encryptedConsistency = await encryptData(consistency);
 			const encryptedAmount = await encryptData(amount);
@@ -181,6 +183,7 @@ const DiaperLogsView: React.FC = () => {
 				const success = await updateRow("diaper_logs", id, {
 					consistency: encryptedConsistency,
 					amount: encryptedAmount,
+					change_time: change_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -197,6 +200,7 @@ const DiaperLogsView: React.FC = () => {
                     .update({
                         consistency: encryptedConsistency,
                         amount: encryptedAmount,
+						change_time: change_time.toISOString(),
                         note: encryptedNote,
                     })
                     .eq("id", id);
@@ -225,8 +229,8 @@ const DiaperLogsView: React.FC = () => {
 			onDelete={() => handleDelete(item.id)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(new Date(item.change_time), "MMM dd, yyyy") },
-				{ type: "text", value: format(new Date(item.change_time), "h:mm a") },
+				{ type: "title", value: format(item.change_time, "MMM dd, yyyy") },
+				{ type: "text", value: format(item.change_time, "h:mm a") },
 				{ type: "item", label: "Consistency", value: item.consistency },
 				{ type: "item", label: "Size", value: item.amount },
 				{ type: "note", value: item.note},
@@ -275,6 +279,11 @@ const DiaperLogsView: React.FC = () => {
 						type: "category",
 						categories: ["SM", "MD", "LG"],
 						value: editingLog?.amount,
+					},
+					change_time: {
+						title: "Change Time",
+						type: "time",
+						value: editingLog?.change_time,
 					},
 					note:  {
 						title: "Note",

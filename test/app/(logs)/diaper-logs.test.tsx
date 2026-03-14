@@ -1,6 +1,6 @@
 import DiaperLogsView from "@/app/(logs)/diaper-logs";
 import { render, screen, act } from "@testing-library/react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
@@ -42,7 +42,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildId: jest.fn(async () => ({ success: true, childId: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -129,13 +129,13 @@ describe("Diaper logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error", async () => {
+    test("Catch getActiveChildData() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
-        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/diaper-logs.tsx -> fetchDiaperLogs()
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: false, error: testErrorMessage })
         );
         await catchLoadingError(testErrorMessage);
@@ -172,10 +172,10 @@ describe("Diaper logs screen", () => {
             async () => ({})
         );
         
-        // library/utils -> getActiveChildId() should be mocked to return:
+        // library/utils -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childId: /* truthy value */, childName: /* test value */ }
         // This is to track the test value passed as childName
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childId: true, childName: testChildName })
         );
         await catchNoLogs(`You don't have any diaper logs for ${testChildName} yet!`);
@@ -526,6 +526,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const editedConsistency = `edited consistency ${log.id}`;
         const editedAmount = `edited amount ${log.id}`;
         const editedNote = `edited note ${log.id}`;
+        const editedTime = new Date((new Date(log.change_time)).getTime() - 74*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -543,6 +544,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
                 ...prev,
                 consistency: editedConsistency,
                 amount: editedAmount,
+                change_time: editedTime,
                 note: editedNote,
             }))
         );
@@ -556,6 +558,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             .toEqual({  // loose comparison for objects
                 consistency: await encryptData(editedConsistency),
                 amount: await encryptData(editedAmount),
+                change_time: editedTime.toISOString(),
                 note: await encryptData(editedNote),
             });
         // Ensure mock was called with correct id

@@ -7,7 +7,7 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { encryptData, decryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -29,7 +29,7 @@ interface FeedingLog {
 	category: string;
 	item_name: string;
 	amount: string;
-	feeding_time: string;
+	feeding_time: Date;
 	note: string | null;
 }
 
@@ -84,6 +84,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -96,7 +97,7 @@ const FeedingLogsView: React.FC = () => {
 					childId,
 					childName,
 					error: childError,
-				} = await getActiveChildId();
+				} = await getActiveChildData();
 				if (!success || !childId) {
 					throw new Error(
 						typeof childError === "string"
@@ -121,6 +122,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -180,7 +182,7 @@ const FeedingLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, category, item_name, amount, note } = editingLog;
+			const { id, category, item_name, amount, feeding_time, note } = editingLog;
 
 			const encryptedCategory = await encryptData(category);
 			const encryptedItemName = await encryptData(item_name);
@@ -192,6 +194,7 @@ const FeedingLogsView: React.FC = () => {
 					category: encryptedCategory,
 					item_name: encryptedItemName,
 					amount: encryptedAmount,
+					feeding_time: feeding_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -209,6 +212,7 @@ const FeedingLogsView: React.FC = () => {
 						category: encryptedCategory,
 						item_name: encryptedItemName,
 						amount: encryptedAmount,
+						feeding_time: feeding_time.toISOString(),
 						note: encryptedNote,
 					})
 					.eq("id", id);
@@ -241,8 +245,8 @@ const FeedingLogsView: React.FC = () => {
 			onDelete={() => handleDelete(item.id)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(new Date(item.feeding_time), "MMM dd, yyyy") },
-				{ type: "text", value: format(new Date(item.feeding_time), "h:mm a") },
+				{ type: "title", value: format(item.feeding_time, "MMM dd, yyyy") },
+				{ type: "text", value: format(item.feeding_time, "h:mm a") },
 				{ type: "item", label: "Category", value: item.category },
 				{ type: "item", label: "Item", value: item.item_name },
 				{ type: "item", label: "Amount", value: item.amount },
@@ -296,6 +300,11 @@ const FeedingLogsView: React.FC = () => {
 						title: "Amount",
 						type: "text",
 						value: editingLog?.amount,
+					},
+					feeding_time: {
+						title: "Meal Time",
+						type: "time",
+						value: editingLog?.feeding_time,
 					},
 					note:  {
 						title: "Note",

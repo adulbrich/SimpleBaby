@@ -6,7 +6,7 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from "date-fns";
@@ -27,7 +27,7 @@ interface HealthLog {
 	id: string;
 	child_id: string;
 	category: string;
-	date: string;
+	date: Date;
 	growth_length: string | null;
 	growth_weight: string | null;
 	growth_head: string | null;
@@ -97,6 +97,7 @@ const HealthLogsView: React.FC = () => {
 						vaccine_location: await safeDecrypt(entry.vaccine_location),
 						other_name: await safeDecrypt(entry.other_name),
 						other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
 						note: await safeDecrypt(entry.note),
 					})),
 				);
@@ -107,7 +108,7 @@ const HealthLogsView: React.FC = () => {
                     childId,
                     childName,
                     error: childError,
-                } = await getActiveChildId();
+                } = await getActiveChildData();
                 if (!success || !childId) {
                     throw new Error(
                         typeof childError === "string"
@@ -142,6 +143,7 @@ const HealthLogsView: React.FC = () => {
                         vaccine_location: await safeDecrypt(entry.vaccine_location),
                         other_name: await safeDecrypt(entry.other_name),
                         other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
                         note: await safeDecrypt(entry.note),
                     })),
                 );
@@ -197,6 +199,7 @@ const HealthLogsView: React.FC = () => {
 				other_description: editingLog.other_description
 					? await encryptData(editingLog.other_description)
 					: null,
+				date: editingLog.date.toISOString(),
 				note: editingLog.note ? await encryptData(editingLog.note) : null,
 			};
 
@@ -270,7 +273,7 @@ const HealthLogsView: React.FC = () => {
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
 				{ type: "title", value: item.category },
-				{ type: "text", value: format(new Date(item.date), "MMM dd, yyyy") },
+				{ type: "text", value: format(item.date, "MMM dd, yyyy") },
 				item.growth_length && { type: "item", label: "Length", value: item.growth_length },
 				item.growth_weight && { type: "item", label: "Weight", value: item.growth_weight },
 				item.growth_head && { type: "item", label: "Head", value: item.growth_head },
@@ -383,7 +386,12 @@ const HealthLogsView: React.FC = () => {
 						value: editingLog?.other_description,
 					}},
 
-					// Note input, displayed for all categories
+					// Date & note input displayed for all categories
+					date:  {
+						title: "Date",
+						type: "date",
+						value: editingLog?.date,
+					},
 					note:  {
 						title: "Note",
 						type: "text",

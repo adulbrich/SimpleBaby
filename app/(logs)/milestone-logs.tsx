@@ -7,7 +7,7 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -123,7 +123,7 @@ const MilestoneLogsView: React.FC = () => {
 					);
 
 			} else {
-				const result = await getActiveChildId();
+				const result = await getActiveChildData();
 				if (!result?.success || !result.childId) {
 					throw new Error(
 						result?.error

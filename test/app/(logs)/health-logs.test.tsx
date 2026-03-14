@@ -1,6 +1,6 @@
 import HealthLogsView from "@/app/(logs)/health-logs";
 import { render, screen, act } from "@testing-library/react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
@@ -42,7 +42,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildId: jest.fn(async () => ({ success: true, childId: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -162,13 +162,13 @@ describe("Health logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error", async () => {
+    test("Catch getActiveChildData() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
-        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/health-logs.tsx -> fetchHealthLogs()
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: false, error: testErrorMessage })
         );
         await catchLoadingError(testErrorMessage);
@@ -205,10 +205,10 @@ describe("Health logs screen", () => {
             async () => ({})
         );
         
-        // library/utils -> getActiveChildId() should be mocked to return:
+        // library/utils -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childId: /* truthy value */, childName: /* test value */ }
         // This is to track the test value passed as childName
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childId: true, childName: testChildName })
         );
         await catchNoLogs(`You don't have any health logs for ${testChildName} yet!`);
@@ -601,6 +601,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
 
         const editFields = [
             log.note ? "note" : null,
+            "date",
             // growth category values
             log.test_category === "growth" ? "growth_head" : null,
             log.test_category === "growth" ? "growth_length" : null,
@@ -618,6 +619,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             log.test_category === "other" ? "other_name" : null,
             log.test_category === "other" ? "other_description" : null,
         ].filter(value => value !== null);  // remove null values
+        const editedDate = new Date((new Date(log.date)).getTime() + 5*24*60*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -632,7 +634,10 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         // clear set new field values from <EditLogPopup/>
         const editedFields = Object.fromEntries(
             editFields.map(field => (
-                [field, `edited ${field} ${log.id}`]
+                field === "date" ?
+                    [field, editedDate]
+                :
+                    [field, `edited ${field} ${log.id}`]
             ))
         );
         await act(async () =>
@@ -650,7 +655,11 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const submitedData = dataMock.mock.calls[0][dataArgI];
         for (const [field, submittedValue] of Object.entries(submitedData)) {
             if (editFields.includes(field)) {
-                expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
+                if (field === "date") {
+                    expect(submittedValue).toBe(editedDate.toISOString());
+                } else {
+                    expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
+                }
             } else {
                 expect(submittedValue).toBe(null);
             }
