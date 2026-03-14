@@ -586,6 +586,9 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);
 
+    // clear the calls of <LogItem/> to track which items are re-rendered from this point onwards
+    (LogItem as jest.Mock).mockClear();
+
     // submit edit
     const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
