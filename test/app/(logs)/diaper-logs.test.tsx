@@ -1,6 +1,6 @@
 import DiaperLogsView from "@/app/(logs)/diaper-logs";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
@@ -12,6 +12,7 @@ import {
 	deleteRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -40,7 +41,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildId: jest.fn(async () => ({ success: true, childId: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -59,6 +60,11 @@ jest.mock("@/library/local-store", () => ({
     deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));
+
+jest.mock("@/components/edit-log-popup", () => {
+    const View = jest.requireActual("react-native").View;
+    return jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+});
 
 
 const TEST_CHILD_ID = "test child id";
@@ -103,17 +109,18 @@ describe("Diaper logs screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear();
         (supabase.from("").update as unknown as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error", async () => {
+    test("Catch getActiveChildData() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
-        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/diaper-logs.tsx -> fetchDiaperLogs()
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: false, error: testErrorMessage })
         );
         await catchLoadingError(testErrorMessage);
@@ -150,10 +157,10 @@ describe("Diaper logs screen", () => {
             async () => ({})
         );
         
-        // library/utils -> getActiveChildId() should be mocked to return:
+        // library/utils -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childId: /* truthy value */, childName: /* test value */ }
         // This is to track the test value passed as childName
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childId: true, childName: testChildName })
         );
         await catchNoLogs(`You don't have any diaper logs for ${testChildName} yet!`);
@@ -193,7 +200,7 @@ describe("Diaper logs screen", () => {
 
     test("Deletes log", deletesLog);
 
-    test("Displays edit log", async () => {
+    test("Displays edit log popup", async () => {
         render(<DiaperLogsView/>);
         await screen.findByTestId("diaper-logs");  // wait for log list to render
 
@@ -202,17 +209,13 @@ describe("Diaper logs screen", () => {
             screen.getByTestId(`diaper-logs-edit-button-${TEST_LOGS[0].id}`)
         );
         
-        // edit fields
-        expect(screen.getByTestId("diaper-log-edit-consistency")).toBeTruthy();
-        expect(screen.getByTestId("diaper-log-edit-amount")).toBeTruthy();
-        expect(screen.getByTestId("diaper-log-edit-note")).toBeTruthy();
-
-        // edit buttons
-        expect(screen.getByTestId("diaper-log-edit-cancel")).toBeTruthy();
-        expect(screen.getByTestId("diaper-log-edit-save")).toBeTruthy();
+        // ensure popup is in DOM
+        expect(screen.getByTestId("diaper-logs-edit-popup")).toBeTruthy();
+        // Ensure popup has been shown
+        expect((EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].popupVisible).toBe(true);
     });
 
-    test("Pre-populates edit log fields", async () => {
+    test("Passes current values to edit log pop-up", async () => {
         render(<DiaperLogsView/>);
         await screen.findByTestId("diaper-logs");  // wait for log list to render
 
@@ -221,19 +224,14 @@ describe("Diaper logs screen", () => {
             await userEvent.press(
                 screen.getByTestId(`diaper-logs-edit-button-${log.id}`)
             );
+
+            // retrieve current editingLog from <EditingLogPopup/>
+            const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
             
             // check field values
-            expect(screen.getByTestId("diaper-log-edit-consistency")._fiber.pendingProps.value)  // find consistency input and extract the value
-                .toBe(await decryptData(log.consistency));
-            expect(screen.getByTestId("diaper-log-edit-amount")._fiber.pendingProps.value)  // find amount input and extract the value
-                .toBe(await decryptData(log.amount));
-            expect(screen.getByTestId("diaper-log-edit-note")._fiber.pendingProps.value)  // find note input and extract the value
-                .toBe(await decryptData(log.note));
-
-            // close edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`diaper-log-edit-cancel`)
-            );
+            expect(editingLog.consistency.value).toBe(await decryptData(log.consistency));
+            expect(editingLog.amount.value).toBe(await decryptData(log.amount));
+            expect(editingLog.note.value).toBe(await decryptData(log.note));
         }
     });
 
@@ -256,9 +254,8 @@ describe("Diaper logs screen", () => {
             );
             
             // submit edit
-            await userEvent.press(
-                screen.getByTestId("diaper-log-edit-save")
-            );
+            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+            await act(async () => submitCallback());
 
             // Alert.alert called by diaper-logs.tsx -> handleSaveEdit()
             expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Something went wrong during save.");
@@ -280,7 +277,7 @@ describe("Diaper logs screen", () => {
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -300,6 +297,7 @@ describe("diaper logs screen (guest mode)", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -365,7 +363,7 @@ describe("diaper logs screen (guest mode)", () => {
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(
@@ -505,9 +503,8 @@ async function catchUpdateError(mockFailingEdit: () => void) {
         );
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("diaper-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Alert.alert called by diaper-logs.tsx -> handleSaveEdit()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Failed to update log");
@@ -523,6 +520,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const editedConsistency = `edited consistency ${log.id}`;
         const editedAmount = `edited amount ${log.id}`;
         const editedNote = `edited note ${log.id}`;
+        const editedTime = new Date((new Date(log.change_time)).getTime() - 74*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -532,34 +530,31 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         await userEvent.press(
             screen.getByTestId(`diaper-logs-edit-button-${log.id}`)
         );
+
+        // retrieve setLog callback from <EditingLogPopup/>
+        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
         
-        // clear fields, then type new values
-        await userEvent.clear(screen.getByTestId("diaper-log-edit-consistency"));
-        await userEvent.type(
-            screen.getByTestId("diaper-log-edit-consistency"),
-            editedConsistency
-        );
-        await userEvent.clear(screen.getByTestId("diaper-log-edit-amount"));
-        await userEvent.type(
-            screen.getByTestId("diaper-log-edit-amount"),
-            editedAmount
-        );
-        await userEvent.clear(screen.getByTestId("diaper-log-edit-note"));
-        await userEvent.type(
-            screen.getByTestId("diaper-log-edit-note"),
-            editedNote
+        // clear set new field values from <EditLogPopup/>
+        await act(async () =>
+            setLog((prev: object) => ({
+                ...prev,
+                consistency: editedConsistency,
+                amount: editedAmount,
+                change_time: editedTime,
+                note: editedNote,
+            }))
         );
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("diaper-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
         expect(dataMock.mock.calls[0][dataArgI])
             .toEqual({  // loose comparison for objects
                 consistency: await encryptData(editedConsistency),
                 amount: await encryptData(editedAmount),
+                change_time: editedTime.toISOString(),
                 note: await encryptData(editedNote),
             });
         // Ensure mock was called with correct id
@@ -595,16 +590,17 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     mockFetchLogs(updatedLogs);
 
     // submit edit
-    await userEvent.press(
-        screen.getByTestId("diaper-log-edit-save")
-    );
+    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+    await act(async () => submitCallback());
 
-    // ensure new values are on the page...
-    expect(screen.getByText(await decryptData(editedLog.consistency), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.amount), {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
-    // ...and that the previous values are not
-    expect(async () => screen.getByText(await decryptData(log.consistency), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.amount), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    await act(async () => {
+        // ensure new values are on the page...
+        expect(screen.getByText(await decryptData(editedLog.consistency), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.amount), {exact: false})).toBeTruthy();
+        expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
+        // ...and that the previous values are not
+        expect(async () => screen.getByText(await decryptData(log.consistency), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.amount), {exact: false})).rejects.toThrow();
+        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    });
 }

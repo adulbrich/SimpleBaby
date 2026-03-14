@@ -1,6 +1,6 @@
 import HealthModule, { HealthCategory } from "@/components/health-module";
 import supabase from "@/library/supabase-client";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -174,7 +174,7 @@ export default function Health() {
 				success,
 				childId: cloudChildId,
 				error,
-			} = await getActiveChildId();
+			} = await getActiveChildData();
 			if (!success) {
 				return {
 					success: false,

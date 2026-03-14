@@ -5,16 +5,10 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
 	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { encryptData, decryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -25,6 +19,9 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
+
+import stringLib from "../../assets/stringLibrary.json";
 
 interface FeedingLog {
 	id: string;
@@ -32,7 +29,7 @@ interface FeedingLog {
 	category: string;
 	item_name: string;
 	amount: string;
-	feeding_time: string;
+	feeding_time: Date;
 	note: string | null;
 }
 
@@ -44,6 +41,7 @@ const FeedingLogsView: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<FeedingLog | null>(null);
 	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
@@ -86,6 +84,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -98,7 +97,7 @@ const FeedingLogsView: React.FC = () => {
 					childId,
 					childName,
 					error: childError,
-				} = await getActiveChildId();
+				} = await getActiveChildData();
 				if (!success || !childId) {
 					throw new Error(
 						typeof childError === "string"
@@ -123,6 +122,7 @@ const FeedingLogsView: React.FC = () => {
 						category: await safeDecrypt(entry.category),
 						item_name: await safeDecrypt(entry.item_name),
 						amount: await safeDecrypt(entry.amount),
+						feeding_time: new Date(entry.feeding_time),
 						note: entry.note ? await safeDecrypt(entry.note) : "",
 					})),
 				);
@@ -144,8 +144,9 @@ const FeedingLogsView: React.FC = () => {
 	}, [fetchFeedingLogs]);
 
 	const handleDelete = async (id: string) => {
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
-			{ text: "Cancel", style: "cancel" },
+		setDeleteAlertVisible(true);
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
+			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
 				style: "destructive",
@@ -171,6 +172,7 @@ const FeedingLogsView: React.FC = () => {
 
 						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
 					}
+					setDeleteAlertVisible(false);
 				},
 			},
 		]);
@@ -180,7 +182,7 @@ const FeedingLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, category, item_name, amount, note } = editingLog;
+			const { id, category, item_name, amount, feeding_time, note } = editingLog;
 
 			const encryptedCategory = await encryptData(category);
 			const encryptedItemName = await encryptData(item_name);
@@ -192,10 +194,11 @@ const FeedingLogsView: React.FC = () => {
 					category: encryptedCategory,
 					item_name: encryptedItemName,
 					amount: encryptedAmount,
+					feeding_time: feeding_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -209,12 +212,13 @@ const FeedingLogsView: React.FC = () => {
 						category: encryptedCategory,
 						item_name: encryptedItemName,
 						amount: encryptedAmount,
+						feeding_time: feeding_time.toISOString(),
 						note: encryptedNote,
 					})
 					.eq("id", id);
 
 				if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 
@@ -234,10 +238,10 @@ const FeedingLogsView: React.FC = () => {
 	const renderFeedingLogItem = ({ item }: { item: FeedingLog }) => (
 		<View className="bg-white rounded-xl p-4 mb-4 shadow">
 			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.feeding_time), "MMM dd, yyyy")}
+				{format(item.feeding_time, "MMM dd, yyyy")}
 			</Text>
 			<Text className="text-base mb-1">
-				{format(new Date(item.feeding_time), "h:mm a")}
+				{format(item.feeding_time, "h:mm a")}
 			</Text>
 			<Text className="text-base mb-1">Category: {item.category}</Text>
 			<Text className="text-base mb-1">Item: {item.item_name}</Text>
@@ -251,9 +255,10 @@ const FeedingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-blue-100"
 					onPress={() => {
-						setEditingLog(item);
 						setEditModalVisible(true);
+						setEditingLog(item);
 					}}
+					disabled={deleteAlertVisible}
 					testID={`feeding-logs-edit-button-${item.id}`}
 				>
 					<Text className="text-blue-700">✏️ Edit</Text>
@@ -261,6 +266,7 @@ const FeedingLogsView: React.FC = () => {
 				<Pressable
 					className="px-3 py-2 rounded-full bg-red-100"
 					onPress={() => handleDelete(item.id)}
+					disabled={editModalVisible}
 					testID={`feeding-logs-delete-button-${item.id}`}
 				>
 					<Text className="text-red-700">🗑️ Delete</Text>
@@ -291,91 +297,43 @@ const FeedingLogsView: React.FC = () => {
 				/>
 			)}
 
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Feeding Log</Text>
-							<Text className="text-sm text-gray-500 mb-1">Category</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.category}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, category: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-category"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Item</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.item_name}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, item_name: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-item"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Amount</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.amount}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, amount: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-amount"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Note</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-6"
-								value={editingLog?.note || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, note: text } : prev,
-									)
-								}
-								testID="feeding-log-edit-note"
-							/>
-							<View className="flex-row justify-end gap-3">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="feeding-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="feeding-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			{/* Edit Modal */}
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Feeding Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					category: {
+						title: "Category",
+						type: "category",
+						categories: ["Liquid", "Solid", "Soft"],
+						value: editingLog?.category,
+					},
+					item_name: {
+						title: "Item",
+						type: "text",
+						value: editingLog?.item_name,
+					},
+					amount: {
+						title: "Amount",
+						type: "text",
+						value: editingLog?.amount,
+					},
+					feeding_time: {
+						title: "Meal Time",
+						type: "time",
+						value: editingLog?.feeding_time,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+				}}
+				testID="feeding-logs-edit-popup"
+			/>
 		</View>
 	);
 };
