@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -223,7 +223,7 @@ export default function Milestone() {
 			}
 			if (photoUri) photoPath = photoUri; // in guest mode: store the local URI directly
 		} else {
-			const result = await getActiveChildId();
+			const result = await getActiveChildData();
 			if (!result?.success || !result.childId) {
 				Alert.alert(`Error: ${result?.error}`);
 				return { success: false, error: result?.error };

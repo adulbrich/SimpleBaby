@@ -5,7 +5,7 @@ export function capitalize(text: string) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export const getActiveChildId = async () => {
+export const getActiveChildData = async () => {
     // Get the current user
     const {
         data: { user },

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import DiaperModule from "@/components/diaper-module";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -106,7 +106,7 @@ export default function Diaper() {
 				note,
 			);
 		} else {
-            const { success, childId, error } = await getActiveChildId();
+            const { success, childId, error } = await getActiveChildData();
 
             if (!success) {
                 Alert.alert(`Error: ${error}`);

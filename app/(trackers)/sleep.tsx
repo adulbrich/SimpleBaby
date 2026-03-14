@@ -14,7 +14,7 @@ import Stopwatch from "@/components/stopwatch";
 import ManualEntry from "@/components/manual-entry-sleep";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { insertRow, getActiveChildId as getLocalActiveChildId } from "@/library/local-store";
@@ -138,7 +138,7 @@ export default function Sleep() {
 				return { success: false, error: "Encryption or local save error" };
 			}
 		} else {
-            const { success, childId, error } = await getActiveChildId();
+            const { success, childId, error } = await getActiveChildData();
             if (!success) {
                 Alert.alert(`Error: ${error}`);
                 return { success: false, error };
