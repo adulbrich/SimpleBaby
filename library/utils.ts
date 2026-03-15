@@ -129,10 +129,6 @@ export async function getChildren(): Promise<{ name: string; id: string }[]> {
 
     const children = await getChildrenByUserId(userId);
 
-    if (children.filter(child => !child || !child.name || !child.id).length > 0) {
-        throw new Error("Failed to retrieve some children");
-    }
-
     return children.sort((child1, child2) => child1.name.localeCompare(child2.name));
 };
 
