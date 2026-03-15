@@ -5,16 +5,9 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
-	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -25,12 +18,16 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
+
+import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface SleepLog {
 	id: string;
 	child_id: string;
-	start_time: string;
-	end_time: string;
+	start_time: Date;
+	end_time: Date;
 	duration: string | null;
 	note: string | null;
 }
@@ -79,6 +76,8 @@ const SleepLogsView: React.FC = () => {
 				const decrypted = await Promise.all(
 					childRows.map(async (entry) => ({
 						...entry,
+						start_time: new Date(entry.start_time),
+						end_time: new Date(entry.end_time),
 						note: await safeDecrypt(entry.note),
 					})),
 				);
@@ -91,7 +90,7 @@ const SleepLogsView: React.FC = () => {
 					childId,
 					childName,
 					error: childError,
-				} = await getActiveChildId();
+				} = await getActiveChildData();
 				if (!success || !childId) {
 					throw new Error(
 						typeof childError === "string"
@@ -113,6 +112,8 @@ const SleepLogsView: React.FC = () => {
 				const decrypted = await Promise.all(
 					(data || []).map(async (entry) => ({
 						...entry,
+						start_time: new Date(entry.start_time),
+						end_time: new Date(entry.end_time),
 						note: await safeDecrypt(entry.note),
 					})),
 				);
@@ -135,7 +136,7 @@ const SleepLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
@@ -182,8 +183,8 @@ const SleepLogsView: React.FC = () => {
 
 			if (isGuest) {
 				const success = await updateRow("sleep_logs", editingLog.id, {
-					start_time: editingLog.start_time,
-					end_time: editingLog.end_time,
+					start_time: editingLog.start_time.toISOString(),
+					end_time: editingLog.end_time.toISOString(),
 					duration: editingLog.duration,
 					note: encryptedNote,
 				});
@@ -201,8 +202,8 @@ const SleepLogsView: React.FC = () => {
 				const { error } = await supabase
 					.from("sleep_logs")
 					.update({
-						start_time: editingLog.start_time,
-						end_time: editingLog.end_time,
+						start_time: editingLog.start_time.toISOString(),
+						end_time: editingLog.end_time.toISOString(),
 						duration: editingLog.duration,
 						note: encryptedNote,
 					})
@@ -224,44 +225,22 @@ const SleepLogsView: React.FC = () => {
 	};
 
 	const renderSleepLogItem = ({ item }: { item: SleepLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-2">
-				{format(new Date(item.start_time), "MMM dd, yyyy")}
-			</Text>
-			<Text className="text-base mb-1">
-				Start: {format(new Date(item.start_time), "h:mm a")}
-			</Text>
-			<Text className="text-base mb-1">
-				End: {format(new Date(item.end_time), "h:mm a")}
-			</Text>
-			<Text className="text-base mb-1">Duration: {item.duration || "N/A"}</Text>
-			{item.note && (
-				<Text className="text-sm italic text-gray-500 mt-1">
-					📝 {item.note}
-				</Text>
-			)}
-			<View className="flex-row justify-end gap-3 mt-4">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`sleep-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`sleep-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: format(item.start_time, "MMM dd, yyyy") },
+				{ type: "item", label: "Start", value: format(item.start_time, "h:mm a") },
+				{ type: "item", label: "End", value: format(item.end_time, "h:mm a") },
+				{ type: "item", label: "Duration", value: item.duration || "N/A" },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (
@@ -285,92 +264,38 @@ const SleepLogsView: React.FC = () => {
 					testID="sleep-logs"
 				/>
 			)}
-
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Sleep Log</Text>
-							<Text className="text-sm text-gray-500 mb-1">Start Time</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.start_time || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, start_time: text } : prev,
-									)
-								}
-								testID="sleep-log-edit-start-time"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">End Time</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.end_time || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, end_time: text } : prev,
-									)
-								}
-								testID="sleep-log-edit-end-time"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Duration</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
-								value={editingLog?.duration || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, duration: text } : prev,
-									)
-								}
-								testID="sleep-log-edit-duration"
-							/>
-							<Text className="text-sm text-gray-500 mb-1">Note</Text>
-							<TextInput
-								className="border border-gray-300 rounded-xl px-3 py-2 mb-6"
-								value={editingLog?.note || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, note: text } : prev,
-									)
-								}
-								testID="sleep-log-edit-note"
-							/>
-							<View className="flex-row justify-end gap-3">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="sleep-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="sleep-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			
+			{/* Edit Modal */}
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Sleep Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					start_time: {
+						title: "Start Time",
+						type: "time",
+						value: editingLog?.start_time,
+					},
+					end_time: {
+						title: "End Time",
+						type: "time",
+						value: editingLog?.end_time,
+					},
+					duration: {
+						title: "Duration",
+						type: "duration",
+						value: editingLog?.duration,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+				}}
+				testID="sleep-logs-edit-popup"
+			/>
 		</View>
 	);
 };

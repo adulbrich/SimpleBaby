@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import FeedingCategory, {
 	FeedingCategoryList,
 } from "@/components/feeding-category";
@@ -22,6 +22,8 @@ import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+
+import stringLib from "../../assets/stringLibrary.json";
 
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
@@ -107,7 +109,7 @@ export default function Feeding() {
 				return { success: false, error: "Encryption or local save error" };
 			}
 		} else {
-            const { success, childId, error } = await getActiveChildId();
+            const { success, childId, error } = await getActiveChildData();
 
             if (!success) {
                 Alert.alert(`Error: ${error}`);
@@ -148,7 +150,7 @@ export default function Feeding() {
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Feeding log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -195,7 +197,7 @@ export default function Feeding() {
 								testID="feeding-note"
 							>
 								<Text className="bg-gray-200 p-3 rounded-xl font">
-									Add a note
+									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
 							<View className="p-4 pt-9 bg-white rounded-xl z-0">

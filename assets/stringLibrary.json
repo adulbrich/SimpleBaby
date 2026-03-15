@@ -1,0 +1,15 @@
+{
+    "errors": {
+        "trackerMissingInfo": "Missing Information",
+        "logUpdateFailure": "Failed to update log"
+    },
+
+    "warnings": {
+        "logDeletionConfirmation": "Are you sure you want to delete this log?"
+    },
+
+    "uiLabels": {
+        "noteLabel": "Add a note",
+        "manualEntryLabel": "Manual Entry"
+    }
+}

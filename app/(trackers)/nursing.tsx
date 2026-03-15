@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import NursingStopwatch from "@/components/nursing-stopwatch";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -20,6 +20,8 @@ import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+
+import stringLib from "../../assets/stringLibrary.json";
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
@@ -85,13 +87,13 @@ export default function Nursing() {
 			}
 
 			try {
-				const normalizedLeftAmount =
-					leftAmount.trim() === "" ? "0" : leftAmount.trim();
-				const normalizedRightAmount =
-					rightAmount.trim() === "" ? "0" : rightAmount.trim();
+				const normalizedLeftDuration = leftDuration === "00:00:00" ? "" : leftDuration;
+				const normalizedRightDuration = rightDuration === "00:00:00" ? "" : rightDuration;
+				const normalizedLeftAmount = leftAmount.trim();
+				const normalizedRightAmount = rightAmount.trim();
 
-				const encryptedLeftDuration = await encryptData(leftDuration);
-				const encryptedRightDuration = await encryptData(rightDuration);
+				const encryptedLeftDuration = await encryptData(normalizedLeftDuration);
+				const encryptedRightDuration = await encryptData(normalizedRightDuration);
 				const encryptedLeftAmount = await encryptData(normalizedLeftAmount);
 				const encryptedRightAmount = await encryptData(normalizedRightAmount);
 				const encryptedNote = note ? await encryptData(note) : null;
@@ -114,7 +116,7 @@ export default function Nursing() {
 				return { success: false, error: "Encryption or local save error" };
 			}
 		} else {
-			const { success, childId, error } = await getActiveChildId();
+			const { success, childId, error } = await getActiveChildData();
 
 			if (!success) {
 				Alert.alert(`Error: ${error}`);
@@ -168,7 +170,7 @@ export default function Nursing() {
 					? `${missingFields.slice(0, -1).join(", ")} or ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -247,7 +249,7 @@ export default function Nursing() {
 						<View className="bottom-5">
 							<View className="items-start top-5 left-3 z-10">
 								<Text className="bg-gray-200 p-3 rounded-xl font">
-									Add a note
+									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
 							<View className="p-4 pt-9 bg-white rounded-xl z-0">

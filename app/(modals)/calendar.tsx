@@ -3,7 +3,7 @@ import { Calendar } from "react-native-calendars";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
-import { getActiveChildId } from '@/library/utils';
+import { getActiveChildData } from '@/library/utils';
 import { useAuth } from '@/library/auth-provider';
 
 function toYMD(d: Date) {
@@ -43,7 +43,7 @@ export default function CalendarModal() {
         setError(null);
 
         try {
-            const result = await getActiveChildId();
+            const result = await getActiveChildData();
             if (!result?.success || !result.childId) {
                 throw new Error(result?.error ? String(result.error) : "Failed to get active child ID");
             }
@@ -73,7 +73,7 @@ export default function CalendarModal() {
         (async () => {
             const requestId = ++monthRequestIdRef.current;
             try {
-                const result = await getActiveChildId();
+                const result = await getActiveChildData();
                 if (!result?.success || !result.childId) return;
 
                 const childId = String(result.childId);

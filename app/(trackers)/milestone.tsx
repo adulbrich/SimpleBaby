@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -28,6 +28,8 @@ import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+
+import stringLib from "../../assets/stringLibrary.json";
 
 export default function Milestone() {
 	const insets = useSafeAreaInsets();
@@ -223,7 +225,7 @@ export default function Milestone() {
 			}
 			if (photoUri) photoPath = photoUri; // in guest mode: store the local URI directly
 		} else {
-			const result = await getActiveChildId();
+			const result = await getActiveChildData();
 			if (!result?.success || !result.childId) {
 				Alert.alert(`Error: ${result?.error}`);
 				return { success: false, error: result?.error };
@@ -275,7 +277,7 @@ export default function Milestone() {
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -408,7 +410,7 @@ export default function Milestone() {
 							testID="milestone-note"
 						>
 							<Text className="bg-gray-200 p-3 rounded-xl font">
-								Add a note
+								{stringLib.uiLabels.noteLabel}
 							</Text>
 						</View>
 						<View className="p-4 pt-9 bg-white rounded-xl z-0">

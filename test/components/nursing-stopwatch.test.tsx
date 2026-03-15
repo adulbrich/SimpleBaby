@@ -20,7 +20,31 @@ describe("Nursing component <NursingStopwatch/>", () => {
         expect(screen.getByTestId("nursing-stopwatch-left")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-right")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-start")).toBeTruthy();
+        expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
+    });
+    
+    test("Switches stopwatch buttons", async () => {
+        render(<NursingStopwatch onTimeUpdateLeft={undefined} onTimeUpdateRight={undefined}/>);
+
+        expect(screen.getByTestId("nursing-stopwatch-start")).toBeTruthy();
+        expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
+
+        // start timer
+        await userEvent.press(
+            screen.getByTestId("nursing-stopwatch-start")
+        );
+
+        // stop button should now be shown, and reset button still present
         expect(screen.getByTestId("nursing-stopwatch-stop")).toBeTruthy();
+        expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
+
+        // stop timer
+        await userEvent.press(
+            screen.getByTestId("nursing-stopwatch-stop")
+        );
+
+        // start button should be shown again, and reset button still present
+        expect(screen.getByTestId("nursing-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
     });
 

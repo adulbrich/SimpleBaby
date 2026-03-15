@@ -18,7 +18,31 @@ describe("Sleep component <Stopwatch/>", () => {
         render(<Stopwatch onTimeUpdate={undefined}/>);
 
         expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
+        expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
+    });
+
+    test("Switches stopwatch buttons", async () => {
+        render(<Stopwatch onTimeUpdate={undefined}/>);
+
+        expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
+        expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
+
+        // start timer
+        await userEvent.press(
+            screen.getByTestId("sleep-stopwatch-start")
+        );
+
+        // stop button should now be shown, and reset button still present
         expect(screen.getByTestId("sleep-stopwatch-stop")).toBeTruthy();
+        expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
+
+        // stop timer
+        await userEvent.press(
+            screen.getByTestId("sleep-stopwatch-stop")
+        );
+
+        // start button should be shown again, and reset button still present
+        expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
     });
 

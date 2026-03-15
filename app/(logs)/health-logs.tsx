@@ -5,15 +5,8 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
-	TextInput,
-	Modal,
-	TouchableOpacity,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from "date-fns";
@@ -25,12 +18,16 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
+
+import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface HealthLog {
 	id: string;
 	child_id: string;
 	category: string;
-	date: string;
+	date: Date;
 	growth_length: string | null;
 	growth_weight: string | null;
 	growth_head: string | null;
@@ -100,6 +97,7 @@ const HealthLogsView: React.FC = () => {
 						vaccine_location: await safeDecrypt(entry.vaccine_location),
 						other_name: await safeDecrypt(entry.other_name),
 						other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
 						note: await safeDecrypt(entry.note),
 					})),
 				);
@@ -110,7 +108,7 @@ const HealthLogsView: React.FC = () => {
                     childId,
                     childName,
                     error: childError,
-                } = await getActiveChildId();
+                } = await getActiveChildData();
                 if (!success || !childId) {
                     throw new Error(
                         typeof childError === "string"
@@ -145,6 +143,7 @@ const HealthLogsView: React.FC = () => {
                         vaccine_location: await safeDecrypt(entry.vaccine_location),
                         other_name: await safeDecrypt(entry.other_name),
                         other_description: await safeDecrypt(entry.other_description),
+						date: new Date(entry.date),
                         note: await safeDecrypt(entry.note),
                     })),
                 );
@@ -225,13 +224,14 @@ const HealthLogsView: React.FC = () => {
 				other_description: editingLog.other_description
 					? await encryptData(editingLog.other_description)
 					: null,
+				date: editingLog.date.toISOString(),
 				note: editingLog.note ? await encryptData(editingLog.note) : null,
 			};
 
 			if (isGuest) {
 				const success = await updateRow("health_logs", editingLog.id, updated);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchHealthLogs();
@@ -243,7 +243,7 @@ const HealthLogsView: React.FC = () => {
 				.eq("id", editingLog.id);
 
                 if (error) {
-                    Alert.alert("Failed to update log");
+                    Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
                 await fetchHealthLogs();
@@ -257,7 +257,7 @@ const HealthLogsView: React.FC = () => {
 
 	const handleDelete = async (id: string) => {
 		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", "Are you sure you want to delete this log?", [
+		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
 			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 			{
 				text: "Delete",
@@ -288,51 +288,31 @@ const HealthLogsView: React.FC = () => {
 	};
 
 	const renderLog = ({ item }: { item: HealthLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-1">{item.category}</Text>
-			<Text className="text-base">
-				{format(new Date(item.date), "MMM dd, yyyy")}
-			</Text>
-			{item.growth_length && <Text>Length: {item.growth_length} cm</Text>}
-			{item.growth_weight && <Text>Weight: {item.growth_weight} kg</Text>}
-			{item.growth_head && <Text>Head: {item.growth_head} cm</Text>}
-			{item.activity_type && <Text>Activity: {item.activity_type}</Text>}
-			{item.activity_duration && (
-				<Text>Duration: {item.activity_duration}</Text>
-			)}
-			{item.meds_name && <Text>Med: {item.meds_name}</Text>}
-			{item.meds_amount && <Text>Amount: {item.meds_amount}</Text>}
-			{item.vaccine_name && <Text>Vaccine: {item.vaccine_name}</Text>}
-			{item.vaccine_location && <Text>Location: {item.vaccine_location}</Text>}
-			{item.other_name && <Text>Name: {item.other_name}</Text>}
-			{item.other_description && (
-				<Text>Description: {item.other_description}</Text>
-			)}
-			{item.note && (
-				<Text className="italic text-gray-500">📝 {item.note}</Text>
-			)}
-			<View className="flex-row justify-end mt-3 gap-3">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`health-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`health-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: item.category },
+				{ type: "text", value: format(item.date, "MMM dd, yyyy") },
+				item.growth_length && { type: "item", label: "Length", value: item.growth_length },
+				item.growth_weight && { type: "item", label: "Weight", value: item.growth_weight },
+				item.growth_head && { type: "item", label: "Head", value: item.growth_head },
+				item.activity_type && { type: "item", label: "Activity", value: item.activity_type },
+				item.activity_duration && { type: "item", label: "Duration", value: item.activity_duration },
+				item.meds_name && { type: "item", label: "Med", value: item.meds_name },
+				item.meds_amount && { type: "item", label: "Amount", value: item.meds_amount },
+				item.vaccine_name && { type: "item", label: "Vaccine", value: item.vaccine_name },
+				item.vaccine_location && { type: "item", label: "Location", value: item.vaccine_location },
+				item.other_name && { type: "item", label: "Name", value: item.other_name },
+				item.other_description && { type: "item", label: "Description", value: item.other_description },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (
@@ -356,207 +336,104 @@ const HealthLogsView: React.FC = () => {
 					testID="health-logs"
 				/>
 			)}
+			
+			{/* Edit Modal */}
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title={`Edit '${editingLog?.category}' Health Log`}
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
 
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent={true}
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">
-								Edit &apos;{editingLog?.category}&apos; Health Log
-							</Text>
-							{editingLog?.growth_length && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Length (cm)"
-									value={editingLog?.growth_length || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_length: text } : prev,
-										)
-									}
-									testID="health-log-edit-growth-length"
-								/>
-							)}
-							{editingLog?.growth_weight && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Weight (kg)"
-									value={editingLog?.growth_weight || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_weight: text } : prev,
-										)
-									}
-									testID="health-log-edit-growth-weight"
-								/>
-							)}
-							{editingLog?.growth_head && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Head (cm)"
-									value={editingLog?.growth_head || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, growth_head: text } : prev,
-										)
-									}
-									testID="health-log-edit-growth-head"
-								/>
-							)}
-							{editingLog?.activity_type && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Activity Type"
-									value={editingLog?.activity_type || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, activity_type: text } : prev,
-										)
-									}
-									testID="health-log-edit-activity-type"
-								/>
-							)}
-							{editingLog?.activity_duration && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Activity Duration"
-									value={editingLog?.activity_duration || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, activity_duration: text } : prev,
-										)
-									}
-									testID="health-log-edit-activity-duration"
-								/>
-							)}
-							{editingLog?.meds_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Medication Name"
-									value={editingLog?.meds_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, meds_name: text } : prev,
-										)
-									}
-									testID="health-log-edit-meds-name"
-								/>
-							)}
-							{editingLog?.meds_amount && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Medication Amount"
-									value={editingLog?.meds_amount || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, meds_amount: text } : prev,
-										)
-									}
-									testID="health-log-edit-meds-amount"
-								/>
-							)}
-							{editingLog?.vaccine_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Vaccine Name"
-									value={editingLog?.vaccine_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, vaccine_name: text } : prev,
-										)
-									}
-									testID="health-log-edit-vaccine-name"
-								/>
-							)}
-							{editingLog?.vaccine_location && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Vaccine Location"
-									value={editingLog?.vaccine_location || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, vaccine_location: text } : prev,
-										)
-									}
-									testID="health-log-edit-vaccine-location"
-								/>
-							)}
-							{editingLog?.other_name && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Other Event Name"
-									value={editingLog?.other_name || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, other_name: text } : prev,
-										)
-									}
-									testID="health-log-edit-other-name"
-								/>
-							)}
-							{editingLog?.other_description && (
-								<TextInput
-									className="border mb-2 px-3 py-2"
-									placeholder="Other Event Description"
-									value={editingLog?.other_description || ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, other_description: text } : prev,
-										)
-									}
-									testID="health-log-edit-other-description"
-								/>
-							)}
-							<TextInput
-								className="border mb-2 px-3 py-2"
-								placeholder="Note"
-								value={editingLog?.note || ""}
-								onChangeText={(text) =>
-									setEditingLog((prev) =>
-										prev ? { ...prev, note: text } : prev,
-									)
-								}
-								testID="health-log-edit-note"
-							/>
+					// Growth category inputs
+					...(editingLog?.category === "Growth") && {growth_length: {
+						title: "Length",
+						type: "text",
+						value: editingLog?.growth_length,
+					}},
+					...(editingLog?.category === "Growth") && {growth_weight: {
+						title: "Weight",
+						type: "text",
+						value: editingLog?.growth_weight,
+					}},
+					...(editingLog?.category === "Growth") && {growth_head: {
+						title: "Head",
+						type: "text",
+						value: editingLog?.growth_head,
+					}},
+
+					// Activity category inputs
+					...(editingLog?.category === "Activity") && {activity_type: {
+						title: "Type",
+						type: "text",
+						value: editingLog?.activity_type,
+					}},
+					...(editingLog?.category === "Activity") && {activity_duration: {
+						title: "Duration",
+						type: "text",
+						value: editingLog?.activity_duration,
+					}},
+
+					// Meds category inputs
+					...(editingLog?.category === "Meds") && {meds_name: {
+						title: "Name",
+						type: "text",
+						value: editingLog?.meds_name,
+					}},
+					...(editingLog?.category === "Meds") && {meds_amount: {
+						title: "Amount",
+						type: "text",
+						value: editingLog?.meds_amount,
+					}},
+
+					// Vaccine category inputs
+					...(editingLog?.category === "Vaccine") && {vaccine_name: {
+						title: "Name",
+						type: "text",
+						value: editingLog?.vaccine_name,
+					}},
+					...(editingLog?.category === "Vaccine") && {vaccine_location: {
+						title: "Location",
+						type: "text",
+						value: editingLog?.vaccine_location,
+					}},
+
+					// Other category inputs
+					...(editingLog?.category === "Other") && {other_name: {
+						title: "Name",
+						type: "text",
+						value: editingLog?.other_name,
+					}},
+					...(editingLog?.category === "Other") && {other_description: {
+						title: "Description",
+						type: "text",
+						value: editingLog?.other_description,
+					}},
+
+					// Date & note input displayed for all categories
+					date:  {
+						title: "Date",
+						type: "date",
+						value: editingLog?.date,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+					category:  {
+						title: undefined,
+						type: "insert",
+						value: (
 							<Text className="text-xs text-gray-400 mt-1">
 								Health log categories may not be updated after the log is created. Please delete this log and create a new one if you wish to update the category.
 							</Text>
-							<View className="flex-row justify-end gap-3 mt-4">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="health-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="health-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+						),
+					},
+				}}
+				testID="health-logs-edit-popup"
+			/>
 		</View>
 	);
 };

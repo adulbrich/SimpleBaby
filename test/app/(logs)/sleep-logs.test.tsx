@@ -1,6 +1,6 @@
 import SleepLogsView from "@/app/(logs)/sleep-logs";
-import { render, screen, userEvent, act } from "@testing-library/react-native";
-import { getActiveChildId } from "@/library/utils";
+import { render, screen, act } from "@testing-library/react-native";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
@@ -12,6 +12,8 @@ import {
 	deleteRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
+import LogItem from "@/components/log-item";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -34,13 +36,18 @@ jest.mock("@/library/supabase-client", () => {
     });
 });
 
+jest.mock("@/components/edit-log-popup", () => {
+    const View = jest.requireActual("react-native").View;
+    return jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+});
+
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
     decryptData: jest.fn(async (string) => string ? `Decrypted: ${string}` : ""),
 }));
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildId: jest.fn(async () => ({ success: true, childId: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -59,6 +66,11 @@ jest.mock("@/library/local-store", () => ({
     deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));
+
+jest.mock("@/components/log-item.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    return jest.fn(({id}: {id?: string}) => (<View testID={`log-item-${id}`}></View>));
+});
 
 
 const NOW = (new Date).getTime();
@@ -91,6 +103,14 @@ const TEST_LOGS = [{
 );
 
 
+const pressButton = async (id: string, button: "delete" | "edit") => {
+    const logItems = (LogItem as jest.Mock).mock.calls;
+    const logItemProps = logItems.find(call => call[0].id === id)[0];
+    if (button === "delete") await act(async () => logItemProps.onDelete());
+    if (button === "edit") await act(async () => logItemProps.onEdit());
+};
+
+
 describe("Sleep logs screen", () => {
 
     beforeAll(() => {
@@ -104,17 +124,19 @@ describe("Sleep logs screen", () => {
         (Alert.alert as jest.Mock).mockClear();
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear();
         (supabase.from("").update as unknown as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
+        (LogItem as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildId() error", async () => {
+    test("Catch getActiveChildData() error", async () => {
         const testErrorMessage = "testErrorGetID";
     
-        // library/utils.ts -> getActiveChildId() should be mocked to return:
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs()
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: false, error: testErrorMessage })
         );
         await catchLoadingError(testErrorMessage);
@@ -151,16 +173,16 @@ describe("Sleep logs screen", () => {
             async () => ({})
         );
         
-        // library/utils -> getActiveChildId() should be mocked to return:
+        // library/utils -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childId: /* truthy value */, childName: /* test value */ }
         // This is to track the test value passed as childName
-        (getActiveChildId as jest.Mock).mockImplementationOnce(
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childId: true, childName: testChildName })
         );
         await catchNoLogs(`You don't have any sleep logs for ${testChildName} yet!`);
     });
 
-    test("Renders log buttons", rendersLogButtons);
+    test("Renders log buttons", rendersLogItems);
 
     test("Catches decryption error", catchDecryptionError);
 
@@ -171,9 +193,7 @@ describe("Sleep logs screen", () => {
         await screen.findByTestId("sleep-logs");  // wait for log list to render
 
         for (const log of TEST_LOGS) {
-            await userEvent.press(
-                screen.getByTestId(`sleep-logs-delete-button-${log.id}`)
-            );
+            await pressButton(log.id, "delete");
 
             // Alert.alert called by sleep-logs.tsx -> handleDelete()
             expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Delete Entry");
@@ -199,45 +219,30 @@ describe("Sleep logs screen", () => {
         await screen.findByTestId("sleep-logs");  // wait for log list to render
 
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`sleep-logs-edit-button-${TEST_LOGS[0].id}`)
-        );
-        
-        // edit fields
-        expect(screen.getByTestId("sleep-log-edit-start-time")).toBeTruthy();
-        expect(screen.getByTestId("sleep-log-edit-end-time")).toBeTruthy();
-        expect(screen.getByTestId("sleep-log-edit-duration")).toBeTruthy();
-        expect(screen.getByTestId("sleep-log-edit-note")).toBeTruthy();
-
-        // edit buttons
-        expect(screen.getByTestId("sleep-log-edit-cancel")).toBeTruthy();
-        expect(screen.getByTestId("sleep-log-edit-save")).toBeTruthy();
+        await pressButton(TEST_LOGS[0].id, "edit");
+                        
+        // ensure popup is in DOM
+        expect(screen.getByTestId("sleep-logs-edit-popup")).toBeTruthy();
+        // Ensure popup has been shown
+        expect((EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].popupVisible).toBe(true);
     });
 
-    test("Pre-populates edit log fields", async () => {
+    test("Passes current values to edit log pop-up", async () => {
         render(<SleepLogsView/>);
         await screen.findByTestId("sleep-logs");  // wait for log list to render
 
         for (const log of TEST_LOGS) {
             // open edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`sleep-logs-edit-button-${log.id}`)
-            );
+            await pressButton(log.id, "edit");
+                        
+            // retrieve current editingLog from <EditingLogPopup/>
+            const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
             
             // check field values
-            expect(screen.getByTestId("sleep-log-edit-start-time")._fiber.pendingProps.value)  // find start time input and extract the value
-                .toBe(log.start_time);
-            expect(screen.getByTestId("sleep-log-edit-end-time")._fiber.pendingProps.value)  // find end time input and extract the value
-                .toBe(log.end_time);
-            expect(screen.getByTestId("sleep-log-edit-duration")._fiber.pendingProps.value)  // find duration input and extract the value
-                .toBe(log.duration);
-            expect(screen.getByTestId("sleep-log-edit-note")._fiber.pendingProps.value)  // find note input and extract the value
-                .toBe(await decryptData(log.note));
-
-            // close edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`sleep-log-edit-cancel`)
-            );
+            expect(editingLog.start_time.value.toISOString()).toBe(log.start_time);
+            expect(editingLog.end_time.value.toISOString()).toBe(log.end_time);
+            expect(editingLog.duration.value).toBe(log.duration);
+            expect(editingLog.note.value).toBe(await decryptData(log.note));
         }
     });
 
@@ -259,14 +264,11 @@ describe("Sleep logs screen", () => {
             );
 
             // open edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`sleep-logs-edit-button-${log.id}`)
-            );
+            await pressButton(log.id, "edit");
             
             // submit edit
-            await userEvent.press(
-                screen.getByTestId("sleep-log-edit-save")
-            );
+            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+            await act(async () => submitCallback());
 
             // Alert.alert called by sleep-logs.tsx -> handleSaveEdit()
             expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Something went wrong during save.");
@@ -288,7 +290,7 @@ describe("Sleep logs screen", () => {
         0,
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear(),
         1
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
@@ -308,6 +310,8 @@ describe("sleep logs screen (guest mode)", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
+        (EditLogPopup as jest.Mock).mockClear();
+        (LogItem as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -342,7 +346,7 @@ describe("sleep logs screen (guest mode)", () => {
         await catchNoLogs("You don't have any sleep logs yet!");
     });
 
-    test("Renders log buttons (guest)", rendersLogButtons);
+    test("Renders log buttons (guest)", rendersLogItems);
 
     test("Catches decryption error (guest)", catchDecryptionError);
 
@@ -359,7 +363,7 @@ describe("sleep logs screen (guest mode)", () => {
 
     test("Deletes log (guest)", deletesLog);
 
-    test("Catch supabase error edit log", async () => catchUpdateError(() =>
+    test("Catch local storage error edit log", async () => catchUpdateError(() =>
         // library/local-store.ts -> updateRow should be mocked to return:
         // /* falsy value */
         // This should cause error handling in app/(logs)/sleep-logs.tsx -> handleSaveEdit
@@ -373,7 +377,7 @@ describe("sleep logs screen (guest mode)", () => {
         2,  // updateRow() is called wit the data object as the 3rd argument
         (updateRow as jest.Mock).mockClear(),
         1  // updateRow() is called wit the log id as the 2nd argument
-    ), 10000);
+    ));
 
     test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
         (listRows as jest.Mock).mockImplementationOnce(
@@ -406,13 +410,12 @@ async function catchNoLogs(message: string) {
     expect(await screen.findByText(message)).toBeTruthy();
 }
 
-async function rendersLogButtons() {
+async function rendersLogItems() {
     render(<SleepLogsView/>);
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        expect(screen.getByTestId(`sleep-logs-edit-button-${log.id}`)).toBeTruthy();
-        expect(screen.getByTestId(`sleep-logs-delete-button-${log.id}`)).toBeTruthy();
+        expect(screen.getByTestId(`log-item-${log.id}`)).toBeTruthy();
     }
 }
 
@@ -430,7 +433,11 @@ async function catchDecryptionError() {
     render(<SleepLogsView/>);
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
-    expect(screen.getByText(`[Decryption Failed]: ${testError}`, {exact: false})).toBeTruthy();
+    const logItems = (LogItem as jest.Mock).mock.calls;
+    const logItemProps = logItems.find(call => call[0].id === TEST_LOGS[0].id)[0];
+    const displayValues = logItemProps.logData.map((item: any) => item.value);
+
+    expect(displayValues.includes(`[Decryption Failed]: ${testError}`)).toBeTruthy();
 }
 
 async function rendersLogs() {
@@ -438,11 +445,15 @@ async function rendersLogs() {
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        expect(screen.getByText(format(log.start_time, "MMM dd, yyyy"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(log.start_time, "h:mm a"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(log.end_time, "h:mm a"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(log.duration, {exact: false})).toBeTruthy();
-        if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
+        const logItems = (LogItem as jest.Mock).mock.calls;
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
+        const displayValues = logItemProps.logData.map((item: any) => item.value);
+        
+        expect(displayValues.includes(format(new Date(log.start_time), 'MMM dd, yyyy'))).toBeTruthy();
+        expect(displayValues.includes(format(new Date(log.start_time), 'h:mm a'))).toBeTruthy();
+        expect(displayValues.includes(format(new Date(log.end_time), 'h:mm a'))).toBeTruthy();
+        expect(displayValues.includes(log.duration)).toBeTruthy();
+        if (log.note) expect(displayValues.includes(await decryptData(log.note))).toBeTruthy();
     }
 }
 
@@ -453,9 +464,8 @@ async function catchDeleteError(mockFailingDelete: () => void) {
     for (const log of TEST_LOGS) {
         mockFailingDelete();
 
-        await userEvent.press(
-            screen.getByTestId(`sleep-logs-delete-button-${log.id}`)
-        );
+        // press delete
+        await pressButton(log.id, "delete");
 
         // Alert.alert called by sleep-logs.tsx -> handleDelete()
         const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
@@ -474,27 +484,21 @@ async function deletesLog() {
 
     for (const log of TEST_LOGS) {
         // ensure log is still present
-        expect(screen.getByText(format(log.start_time, "MMM dd, yyyy"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(log.start_time, "h:mm a"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(log.end_time, "h:mm a"), {exact: false})).toBeTruthy();
-        expect(screen.getByText(log.duration, {exact: false})).toBeTruthy();
-        if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
+        let logItems = (LogItem as jest.Mock).mock.calls;
+        expect(logItems.find(call => call[0].id === log.id)).toBeTruthy();
 
         // press delete
-        await userEvent.press(
-            screen.getByTestId(`sleep-logs-delete-button-${log.id}`)
-        );
+        await pressButton(log.id, "delete");
+
+        (LogItem as jest.Mock).mockClear();  // clear the calls of <LogItem/>
+        logItems = (LogItem as jest.Mock).mock.calls;  // track which items are re-rendered from this point onwards
+
         // Alert.alert called by sleep-logs.tsx -> handleDelete()
         const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
         await act(deleteHandler);  // call delete handler (user confirms delete)
 
-        // confirm all log details are no longer present
-        expect(async () => screen.getByText(format(log.start_time, "MMM dd, yyyy"), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(format(log.start_time, "h:mm a"), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(format(log.end_time, "h:mm a"), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(log.duration, {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
-
+        // confirm deleted log was not rerendered
+        expect(logItems.find(call => call[0].id === log.id)).toBeFalsy();
         
         (Alert.alert as jest.Mock).mockClear();  // clear .mock.calls array for next loop
     }
@@ -508,14 +512,11 @@ async function catchUpdateError(mockFailingEdit: () => void) {
         mockFailingEdit();
     
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`sleep-logs-edit-button-${log.id}`)
-        );
+        await pressButton(log.id, "edit");
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("sleep-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Alert.alert called by sleep-logs.tsx -> handleSaveEdit()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Failed to update log");
@@ -528,8 +529,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        const editedStartTime = `edited start time ${log.id}`;
-        const editedEndTime = `edited end time ${log.id}`;
+        const editedStartTime = new Date((new Date(log.start_time)).getTime() - 61*1000);
+        const editedEndTime = new Date((new Date(log.end_time)).getTime() - 61*1000);
         const editedDuration = `edited duration ${log.id}`;
         const editedNote = `edited note ${log.id}`;
 
@@ -538,42 +539,31 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         dataMock.mockClear();
 
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`sleep-logs-edit-button-${log.id}`)
-        );
+        await pressButton(log.id, "edit");
         
-        // clear fields, then type new values
-        await userEvent.clear(screen.getByTestId("sleep-log-edit-start-time"));
-        await userEvent.type(
-            screen.getByTestId("sleep-log-edit-start-time"),
-            editedStartTime
-        );
-        await userEvent.clear(screen.getByTestId("sleep-log-edit-end-time"));
-        await userEvent.type(
-            screen.getByTestId("sleep-log-edit-end-time"),
-            editedEndTime
-        );
-        await userEvent.clear(screen.getByTestId("sleep-log-edit-duration"));
-        await userEvent.type(
-            screen.getByTestId("sleep-log-edit-duration"),
-            editedDuration
-        );
-        await userEvent.clear(screen.getByTestId("sleep-log-edit-note"));
-        await userEvent.type(
-            screen.getByTestId("sleep-log-edit-note"),
-            editedNote
+        // retrieve setLog callback from <EditingLogPopup/>
+        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
+        
+        // clear set new field values from <EditLogPopup/>
+        await act(async () =>
+            setLog((prev: object) => ({
+                ...prev,
+                start_time: editedStartTime,
+                end_time: editedEndTime,
+                duration: editedDuration,
+                note: editedNote,
+            }))
         );
 
         // submit edit
-        await userEvent.press(
-            screen.getByTestId("sleep-log-edit-save")
-        );
+        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
         expect(dataMock.mock.calls[0][dataArgI])
             .toEqual({  // loose comparison for objects
-                start_time: editedStartTime,
-                end_time: editedEndTime,
+                start_time: editedStartTime.toISOString(),
+                end_time: editedEndTime.toISOString(),
                 duration: editedDuration,
                 note: await encryptData(editedNote),
             });
@@ -601,28 +591,33 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
     // open edit log pop-up
-    await userEvent.press(
-        screen.getByTestId(`sleep-logs-edit-button-${log.id}`)
-    );
+    await pressButton(log.id, "edit");
 
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);
 
-    // submit edit
-    await userEvent.press(
-        screen.getByTestId("sleep-log-edit-save")
-    );
+    // clear the calls of <LogItem/> to track which items are re-rendered from this point onwards
+    (LogItem as jest.Mock).mockClear();
 
-    // ensure new values are on the page...
-    expect(screen.getByText(format(editedLog.start_time, "MMM dd, yyyy"), {exact: false})).toBeTruthy();
-    expect(screen.getByText(format(editedLog.start_time, "h:mm a"), {exact: false})).toBeTruthy();
-    expect(screen.getByText(format(editedLog.end_time, "h:mm a"), {exact: false})).toBeTruthy();
-    expect(screen.getByText(editedLog.duration, {exact: false})).toBeTruthy();
-    expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
-    // ...and that the previous values are not
-    expect(async () => screen.getByText(format(log.start_time, "MMM dd, yyyy"), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(format(log.start_time, "h:mm a"), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(format(log.end_time, "h:mm a"), {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(log.duration, {exact: false})).rejects.toThrow();
-    expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+    // submit edit
+    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+    await act(async () => submitCallback());
+
+    await act(async () => {
+        const logItems = (LogItem as jest.Mock).mock.calls;
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
+        const displayValues = logItemProps.logData.map((item: any) => item.value);
+        // ensure new values were passed...
+        expect(displayValues.includes(format(editedLog.start_time, "MMM dd, yyyy"))).toBeTruthy();
+        expect(displayValues.includes(format(editedLog.start_time, "h:mm a"))).toBeTruthy();
+        expect(displayValues.includes(format(editedLog.end_time, "h:mm a"))).toBeTruthy();
+        expect(displayValues.includes(editedLog.duration)).toBeTruthy();
+        expect(displayValues.includes(await decryptData(editedLog.note))).toBeTruthy();
+        // ...and that the previous values are not
+        expect(displayValues.includes(format(log.start_time, "MMM dd, yyyy"))).toBeFalsy();
+        expect(displayValues.includes(format(log.start_time, "h:mm a"))).toBeFalsy();
+        expect(displayValues.includes(format(log.end_time, "h:mm a"))).toBeFalsy();
+        expect(displayValues.includes(log.duration)).toBeFalsy();
+        expect(displayValues.includes(await decryptData(log.note))).toBeFalsy();
+    });
 }

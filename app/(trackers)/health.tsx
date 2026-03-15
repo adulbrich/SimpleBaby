@@ -1,6 +1,6 @@
 import HealthModule, { HealthCategory } from "@/components/health-module";
 import supabase from "@/library/supabase-client";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -20,6 +20,7 @@ import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+import stringLib from "../../assets/stringLibrary.json";
 
 // Define the shape of the health log data object with optional nested properties
 interface HealthLog {
@@ -108,7 +109,7 @@ export default function Health() {
 						? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 						: missingFields[0];
 				Alert.alert(
-					"Missing Information",
+					`${stringLib.errors.trackerMissingInfo}`,
 					`Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`,
 				);
 				return { success: false, error: "Missing required growth fields" };
@@ -174,7 +175,7 @@ export default function Health() {
 				success,
 				childId: cloudChildId,
 				error,
-			} = await getActiveChildId();
+			} = await getActiveChildData();
 			if (!success) {
 				return {
 					success: false,
@@ -425,7 +426,7 @@ export default function Health() {
 					<View className="bottom-5 pt-5">
 						<View className="items-start top-5 left-3 z-10">
 							<Text className="bg-gray-200 p-3 rounded-xl font">
-								Add a note
+								{stringLib.uiLabels.noteLabel}
 							</Text>
 						</View>
 						<View className="p-4 pt-9 bg-white rounded-xl z-0">
