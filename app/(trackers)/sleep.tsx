@@ -19,6 +19,8 @@ import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { insertRow, getActiveChildId as getLocalActiveChildId } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
 export default function Sleep() {
@@ -180,7 +182,7 @@ export default function Sleep() {
 			}
 		} else {
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				"Failed to save the Sleep log. Please provide either a stopwatch time or manual start and end times.",
 			);
 		}
@@ -228,7 +230,7 @@ export default function Sleep() {
 						<View className="bottom-5">
 							<View className="items-start top-5 left-3 z-10">
 								<Text className="bg-gray-200 p-3 rounded-xl font">
-									Add a note
+									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
 							<View className="p-4 pt-9 bg-white rounded-xl z-0">
