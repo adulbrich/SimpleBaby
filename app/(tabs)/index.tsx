@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { ExternalPathString } from "expo-router";
 import {
-	Modal,
 	View,
-	Text,
-	TextInput,
-	TouchableWithoutFeedback,
-	Keyboard,
 	Alert,
 } from "react-native";
 import TrackerButton from "@/components/tracker-button";
 import { useAuth } from "@/library/auth-provider";
-import { BlurView } from "expo-blur";
-import Button from "@/components/button";
 import {
 	createChild,
 	getActiveChildId,
