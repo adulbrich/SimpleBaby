@@ -15,10 +15,9 @@ import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 
 /**
- * Profile Screen
- * Displays current user profile details (e.g., name, email, active child) using session context from Supabase.
- * Users can view but not yet edit their account details. A "Sign Out" button allows users to log out.
- * Some options like changing email or password and managing caretakers are shown as placeholders with alerts.
+ * Active Child Screen
+ * Displays details for a user's active child, and provides some related utilities
+ * Users can change their child's name, or delete the child account from this page
  */
 
 export default function ActiveChild() {
@@ -63,12 +62,12 @@ export default function ActiveChild() {
 
             const otherChildren = allChildren.filter(({ name }) => name !== childName);
             if (otherChildren.length === 1) {
+                // the user has no other child accounts
+                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
                 // remove the active child from the user's supabase account. This will propagate to the user's session
                 await supabase.auth.updateUser({
                     data: { activeChild: "", activeChildId: "" },
                 });
-                // the user has no other child accounts
-                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
                 return;
             }
 
