@@ -29,7 +29,7 @@ const alertSound = require('../../assets/sounds/ui-pop.mp3');
 export default function Profile() {
 
     const player = useAudioPlayer(alertSound);
-    
+
     const { isGuest, exitGuest, session } = useAuth();
 
     const [showAddChild, setShowAddChild] = useState(false);
@@ -109,7 +109,7 @@ export default function Profile() {
 
     useEffect(() => {
         fetchChildNames();
-    }, [session?.user.user_metadata?.activeChild]);  // re-fetch child names if the user renames a child
+    }, [session]);  // re-fetch child names if the user renames a child
 
     const fetchChildNames = async () => {
         try {
@@ -122,7 +122,7 @@ export default function Profile() {
             setLoadingNames(false);
         };
     };
-    
+
     useEffect(() => {
         const loadChildName = async () => {
             try {
@@ -137,7 +137,7 @@ export default function Profile() {
                     setChildName(activeChild?.name ?? 'Guest Child');
                 } else if (session) {
                     const result = await getActiveChildData();
-                    if (!result.success || !result.childName) { 
+                    if (!result.success || !result.childName) {
                         Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
                         setChildName("ERROR");
                         return;

@@ -138,7 +138,7 @@ export async function updateChildName(childId: string, newChildName: string) {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
-    if (!userId || true) {
+    if (!userId) {
         throw new Error('User not found.');
     }
 

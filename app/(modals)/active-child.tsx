@@ -30,7 +30,7 @@ export default function ActiveChild() {
     const [childName, setChildName] = useState<string>('Loading...');
     const [childId, setChildId] = useState<string>('');
     const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
-    
+
     // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
         try {
@@ -52,7 +52,7 @@ export default function ActiveChild() {
             Alert.alert("Error", err instanceof Error ? err.message : 'An unknown error occurred');
         }
     };
-    
+
     // Handles second user request to delete a child, after confirmation
     const handleConfirmedDeleteChild = async () => {
         try {
@@ -71,12 +71,12 @@ export default function ActiveChild() {
                 router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
                 return;
             }
-            
+
             // Update user session metadata with the active child as the user's first other child
             await supabase.auth.updateUser({
                 data: { activeChildId: otherChildren[0].id, activeChild: "" },
             });
-            
+
             if (otherChildren.length === 1) {
                 // send the user back to the profile page
                 router.dismissTo("/(modals)/profile");
