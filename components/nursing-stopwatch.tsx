@@ -151,7 +151,7 @@ export default function NursingStopwatch({
                 </View>
             </View>
             <View className='stopwatch-secondary'>
-                { (activeSide === "left" && leftRunning) || (activeSide && rightRunning) ? (
+                { (activeSide === "left" && leftRunning) || (activeSide === "right" && rightRunning) ? (
                     <TouchableOpacity
                         className='stopwatch-button-stop dark:bg-[#f1efd2]'
                         onPress={() => toggleRunning(false)}
