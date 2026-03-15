@@ -5,7 +5,6 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
 } from "react-native";
 import { format } from "date-fns";
 import { getActiveChildData } from "@/library/utils";
@@ -22,6 +21,7 @@ import {
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface SleepLog {
 	id: string;
@@ -219,44 +219,22 @@ const SleepLogsView: React.FC = () => {
 	};
 
 	const renderSleepLogItem = ({ item }: { item: SleepLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-2">
-				{format(item.start_time, "MMM dd, yyyy")}
-			</Text>
-			<Text className="text-base mb-1">
-				Start: {format(item.start_time, "h:mm a")}
-			</Text>
-			<Text className="text-base mb-1">
-				End: {format(item.end_time, "h:mm a")}
-			</Text>
-			<Text className="text-base mb-1">Duration: {item.duration || "N/A"}</Text>
-			{item.note && (
-				<Text className="text-sm italic text-gray-500 mt-1">
-					📝 {item.note}
-				</Text>
-			)}
-			<View className="flex-row justify-end gap-3 mt-4">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`sleep-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`sleep-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: format(item.start_time, "MMM dd, yyyy") },
+				{ type: "item", label: "Start", value: format(item.start_time, "h:mm a") },
+				{ type: "item", label: "End", value: format(item.end_time, "h:mm a") },
+				{ type: "item", label: "Duration", value: item.duration || "N/A" },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (

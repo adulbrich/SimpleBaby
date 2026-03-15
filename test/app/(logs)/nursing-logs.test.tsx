@@ -1,5 +1,5 @@
 import NursingLogsView from "@/app/(logs)/nursing-logs";
-import { render, screen, userEvent, act } from "@testing-library/react-native";
+import { render, screen, act } from "@testing-library/react-native";
 import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
@@ -13,6 +13,7 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
+import LogItem from "@/components/log-item";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -66,6 +67,11 @@ jest.mock("@/library/local-store", () => ({
     updateRow: jest.fn(async () => true),
 }));
 
+jest.mock("@/components/log-item.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    return jest.fn(({id}: {id?: string}) => (<View testID={`log-item-${id}`}></View>));
+});
+
 
 const NOW = (new Date).getTime();
 const TEST_CHILD_ID = "test child id";
@@ -101,6 +107,14 @@ const TEST_LOGS = [{
 );
 
 
+const pressButton = async (id: string, button: "delete" | "edit") => {
+    const logItems = (LogItem as jest.Mock).mock.calls;
+    const logItemProps = logItems.find(call => call[0].id === id)[0];
+    if (button === "delete") await act(async () => logItemProps.onDelete());
+    if (button === "edit") await act(async () => logItemProps.onEdit());
+};
+
+
 describe("Nursing logs screen", () => {
 
     beforeAll(() => {
@@ -115,6 +129,7 @@ describe("Nursing logs screen", () => {
         (supabase.from("").update({}).eq as unknown as jest.Mock).mockClear();
         (supabase.from("").update as unknown as jest.Mock).mockClear();
         (EditLogPopup as jest.Mock).mockClear();
+        (LogItem as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -171,7 +186,7 @@ describe("Nursing logs screen", () => {
         await catchNoLogs(`You don't have any nursing logs for ${testChildName} yet!`);
     });
 
-    test("Renders log buttons", rendersLogButtons, 10000);
+    test("Renders log buttons", rendersLogItems, 10000);
 
     test("Catches decryption error", catchDecryptionError);
 
@@ -182,9 +197,7 @@ describe("Nursing logs screen", () => {
         await screen.findByTestId("nursing-logs");  // wait for log list to render
 
         for (const log of TEST_LOGS) {
-            await userEvent.press(
-                screen.getByTestId(`nursing-logs-delete-button-${log.id}`)
-            );
+            await pressButton(log.id, "delete");
 
             // Alert.alert called by nursing-logs.tsx -> handleDelete()
             expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Delete Entry");
@@ -210,9 +223,7 @@ describe("Nursing logs screen", () => {
         await screen.findByTestId("nursing-logs");  // wait for log list to render
 
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`nursing-logs-edit-button-${TEST_LOGS[0].id}`)
-        );
+        await pressButton(TEST_LOGS[0].id, "edit");
                         
         // ensure popup is in DOM
         expect(screen.getByTestId("nursing-logs-edit-popup")).toBeTruthy();
@@ -226,9 +237,7 @@ describe("Nursing logs screen", () => {
 
         for (const log of TEST_LOGS) {
             // open edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
-            );
+            await pressButton(log.id, "edit");
                         
             // retrieve current editingLog from <EditingLogPopup/>
             const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
@@ -256,9 +265,7 @@ describe("Nursing logs screen", () => {
             );
 
             // open edit log pop-up
-            await userEvent.press(
-                screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
-            );
+            await pressButton(log.id, "edit");
 
             // submit edit
             const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
@@ -305,6 +312,7 @@ describe("nursing logs screen (guest mode)", () => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
         (EditLogPopup as jest.Mock).mockClear();
+        (LogItem as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
@@ -339,7 +347,7 @@ describe("nursing logs screen (guest mode)", () => {
         await catchNoLogs("You don't have any nursing logs yet!");
     });
 
-    test("Renders log buttons (guest)", rendersLogButtons);
+    test("Renders log buttons (guest)", rendersLogItems);
 
     test("Catches decryption error (guest)", catchDecryptionError);
 
@@ -403,13 +411,12 @@ async function catchNoLogs(message: string) {
     expect(await screen.findByText(message)).toBeTruthy();
 }
 
-async function rendersLogButtons() {
+async function rendersLogItems() {
     render(<NursingLogsView/>);
     await screen.findByTestId("nursing-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        expect(screen.getByTestId(`nursing-logs-edit-button-${log.id}`)).toBeTruthy();
-        expect(screen.getByTestId(`nursing-logs-delete-button-${log.id}`)).toBeTruthy();
+        expect(screen.getByTestId(`log-item-${log.id}`)).toBeTruthy();
     }
 }
 
@@ -427,7 +434,11 @@ async function catchDecryptionError() {
     render(<NursingLogsView/>);
     await screen.findByTestId("nursing-logs");  // wait for log list to render
 
-    expect(screen.getByText(`[Decryption Failed]: ${testError}`, {exact: false})).toBeTruthy();
+    const logItems = (LogItem as jest.Mock).mock.calls;
+    const logItemProps = logItems.find(call => call[0].id === TEST_LOGS[0].id)[0];
+    const displayValues = logItemProps.logData.map((item: any) => item.value);
+
+    expect(displayValues.includes(`[Decryption Failed]: ${testError}`)).toBeTruthy();
 }
 
 async function rendersLogs() {
@@ -435,13 +446,17 @@ async function rendersLogs() {
     await screen.findByTestId("nursing-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        expect(screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.left_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.right_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.left_duration), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.right_duration), {exact: false})).toBeTruthy();
-        if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
+        const logItems = (LogItem as jest.Mock).mock.calls;
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
+        const displayValues = logItemProps.logData.map((item: any) => item.value);
+        
+        expect(displayValues.includes(format(new Date(log.logged_at), 'MMM dd, yyyy'))).toBeTruthy();
+        expect(displayValues.includes(format(new Date(log.logged_at), 'h:mm a'))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.left_amount))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.right_amount))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.left_duration))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(log.right_duration))).toBeTruthy();
+        if (log.note) expect(displayValues.includes(await decryptData(log.note))).toBeTruthy();
     }
 }
 
@@ -452,9 +467,8 @@ async function catchDeleteError(mockFailingDelete: () => void) {
     for (const log of TEST_LOGS) {
         mockFailingDelete();
 
-        await userEvent.press(
-            screen.getByTestId(`nursing-logs-delete-button-${log.id}`)
-        );
+        // press delete
+        await pressButton(log.id, "delete");
 
         // Alert.alert called by nursing-logs.tsx -> handleDelete()
         const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
@@ -473,31 +487,21 @@ async function deletesLog() {
 
     for (const log of TEST_LOGS) {
         // ensure log is still present
-        expect(screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.left_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.right_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.left_duration), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(log.right_duration), {exact: false})).toBeTruthy();
-        if (log.note) expect(screen.getByText(await decryptData(log.note), {exact: false})).toBeTruthy();
+        let logItems = (LogItem as jest.Mock).mock.calls;
+        expect(logItems.find(call => call[0].id === log.id)).toBeTruthy();
 
         // press delete
-        await userEvent.press(
-            screen.getByTestId(`nursing-logs-delete-button-${log.id}`)
-        );
+        await pressButton(log.id, "delete");
+
+        (LogItem as jest.Mock).mockClear();  // clear the calls of <LogItem/>
+        logItems = (LogItem as jest.Mock).mock.calls;  // track which items are re-rendered from this point onwards
+
         // Alert.alert called by nursing-logs.tsx -> handleDelete()
         const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
         await act(deleteHandler);  // call delete handler (user confirms delete)
 
-        // confirm all log details are no longer present
-        expect(() => screen.getByText(format(new Date(log.logged_at), 'MMM dd, yyyy'), {exact: false})).toThrow();
-        expect(() => screen.getByText(format(new Date(log.logged_at), 'h:mm a'), {exact: false})).toThrow();
-        expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
-
+        // confirm deleted log was not rerendered
+        expect(logItems.find(call => call[0].id === log.id)).toBeFalsy();
         
         (Alert.alert as jest.Mock).mockClear();  // clear .mock.calls array for next loop
     }
@@ -511,9 +515,7 @@ async function catchUpdateError(mockFailingEdit: () => void) {
         mockFailingEdit();
     
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
-        );
+        await pressButton(log.id, "edit");
 
         // submit edit
         const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
@@ -541,9 +543,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         dataMock.mockClear();
 
         // open edit log pop-up
-        await userEvent.press(
-            screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
-        );
+        await pressButton(log.id, "edit");
         
         // retrieve setLog callback from <EditingLogPopup/>
         const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
@@ -587,8 +587,8 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
         child_id: "test child id",
         left_amount: "edited left amount U2FsdGVkX1",
         right_amount: "edited right amount U2FsdGVkX1",
-        left_duration: "03:02:01",
-        right_duration: "06:05:04",
+        left_duration: "03:02:01 U2FsdGVkX1",
+        right_duration: "06:05:04 U2FsdGVkX1",
         logged_at: (new Date(NOW - 4*24*60*60*1000 - 6*60*1000)).toISOString(),
         note: "edited note U2FsdGVkX1",
     };
@@ -600,29 +600,33 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     await screen.findByTestId("nursing-logs");  // wait for log list to render
 
     // open edit log pop-up
-    await userEvent.press(
-        screen.getByTestId(`nursing-logs-edit-button-${log.id}`)
-    );
+    await pressButton(log.id, "edit");
 
     // update the mock to return 'updated' logs
     mockFetchLogs(updatedLogs);
+
+    // clear the calls of <LogItem/> to track which items are re-rendered from this point onwards
+    (LogItem as jest.Mock).mockClear();
 
     // submit edit
     const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
     await act(async () => submitCallback());
 
     await act(async () => {
-        // ensure new values are on the page...
-        expect(screen.getByText(await decryptData(editedLog.left_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(editedLog.right_amount), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(editedLog.left_duration), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(editedLog.right_duration), {exact: false})).toBeTruthy();
-        expect(screen.getByText(await decryptData(editedLog.note), {exact: false})).toBeTruthy();
+        const logItems = (LogItem as jest.Mock).mock.calls;
+        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
+        const displayValues = logItemProps.logData.map((item: any) => item.value);
+        // ensure new values were passed...
+        expect(displayValues.includes(await decryptData(editedLog.left_amount))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(editedLog.right_amount))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(editedLog.left_duration))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(editedLog.right_duration))).toBeTruthy();
+        expect(displayValues.includes(await decryptData(editedLog.note))).toBeTruthy();
         // ...and that the previous values are not
-        expect(async () => screen.getByText(await decryptData(log.left_amount), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.right_amount), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.left_duration), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.right_duration), {exact: false})).rejects.toThrow();
-        expect(async () => screen.getByText(await decryptData(log.note), {exact: false})).rejects.toThrow();
+        expect(displayValues.includes(await decryptData(log.left_amount))).toBeFalsy();
+        expect(displayValues.includes(await decryptData(log.right_amount))).toBeFalsy();
+        expect(displayValues.includes(await decryptData(log.left_duration))).toBeFalsy();
+        expect(displayValues.includes(await decryptData(log.right_duration))).toBeFalsy();
+        expect(displayValues.includes(await decryptData(log.note))).toBeFalsy();
     });
 }

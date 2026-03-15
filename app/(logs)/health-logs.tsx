@@ -5,7 +5,6 @@ import {
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	Pressable,
 } from "react-native";
 import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
@@ -22,6 +21,7 @@ import {
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 interface HealthLog {
 	id: string;
@@ -263,51 +263,31 @@ const HealthLogsView: React.FC = () => {
 	};
 
 	const renderLog = ({ item }: { item: HealthLog }) => (
-		<View className="bg-white rounded-xl p-4 mb-4 shadow">
-			<Text className="text-lg font-bold mb-1">{item.category}</Text>
-			<Text className="text-base">
-				{format(item.date, "MMM dd, yyyy")}
-			</Text>
-			{item.growth_length && <Text>Length: {item.growth_length}</Text>}
-			{item.growth_weight && <Text>Weight: {item.growth_weight}</Text>}
-			{item.growth_head && <Text>Head: {item.growth_head}</Text>}
-			{item.activity_type && <Text>Activity: {item.activity_type}</Text>}
-			{item.activity_duration && (
-				<Text>Duration: {item.activity_duration}</Text>
-			)}
-			{item.meds_name && <Text>Med: {item.meds_name}</Text>}
-			{item.meds_amount && <Text>Amount: {item.meds_amount}</Text>}
-			{item.vaccine_name && <Text>Vaccine: {item.vaccine_name}</Text>}
-			{item.vaccine_location && <Text>Location: {item.vaccine_location}</Text>}
-			{item.other_name && <Text>Name: {item.other_name}</Text>}
-			{item.other_description && (
-				<Text>Description: {item.other_description}</Text>
-			)}
-			{item.note && (
-				<Text className="italic text-gray-500">📝 {item.note}</Text>
-			)}
-			<View className="flex-row justify-end mt-3 gap-3">
-				<Pressable
-					className="px-3 py-2 rounded-full bg-blue-100"
-					onPress={() => {
-						setEditModalVisible(true);
-						setEditingLog(item);
-					}}
-					disabled={deleteAlertVisible}
-					testID={`health-logs-edit-button-${item.id}`}
-				>
-					<Text className="text-blue-700">✏️ Edit</Text>
-				</Pressable>
-				<Pressable
-					className="px-3 py-2 rounded-full bg-red-100"
-					onPress={() => handleDelete(item.id)}
-					disabled={editModalVisible}
-					testID={`health-logs-delete-button-${item.id}`}
-				>
-					<Text className="text-red-700">🗑️ Delete</Text>
-				</Pressable>
-			</View>
-		</View>
+		<LogItem
+			id={item.id}
+			onEdit={() => {
+				setEditModalVisible(true);
+				setEditingLog(item);
+			}}
+			onDelete={() => handleDelete(item.id)}
+			buttonsDisabled={editModalVisible || deleteAlertVisible}
+			logData={[
+				{ type: "title", value: item.category },
+				{ type: "text", value: format(item.date, "MMM dd, yyyy") },
+				item.growth_length && { type: "item", label: "Length", value: item.growth_length },
+				item.growth_weight && { type: "item", label: "Weight", value: item.growth_weight },
+				item.growth_head && { type: "item", label: "Head", value: item.growth_head },
+				item.activity_type && { type: "item", label: "Activity", value: item.activity_type },
+				item.activity_duration && { type: "item", label: "Duration", value: item.activity_duration },
+				item.meds_name && { type: "item", label: "Med", value: item.meds_name },
+				item.meds_amount && { type: "item", label: "Amount", value: item.meds_amount },
+				item.vaccine_name && { type: "item", label: "Vaccine", value: item.vaccine_name },
+				item.vaccine_location && { type: "item", label: "Location", value: item.vaccine_location },
+				item.other_name && { type: "item", label: "Name", value: item.other_name },
+				item.other_description && { type: "item", label: "Description", value: item.other_description },
+				{ type: "note", value: item.note},
+			]}
+		/>
 	);
 
 	return (
