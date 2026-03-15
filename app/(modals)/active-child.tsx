@@ -55,13 +55,13 @@ export default function ActiveChild() {
     // Handles second user request to delete a child, after confirmation
     const handleConfirmedDeleteChild = async () => {
         try {
-            const allChildren = await getChildren(); // get child names
+            const allChildren = await getChildren();  // get child names
             if (allChildren.length === 0) throw new Error("Unable to access child data");
 
             await deleteChild(childId);  // delete the current child
 
             const otherChildren = allChildren.filter(({ name }) => name !== childName);
-            if (otherChildren.length === 1) {
+            if (otherChildren.length === 0) {
                 // the user has no other child accounts
                 router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
                 // remove the active child from the user's supabase account. This will propagate to the user's session

@@ -66,7 +66,7 @@ async function getChildrenByUserId(userId: string): Promise<{ name: string; id: 
     // decrypt names
     const decrypted = await Promise.all(data.map(async ({ name, id }) => {
         try {
-            return {name: await decryptData(name), id};
+            return { name: await decryptData(name), id };
         } catch {
             return { name, id };
         }
@@ -128,6 +128,10 @@ export async function getChildren(): Promise<{ name: string; id: string }[]> {
     }
 
     const children = await getChildrenByUserId(userId);
+
+    if (children.filter(({ name, id }) => !(name && id)).length > 0) {
+        throw new Error("Failed to retrieve some children");
+    }
 
     return children.sort((child1, child2) => child1.name.localeCompare(child2.name));
 };
