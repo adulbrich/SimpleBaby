@@ -79,7 +79,7 @@ export default function ManualEntry({
         <View className='manual-primary' testID={testID}>
             <View className='items-start relative bottom-5 left-3'>
                 <Text className='bg-gray-200 p-3 rounded-xl font'>
-                    {stringLib.uiLabels.manuelEntryLabel}
+                    {stringLib.uiLabels.manualEntryLabel}
                 </Text>
             </View>
             <View className='manual-secondary p-4 pt-0 flex-col gap-4'>
