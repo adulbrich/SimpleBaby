@@ -30,11 +30,23 @@
 }
 
 .stopwatch-secondary {
-    @apply flex-row justify-between p-6 pr-12 pl-12 dark:bg-[#30504d] rounded-xl rounded-t-none;
+    @apply flex-row justify-around p-6 pr-12 pl-12 dark:bg-[#30504d] rounded-xl rounded-t-none;
 }
 
 .stopwatch-button {
-    @apply aspect-square p-4 scale-100 items-center justify-center rounded-full;
+    @apply min-w-[6em] p-6 scale-100 items-center justify-center rounded-full;
+}
+
+.stopwatch-button-start {
+    @apply stopwatch-button bg-green-100;
+}
+
+.stopwatch-button-stop {
+    @apply stopwatch-button bg-red-100;
+}
+
+.stopwatch-button-reset {
+    @apply stopwatch-button bg-gray-100;
 }
 
 .stopwatch-button-text {

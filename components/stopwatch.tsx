@@ -82,22 +82,25 @@ export default function Stopwatch({ onTimeUpdate, testID }: {onTimeUpdate: any, 
                 </View>
             </View>
             <View className='stopwatch-secondary'>
+                { running ? (
+                    <TouchableOpacity
+                        className='stopwatch-button-stop dark:bg-[#f1efd2]'
+                        onPress={() => setRunning(false)}
+                        testID='sleep-stopwatch-stop'
+                    >
+                        <Text className='stopwatch-button-text'>Stop</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        className='stopwatch-button-start dark:bg-[#d2f1e0]'
+                        onPress={() => setRunning(true)}
+                        testID='sleep-stopwatch-start'
+                    >
+                        <Text className='stopwatch-button-text'>Start</Text>
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#d2f1e0]'
-                    onPress={() => setRunning(true)}
-                    testID='sleep-stopwatch-start'
-                >
-                    <Text className='stopwatch-button-text'>Start</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#f1efd2]'
-                    onPress={() => setRunning(false)}
-                    testID='sleep-stopwatch-stop'
-                >
-                    <Text className='stopwatch-button-text'>Stop</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='stopwatch-button dark:bg-[#f1d2d2]'
+                    className='stopwatch-button-reset dark:bg-[#f1d2d2]'
                     onPress={reset}
                     testID='sleep-stopwatch-reset'
                 >
