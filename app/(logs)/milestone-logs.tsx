@@ -2,23 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
 	View,
 	Text,
-	Image,
 	FlatList,
 	ActivityIndicator,
 	Alert,
-	TextInput,
-	Modal,
-	TouchableOpacity,
-	Pressable,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from "react-native";
 import { format } from "date-fns";
-import DateTimePicker, {
-	DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
 import { decryptData, encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -29,6 +18,10 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 	LocalRow,
 } from "@/library/local-store";
+import EditLogPopup from "@/components/edit-log-popup";
+
+import stringLib from "../../assets/stringLibrary.json";
+import LogItem from "@/components/log-item";
 
 type MilestoneCategory =
 	| "Motor"
@@ -43,7 +36,7 @@ interface MilestoneLog {
 	title: string;
 	category: MilestoneCategory | null;
 	note: string | null;
-	achieved_at: string;
+	achieved_at: Date;
 	photo_url: string | null;
 	source: string | null;
 	created_at: string;
@@ -67,8 +60,6 @@ const MilestoneLogsView: React.FC = () => {
 	const [photoSignedUrls, setPhotoSignedUrls] = useState<
 		Record<string, string>
 	>({});
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [editAchievedAt, setEditAchievedAt] = useState<Date>(new Date());
 	const { isGuest } = useAuth();
 
     const safeDecrypt = async (value: string | null): Promise<string> => {
@@ -132,7 +123,7 @@ const MilestoneLogsView: React.FC = () => {
 					);
 
 			} else {
-				const result = await getActiveChildId();
+				const result = await getActiveChildData();
 				if (!result?.success || !result.childId) {
 					throw new Error(
 						result?.error
@@ -157,6 +148,7 @@ const MilestoneLogsView: React.FC = () => {
 				(data || []).map(async (entry) => ({
 					...entry,
 					title: await safeDecrypt(entry.title),
+					achieved_at: new Date(entry.achieved_at),
 					note: entry.note ? await safeDecrypt(entry.note) : "",
 				})),
 			);
@@ -192,23 +184,6 @@ const MilestoneLogsView: React.FC = () => {
 		fetchMilestoneLogs();
 	}, [fetchMilestoneLogs]);
 
-	const openEditModal = (log: MilestoneLog) => {
-		setEditingLog(log);
-		const parsed = new Date(log.achieved_at);
-		setEditAchievedAt(isNaN(parsed.getTime()) ? new Date() : parsed);
-		setShowDatePicker(false);
-		setEditModalVisible(true);
-	};
-
-	const onChangeEditDate = (event: DateTimePickerEvent, selected?: Date) => {
-		if (event.type === "dismissed") {
-			setShowDatePicker(false);
-			return;
-		}
-		if (selected) setEditAchievedAt(selected);
-		if (Platform.OS === "android") setShowDatePicker(false);
-	};
-
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
 
@@ -235,13 +210,13 @@ const MilestoneLogsView: React.FC = () => {
 				title: encryptedTitle,
 				category: editingLog.category ?? "Other",
 				note: encryptedNote,
-				achieved_at: editAchievedAt.toISOString(),
+				achieved_at: editingLog.achieved_at.toISOString(),
 			};
 
 			if (isGuest) {
 				const success = await updateRow("milestone_logs", editingLog.id, patch);
 				if (!success) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
 				}
 				await fetchMilestoneLogs();
@@ -254,7 +229,7 @@ const MilestoneLogsView: React.FC = () => {
                     .eq("id", editingLog.id);
 
                 if (error) {
-					Alert.alert("Failed to update log");
+					Alert.alert(stringLib.errors.logUpdateFailure);
                     return;
                 }
 
@@ -271,7 +246,7 @@ const MilestoneLogsView: React.FC = () => {
 		setDeleteAlertVisible(true);
 		Alert.alert(
 			"Delete Entry",
-			"Are you sure you want to delete this log?",
+			stringLib.warnings.logDeletionConfirmation,
 			[
 				{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
 				{
@@ -305,67 +280,27 @@ const MilestoneLogsView: React.FC = () => {
 	};
 
 	const renderMilestoneItem = ({ item }: { item: MilestoneLog }) => {
-		const achieved = new Date(item.achieved_at);
-		const hasValidDate = !isNaN(achieved.getTime());
+		const hasValidDate = !isNaN(item.achieved_at.getTime());
 
 		return (
-			<View className="bg-white rounded-xl p-4 mb-4 shadow">
-				<Text className="text-lg font-bold mb-2">{item.title}</Text>
-
-				<Text className="text-sm text-gray-500 mb-2">
-					{item.category ?? "Other"}
-				</Text>
-
-				<Text className="text-base mb-1">
-					Date:{" "}
-					{hasValidDate ? format(achieved, "MMM dd, yyyy") : item.achieved_at}
-				</Text>
-
-				{item.note ? (
-					<Text className="text-sm italic text-gray-500 mt-2">
-						📝 {item.note}
-					</Text>
-				) : null}
-
-				{photoSignedUrls[item.id] ? (
-					<Image
-						source={{ uri: photoSignedUrls[item.id] }}
-						style={{
-							width: "100%",
-							height: 220,
-							borderRadius: 12,
-							marginTop: 12,
-						}}
-						resizeMode="cover"
-						onError={(e) =>
-							console.log("❌ Image Failed to Load:", item.id, e.nativeEvent)
-						}
-					/>
-				) : null}
-
-				<View className="flex-row justify-end gap-3 mt-4">
-					<Pressable
-						className="px-3 py-2 rounded-full bg-blue-100"
-						onPress={() => {
-							setEditModalVisible(true); 
-							openEditModal(item);
-						}}
-						disabled={deleteAlertVisible}
-						testID={`milestone-logs-edit-button-${item.id}`}
-					>
-						<Text className="text-blue-700">✏️ Edit</Text>
-					</Pressable>
-
-					<Pressable
-						className="px-3 py-2 rounded-full bg-red-100"
-						onPress={() => handleDelete(item.id)}
-						disabled={editModalVisible}
-						testID={`milestone-logs-delete-button-${item.id}`}
-					>
-						<Text className="text-red-700">🗑️ Delete</Text>
-					</Pressable>
-				</View>
-			</View>
+			<LogItem
+				id={item.id}
+				onEdit={() => {
+					setEditModalVisible(true);
+					setEditingLog(item);
+				}}
+				onDelete={() => handleDelete(item.id)}
+				buttonsDisabled={editModalVisible || deleteAlertVisible}
+				logData={[
+					{ type: "title", value: item.title },
+					{ type: "text", value: item.category ?? "Other" },
+					{ type: "item", label: "Date", value:
+						hasValidDate ? format(item.achieved_at, "MMM dd, yyyy") : "[unable to retrieve date]"
+					},
+					{ type: "note", value: item.note},
+					{ type: "image", uri: photoSignedUrls[item.id] },
+				]}
+			/>
 		);
 	};
 
@@ -395,139 +330,42 @@ const MilestoneLogsView: React.FC = () => {
 			)}
 
 			{/* Edit Modal */}
-			<Modal
-				visible={editModalVisible}
-				animationType="slide"
-				transparent
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : undefined}
-					style={{ flex: 1 }}
-				>
-					<ScrollView
-						contentContainerStyle={{
-							flexGrow: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							padding: 16,
-							backgroundColor: "#00000099",
-						}}
-						keyboardShouldPersistTaps="handled"
-					>
-						<View className="bg-white w-full rounded-2xl p-6">
-							<Text className="text-xl font-bold mb-4">Edit Milestone</Text>
-
-							{/* Title */}
-							<View className="mb-3">
-								<Text className="text-sm text-gray-500 mb-1">Title</Text>
-								<TextInput
-									className="border border-gray-300 rounded-xl px-3 py-2"
-									value={editingLog?.title ?? ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, title: text } : prev,
-										)
-									}
-									testID="milestone-log-edit-title"
-								/>
-							</View>
-
-							{/* Category */}
-							<View className="mb-3">
-								<Text className="text-sm text-gray-500 mb-1">Category</Text>
-								<TextInput
-									className="border border-gray-300 rounded-xl px-3 py-2"
-									value={String(editingLog?.category ?? "Other")}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev
-												? { ...prev, category: text as MilestoneCategory }
-												: prev,
-										)
-									}
-									testID="milestone-log-edit-category"
-								/>
-								<Text className="text-xs text-gray-400 mt-1">
-									Must enter: Cognitive, Social, Motor, Language, or Other.
-								</Text>
-							</View>
-
-							{/* Achieved date */}
-							<View className="mb-3">
-								<Text className="text-sm text-gray-500 mb-1">Date</Text>
-
-								<TouchableOpacity
-									className="border border-gray-300 rounded-xl px-3 py-3"
-									onPress={() => setShowDatePicker(true)}
-								>
-									<Text>{format(editAchievedAt, "MMM dd, yyyy")}</Text>
-								</TouchableOpacity>
-
-								{showDatePicker && (
-									<DateTimePicker
-										value={editAchievedAt}
-										mode="date"
-										display={Platform.OS === "ios" ? "spinner" : "default"}
-										onChange={onChangeEditDate}
-									/>
-								)}
-
-								{Platform.OS === "ios" && showDatePicker && (
-									<View className="mt-2 items-end">
-										<TouchableOpacity
-											className="bg-gray-200 rounded-full px-4 py-2"
-											onPress={() => setShowDatePicker(false)}
-										>
-											<Text>Done</Text>
-										</TouchableOpacity>
-									</View>
-								)}
-							</View>
-
-							{/* Note */}
-							<View className="mb-3">
-								<Text className="text-sm text-gray-500 mb-1">Note</Text>
-								<TextInput
-									className="border border-gray-300 rounded-xl px-3 py-2"
-									value={editingLog?.note ?? ""}
-									onChangeText={(text) =>
-										setEditingLog((prev) =>
-											prev ? { ...prev, note: text } : prev,
-										)
-									}
-									multiline
-									testID="milestone-log-edit-note"
-								/>
-							</View>
-
-							{/* Photo */}
-							<Text className="text-xs text-gray-400 mt-1">
-								Photos cannot be edited/updated yet in this menu. This feature
-								will be added in a later release. For now, please create a new
-								log.
-							</Text>
-
-							<View className="flex-row justify-end gap-3 mt-4">
-								<TouchableOpacity
-									className="bg-gray-200 rounded-full px-4 py-2"
-									onPress={() => setEditModalVisible(false)}
-									testID="milestone-log-edit-cancel"
-								>
-									<Text>Cancel</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									className="bg-green-500 rounded-full px-4 py-2"
-									onPress={handleSaveEdit}
-									testID="milestone-log-edit-save"
-								>
-									<Text className="text-white">Save</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
-			</Modal>
+			<EditLogPopup
+				popupVisible={editModalVisible}
+				hidePopup={() => setEditModalVisible(false)}
+				title="Edit Milestone Log"
+				setLog={setEditingLog}
+				handleSubmit={handleSaveEdit}
+				editingLog={editingLog && {
+					title: {
+						title: "Title",
+						type: "text",
+						value: editingLog?.title,
+					},
+					category: {
+						title: "Category",
+						type: "category",
+						categories: ["Motor", "Language", "Social", "Cognitive", "Other"],
+						value: editingLog?.category,
+					},
+					achieved_at: {
+						title: "Date",
+						type: "date",
+						value: editingLog?.achieved_at,
+					},
+					note:  {
+						title: "Note",
+						type: "text",
+						value: editingLog?.note,
+					},
+					photo_url:  {
+						title: "Photo",
+						type: "image",
+						value: editingLog?.photo_url,
+					},
+				}}
+				testID="milestone-logs-edit-popup"
+			/>
 		</View>
 	);
 };

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildId } from "@/library/utils";
+import { getActiveChildData } from "@/library/utils";
 import FeedingCategory, {
 	FeedingCategoryList,
 } from "@/components/feeding-category";
@@ -107,7 +107,7 @@ export default function Feeding() {
 				return { success: false, error: "Encryption or local save error" };
 			}
 		} else {
-            const { success, childId, error } = await getActiveChildId();
+            const { success, childId, error } = await getActiveChildData();
 
             if (!success) {
                 Alert.alert(`Error: ${error}`);

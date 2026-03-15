@@ -13,7 +13,7 @@ import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildId as getRemoteActiveChildId } from '@/library/utils';
+import { getActiveChildData } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -72,7 +72,7 @@ export default function Profile() {
                     const activeChild = children.find(c => c.id === activeId);
                     setChildName(activeChild?.name ?? 'Guest Child');
                 } else if (session) {
-                    const result = await getRemoteActiveChildId();
+                    const result = await getActiveChildData();
                     if (!result.success || !result.childName) { 
                         Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
                         setChildName("ERROR");
