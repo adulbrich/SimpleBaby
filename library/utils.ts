@@ -77,7 +77,8 @@ async function getChildrenByUserId(userId: string): Promise<{ name: string; id: 
 
 
 export const saveNewChild = async (childName: string) => {
-	if (!childName.trim()) {
+    const formattedName = formatName(childName);
+	if (!formattedName.trim()) {
 		throw new Error("Child name is required.");
 	}
 
@@ -88,13 +89,11 @@ export const saveNewChild = async (childName: string) => {
         throw new Error('User not found.');
     }
 
-    const child = formatName(childName);
-
     // make sure that the user does not already have any other children with the new name
     try {
         const children = await getChildrenByUserId(userId);
         // check if user already has a child with this name
-        if (children.find(({ name}) => name === child)) {
+        if (children.find(({ name}) => name === formattedName)) {
             throw new Error("Child name already exists.");
         }
     } catch (error) {
@@ -102,7 +101,7 @@ export const saveNewChild = async (childName: string) => {
     }
 
     // Insert child into the database
-    const encryptedChildName = await encryptData(child);
+    const encryptedChildName = await encryptData(formattedName);
     const { data, error } = await supabase
         .from('children')
         .insert([{ user_id: userId, name: encryptedChildName }])
@@ -135,6 +134,11 @@ export async function getChildren(): Promise<{ name: string; id: string }[]> {
 
 
 export async function updateChildName(childId: string, newChildName: string) {
+    const formattedName = formatName(newChildName);
+	if (!formattedName.trim()) {
+		throw new Error("Child name is required.");
+	}
+
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -150,11 +154,11 @@ export async function updateChildName(childId: string, newChildName: string) {
         throw new Error("Unable to check name availability.");
     }
     const names = children.map(child => child.name);
-    if (names.includes(newChildName)) {
+    if (names.includes(formattedName)) {
         throw new Error("Child name already exists.");
     }
 
-    const encryptedChildName = await encryptData(newChildName);
+    const encryptedChildName = await encryptData(formattedName);
 
     const { error } = await supabase
         .from("children")

@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import RenameChildPopup from '@/components/rename-child-popup';
-import { getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/utils';
+import { formatName, getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 
@@ -108,12 +108,7 @@ export default function ActiveChild() {
     };
 
     const handleRenameChild = async () => {
-        if (!newChildName) {
-            Alert.alert('Please enter a name!');
-            return;
-        }
-
-        if (newChildName.trim() === childName) {
+        if (formatName(newChildName) === childName) {
             Alert.alert("Keeping current name", "The name you entered is the same as your child's current name.");
             setShowRenameChild(false);
             return;

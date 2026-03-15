@@ -69,11 +69,6 @@ export default function Profile() {
     };
 
     const handleSaveChild = async () => {
-        if (!newChildName) {
-            Alert.alert('Please enter a name!');
-            return;
-        }
-
         try {
             await saveNewChild(newChildName);  // try to save new child
             setShowAddChild(false);  // Close modal if successful
