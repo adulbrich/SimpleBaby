@@ -11,9 +11,11 @@ import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAudioPlayer } from 'expo-audio';
+import AddChildPopup from '@/components/add-child-popup';
+import SwitchChildPopup from '@/components/switch-child-popup';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildData } from '@/library/utils';
+import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -29,6 +31,13 @@ export default function Profile() {
     const player = useAudioPlayer(alertSound);
 
     const { isGuest, exitGuest, session } = useAuth();
+
+    const [showAddChild, setShowAddChild] = useState(false);
+    const [showSwitchChild, setShowSwitchChild] = useState(false);
+    const [newChildName, setNewChildName] = useState("");
+    const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
+    const [loadingNames, setLoadingNames] = useState(true);
+    const [namesError, setNamesError] = useState<string | null>(null);
 
     const [childName, setChildName] = useState<string>('Loading...');
     const [displayName, setDisplayName] = useState<string>('');
@@ -59,24 +68,74 @@ export default function Profile() {
         }
     };
 
+    const handleSaveChild = async () => {
+        try {
+            await saveNewChild(newChildName);  // try to save new child
+            setShowAddChild(false);  // Close modal if successful
+            setNewChildName("");  // reset child name
+            await fetchChildNames();  // reload child names for switching
+        } catch (error: any) {
+            Alert.alert(
+                'Error',
+                error.message || 'An error occurred while saving child data.',
+            );
+        }
+    };
+
+    const handleSwitchChild = async (index: number) => {
+        try {
+            if (index < 0 || index >= children.length) {  // if index is invalid
+                throw new Error("Unable to find selected child");
+            }
+            // Update user session metadata with the active child
+            await supabase.auth.updateUser({
+                data: { activeChildId: children[index].id, activeChild: "" },
+            });
+        } catch (err) {
+            Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
+
+            // reload names
+            setLoadingNames(true);
+            fetchChildNames();
+        } finally {
+            setShowSwitchChild(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchChildNames();
+    }, [session]);  // re-fetch child names if the user renames a child
+
+    const fetchChildNames = async () => {
+        try {
+            const data = await getChildren();
+
+            if (data) setChildren(data);
+        } catch (err) {
+            setNamesError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } finally {
+            setLoadingNames(false);
+        };
+    };
+
     useEffect(() => {
         const loadChildName = async () => {
             try {
                 if (isGuest) {
                     const activeId = await getLocalActiveChildId();
-                    if (!activeId) { 
+                    if (!activeId) {
                         setChildName("Guest Child");
-                        return; 
+                        return;
                     }
                     const children = await listChildren();
                     const activeChild = children.find(c => c.id === activeId);
                     setChildName(activeChild?.name ?? 'Guest Child');
                 } else if (session) {
                     const result = await getActiveChildData();
-                    if (!result.success || !result.childName) { 
+                    if (!result.success || !result.childName) {
                         Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
                         setChildName("ERROR");
-                        return; 
+                        return;
                     }
                     setChildName(result.childName);
                 }
@@ -105,14 +164,58 @@ export default function Profile() {
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
             <ScrollView>
                 <View className='flex-col gap-4'>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Active Child
                         </Text>
-                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {childName}
-                        </Text>
+                        { isGuest ? (
+                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                👶 {childName}
+                            </Text>
+                        ) : (
+                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
+                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                    👶 {childName}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
+                    { isGuest ? (
+                        undefined
+                    ) : loadingNames ? (
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
+                                Loading Child Profiles...
+                            </Text>
+                        </View>
+                    ) : namesError ? (
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
+                                Error loading child names
+                            </Text>
+                        </View>
+                    ) : children.length < 2 ? (
+                        undefined  // show nothing if the user has no other child accounts
+                    ) : (
+                        <TouchableOpacity
+                            onPress={() => setShowSwitchChild(true)}
+                        >
+                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                                <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                                    🔃 Switch Child
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                    {!isGuest && <TouchableOpacity
+                        onPress={() => setShowAddChild(true)}
+                    >
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                            <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                                ✚ Add Child
+                            </Text>
+                        </View>
+                    </TouchableOpacity>}
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👤 Name
@@ -205,6 +308,25 @@ export default function Profile() {
                     />
                 )}
             </View>
+            <AddChildPopup
+                visible={showAddChild}
+                childName={newChildName}
+                onChildNameUpdate={(name: string) => setNewChildName(name)}
+                handleSave={handleSaveChild}
+                handleCancel={() => {
+                    setShowAddChild(false);
+                    setNewChildName("");  // reset name
+                }}
+            />
+            <SwitchChildPopup
+                visible={showSwitchChild}
+                childNames={children.map(child => child.name)}
+                currentChild={childName}
+                handleSwitch={handleSwitchChild}
+                handleCancel={() => {
+                    setShowSwitchChild(false);
+                }}
+            />
         </SafeAreaView>
     );
 }

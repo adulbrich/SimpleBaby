@@ -35,12 +35,17 @@ export default function ModalsLayout() {
                     }}
                 />
                 <Stack.Screen
+                    name='active-child'
+                    options={{
+                        headerTitle: 'Active Child',
+                    }}
+                />
+                <Stack.Screen
                     name='tos'
                     options={{
                         headerTitle: 'Terms of Service',
                     }}
                 />
-
                 <Stack.Screen
                     name='privacypolicy'
                     options={{
