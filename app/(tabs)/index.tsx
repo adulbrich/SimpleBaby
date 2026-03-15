@@ -18,6 +18,7 @@ import {
 	getActiveChildId,
 } from "@/library/local-store";
 import { formatName, saveNewChild } from "@/library/utils";
+import AddChildPopup from "@/components/add-child-popup";
 
 export default function MainTab() {
 	type Button = {
@@ -122,49 +123,14 @@ export default function MainTab() {
 					<TrackerButton button={buttons[4]} testID="diaper-button" />
 					<TrackerButton button={buttons[5]} testID="health-button" />
 				</View>
-				<Modal visible={newChildState} transparent>
-					<TouchableWithoutFeedback
-						onPress={Keyboard.dismiss}
-						accessible={false}
-					>
-						<BlurView
-							intensity={10}
-							className="grow items-center justify-center"
-						>
-							<View className="p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600">
-								<View className="mb-5">
-									<Text className="subheading font-bold mb-6">
-										Welcome to SimpleBaby
-									</Text>
-									<Text className="subtitle">
-										{"Please add your first child's name below:"}
-									</Text>
-								</View>
-								<View className="grow justify-between">
-									<View>
-										<Text className="text font-bold mb-1">Child Name</Text>
-										<TextInput
-											className="text-input mb-4"
-											placeholder="Enter a name to start tracking"
-											value={childName}
-											onChangeText={setChildName}
-											autoCapitalize="none"
-											keyboardType="default"
-										/>
-									</View>
-									<View>
-										<Button
-											text="Save & Start Tracking"
-											action={handleSaveChild}
-											textClass="font-bold"
-											buttonClass="button-normal"
-										/>
-									</View>
-								</View>
-							</View>
-						</BlurView>
-					</TouchableWithoutFeedback>
-				</Modal>
+				<AddChildPopup
+					visible={newChildState}
+					childName={childName}
+					onChildNameUpdate={setChildName}
+					handleSave={handleSaveChild}
+					altTitle="Welcome to SimpleBaby"
+					altSubtitle="Please add your first child's name below:"
+				/>
 			</View>
 		</View>
 	);

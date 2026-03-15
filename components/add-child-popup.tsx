@@ -14,15 +14,19 @@ export default function AddChildPopup(
     {
         visible,
         childName,
+        altTitle,
+        altSubtitle,
         onChildNameUpdate,
         handleSave,
-        handleCancel
+        handleCancel,
     } : {
         visible?: boolean;
         childName: string;
+        altTitle?: string;
+        altSubtitle?: string;
         onChildNameUpdate: (text: string) => void;
         handleSave: () => void;
-        handleCancel: () => void;
+        handleCancel?: () => void;
     }
 ) {
     return (
@@ -36,19 +40,14 @@ export default function AddChildPopup(
                     className='grow items-center justify-center'
                 >
                     <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
-                        <View className='mb-5'>
-                            <Text className='subheading font-bold mb-6'>
-                                Add a Child
-                            </Text>
-                            <Text className='subtitle'>
-                                Please enter the name of the child you would like to add:
-                            </Text>
-                        </View>
-                        <Text className='text font-bold mb-1'>
-                            Child Name
+                        <Text className='subheading font-bold mb-6'>
+                            {altTitle ?? "Add a Child"}
+                        </Text>
+                        <Text className='subtitle'>
+                            {altSubtitle ?? "Please enter the name of the child you would like to add:"}
                         </Text>
                         <TextInput
-                            className='text-input mb-4'
+                            className='text-input mb-4 mt-4'
                             placeholder='Enter a name'
                             value={childName}
                             onChangeText={onChildNameUpdate}
@@ -61,12 +60,12 @@ export default function AddChildPopup(
                             textClass='font-bold'
                             buttonClass='button-normal mb-4'
                         />
-                        <Button
+                        {handleCancel && <Button
                             text='Cancel'
                             action={handleCancel}
                             textClass='font-bold'
                             buttonClass='bg-red-600 border-gray-500'
-                        />
+                        />}
                     </View>
                 </BlurView>
             </TouchableWithoutFeedback>
