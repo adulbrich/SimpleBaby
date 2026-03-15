@@ -129,7 +129,7 @@ export async function getChildren(): Promise<{ name: string; id: string }[]> {
 
     const children = await getChildrenByUserId(userId);
 
-    if (children.filter(({ name, id }) => !(name && id)).length > 0) {
+    if (children.filter(child => !child || !child.name || !child.id).length > 0) {
         throw new Error("Failed to retrieve some children");
     }
 
