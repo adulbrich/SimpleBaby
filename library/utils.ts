@@ -1,8 +1,9 @@
 import supabase from './supabase-client';
-import { decryptData } from './crypto';
+import { encryptData, decryptData } from './crypto';
 
-export function capitalize(text: string) {
-    return text.charAt(0).toUpperCase() + text.slice(1);
+export function formatName(text: string) {
+    const trimmed = text.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
 export const getActiveChildData = async () => {
@@ -28,7 +29,7 @@ export const getActiveChildData = async () => {
 
     const query = supabase
         .from('children')
-        .select('id, name')
+        .select('*')
         .eq('user_id', user.id);
 
     const { data, error } = activeChildId
@@ -50,11 +51,36 @@ export const getActiveChildData = async () => {
         }
     }
 
-    return { success: true, childId: data.id, childName };
+    return { success: true, childId: data.id, childName, created_at: data.created_at };
+};
+
+
+async function getChildrenByUserId(userId: string): Promise<{ name: string; id: string }[]> {
+    const { data, error } = await supabase
+        .from("children")
+        .select("name, id")
+        .eq("user_id", userId);  // filter by userID
+    if (error) {
+        throw new Error("Failed to retrieve children.");
+    }
+    // decrypt names
+    const decrypted = await Promise.all(data.map(async ({ name, id }) => {
+        try {
+            return {name: await decryptData(name), id};
+        } catch {
+            return { name, id };
+        }
+    }));
+
+    return decrypted;
 };
 
 
 export const saveNewChild = async (childName: string) => {
+	if (!childName.trim()) {
+		throw new Error("Child name is required.");
+	}
+
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -62,25 +88,24 @@ export const saveNewChild = async (childName: string) => {
         throw new Error('User not found.');
     }
 
-    const child = childName.charAt(0).toUpperCase() + childName.slice(1);
+    const child = formatName(childName);
 
     // make sure that the user does not already have any other children with the new name
-    const { data: nameData, error: getNameError } = await supabase
-        .from("children")
-        .select("id")
-        .eq("user_id", userId)  // filter by userID
-        .eq("name", child);  // and by new child name
-    if (getNameError) {
-        throw new Error("Unable to check name availability.");
-    }
-    if (nameData.length > 0) {
-        throw new Error("Child name already exists.");
+    try {
+        const children = await getChildrenByUserId(userId);
+        // check if user already has a child with this name
+        if (children.find(({ name}) => name === child)) {
+            throw new Error("Child name already exists.");
+        }
+    } catch (error) {
+        throw error;
     }
 
     // Insert child into the database
-    const { error } = await supabase
+    const encryptedChildName = await encryptData(child);
+    const { data, error } = await supabase
         .from('children')
-        .insert([{ user_id: userId, name: child }])
+        .insert([{ user_id: userId, name: encryptedChildName }])
         .select('id')
         .single();
 
@@ -88,14 +113,14 @@ export const saveNewChild = async (childName: string) => {
         throw error;
     }
 
-    // Update user session metadata with the active child
+    // Update user session metadata with the active child ID
     await supabase.auth.updateUser({
-        data: { activeChild: child },
+        data: { activeChildId: data.id },
     });
 };
 
 
-export async function getChildNames(): Promise<{ names: string[] }> {
+export async function getChildren(): Promise<{ name: string; id: string }[]> {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -103,85 +128,47 @@ export async function getChildNames(): Promise<{ names: string[] }> {
         throw new Error('User not found.');
     }
 
-    const { data, error } = await supabase
-        .from("children")
-        .select("name")  // select only the child's name column
-        .eq("user_id", userId)  // filter by userID
-        .order("name");
-    if (error) {
-        throw new Error("Failed to retrieve children.");
-    }
+    const children = await getChildrenByUserId(userId);
 
-    return { names: data.map(({name}) => name) };  // extract name, since each row is returned as {columnName: value, ...}
+    return children.sort((child1, child2) => child1.name.localeCompare(child2.name));
 };
 
 
-export async function getChildCreatedDate(childName: string): Promise<{success: boolean; date: string}> {
+export async function updateChildName(childId: string, newChildName: string) {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
-    if (!userId) {
+    if (!userId || true) {
         throw new Error('User not found.');
     }
-
-    const { data, error } = await supabase
-        .from("children")
-        .select("created_at")
-        .eq("user_id", userId)  // filter by userID
-        .eq("name", childName)  // and by child name
-        .single();  // restrict to one row
-    if (error) {
-        throw new Error("Failed to retrieve created at date.");
-    }
-
-    return { success: true, date: String(data.created_at) };
-};
-
-
-export async function updateChildName(oldChildName: string, newChildName: string) {
-    const user = await supabase.auth.getUser();
-    const userId = user.data?.user?.id;
-
-    if (!userId) {
-        throw new Error('User not found.');
-    }
-
-    // get child id
-    const { data: idData, error: getIdError } = await supabase
-        .from("children")
-        .select("id")
-        .eq("user_id", userId)  // filter by userID
-        .eq("name", oldChildName)  // and by child name
-        .single();  // restrict to one row
-    if (getIdError) {
-        throw new Error("Failed to find child ID.");
-    }
-    const childID: string = String(idData.id);  // ensure id field is a string
 
     // make sure that the user does not already have any other children with the new name
-    const { data: nameData, error: getNameError } = await supabase
-        .from("children")
-        .select("id")
-        .eq("user_id", userId)  // filter by userID
-        .eq("name", newChildName);  // and by new child name
-    if (getNameError) {
+    let children: { name: string; id: string }[];
+    try {
+        children = await getChildrenByUserId(userId);
+    } catch {
         throw new Error("Unable to check name availability.");
     }
-    if (nameData.length > 0) {
+    const names = children.map(child => child.name);
+    if (names.includes(newChildName)) {
         throw new Error("Child name already exists.");
     }
 
+    const encryptedChildName = await encryptData(newChildName);
+
     const { error } = await supabase
         .from("children")
-        .update({name: newChildName})
-        .eq("id", childID);
+        .update({name: encryptedChildName})
+        .eq("user_id", userId)  // filter by userID
+        .eq("id", childId)  // and child id
+        .single();  // this should only update one child
     if (error) {
         throw new Error("Failed to update child name.");
     }
 };
 
 
-export async function deleteChild(childName: string) {
+export async function deleteChild(childId: string) {
     const user = await supabase.auth.getUser();
     const userId = user.data?.user?.id;
 
@@ -189,22 +176,12 @@ export async function deleteChild(childName: string) {
         throw new Error('User not found.');
     }
 
-    // get child id
-    const { data, error: getError } = await supabase
-        .from("children")
-        .select("id")
-        .eq("user_id", userId)  // filter by userID
-        .eq("name", childName)  // and by child name
-        .single();  // restrict to one row
-    if (getError) {
-        throw new Error("Failed to find child ID.");
-    }
-    const childID: string = String(data.id);  // ensure id field is a string
-
     const { error } = await supabase
         .from("children")
         .delete()
-        .eq("id", childID);
+        .eq("user_id", userId)  // filter by userID
+        .eq("id", childId)  // and child id
+        .single();  // this should only delete one child
     if (error) {
         throw new Error("Failed to delete child.");
     }

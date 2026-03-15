@@ -15,7 +15,7 @@ import AddChildPopup from '@/components/add-child-popup';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildData, getChildNames, saveNewChild } from '@/library/utils';
+import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
 
 /**
  * Profile Screen
@@ -35,7 +35,7 @@ export default function Profile() {
     const [showAddChild, setShowAddChild] = useState(false);
     const [showSwitchChild, setShowSwitchChild] = useState(false);
     const [newChildName, setNewChildName] = useState("");
-    const [childNames, setChildNames] = useState<string[]>([]);
+    const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
     const [loadingNames, setLoadingNames] = useState(true);
     const [namesError, setNamesError] = useState<string | null>(null);
 
@@ -89,12 +89,12 @@ export default function Profile() {
 
     const handleSwitchChild = async (index: number) => {
         try {
-            if (index < 0 || index >= childNames.length) {  // if index is invalid
+            if (index < 0 || index >= children.length) {  // if index is invalid
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
             await supabase.auth.updateUser({
-                data: { activeChild: childNames[index] },
+                data: { activeChildId: children[index].id, activeChild: "" },
             });
         } catch (err) {
             Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
@@ -113,9 +113,9 @@ export default function Profile() {
 
     const fetchChildNames = async () => {
         try {
-            const { names } = await getChildNames();
+            const data = await getChildren();
 
-            if (names) setChildNames(names);
+            if (data) setChildren(data);
         } catch (err) {
             setNamesError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
@@ -128,9 +128,9 @@ export default function Profile() {
             try {
                 if (isGuest) {
                     const activeId = await getLocalActiveChildId();
-                    if (!activeId) { 
+                    if (!activeId) {
                         setChildName("Guest Child");
-                        return; 
+                        return;
                     }
                     const children = await listChildren();
                     const activeChild = children.find(c => c.id === activeId);
@@ -140,7 +140,7 @@ export default function Profile() {
                     if (!result.success || !result.childName) { 
                         Alert.alert("Could Not Retrieve Child Name", "The name for the active child could not be retrieved. Restarting the app may solve the issue.");
                         setChildName("ERROR");
-                        return; 
+                        return;
                     }
                     setChildName(result.childName);
                 }
@@ -199,7 +199,7 @@ export default function Profile() {
                                 Error loading child names
                             </Text>
                         </View>
-                    ) : childNames.length < 2 ? (
+                    ) : children.length < 2 ? (
                         undefined  // show nothing if the user has no other child accounts
                     ) : (
                         <TouchableOpacity
@@ -325,8 +325,8 @@ export default function Profile() {
             />
             <SwitchChildPopup
                 visible={showSwitchChild}
-                childNames={childNames}
-                currentChild={session?.user.user_metadata?.activeChild}
+                childNames={children.map(child => child.name)}
+                currentChild={childName}
                 handleSwitch={handleSwitchChild}
                 handleCancel={() => {
                     setShowSwitchChild(false);

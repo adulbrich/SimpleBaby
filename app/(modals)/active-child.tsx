@@ -7,11 +7,10 @@ import {
     Alert
 } from 'react-native';
 import { router } from 'expo-router';
-import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import RenameChildPopup from '@/components/rename-child-popup';
-import { getChildCreatedDate, updateChildName, getChildNames, deleteChild } from '@/library/utils';
+import { getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 
@@ -24,22 +23,20 @@ import SwitchChildPopup from '@/components/switch-child-popup';
 
 export default function ActiveChild() {
 
-    const { session } = useAuth();
-
     const [showRenameChild, setShowRenameChild] = useState(false);
     const [newChildName, setNewChildName] = useState("");
-    const [createdDate, setCreatedDate] = useState<string|undefined>(undefined);
-    const [loadingDate, setLoadingDate] = useState(true);
-    const [dateError, setDateError] = useState<string | null>(null);
     const [showSelectChild, setShowSelectChild] = useState(false);
-    const [childNames, setChildNames] = useState<string[]>([]);
+    const [createdDate, setCreatedDate] = useState<string>('Loading...');
+    const [childName, setChildName] = useState<string>('Loading...');
+    const [childId, setChildId] = useState<string>('');
+    const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
     
     // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
         try {
             Alert.alert(
                 "Confirm Delete",
-                `Are you sure you want to delete ${session?.user.user_metadata?.activeChild}?`,
+                `Are you sure you want to delete ${childName}?`,
                 [{
                     text: "Cancel",
                     style: "cancel",
@@ -59,31 +56,35 @@ export default function ActiveChild() {
     // Handles second user request to delete a child, after confirmation
     const handleConfirmedDeleteChild = async () => {
         try {
-            const { names } = await getChildNames(); // get child names
-            if (names.length === 0) throw new Error("Unable to access child data");
+            const allChildren = await getChildren(); // get child names
+            if (allChildren.length === 0) throw new Error("Unable to access child data");
 
-            await deleteChild(session?.user.user_metadata?.activeChild);  // delete the current child
+            await deleteChild(childId);  // delete the current child
 
-            const otherNames = names.filter(name => name !== session?.user.user_metadata?.activeChild);
-            if (otherNames.length > 1) {
-                // store names to display to user
-                setChildNames(otherNames);
-                // show selection pop up for the user to select a new child
-                setShowSelectChild(true);
-            } else if (otherNames.length === 1) {
-                // Update user session metadata with the active child as the user's (only) other child
+            const otherChildren = allChildren.filter(({ name }) => name !== childName);
+            if (otherChildren.length === 1) {
+                // remove the active child from the user's supabase account. This will propagate to the user's session
                 await supabase.auth.updateUser({
-                    data: { activeChild: otherNames[0] },
+                    data: { activeChild: "", activeChildId: "" },
                 });
+                // the user has no other child accounts
+                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
+                return;
+            }
+            
+            // Update user session metadata with the active child as the user's first other child
+            await supabase.auth.updateUser({
+                data: { activeChildId: otherChildren[0].id, activeChild: "" },
+            });
+            
+            if (otherChildren.length === 1) {
                 // send the user back to the profile page
                 router.dismissTo("/(modals)/profile");
             } else {
-                // the user has no other child accounts
-                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
-                // remove the active child from the user's supabase account. This will propagate to the user's session
-                await supabase.auth.updateUser({
-                    data: { activeChild: null },
-                });
+                // store names to display to user
+                setChildren(otherChildren);
+                // show selection pop up for the user to select a new child
+                setShowSelectChild(true);
             }
         } catch (err) {
             Alert.alert("Error", err instanceof Error ? err.message : 'An unknown error occurred');
@@ -92,31 +93,17 @@ export default function ActiveChild() {
 
     const handleSelectChild = async (index: number) => {
         try {
-            if (index < 0 || index >= childNames.length) {  // if index is invalid
+            if (index < 0 || index >= children.length) {  // if index is invalid
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
             await supabase.auth.updateUser({
-                data: { activeChild: childNames[index] },
+                data: { activeChildId: children[index].id, activeChild: "" },
             });
             // send the user back to the profile page
             router.dismissTo("/(modals)/profile");
         } catch (err) {
             Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
-        }
-    };
-
-    const handleCancelSelectChild = async () => {
-        try {
-            // Update user session metadata with the next child that wasn't deleted
-            await supabase.auth.updateUser({
-                data: { activeChild: childNames[0] },
-            });
-        } catch (err) {
-            console.error("Failed to select new child", err instanceof Error ? err.message : 'Failed to change active child.');
-        } finally {
-            setShowSelectChild(false);
-            router.dismissTo("/(modals)/profile");  // send the user back to the profile page
         }
     };
 
@@ -126,14 +113,19 @@ export default function ActiveChild() {
             return;
         }
 
+        if (newChildName.trim() === childName) {
+            Alert.alert("Keeping current name", "The name you entered is the same as your child's current name.");
+            setShowRenameChild(false);
+            return;
+        }
+
         try {
-            await updateChildName(session?.user.user_metadata?.activeChild, newChildName);  // try to update child name
-            // Update user session metadata with the active child's new name
-            await supabase.auth.updateUser({
-                data: { activeChild: newChildName },
-            });
+            await updateChildName(childId, newChildName);  // try to update child name
+            await supabase.auth.updateUser({});  // Update user session to trigger useEffects in profile page
             setShowRenameChild(false);  // Close modal if successful
             setNewChildName("");  // reset child name
+            setChildName("Loading...");
+            loadChildData();  // refresh child name
         } catch (error: any) {
             Alert.alert(
                 'Error',
@@ -144,26 +136,27 @@ export default function ActiveChild() {
         }
     };
 
+    const loadChildData = async () => {
+        try {
+            const result = await getActiveChildData();
+            if (!result.success || !result.childName || !result.childId) {
+                throw new Error();
+            }
+            setChildName(result.childName);
+            setChildId(result.childId);
+            if (result.created_at) {
+                setCreatedDate((new Date(result.created_at)).toDateString());
+            }
+        } catch {
+            Alert.alert("Could Not Retrieve Child Data",
+                "The information for the active child could not be retrieved. Restarting the app may solve the issue.");
+            router.dismissTo("/(modals)/profile");  // send the user back to the profile page
+        }
+    };
+
     useEffect(() => {
-        const fetchCreatedDate = async () => {
-            try {
-                const { success, date } = await getChildCreatedDate(session?.user.user_metadata?.activeChild);
-                if (!success) throw new Error("Unable to retrieve date.");
-
-                if (date) {
-                    setCreatedDate((new Date(date)).toDateString());
-                } else {
-                    throw new Error("Failed to retrieve valid date.");
-                }
-            } catch (err) {
-                setDateError(err instanceof Error ? err.message : 'An unknown error occurred.');
-            } finally {
-                setLoadingDate(false);
-            };
-        };
-
-        fetchCreatedDate();
-    }, [session?.user.user_metadata?.activeChild]);
+        loadChildData();
+    }, []);
 
     return (
         <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
@@ -174,14 +167,15 @@ export default function ActiveChild() {
                             Name
                         </Text>
                         <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
-                            👶 {session?.user.user_metadata?.activeChild}
+                            👶 {childName}
                         </Text>
                     </View>
                     <TouchableOpacity
                         onPress={() => {
-                            setNewChildName(session?.user.user_metadata?.activeChild);  // autofill with current name
+                            setNewChildName(childName);  // autofill with current name
                             setShowRenameChild(true);
                         }}
+                        disabled={childId === ""}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
                             <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
@@ -194,13 +188,7 @@ export default function ActiveChild() {
                             📆 Created On
                         </Text>
                         <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
-                            { loadingDate ? (
-                                "loading..."
-                            ) : !createdDate || dateError ? (
-                                dateError
-                            ) : (
-                                createdDate
-                            )}
+                            {createdDate}
                         </Text>
                     </View>
                 </View>
@@ -209,6 +197,7 @@ export default function ActiveChild() {
                 <Button
                     text='Delete Child'
                     action={handleDeleteChild}
+                    disabled={childId === ""}
                     buttonClass='bg-red-600 border-gray-500'
                     textClass='font-bold dark:text-white'
                 />
@@ -216,7 +205,7 @@ export default function ActiveChild() {
             <RenameChildPopup
                 visible={showRenameChild}
                 childName={newChildName}
-                originalName={session?.user.user_metadata?.activeChild}
+                originalName={childName}
                 onChildNameUpdate={(name: string) => setNewChildName(name)}
                 handleSave={handleRenameChild}
                 handleCancel={() => {
@@ -226,11 +215,11 @@ export default function ActiveChild() {
             />
             <SwitchChildPopup
                 visible={showSelectChild}
-                childNames={childNames}
-                currentChild={childNames[0]}
+                childNames={children.map(child => child.name)}
+                currentChild={children[0]?.name}
                 hideCancelButton={true}
                 handleSwitch={handleSelectChild}
-                handleCancel={handleCancelSelectChild}
+                handleCancel={() => handleSelectChild(0)}
             />
         </SafeAreaView>
     );
