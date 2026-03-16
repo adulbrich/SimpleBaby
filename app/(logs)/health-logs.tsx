@@ -165,7 +165,7 @@ const HealthLogsView: React.FC = () => {
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
 
-		const isBlank = (val: string | null) => val !== null && val.trim().length === 0;
+		const isBlank = (val: string | null) => val !== null && !val.trim();
 
 		const invalidByCategory =
 			(editingLog.category === "Growth" && (
