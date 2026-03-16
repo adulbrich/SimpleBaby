@@ -177,7 +177,7 @@ const HealthLogsView: React.FC = () => {
 				isBlank(editingLog.activity_type) ||
 				isBlank(editingLog.activity_duration)
 			)) ||
-			(editingLog.category === "Medication" && (
+			(editingLog.category === "Meds" && (
 				isBlank(editingLog.meds_name) ||
 				isBlank(editingLog.meds_amount)
 			)) ||
