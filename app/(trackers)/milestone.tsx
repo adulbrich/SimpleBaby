@@ -270,7 +270,7 @@ export default function Milestone() {
 			setIsSaving(false);
 		} else {
 			const missingFields = [];
-			if (!name || name.trim().length === 0) missingFields.push("name");
+			if (!name.trim()) missingFields.push("name");
 			if (!milestoneDate) missingFields.push("date");
 			const formattedMissing =
 				missingFields.length > 1
