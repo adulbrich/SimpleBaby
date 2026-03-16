@@ -258,7 +258,7 @@ export default function Milestone() {
 	const handleSaveMilestoneLog = async () => {
 		if (isSaving) return;
 		
-		if (name.trim().length !== 0 && milestoneDate) {
+		if (name.trim() && milestoneDate) {
 			setIsSaving(true);
 			const result = await saveMilestoneLog();
 			if (result.success) {
