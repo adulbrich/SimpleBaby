@@ -130,7 +130,7 @@ export default function Feeding() {
 	// Validate input fields and trigger save action
 	const handleSaveFeedingLog = async () => {
 		if (isSaving) return;
-		if (category && itemName.trim().length! !== 0 && amount.trim().length! !== 0) {
+		if (category && itemName.trim() && amount.trim()) {
 			setIsSaving(true);
 			const result = await saveFeedingLog();
 			if (result.success) {
