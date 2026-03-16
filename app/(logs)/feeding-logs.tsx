@@ -184,8 +184,8 @@ const FeedingLogsView: React.FC = () => {
 		try {
 			const { id, category, item_name, amount, feeding_time, note } = editingLog;
 
-			if (item_name.trim().length === 0 || amount.trim().length === 0) {
-				Alert.alert("Failed to update log", "Please ensure the item name and/or amount are valid.");
+			if (!item_name.trim() || !amount.trim()) {
+				Alert.alert("Failed to update log", "Please ensure the item name and amount are valid.");
 				return;
 			}
 
