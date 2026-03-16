@@ -130,7 +130,7 @@ export default function Feeding() {
 	// Validate input fields and trigger save action
 	const handleSaveFeedingLog = async () => {
 		if (isSaving) return;
-		if (category && itemName && amount) {
+		if (category && itemName.trim() && amount.trim()) {
 			setIsSaving(true);
 			const result = await saveFeedingLog();
 			if (result.success) {
@@ -143,8 +143,8 @@ export default function Feeding() {
 		} else {
 			const missingFields = [];
 			if (!category) missingFields.push("category");
-			if (!itemName) missingFields.push("item name");
-			if (!amount) missingFields.push("amount");
+			if (!itemName.trim()) missingFields.push("item name");
+			if (!amount.trim()) missingFields.push("amount");
 			const formattedMissing =
 				missingFields.length > 1
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`

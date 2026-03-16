@@ -258,7 +258,7 @@ export default function Milestone() {
 	const handleSaveMilestoneLog = async () => {
 		if (isSaving) return;
 		
-		if (name && milestoneDate) {
+		if (name.trim() && milestoneDate) {
 			setIsSaving(true);
 			const result = await saveMilestoneLog();
 			if (result.success) {
@@ -270,7 +270,7 @@ export default function Milestone() {
 			setIsSaving(false);
 		} else {
 			const missingFields = [];
-			if (!name) missingFields.push("name");
+			if (!name.trim()) missingFields.push("name");
 			if (!milestoneDate) missingFields.push("date");
 			const formattedMissing =
 				missingFields.length > 1
