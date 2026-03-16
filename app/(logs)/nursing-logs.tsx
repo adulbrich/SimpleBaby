@@ -147,6 +147,12 @@ const NursingLogsView: React.FC = () => {
         if (editingLog.right_duration && !durationRegex.test(editingLog.right_duration)) {
             errorFields.push("Right duration must be in HH:MM:SS format.");
         }
+		if (!editingLog.left_amount?.trim()) {
+			errorFields.push("Left amount is missing.");
+		}
+		if (!editingLog.right_amount?.trim()) {
+			errorFields.push("Right amount is missing.");
+		}
 
 		if (errorFields.length !== 0) {
 			Alert.alert("Invalid Format", `Please fix the following errors:\n\n${errorFields.join("\n\n")}`);
