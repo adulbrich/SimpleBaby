@@ -143,8 +143,8 @@ export default function Feeding() {
 		} else {
 			const missingFields = [];
 			if (!category) missingFields.push("category");
-			if (!itemName) missingFields.push("item name");
-			if (!amount) missingFields.push("amount");
+			if (!itemName.trim()) missingFields.push("item name");
+			if (!amount.trim()) missingFields.push("amount");
 			const formattedMissing =
 				missingFields.length > 1
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
