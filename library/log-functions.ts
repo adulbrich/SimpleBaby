@@ -177,7 +177,8 @@ export async function saveLog(
                 [field.dbFieldName, await encryptField(field)]
         ));
         encryptedFields = Object.fromEntries(encryptedEntries);
-    } catch {
+    } catch (err) {
+		console.error("❌ Encryption or insert failed:", err);
         return { success: false, error: "Encryption error" };
     }
     
