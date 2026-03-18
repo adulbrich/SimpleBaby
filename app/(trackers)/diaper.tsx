@@ -62,6 +62,8 @@ export default function Diaper() {
 		const validInputs = checkInputs();
 		if (!validInputs.success) {
 			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
 		}
 
 		const result = await saveLog({

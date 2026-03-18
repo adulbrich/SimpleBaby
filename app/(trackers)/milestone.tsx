@@ -135,6 +135,8 @@ export default function Milestone() {
 		const validInputs = checkInputs();
 		if (!validInputs.success) {
 			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
 		}
 
 		const result = await saveLog({
@@ -142,7 +144,7 @@ export default function Milestone() {
 			fields: [{
 				dbFieldName: "category",
 				value: category,
-				type: "string",
+				type: "unencrypted",
 			}, {
 				dbFieldName: "title",
 				value: name,
@@ -153,7 +155,7 @@ export default function Milestone() {
 				type: "string",
 			}, {
 				dbFieldName: "achieved_at",
-				value: new Date(),
+				value: milestoneDate,
 				type: "date",
 			}].concat( photoUri ? [{  // include the photo only if the user added one
 				dbFieldName: "photo_url",

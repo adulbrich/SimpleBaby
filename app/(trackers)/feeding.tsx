@@ -63,8 +63,11 @@ export default function Feeding() {
 		setIsSaving(true);
 
 		const validInputs = checkInputs();
+		console.log(validInputs)
 		if (!validInputs.success) {
 			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
 		}
 
 		const result = await saveLog({

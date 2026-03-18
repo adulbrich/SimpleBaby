@@ -79,11 +79,9 @@ export default function Health() {
 			if (!healthLog.growth?.weight?.trim()) missingFields.push("weight");
 			if (!healthLog.growth?.head?.trim()) missingFields.push("head");
 		} else if (healthLog.category === "Activity") {
-			const missingFields = [];
 			if (!healthLog.activity?.type?.trim()) missingFields.push("type");
 			if (!healthLog.activity?.duration?.trim()) missingFields.push("duration");
 		} else if (healthLog.category === "Meds") {
-			const missingFields = [];
 			if (!healthLog.meds?.name?.trim()) missingFields.push("name");
 			if (!healthLog.meds?.amount?.trim()) missingFields.push("amount");
 			if (!healthLog.meds?.time_taken) missingFields.push("time taken");
@@ -120,6 +118,8 @@ export default function Health() {
 		const validInputs = checkInputs();
 		if (!validInputs.success) {
 			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
 		}
 
 		const logFields =

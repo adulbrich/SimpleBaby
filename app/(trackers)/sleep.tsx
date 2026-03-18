@@ -78,8 +78,8 @@ export default function Sleep() {
 		error: string
 	} => {
 		if (
-			!(stopwatchTime && stopwatchTime !== "00:00:00") &&
-			!(startTime && endTime)
+			(!stopwatchTime || stopwatchTime === "00:00:00") &&
+			(!startTime || !endTime || startTime.getTime() >= endTime.getTime())
 		) {
 			const error = `Failed to save the Sleep log. Please provide either a stopwatch time or manual valid start and end times.`;
 			return { success: false, error };
@@ -96,6 +96,8 @@ export default function Sleep() {
 		const validInputs = checkInputs();
 		if (!validInputs.success) {
 			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
 		}
 
 		const times = getFinalTimes();
