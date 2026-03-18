@@ -81,7 +81,7 @@ export default function Sleep() {
 			(!stopwatchTime || stopwatchTime === "00:00:00") &&
 			(!startTime || !endTime || startTime.getTime() >= endTime.getTime())
 		) {
-			const error = `Failed to save the Sleep log. Please provide either a stopwatch time or manual valid start and end times.`;
+			const error = `Failed to save the Sleep log. Please provide either a stopwatch time or valid manual start and end times.`;
 			return { success: false, error };
 		}
 
