@@ -10,16 +10,10 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildData } from "@/library/utils";
 import DiaperModule from "@/components/diaper-module";
-import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	insertRow,
-	getActiveChildId as getLocalActiveChildId,
-} from "@/library/local-store";
+import { formatStringList, saveLog } from "@/library/log-functions";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -38,119 +32,66 @@ export default function Diaper() {
 	const { isGuest } = useAuth();
 
 	/**
-	 * Saves and inserts a new diaper log into either the local or remote database.
-	 * Encrypts consistency, amount, and the note before proceeding.
+	 * Validates form inputs
 	 */
-	const createDiaperLog = async (
-		childId: string,
-		consistency: string,
-		amount: string,
-		changeTime: Date,
-		note = "",
-	) => {
-		try {
-			const encryptedConsistency = await encryptData(consistency);
-			const encryptedAmount = await encryptData(amount);
-			const encryptedNote = note ? await encryptData(note) : null;
+	const checkInputs = (): {
+		success: true
+	} | {
+		success: false;
+		error: string
+	} => {
+		const missingFields = [];
+		if (!consistency) missingFields.push("consistency");
+		if (!amount) missingFields.push("amount");
 
-			if (isGuest) {
-				const success = await insertRow("diaper_logs", {
-					child_id: childId,
-					consistency: encryptedConsistency,
-					amount: encryptedAmount,
-					note: encryptedNote,
-					change_time: changeTime.toISOString(),
-					logged_at: new Date().toISOString(),
-				});
-				return success
-					? { success: true }
-					: { success: false, error: "Failed to save diaper log locally." };
-			} else {
-                const { error } = await supabase.from("diaper_logs").insert([
-                    {
-                        child_id: childId,
-                        consistency: encryptedConsistency,
-                        amount: encryptedAmount,
-                        change_time: changeTime.toISOString(),
-                        note: encryptedNote,
-                    },
-			    ]);
+		if (missingFields.length > 0) {
+			const formattedMissing = formatStringList(missingFields);
 
-                if (error) {
-                    console.error("Error creating diaper log:", error);
-                    return { success: false, error };
-                }
-
-			    return { success: true };
-            }
-
-			
-		} catch (err) {
-			console.error("❌ Encryption or insert failed:", err);
-			return { success: false, error: "Encryption or database error" };
+			const error = `Failed to save the Diaper log. You are missing the following fields: ${formattedMissing}.`;
+			return { success: false, error };
 		}
-	};
 
-
-	// Get active child ID, determine save location, and begin to create the diaper log
-	const saveDiaperLog = async () => {
-		if (isGuest) {
-			const childId = await getLocalActiveChildId();
-			if (!childId) {
-				Alert.alert("No active child set (guest mode)");
-				return { success: false, error: "No active child set" };
-			}
-			return await createDiaperLog(
-				childId,
-				consistency,
-				amount,
-				changeTime,
-				note,
-			);
-		} else {
-            const { success, childId, error } = await getActiveChildData();
-
-            if (!success) {
-                Alert.alert(`Error: ${error}`);
-                return { success: false, error };
-            }
-
-            return await createDiaperLog(
-                childId,
-                consistency,
-                amount,
-                changeTime,
-                note,
-            );
-        }
+		return { success: true };
 	};
 
 	// Validate and handle the save action with alerts based on the result
 	const handleSaveDiaperLog = async () => {
 		if (isSaving) return;
-		if (consistency && amount) {
-			setIsSaving(true);
-			const result = await saveDiaperLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Diaper log saved successfully!");
-			} else {
-				Alert.alert(`Failed to save diaper log: ${result.error}`);
-			}
-			setIsSaving(false);
-		} else {
-			const missingFields = [];
-			if (!consistency) missingFields.push("consistency");
-			if (!amount) missingFields.push("amount");
-			const formattedMissing =
-				missingFields.length > 1
-					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-					: missingFields[0];
-			Alert.alert(
-				`${stringLib.errors.trackerMissingInfo}`,
-				`Failed to save the Diaper log. You are missing the following fields: ${formattedMissing}.`,
-			);
+		setIsSaving(true);
+
+		const validInputs = checkInputs();
+		if (!validInputs.success) {
+			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
 		}
+
+		const result = await saveLog({
+			tableName: "diaper_logs",
+			fields: [{
+				dbFieldName: "consistency",
+				value: consistency,
+				type: "string",
+			}, {
+				dbFieldName: "amount",
+				value: amount,
+				type: "string",
+			}, {
+				dbFieldName: "note",
+				value: note,
+				type: "string",
+			}, {
+				dbFieldName: "change_time",
+				value: changeTime,
+				type: "date",
+			}],
+		}, isGuest, "diaper");
+
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Diaper log saved successfully!");
+		} else {
+			Alert.alert(`Failed to save diaper log: ${result.error}`);
+		}
+		setIsSaving(false);
 	};
 
 	// Handle the UI logic when resetting fields
