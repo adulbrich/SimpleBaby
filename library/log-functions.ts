@@ -33,7 +33,7 @@ async function uploadPhoto(
     childId: string,
     uri: string,
 ): Promise<
-    { success: false, error: string } |
+    { success: false } |
     { success: true, path: string }
 > {
     try {
@@ -77,7 +77,8 @@ async function uploadPhoto(
 
         return { success: true, path: data.path };
     } catch (err) {
-        return { success: false, error: (err as Error).message };
+        console.error("Photo upload failed", err);
+        return { success: false };
     }
 };
 
@@ -112,6 +113,7 @@ async function createRemoteLog(
 ) {
     const { success, childId, error } = await getActiveChildData();
     if (!success) {
+        console.error(`Error creating ${logType} log:`, error);
         return { success: false, error };
     }
     fields.child_id = childId;
@@ -127,7 +129,7 @@ async function createRemoteLog(
             if (image.result.success) {
                 fields[image.fieldName] = image.result.path;
             } else {
-                console.error("Photo upload failed", image.result.error);
+                setUploadingPhotos?.(false);
                 return { success: false, error: "Photo upload failed" };
             }
         }
@@ -178,7 +180,7 @@ export async function saveLog(
         ));
         encryptedFields = Object.fromEntries(encryptedEntries);
     } catch (err) {
-		console.error("❌ Encryption or insert failed:", err);
+        console.error("❌ Encryption failed:", err);
         return { success: false, error: "Encryption error" };
     }
     

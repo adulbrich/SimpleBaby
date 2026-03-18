@@ -272,8 +272,8 @@ describe("Health component <HealthModule/>", () => {
         expect(onMedsUpdate.mock.calls[0][0].name).toBe("");
         expect(onMedsUpdate.mock.calls[0][0].amount).toBe("");
         // ensure time was initialized to approximately the current time
-        expect(onMedsUpdate.mock.calls[0][0].timeTaken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onMedsUpdate.mock.calls[0][0].timeTaken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
+        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -284,19 +284,19 @@ describe("Health component <HealthModule/>", () => {
         const onDateChange = (DateTimePicker as jest.Mock).mock.calls[0][0].onChange;
         // simulate date change with callback
         await act(async () => onDateChange({type: 'set'}, testTimeTaken));
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", time_taken: testTimeTaken });
 
         // fill in other inputs
         await userEvent.type(
             screen.getByTestId("health-meds-name"),
             testName
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", time_taken: testTimeTaken });
         await userEvent.type(
             screen.getByTestId("health-meds-amount"),
             testAmount
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, time_taken: testTimeTaken });
     });
     
     test("Shows/hides meds time picker (android)", async () => {
@@ -335,8 +335,8 @@ describe("Health component <HealthModule/>", () => {
         expect(onMedsUpdate.mock.calls[0][0].name).toBe("");
         expect(onMedsUpdate.mock.calls[0][0].amount).toBe("");
         // ensure time was initialized to approximately the current time
-        expect(onMedsUpdate.mock.calls[0][0].timeTaken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onMedsUpdate.mock.calls[0][0].timeTaken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
+        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -347,18 +347,18 @@ describe("Health component <HealthModule/>", () => {
         const onDateChange = (DateTimePickerAndroid.open as jest.Mock).mock.calls[0][0].onChange;
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testTimeTaken));
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", time_taken: testTimeTaken });
 
         // fill in other inputs
         await userEvent.type(
             screen.getByTestId("health-meds-name"),
             testName
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", time_taken: testTimeTaken });
         await userEvent.type(
             screen.getByTestId("health-meds-amount"),
             testAmount
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, timeTaken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, time_taken: testTimeTaken });
     });
 });
