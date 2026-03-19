@@ -88,7 +88,12 @@ async function createGuestLog(
     fields: Record<string, string>,
     tableName: TableName,
     logType: string,
-) {
+): Promise<{
+    success: false;
+    error: string;
+} | {
+    success: true;
+}> {
     const childId = await getLocalActiveChildId();
     if (!childId) {
         return { success: false, error: "No active child set (guest mode)" };
@@ -110,19 +115,28 @@ async function createRemoteLog(
     logType: string,
     imageFields: string[],
     setUploadingPhotos?: (state: boolean) => void,
-) {
-    const { success, childId, error } = await getActiveChildData();
-    if (!success) {
-        console.error(`Error creating ${logType} log:`, error);
-        return { success: false, error };
+): Promise<{
+    success: false;
+    error: string;
+} | {
+    success: true;
+}> {
+    try {
+        const { success, childId, error } = await getActiveChildData();
+        if (!success) {
+            console.error(`Error creating ${logType} log:`, error);
+            return { success: false, error };
+        }
+        fields.child_id = childId;
+    } catch {
+        return { success: false, error: "Unable to retrieve active child" };
     }
-    fields.child_id = childId;
 
     if (imageFields.length > 0) {
         setUploadingPhotos?.(true);
         const uploadPaths = await Promise.all(imageFields.map(async fieldName => ({
             fieldName: fieldName,
-            result: await uploadPhoto(childId, fields[fieldName]),
+            result: await uploadPhoto(fields.child_id, fields[fieldName]),
         })));
 
         for (const image of uploadPaths) {
@@ -168,8 +182,10 @@ export async function saveLog(
     logType: string,
     setUploadingPhotos?: (state: boolean) => void,
 ): Promise<{
-    success: boolean;
-    error?: string;
+    success: false;
+    error: string;
+} | {
+    success: true;
 }> {
     let encryptedFields: Record<string, string>;
 
