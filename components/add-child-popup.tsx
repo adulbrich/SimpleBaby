@@ -19,6 +19,7 @@ export default function AddChildPopup(
         onChildNameUpdate,
         handleSave,
         handleCancel,
+        testID,
     } : {
         visible?: boolean;
         childName: string;
@@ -27,10 +28,11 @@ export default function AddChildPopup(
         onChildNameUpdate: (text: string) => void;
         handleSave: () => void;
         handleCancel?: () => void;
+        testID?: string;
     }
 ) {
     return (
-        <Modal visible={visible} transparent>
+        <Modal visible={visible} transparent testID={testID}>
             <TouchableWithoutFeedback
                 onPress={Keyboard.dismiss}
                 accessible={false}
