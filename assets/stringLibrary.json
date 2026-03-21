@@ -28,6 +28,21 @@
             "signOutButton": "profile-sign-out-button",
             "addChildPopup": "profile-add-child-popup",
             "switchChildPopup": "profile-switch-child-popup"
+        },
+        "addChild": {
+            "popup": "add-child-popup",
+            "nameEntry": "add-child-name",
+            "saveButton": "add-child-save-button",
+            "cancelButton": "add-child-cancel-button"
+        },
+        "tabsIndex": {
+            "sleepButton": "sleep-button",
+            "nursingButton": "nursing-button",
+            "milestoneButton": "milestone-button",
+            "feedingButton": "feeding-button",
+            "diaperButton": "diaper-button",
+            "healthButton": "health-button",
+            "addChildPopup": "add-child-popup"
         }
     }
 }
