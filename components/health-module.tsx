@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import CategoryModule from "./milestone-category";
 
 /**
  * HealthModule component lets users select a health category (Growth, Activity, Meds, Vaccine, or Other),
@@ -213,40 +214,21 @@ export default function HealthModule({
 
     return (
         <View className="flex-col gap-6" testID={testID}>
-            <View className="stopwatch-primary">
-                <View className="items-start bottom-5 left-3">
-                    <Text className="bg-gray-200 p-3 rounded-xl font">
-                        🩺 Choose Type
-                    </Text>
-                </View>
-                <View className="flex-row flex-wrap gap-4 justify-center mb-6">
-                    {["Growth", "Activity", "Meds", "Vaccine", "Other"].map((category) => (
-                        <TouchableOpacity
-                            key={category}
-                            className={`feeding-category-button h-[15%] ${
-                                selectedCategory === category
-                                    ? "feeding-category-button-active"
-                                    : ""
-                            }`}
-                            onPress={() => handleCategoryPress(category as HealthCategory)}
-                            testID={`health-category-${category.toLowerCase()}-button`}
-                        >
-                            <Text className="scale-100 text-2xl">
-                                {category === "Growth"
-                                    ? "📏"
-                                    : category === "Activity"
-                                    ? "🏃‍♂️"
-                                    : category === "Vaccine"
-                                    ? "💉"
-                                    : category === "Other"
-                                    ? "❓"
-                                    : "💊"}
-                            </Text>
-                            <Text className="feeding-category-text">{category}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
+
+            <CategoryModule
+                title="🩺 Choose Type"
+                selectedCategory={selectedCategory}
+                categoryList={[
+                    { label: "Growth", icon: "📏" },
+                    { label: "Activity", icon: "🏃‍♂️" },
+                    { label: "Meds", icon: "💊" },
+                    { label: "Vaccine", icon: "💉" },
+                    { label: "Other", icon: "❓" }
+                ]}
+                onCategoryUpdate={handleCategoryPress}
+                testID="health-category-module"
+            />
+
             <View className="stopwatch-primary">
                 <View className="items-start bottom-5 left-3">
                     <Text className="bg-gray-200 p-3 rounded-xl font">

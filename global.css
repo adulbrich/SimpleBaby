@@ -61,20 +61,20 @@
     @apply text-[1rem] scale-100 dark:text-[#ffffff];
 }
 
-.feeding-category-button {
+.category-button {
     @apply flex-col items-center justify-center w-[7rem] rounded-full dark:bg-[#234c47] p-4 gap-1 aspect-square scale-100;
 }
 
-.feeding-category-button-active {
+.category-button-active {
     @apply bg-[#ffffff] border border-[#000000] shadow-sm scale-105 dark:bg-[#568a7b] dark:border-transparent;
 }
 
-.feeding-category-text {
-    @apply dark:text-white uppercase scale-100;
+.category-button-text-sm {
+    @apply dark:text-white uppercase scale-100 text-sm;
 }
 
-.diaper-consistency-text {
-    @apply dark:text-white uppercase scale-100;
+.category-button-text-lg {
+    @apply dark:text-white uppercase scale-100 text-2xl font-bold;
 }
 
 .nursing-side-text {
@@ -153,10 +153,6 @@
 
 .feeding-module-label {
     @apply font-bold dark:text-white scale-100 text-lg pb-1;
-}
-
-.diaper-amount-text {
-    @apply scale-100 text-2xl font-bold dark:text-white;
 }
 
 .transition-padding {

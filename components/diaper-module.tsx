@@ -4,6 +4,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import CategoryModule from './milestone-category';
 
 /**
  * DiaperModule component allows users to select diaper consistency and amount,
@@ -90,93 +91,31 @@ export default function DiaperModule({
 
     return (
         <View className='flex-col gap-6' testID={testID}>
-            <View className='stopwatch-primary'>
-                <View className='items-start bottom-5 left-3'>
-                    <Text className='bg-gray-200 p-3 rounded-xl font'>
-                        🌀 Choose Consistency
-                    </Text>
-                </View>
-                <View className='flex-row gap-4 justify-center mb-6'>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedConsistency === 'Wet'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleConsistencyPress('Wet')}
-                        testID='diaper-consistency-wet-button'
-                    >
-                        <Text className='scale-100 text-2xl'>💧</Text>
-                        <Text className='feeding-category-text'>Wet</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedConsistency === 'Dry'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleConsistencyPress('Dry')}
-                        testID='diaper-consistency-dry-button'
-                    >
-                        <Text className='scale-100 text-2xl'>🌵</Text>
-                        <Text className='feeding-category-text'>Dry</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedConsistency === 'Mixed'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleConsistencyPress('Mixed')}
-                        testID='diaper-consistency-mixed-button'
-                    >
-                        <Text className='scale-100 text-2xl'>🌦️</Text>
-                        <Text className='feeding-category-text'>Mixed</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <View className='stopwatch-primary'>
-                <View className='items-start bottom-5 left-3'>
-                    <Text className='bg-gray-200 p-3 rounded-xl font'>
-                        ⚖️ Choose Amount
-                    </Text>
-                </View>
-                <View className='flex-row gap-4 justify-center mb-6'>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedAmount === 'SM'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleAmountPress('SM')}
-                        testID='diaper-amount-sm-button'
-                    >
-                        <Text className='diaper-amount-text'>SM</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedAmount === 'MD'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleAmountPress('MD')}
-                        testID='diaper-amount-md-button'
-                    >
-                        <Text className='diaper-amount-text'>MD</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            selectedAmount === 'LG'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleAmountPress('LG')}
-                        testID='diaper-amount-lg-button'
-                    >
-                        <Text className='diaper-amount-text'>LG</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+
+            <CategoryModule
+                title="🌀 Choose Consistency"
+                selectedCategory={selectedConsistency}
+                categoryList={[
+                    { label: "Wet", icon: "💧" },
+                    { label: "Dry", icon: "🌵" },
+                    { label: "Mixed", icon: "🌦️" },
+                ]}
+                onCategoryUpdate={handleConsistencyPress}
+                testID="diaper-category-consistency-module"
+            />
+
+            <CategoryModule
+                title="⚖️ Choose Amount"
+                selectedCategory={selectedAmount}
+                categoryList={[
+                    { label: "SM" },
+                    { label: "MD" },
+                    { label: "LG" },
+                ]}
+                onCategoryUpdate={handleAmountPress}
+                testID="diaper-category-amount-module"
+            />
+
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
                     <Text className='bg-gray-200 p-3 rounded-xl font'>

@@ -19,9 +19,7 @@ import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import MilestoneCategory, {
-	MilestoneCategoryList,
-} from "@/components/milestone-category";
+import CategoryModule from "@/components/milestone-category";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
@@ -30,6 +28,8 @@ import {
 } from "@/library/local-store";
 
 import stringLib from "../../assets/stringLibrary.json";
+
+type MilestoneCategoryList = 'Motor' | 'Language' | 'Social' | 'Cognitive' | 'Other';
 
 export default function Milestone() {
 	const insets = useSafeAreaInsets();
@@ -322,11 +322,21 @@ export default function Milestone() {
 						}`}
 					></View>
 
-					<MilestoneCategory
-						category={category}
-						onCategoryUpdate={setCategory}
-						testID="milestone-category-modal"
-					/>
+					<View className='flex-col gap-6 mb-6'>
+						<CategoryModule
+							title="🌐 Choose Category"
+							selectedCategory={category}
+							categoryList={[
+								{ label: "Motor", icon: "🏃" },
+								{ label: "Language", icon: "🗣️" },
+								{ label: "Social", icon: "🧍‍♂️" },
+								{ label: "Cognitive", icon: "🧠" },
+								{ label: "Other", icon: "❓" }
+							]}
+							onCategoryUpdate={setCategory}
+							testID="milestone-category-modal"
+						/>
+					</View>
 
 					{/* Name and Description inputs */}
 					<View className="stopwatch-primary">
