@@ -4,9 +4,6 @@ import { View, Text, TouchableOpacity } from 'react-native';
 /**
  * CategoryModule allows users to select a category from a list.
  * Calls corresponding callbacks whenever category updates.
- * ['Motor', "🏃", 'Language', "🗣️", 'Social', "🧍‍♂️", 'Cognitive', "🧠", 'Other', "❓"]
- * 'Motor' | 'Language' | 'Social' | 'Cognitive' | 'Other'
- * 🌐 Choose Category
  */
 
 export default function CategoryModule<Category extends string>({
