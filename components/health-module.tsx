@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import CategoryModule from "./milestone-category";
+import CategoryModule from "@/components/category-module";
 
 /**
  * HealthModule component lets users select a health category (Growth, Activity, Meds, Vaccine, or Other),
@@ -52,13 +52,11 @@ export interface MedsData {
 export interface VaccineData {
     name: string;
     location: string;
-    date: Date;
 }
 
 export interface OtherData {
     name: string;
     description: string;
-    date: Date;
 }
 
 export default function HealthModule({
@@ -93,12 +91,10 @@ export default function HealthModule({
     const [vaccine, setVaccine] = useState<VaccineData>({
         name: "",
         location: "",
-        date: new Date()
     });
     const [other, setOther] = useState<OtherData>({
         name: "",
         description: "",
-        date: new Date()
     });
 
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -408,6 +404,7 @@ export default function HealthModule({
                                             name: text,
                                         }))
                                     }
+                                    testID="health-vaccine-name"
                                 />
                             </View>
                             <View className="ml-4 mr-4">
@@ -424,6 +421,7 @@ export default function HealthModule({
                                             location: text,
                                         }))
                                     }
+                                    testID="health-vaccine-location"
                                 />
                             </View>
                         </>
@@ -444,6 +442,7 @@ export default function HealthModule({
                                             name: text,
                                         }))
                                     }
+                                    testID="health-other-name"
                                 />
                             </View>
                             <View className="ml-4 mr-4">
@@ -460,6 +459,7 @@ export default function HealthModule({
                                             description: text,
                                         }))
                                     }
+                                    testID="health-other-description"
                                 />
                             </View>
                         </>

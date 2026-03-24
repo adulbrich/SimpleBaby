@@ -39,7 +39,7 @@ export default function CategoryModule<Category extends string>({
                     >
                         { icon ? (<>
                             <Text className="scale-100 text-xl">{icon}</Text>
-                            <Text className="category-button-text">{label}</Text>
+                            <Text className="category-button-text-sm">{label}</Text>
                         </>) : (
                             <Text className="category-button-text-lg">{label}</Text>
                         )}

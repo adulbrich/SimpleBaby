@@ -19,7 +19,7 @@ import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import CategoryModule from "@/components/milestone-category";
+import CategoryModule from "@/components/category-module";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {

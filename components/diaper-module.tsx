@@ -4,7 +4,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
-import CategoryModule from './milestone-category';
+import CategoryModule from "@/components/category-module";
 
 /**
  * DiaperModule component allows users to select diaper consistency and amount,

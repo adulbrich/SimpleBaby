@@ -4,7 +4,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
-import CategoryModule from './milestone-category';
+import CategoryModule from "@/components/category-module";
 
 /**
  * FeedingCategory component allows users to select a feeding category,
