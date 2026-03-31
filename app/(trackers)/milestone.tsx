@@ -12,9 +12,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildData } from "@/library/utils";
 import DateTimePicker, {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -22,12 +20,8 @@ import DateTimePicker, {
 import MilestoneCategory, {
 	MilestoneCategoryList,
 } from "@/components/milestone-category";
-import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	insertRow,
-	getActiveChildId as getLocalActiveChildId,
-} from "@/library/local-store";
+import { field, formatStringList, saveLog } from "@/library/log-functions";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -107,148 +101,27 @@ export default function Milestone() {
 		}
 	};
 
-	const uploadPhoto = async (childId: string, uri: string) => {
-		setUploadingPhoto(true);
-		try {
-			const {
-				data: { user },
-				error: userError,
-			} = await supabase.auth.getUser();
-
-			if (userError || !user) {
-				throw new Error("Not authenticated");
-			}
-
-			const extension = uri.split(".").pop()?.toLowerCase() ?? "jpg";
-			const path = `${user.id}/${childId}/${Date.now()}.${extension}`;
-
-			const res = await fetch(uri);
-			const arrayBuffer = await res.arrayBuffer();
-			const bytes = new Uint8Array(arrayBuffer);
-
-			if (bytes.length === 0) {
-				throw new Error(
-					"Selected photo is empty (0 bytes). Check the URI source.",
-				);
-			}
-
-			const contentType =
-				extension === "png"
-					? "image/png"
-					: extension === "webp"
-						? "image/webp"
-						: "image/jpeg";
-
-			const { data, error } = await supabase.storage
-				.from("milestone-photos")
-				.upload(path, bytes, {
-					contentType,
-					upsert: false,
-				});
-
-			if (error) {
-				throw error;
-			}
-
-			return data.path;
-		} finally {
-			setUploadingPhoto(false);
-		}
-	};
-
 	/**
-	 * Inserts a new milestone log into either the local or remote database.
-	 * Converts milestoneTime to ISO string before sending.
+	 * Validates form inputs
 	 */
-	const createMilestoneLog = async (
-		childId: string,
-		category: MilestoneCategoryList,
-		name: string,
-		milestoneTime: Date,
-		photoPath: string | null,
-		note: string,
-	) => {
-		const encryptedName = await encryptData(name);
-		const encryptedNote = note ? await encryptData(note) : null;
+	const checkInputs = (): {
+		success: true
+	} | {
+		success: false;
+		error: string
+	} => {
+		const missingFields = [];
+		if (!name.trim()) missingFields.push("name");
+		if (!milestoneDate) missingFields.push("date");
 
-		if (isGuest) {
-			try {
-				const success = await insertRow("milestone_logs", {
-					child_id: childId,
-					category,
-					title: encryptedName,
-					achieved_at: milestoneTime.toISOString(),
-					photo_url: photoPath,
-					note: encryptedNote,
-				});
-				return success
-					? { success: true }
-					: { success: false, error: "Failed to save milestone log locally." };
-			} catch (error) {
-				console.error("Error creating milestone log (guest):", error);
-				return { success: false, error };
-			}
-		} else {
-			const { error } = await supabase.from("milestone_logs").insert([
-				{
-					child_id: childId,
-					category,
-					title: encryptedName,
-					achieved_at: milestoneTime.toISOString(),
-					photo_url: photoPath,
-					note: encryptedNote,
-				},
-			]);
+		if (missingFields.length > 0) {
+			const formattedMissing = formatStringList(missingFields);
 
-			if (error) {
-				console.error("Error creating milestone log:", error);
-				return { success: false, error };
-			}
-
-			return { success: true };
-		}
-	};
-
-	/**
-	 * Gets the currently active child ID and attempts to save the milestone log for database entry.
-	 * Returns success/error object for handling in the UI.
-	 */
-	const saveMilestoneLog = async () => {
-		let childId: string | null = null;
-		let photoPath: string | null = null;
-
-		if (isGuest) {
-			childId = await getLocalActiveChildId();
-			if (!childId) {
-				Alert.alert("Error", "No active child selected (Guest Mode).");
-				return { success: false, error: "No active child in guest mode" };
-			}
-			if (photoUri) photoPath = photoUri; // in guest mode: store the local URI directly
-		} else {
-			const result = await getActiveChildData();
-			if (!result?.success || !result.childId) {
-				Alert.alert(`Error: ${result?.error}`);
-				return { success: false, error: result?.error };
-			}
-			childId = String(result.childId);
-			if (photoUri) {
-				try {
-					photoPath = await uploadPhoto(String(childId), photoUri); // logged-in: upload to Supabase storage
-				} catch (e) {
-					Alert.alert("Photo upload failed", String(e));
-					return { success: false, error: e };
-				}
-			}
+			const error = `Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`;
+			return { success: false, error };
 		}
 
-		return await createMilestoneLog(
-			String(childId),
-			category,
-			name,
-			milestoneDate,
-			photoPath,
-			note,
-		);
+		return { success: true };
 	};
 
 	/**
@@ -257,30 +130,47 @@ export default function Milestone() {
 	 */
 	const handleSaveMilestoneLog = async () => {
 		if (isSaving) return;
-		
-		if (name.trim() && milestoneDate) {
-			setIsSaving(true);
-			const result = await saveMilestoneLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Milestone log saved successfully!");
-			} else {
-				Alert.alert(`Failed to save milestone log: ${result.error}`);
-			}
+		setIsSaving(true);
+
+		const validInputs = checkInputs();
+		if (!validInputs.success) {
+			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
 			setIsSaving(false);
-		} else {
-			const missingFields = [];
-			if (!name.trim()) missingFields.push("name");
-			if (!milestoneDate) missingFields.push("date");
-			const formattedMissing =
-				missingFields.length > 1
-					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-					: missingFields[0];
-			Alert.alert(
-				`${stringLib.errors.trackerMissingInfo}`,
-				`Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`,
-			);
+			return;
 		}
+
+		const result = await saveLog({
+			tableName: "milestone_logs",
+			fields: [{
+				dbFieldName: "category",
+				value: category,
+				type: "unencrypted",
+			}, {
+				dbFieldName: "title",
+				value: name,
+				type: "string",
+			}, {
+				dbFieldName: "note",
+				value: note,
+				type: "string",
+			}, {
+				dbFieldName: "achieved_at",
+				value: milestoneDate,
+				type: "date",
+			}].concat( photoUri ? [{  // include the photo only if the user added one
+				dbFieldName: "photo_url",
+				value: photoUri,
+				type: "photo",
+			}] : []) as field[],
+		}, isGuest, "milestone", setUploadingPhoto);
+
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Milestone log saved successfully!");
+		} else {
+			Alert.alert(`Failed to save milestone log: ${result.error}`);
+		}
+		setIsSaving(false);
 	};
 
     // Handle the UI logic when resetting fields

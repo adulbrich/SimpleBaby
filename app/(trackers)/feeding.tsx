@@ -10,18 +10,12 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildData } from "@/library/utils";
 import FeedingCategory, {
 	FeedingCategoryList,
 } from "@/components/feeding-category";
-import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	insertRow,
-	getActiveChildId as getLocalActiveChildId,
-} from "@/library/local-store";
+import { formatStringList, saveLog } from "@/library/log-functions";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -39,121 +33,74 @@ export default function Feeding() {
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
-	// Function to create a new feeding log record into Supabase
-	const createFeedingLog = async (
-		childId: string,
-		category: string,
-		itemName: string,
-		amount: string,
-		feedingTime: Date,
-		note = "",
-	) => {
-		try {
-			const encryptedCategory = await encryptData(category);
-			const encryptedItemName = await encryptData(itemName);
-			const encryptedAmount = await encryptData(amount);
-			const encryptedNote = note ? await encryptData(note) : null;
+	/**
+	 * Validates form inputs
+	 */
+	const checkInputs = (): {
+		success: true
+	} | {
+		success: false;
+		error: string
+	} => {
+		const missingFields = [];
+		if (!category) missingFields.push("category");
+		if (!itemName.trim()) missingFields.push("item name");
+		if (!amount.trim()) missingFields.push("amount");
 
-			const { error } = await supabase.from("feeding_logs").insert([
-				{
-					child_id: childId,
-					category: encryptedCategory,
-					item_name: encryptedItemName,
-					amount: encryptedAmount,
-					feeding_time: feedingTime.toISOString(),
-					note: encryptedNote,
-				},
-			]);
+		if (missingFields.length > 0) {
+			const formattedMissing = formatStringList(missingFields);
 
-			if (error) {
-				console.error("Error creating feeding log:", error);
-				return { success: false, error };
-			}
-
-			return { success: true };
-		} catch (err) {
-			console.error("❌ Encryption or insert failed:", err);
-			return { success: false, error: "Encryption or database error" };
+			const error = `Failed to save the Feeding log. You are missing the following fields: ${formattedMissing}.`;
+			return { success: false, error };
 		}
-	};
 
-	// Fetch active child ID and save feeding log for that child
-	const saveFeedingLog = async () => {
-		if (isGuest) {
-			const childId = await getLocalActiveChildId();
-			if (!childId) {
-				Alert.alert("Error: No active child selected (Guest Mode).");
-				return { success: false, error: "No active child in guest mode" };
-			}
-
-			try {
-				const encryptedCategory = await encryptData(category);
-				const encryptedItemName = await encryptData(itemName);
-				const encryptedAmount = await encryptData(amount);
-				const encryptedNote = note ? await encryptData(note) : null;
-
-				const success = await insertRow("feeding_logs", {
-					child_id: childId,
-					category: encryptedCategory,
-					item_name: encryptedItemName,
-					amount: encryptedAmount,
-					feeding_time: feedingTime.toISOString(),
-					note: encryptedNote,
-				});
-
-				return success
-					? { success: true }
-					: { success: false, error: "Failed to save feeding log locally." };
-			} catch (err) {
-				console.error("❌ Guest insert failed:", err);
-				return { success: false, error: "Encryption or local save error" };
-			}
-		} else {
-            const { success, childId, error } = await getActiveChildData();
-
-            if (!success) {
-                Alert.alert(`Error: ${error}`);
-                return { success: false, error };
-            }
-
-            return await createFeedingLog(
-                childId,
-                category,
-                itemName,
-                amount,
-                feedingTime,
-                note,
-            );
-        }
+		return { success: true };
 	};
 
 	// Validate input fields and trigger save action
 	const handleSaveFeedingLog = async () => {
 		if (isSaving) return;
-		if (category && itemName.trim() && amount.trim()) {
-			setIsSaving(true);
-			const result = await saveFeedingLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Feeding log saved successfully!");
-			} else {
-				Alert.alert(`Failed to save feeding log: ${result.error}`);
-			}
+		setIsSaving(true);
+
+		const validInputs = checkInputs();
+		if (!validInputs.success) {
+			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
 			setIsSaving(false);
-		} else {
-			const missingFields = [];
-			if (!category) missingFields.push("category");
-			if (!itemName.trim()) missingFields.push("item name");
-			if (!amount.trim()) missingFields.push("amount");
-			const formattedMissing =
-				missingFields.length > 1
-					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-					: missingFields[0];
-			Alert.alert(
-				`${stringLib.errors.trackerMissingInfo}`,
-				`Failed to save the Feeding log. You are missing the following fields: ${formattedMissing}.`,
-			);
+			return;
 		}
+
+		const result = await saveLog({
+			tableName: "feeding_logs",
+			fields: [{
+				dbFieldName: "category",
+				value: category,
+				type: "string",
+			}, {
+				dbFieldName: "item_name",
+				value: itemName,
+				type: "string",
+			}, {
+				dbFieldName: "amount",
+				value: amount,
+				type: "string",
+			}, {
+				dbFieldName: "note",
+				value: note,
+				type: "string",
+			}, {
+				dbFieldName: "feeding_time",
+				value: feedingTime,
+				type: "date",
+			}],
+		}, isGuest, "feeding");
+
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Feeding log saved successfully!");
+		} else {
+			Alert.alert(`Failed to save feeding log: ${result.error}`);
+		}
+		setIsSaving(false);
 	};
 
 	// Handle the UI logic when resetting fields

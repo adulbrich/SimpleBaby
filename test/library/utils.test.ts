@@ -53,7 +53,7 @@ describe("Utils: getActiveChildData", () => {
         const result = await getActiveChildData();
 
         expect(result.success).toBe(false);
-        expect(result.error).toBe(testError);
+        expect(result.error).toBe(testError.message);
         expect(console.error).toHaveBeenCalledTimes(1);
         expect(console.error).toHaveBeenLastCalledWith('Error getting active child:', testError);
     });

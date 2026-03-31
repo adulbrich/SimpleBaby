@@ -93,11 +93,7 @@ const NursingLogsView: React.FC = () => {
                 } = await getActiveChildData();
 
                 if (!success || !childId) {
-                    throw new Error(
-                        typeof childError === "string"
-                            ? childError
-                            : childError?.message || "Failed to get child ID",
-                    );
+                    throw new Error(childError);
                 }
 
                 if (childName) setActiveChildName(childName);

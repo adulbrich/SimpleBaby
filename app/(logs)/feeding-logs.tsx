@@ -99,11 +99,7 @@ const FeedingLogsView: React.FC = () => {
 					error: childError,
 				} = await getActiveChildData();
 				if (!success || !childId) {
-					throw new Error(
-						typeof childError === "string"
-							? childError
-							: childError?.message || "Failed to get active child ID",
-					);
+					throw new Error(childError);
 				}
 				if (childName) setActiveChildName(childName);
 

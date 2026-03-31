@@ -1,6 +1,11 @@
-import HealthModule, { HealthCategory } from "@/components/health-module";
-import supabase from "@/library/supabase-client";
-import { getActiveChildData } from "@/library/utils";
+import HealthModule, {
+	HealthCategory,
+	GrowthData,
+	ActivityData,
+	MedsData,
+	VaccineData,
+	OtherData,
+} from "@/components/health-module";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -14,43 +19,32 @@ import {
 	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	insertRow,
-	getActiveChildId as getLocalActiveChildId,
-} from "@/library/local-store";
+import { field, formatStringList, saveLog } from "@/library/log-functions";
 import stringLib from "../../assets/stringLibrary.json";
 
-// Define the shape of the health log data object with optional nested properties
-interface HealthLog {
+// Define the shape of the health log data object with varying nested properties
+type HealthLog = {
 	child_id: string;
 	category: HealthCategory;
 	date: Date;
-	growth?: {
-		length: string;
-		weight: string;
-		head: string;
-	};
-	activity?: {
-		type: string;
-		duration: string;
-	};
-	meds?: {
-		name: string;
-		amount: string;
-		timeTaken: Date;
-	};
-	vaccine?: {
-		name: string;
-		location: string;
-	};
-	other?: {
-		name: string;
-		description: string;
-	};
 	note: string;
-}
+} & ({
+	category: "Growth";
+	growth: GrowthData;
+} | {
+	category: "Activity";
+	activity: ActivityData;
+} | {
+	category: "Meds";
+	meds: MedsData;
+} | {
+	category: "Vaccine";
+	vaccine: VaccineData;
+} | {
+	category: "Other";
+	other: OtherData;
+});
 
 export default function Health() {
 	const insets = useSafeAreaInsets();
@@ -58,6 +52,7 @@ export default function Health() {
 	const [healthLog, setHealthLog] = useState<HealthLog>({
 		child_id: "",
 		category: "Growth",
+		growth: { length: "", weight: "", head: "" },
 		date: new Date(),
 		note: "",
 	});
@@ -66,173 +61,51 @@ export default function Health() {
 	const { isGuest } = useAuth();
 
 	/**
-	 * Creates a health log record in storage.
-	 * Returns success/error object for handling in the UI.
+	 * Validates form inputs
 	 */
-	const createHealthLog = async (log: any) => {
-		if (isGuest) {
-			try {
-				const success = await insertRow("health_logs", log);
-				return success
-					? { success: true }
-					: { success: false, error: "Failed to save health log locally." };
-			} catch (error) {
-				console.error("Error creating health log (guest):", error);
-				return { success: false, error };
-			}
-		} else {
-			const { error } = await supabase.from("health_logs").insert([log]);
-			if (error) {
-				console.error("Error creating health log:", error);
-				return { success: false, error };
-			}
-			return { success: true };
-		}
-	};
-
-	/**
-	 * Validates form inputs, prepares encrypted payload, and saves the health log.
-	 */
-	const saveHealthLog = async () => {
+	const checkInputs = (): {
+		success: true
+	} | {
+		success: false;
+		error: string
+	} => {
 		if (!healthLog.category) {
 			return { success: false, error: "Please provide a category" };
 		}
 
+		const missingFields = [];
 		if (healthLog.category === "Growth") {
-			const missingFields = [];
 			if (!healthLog.growth?.length?.trim()) missingFields.push("length");
 			if (!healthLog.growth?.weight?.trim()) missingFields.push("weight");
 			if (!healthLog.growth?.head?.trim()) missingFields.push("head");
-			if (missingFields.length > 0) {
-				const formattedMissing =
-					missingFields.length > 1
-						? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-						: missingFields[0];
-				Alert.alert(
-					`${stringLib.errors.trackerMissingInfo}`,
-					`Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`,
-				);
-				return { success: false, error: "Missing required growth fields" };
-			}
 		} else if (healthLog.category === "Activity") {
-			const missingFields = [];
 			if (!healthLog.activity?.type?.trim()) missingFields.push("type");
 			if (!healthLog.activity?.duration?.trim()) missingFields.push("duration");
-			if (missingFields.length > 0) {
-				const formattedMissing =
-					missingFields.length > 1
-						? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-						: missingFields[0];
-				Alert.alert(
-					"Missing Information",
-					`Failed to save the Activity Health log. You are missing the following fields: ${formattedMissing}.`,
-				);
-				return { success: false, error: "Missing required activity fields" };
-			}
 		} else if (healthLog.category === "Meds") {
-			const missingFields = [];
 			if (!healthLog.meds?.name?.trim()) missingFields.push("name");
 			if (!healthLog.meds?.amount?.trim()) missingFields.push("amount");
-			if (!healthLog.meds?.timeTaken) missingFields.push("time taken");
-			if (missingFields.length > 0) {
-				const formattedMissing =
-					missingFields.length > 1
-						? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
-						: missingFields[0];
-				Alert.alert(
-					"Missing Information",
-					`Failed to save the Medicine Health log. You are missing the following fields: ${formattedMissing}.`,
-				);
-				return { success: false, error: "Missing required medicine fields" };
-			}
+			if (!healthLog.meds?.time_taken) missingFields.push("time taken");
 		} else if (healthLog.category === "Vaccine") {
-			if (!healthLog.vaccine?.name?.trim()) {
-				Alert.alert(
-					"Missing Information",
-					"Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.",
-				);
-				return { success: false, error: "Missing required vaccine fields" };
-			}
+			if (!healthLog.vaccine?.name?.trim()) missingFields.push("vaccine name");
 		} else if (healthLog.category === "Other") {
-			if (!healthLog.other?.name?.trim()) {
-				Alert.alert(
-					"Missing Information",
-					"Failed to save the 'Other' Health log. Please provide at least a title for the health event.",
-				);
-				return { success: false, error: "Missing required other fields" };
-			}
+			if (!healthLog.other?.name?.trim()) missingFields.push("health event name");
 		}
 
-		let childId: string | null = null;
+		if (missingFields.length > 0) {
+			const formattedMissing = formatStringList(missingFields);
 
-		if (isGuest) {
-			childId = await getLocalActiveChildId();
-			if (!childId) {
-				return { success: false, error: "No active child selected (Guest Mode)." };
-			}
-		} else {
-			const {
-				success,
-				childId: cloudChildId,
-				error,
-			} = await getActiveChildData();
-			if (!success) {
-				return {
-					success: false,
-					error: `Failed to get active child: ${error}`,
-				};
-			}
-			childId = cloudChildId;
+			const categoryName =
+				healthLog.category === "Growth" ? "Growth" :
+				healthLog.category === "Activity" ? "Activity" :
+				healthLog.category === "Meds" ? "Medicine" :
+				healthLog.category === "Vaccine" ? "Vaccine" :
+				"'Other'";
+
+			const error = `Failed to save the ${categoryName} Health log. You are missing the following fields: ${formattedMissing}.`;
+			return { success: false, error };
 		}
 
-		// Prepare data shape for insertion matching DB schemas
-		try {
-			const encryptedLog = {
-				child_id: childId,
-				category: healthLog.category,
-				date: healthLog.date.toISOString(),
-				growth_length: healthLog.growth?.length
-					? await encryptData(healthLog.growth.length)
-					: null,
-				growth_weight: healthLog.growth?.weight
-					? await encryptData(healthLog.growth.weight)
-					: null,
-				growth_head: healthLog.growth?.head
-					? await encryptData(healthLog.growth.head)
-					: null,
-				activity_type: healthLog.activity?.type
-					? await encryptData(healthLog.activity.type)
-					: null,
-				activity_duration: healthLog.activity?.duration
-					? await encryptData(healthLog.activity.duration)
-					: null,
-				meds_name: healthLog.meds?.name
-					? await encryptData(healthLog.meds.name)
-					: null,
-				meds_amount: healthLog.meds?.amount
-					? await encryptData(healthLog.meds.amount)
-					: null,
-				meds_time_taken: healthLog.meds?.timeTaken || null,
-				vaccine_name: healthLog.vaccine?.name
-					? await encryptData(healthLog.vaccine.name)
-					: null,
-				vaccine_location: healthLog.vaccine?.location
-					? await encryptData(healthLog.vaccine.location)
-					: null,
-				other_name: healthLog.other?.name
-					? await encryptData(healthLog.other.name)
-					: null,
-				other_description: healthLog.other?.description
-					? await encryptData(healthLog.other.description)
-					: null,
-				note: healthLog.note ? await encryptData(healthLog.note) : null,
-			};
-
-			return await createHealthLog(encryptedLog);
-		} catch (err) {
-			console.error("❌ Encryption failed:", err);
-			return { success: false, error: "Failed to encrypt and save health log." };
-		}
+		return { success: true };
 	};
 
 	/**
@@ -240,13 +113,54 @@ export default function Health() {
 	 */
 	const handleSaveHealthLog = async () => {
 		if (isSaving) return;
-		
 		setIsSaving(true);
-		const result = await saveHealthLog();
+
+		const validInputs = checkInputs();
+		if (!validInputs.success) {
+			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
+			setIsSaving(false);
+			return;
+		}
+
+		const logFields =
+			healthLog.category === "Growth" ? healthLog.growth :
+			healthLog.category === "Activity" ? healthLog.activity :
+			healthLog.category === "Meds" ? healthLog.meds :
+			healthLog.category === "Vaccine" ? healthLog.vaccine :
+			healthLog.category === "Other" ? healthLog.other : {};
+
+		const result = await saveLog({
+			tableName: "health_logs",
+			fields: [{
+				dbFieldName: "category",
+				value: healthLog.category,
+				type: "unencrypted",
+			}, {
+				dbFieldName: "date",
+				value: healthLog.date,
+				type: "date",
+			}, {
+				dbFieldName: "note",
+				value: healthLog.note,
+				type: "string",
+			},
+			...Object.entries(logFields).map(([key, value]): field => (
+				value instanceof Date ? {
+					dbFieldName: `${healthLog.category.toLowerCase()}_${key}`,
+					value: value,
+					type: "date",
+				} : {
+					dbFieldName: `${healthLog.category.toLowerCase()}_${key}`,
+					value: value as string,
+					type: "string",
+				}
+			))],
+		}, isGuest, "health");
+
 		if (result.success) {
 			router.replace("/(tabs)");
 			Alert.alert("Success", "Health log saved successfully!");
-		} else if (result.error && !String(result.error).startsWith("Missing required")) {
+		} else if (result.error) {
 			const errorMessage = String(result.error);
 			if (errorMessage.startsWith("Failed to ")) {
 				Alert.alert("Error", errorMessage);
@@ -278,38 +192,19 @@ export default function Health() {
 				category === "Activity" ? { type: "", duration: "" } : undefined,
 			meds:
 				category === "Meds"
-					? { name: "", amount: "", timeTaken: new Date() }
+					? { name: "", amount: "", time_taken: new Date() }
 					: undefined,
 			vaccine: category === "Vaccine" ? { name: "", location: "" } : undefined,
 			other: category === "Other" ? { name: "", description: "" } : undefined,
-		}));
+		} as HealthLog));
 	}, []);
 
 	// Update growth-related fields in state with partial updates
 	const handleGrowthUpdate = useCallback(
-		(growth: { length?: string; weight?: string; head?: string }) => {
+		(growth: { length: string; weight: string; head: string }) => {
 			setHealthLog((prev) => ({
 				...prev,
-				growth: {
-					length:
-						growth.length !== undefined
-							? growth.length
-							: prev.growth
-								? prev.growth.length
-								: "",
-					weight:
-						growth.weight !== undefined
-							? growth.weight
-							: prev.growth
-								? prev.growth.weight
-								: "",
-					head:
-						growth.head !== undefined
-							? growth.head
-							: prev.growth
-								? prev.growth.head
-								: "",
-				},
+				growth,
 			}));
 		},
 		[],
@@ -317,23 +212,10 @@ export default function Health() {
 
 	// Update activity-related fields in state with partial updates
 	const handleActivityUpdate = useCallback(
-		(activity: { type?: string; duration?: string }) => {
+		(activity: ActivityData) => {
 			setHealthLog((prev) => ({
 				...prev,
-				activity: {
-					type:
-						activity.type !== undefined
-							? activity.type
-							: prev.activity
-								? prev.activity.type
-								: "",
-					duration:
-						activity.duration !== undefined
-							? activity.duration
-							: prev.activity
-								? prev.activity.duration
-								: "",
-				},
+				activity,
 			}));
 		},
 		[],
@@ -341,43 +223,30 @@ export default function Health() {
 
 	// Update medication-related fields in state with partial updates
 	const handleMedsUpdate = useCallback(
-		(meds: { name?: string; amount?: string; timeTaken?: Date }) => {
-			setHealthLog((prev) => ({
+		(meds: MedsData) => {
+			setHealthLog((prev: any) => ({
 				...prev,
-				meds: {
-					name: prev.meds?.name || "",
-					amount: prev.meds?.amount || "",
-					timeTaken: prev.meds?.timeTaken || new Date(),
-					...meds,
-				},
+				meds,
 			}));
 		},
 		[],
 	);
 
 	const handleVaccineUpdate = useCallback(
-		(vaccine: { name?: string; location?: string }) => {
+		(vaccine: VaccineData) => {
 			setHealthLog((prev) => ({
 				...prev,
-				vaccine: {
-					name: prev.vaccine?.name || "",
-					location: prev.vaccine?.location || "",
-					...vaccine,
-				},
+				vaccine,
 			}));
 		},
 		[],
 	);
 
 	const handleOtherUpdate = useCallback(
-		(other: { name?: string; description?: string }) => {
+		(other: OtherData) => {
 			setHealthLog((prev) => ({
 				...prev,
-				other: {
-					name: prev.other?.name || "",
-					description: prev.other?.description || "",
-					...other,
-				},
+				other,
 			}));
 		},
 		[],
@@ -390,10 +259,6 @@ export default function Health() {
 			category: "Growth",
 			date: new Date(),
 			growth: { length: "", weight: "", head: "" },
-			activity: undefined,
-			meds: undefined,
-			vaccine: undefined,
-			other: undefined,
 			note: "",
 		});
 		setReset((prev) => prev + 1);
