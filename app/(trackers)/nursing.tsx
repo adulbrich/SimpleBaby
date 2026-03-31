@@ -10,16 +10,10 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import supabase from "@/library/supabase-client";
 import { router } from "expo-router";
-import { getActiveChildData } from "@/library/utils";
 import NursingStopwatch from "@/components/nursing-stopwatch";
-import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	insertRow,
-	getActiveChildId as getLocalActiveChildId,
-} from "@/library/local-store";
+import { saveLog } from "@/library/log-functions";
 
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -38,142 +32,76 @@ export default function Nursing() {
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
-	// Insert a new nursing log entry into Supabase
-	const createNursingLog = async (
-		childId: string,
-		leftDuration: string,
-		rightDuration: string,
-		leftAmount: string,
-		rightAmount: string,
-		note = "",
-	) => {
-		try {
-			const encryptedLeftDuration = await encryptData(leftDuration);
-			const encryptedRightDuration = await encryptData(rightDuration);
-			const encryptedLeftAmount = await encryptData(leftAmount);
-			const encryptedRightAmount = await encryptData(rightAmount);
-			const encryptedNote = note ? await encryptData(note) : null;
-
-			const { error } = await supabase.from("nursing_logs").insert([
-				{
-					child_id: childId,
-					left_duration: encryptedLeftDuration,
-					right_duration: encryptedRightDuration,
-					left_amount: encryptedLeftAmount,
-					right_amount: encryptedRightAmount,
-					note: encryptedNote,
-				},
-			]);
-
-			if (error) {
-				console.error("Error creating nursing log:", error);
-				return { success: false, error };
-			}
-
-			return { success: true };
-		} catch (err) {
-			console.error("❌ Encryption failed:", err);
-			return { success: false, error: "Encryption error" };
+	/**
+	 * Validates form inputs
+	 */
+	const checkInputs = (): {
+		success: true
+	} | {
+		success: false;
+		error: string
+	} => {
+		if (
+			leftDuration === "00:00:00" &&
+			rightDuration === "00:00:00" &&
+			leftAmount.trim() === "" &&
+			rightAmount.trim() === ""
+		) {
+			const error = `Failed to save the Nursing log. You are missing the following fields: left or right duration or left or right amount.`;
+			return { success: false, error };
 		}
-	};
 
-	// Retrieve the current active child, then save log to Supabase
-	const saveNursingLog = async () => {
-		if (isGuest) {
-			const childId = await getLocalActiveChildId();
-			if (!childId) {
-				Alert.alert("Error: No active child selected (Guest Mode).");
-				return { success: false, error: "No active child in guest mode" };
-			}
-
-			try {
-				const normalizedLeftDuration = leftDuration === "00:00:00" ? "" : leftDuration;
-				const normalizedRightDuration = rightDuration === "00:00:00" ? "" : rightDuration;
-				const normalizedLeftAmount = leftAmount.trim();
-				const normalizedRightAmount = rightAmount.trim();
-
-				const encryptedLeftDuration = await encryptData(normalizedLeftDuration);
-				const encryptedRightDuration = await encryptData(normalizedRightDuration);
-				const encryptedLeftAmount = await encryptData(normalizedLeftAmount);
-				const encryptedRightAmount = await encryptData(normalizedRightAmount);
-				const encryptedNote = note ? await encryptData(note) : null;
-
-				const success = await insertRow("nursing_logs", {
-					child_id: childId,
-					left_duration: encryptedLeftDuration,
-					right_duration: encryptedRightDuration,
-					left_amount: encryptedLeftAmount,
-					right_amount: encryptedRightAmount,
-					note: encryptedNote,
-					logged_at: new Date().toISOString(),
-				});
-
-				return success
-					? { success: true }
-					: { success: false, error: "Failed to save nursing log locally." };
-			} catch (err) {
-				console.error("Guest insert failed:", err);
-				return { success: false, error: "Encryption or local save error" };
-			}
-		} else {
-			const { success, childId, error } = await getActiveChildData();
-
-			if (!success) {
-				Alert.alert(`Error: ${error}`);
-				return { success: false, error };
-			}
-
-			const normalizedLeftAmount =
-				leftAmount.trim() === "" ? "0" : leftAmount.trim();
-			const normalizedRightAmount =
-				rightAmount.trim() === "" ? "0" : rightAmount.trim();
-
-			return await createNursingLog(
-				childId,
-				leftDuration,
-				rightDuration,
-				normalizedLeftAmount,
-				normalizedRightAmount,
-				note,
-			);
-		}
+		return { success: true };
 	};
 
 	// Validate input, then call save
 	const handleSaveNursingLog = async () => {
 		if (isSaving) return;
-		
-		// Prevent logging if all fields are empty
-		if (
-			leftDuration !== "00:00:00" ||
-			rightDuration !== "00:00:00" ||
-			leftAmount.trim() !== "" ||
-			rightAmount.trim() !== ""
-		) {
-			setIsSaving(true);
-			const result = await saveNursingLog();
-			if (result.success) {
-				router.replace("/(tabs)");
-				Alert.alert("Nursing log saved successfully!");
-			} else {
-				Alert.alert(`Failed to save nursing log: ${result.error}`);
-			}
+		setIsSaving(true);
+
+		const validInputs = checkInputs();
+		if (!validInputs.success) {
+			Alert.alert(stringLib.errors.trackerMissingInfo, validInputs.error);
 			setIsSaving(false);
-		} else {
-			const missingFields = [];
-			if (leftDuration === "00:00:00" || rightDuration === "00:00:00")
-				missingFields.push("left or right duration");
-			if (leftAmount === "" || rightAmount === "")
-				missingFields.push("left or right amount");
-			const formattedMissing =
-				missingFields.length > 1
-					? `${missingFields.slice(0, -1).join(", ")} or ${missingFields.slice(-1)}`
-					: missingFields[0];
-			Alert.alert(
-				`${stringLib.errors.trackerMissingInfo}`,
-				`Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`,
-			);
+			return;
 		}
+
+		const result = await saveLog({
+			tableName: "nursing_logs",
+			fields: [{
+				dbFieldName: "left_duration",
+				value: leftDuration === "00:00:00" ? "" : leftDuration,
+				type: "string",
+			}, {
+				dbFieldName: "right_duration",
+				value: rightDuration === "00:00:00" ? "" : rightDuration,
+				type: "string",
+			}, {
+				dbFieldName: "left_amount",
+				value: leftAmount.trim(),
+				type: "string",
+			}, {
+				dbFieldName: "right_amount",
+				value: rightAmount.trim(),
+				type: "string",
+			}, {
+				dbFieldName: "note",
+				value: note,
+				type: "string",
+			}, {
+				dbFieldName: "logged_at",
+				value: new Date(),
+				type: "date",
+			}],
+		}, isGuest, "nursing");
+
+		if (result.success) {
+			router.replace("/(tabs)");
+			Alert.alert("Nursing log saved successfully!");
+		} else {
+			Alert.alert(`Failed to save nursing log: ${result.error}`);
+		}
+		setIsSaving(false);
 	};
 
 	// Handle the UI logic when resetting fields

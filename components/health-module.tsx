@@ -46,7 +46,7 @@ export interface ActivityData {
 export interface MedsData {
     name: string;
     amount: string;
-    timeTaken: Date;
+    time_taken: Date;
 }
 
 export interface VaccineData {
@@ -86,7 +86,7 @@ export default function HealthModule({
     const [meds, setMeds] = useState<MedsData>({
         name: "",
         amount: "",
-        timeTaken: new Date(),
+        time_taken: new Date(),
     });
     const [vaccine, setVaccine] = useState<VaccineData>({
         name: "",
@@ -106,7 +106,7 @@ export default function HealthModule({
 
     const onChangeTime = (event: DateTimePickerEvent, selectedTime?: Date) => {
         if (event.type === "set" && selectedTime) {
-            setMeds((prevMeds) => ({ ...prevMeds, timeTaken: selectedTime }));
+            setMeds((prevMeds) => ({ ...prevMeds, time_taken: selectedTime }));
         }
         setShowTimePicker(false);
     };
@@ -135,12 +135,12 @@ export default function HealthModule({
     const showTimePickerModal = () => {
         if (Platform.OS === "android") {
             DateTimePickerAndroid.open({
-                value: meds.timeTaken,
+                value: meds.time_taken,
                 onChange: (event, selectedTime) => {
                     if (selectedTime) {
                         setMeds((prevMeds) => ({
                             ...prevMeds,
-                            timeTaken: selectedTime,
+                            time_taken: selectedTime,
                         }));
                     }
                 },
@@ -371,14 +371,14 @@ export default function HealthModule({
                                     >
                                         <Text>Choose ⏰</Text>
                                     </TouchableOpacity>
-                                    <Text className="mr-4">{formatTime(meds.timeTaken)}</Text>
+                                    <Text className="mr-4">{formatTime(meds.time_taken)}</Text>
                                 </View>
                             </View>
                             {showTimePicker && Platform.OS === "ios" && (
                                 <View className="items-center">
                                     <DateTimePicker
                                         testID="timeTimePicker"
-                                        value={meds.timeTaken}
+                                        value={meds.time_taken}
                                         mode="time"
                                         is24Hour={false}
                                         onChange={onChangeTime}

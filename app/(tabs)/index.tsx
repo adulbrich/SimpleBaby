@@ -12,6 +12,11 @@ import {
 } from "@/library/local-store";
 import { formatName, saveNewChild } from "@/library/utils";
 import AddChildPopup from "@/components/add-child-popup";
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.tabsIndex;
+
 
 export default function MainTab() {
 	type Button = {
@@ -107,14 +112,14 @@ export default function MainTab() {
 		<View className="main-container flex-col">
 			<View className="flex-row justify-center gap-4 items-center flex-grow">
 				<View className="flex-col gap-4">
-					<TrackerButton button={buttons[0]} testID="sleep-button" />
-					<TrackerButton button={buttons[1]} testID="nursing-button" />
-					<TrackerButton button={buttons[2]} testID="milestone-button" />
+					<TrackerButton button={buttons[0]} testID={testIDs.sleepButton} />
+					<TrackerButton button={buttons[1]} testID={testIDs.nursingButton} />
+					<TrackerButton button={buttons[2]} testID={testIDs.milestoneButton} />
 				</View>
 				<View className="flex-col gap-4">
-					<TrackerButton button={buttons[3]} testID="feeding-button" />
-					<TrackerButton button={buttons[4]} testID="diaper-button" />
-					<TrackerButton button={buttons[5]} testID="health-button" />
+					<TrackerButton button={buttons[3]} testID={testIDs.feedingButton} />
+					<TrackerButton button={buttons[4]} testID={testIDs.diaperButton} />
+					<TrackerButton button={buttons[5]} testID={testIDs.healthButton} />
 				</View>
 				<AddChildPopup
 					visible={newChildState}
@@ -123,6 +128,7 @@ export default function MainTab() {
 					handleSave={handleSaveChild}
 					altTitle="Welcome to SimpleBaby"
 					altSubtitle="Please add your first child's name below:"
+					testID={testIDs.addChildPopup}
 				/>
 			</View>
 		</View>

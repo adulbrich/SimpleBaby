@@ -6,14 +6,14 @@ export default function SettingScreen() {
     <View className="main-container items-left justify-center">
         <ScrollView>
             <View className="bg-gray-100">
-                <TouchableOpacity className="p-4 gap-4 mb-1 bg-white"
+                <TouchableOpacity className="p-4 gap-4 mb-1 bg-white" testID='settings-tos-button'
                     onPress={() => {
                     router.push('/(modals)/tos');}}>
                     <Text className="text-lg font-bold text-left">
                         Terms of Service
                     </Text>
                 </TouchableOpacity>
-				<TouchableOpacity className="p-4 gap-4 mb-1 bg-white"
+				<TouchableOpacity className="p-4 gap-4 mb-1 bg-white" testID='settings-privacy-button'
                     onPress={() => {
                     router.push('/(modals)/privacypolicy');}}>
                     <Text className="text-lg font-bold text-left">

@@ -6,7 +6,19 @@ export function formatName(text: string) {
     return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
-export const getActiveChildData = async () => {
+export const getActiveChildData = async (): Promise<{
+    success: true;
+    error?: undefined;
+    childId: string;
+    childName: string;
+    created_at: string;
+} | {
+    success: false;
+    error: string;
+    childId?: undefined;
+    childName?: undefined;
+    created_at?: undefined;
+}> => {
     // Get the current user
     const {
         data: { user },
@@ -38,7 +50,7 @@ export const getActiveChildData = async () => {
 
     if (error) {
         console.error('Error getting active child:', error);
-        return { success: false, error };
+        return { success: false, error: error.message };
     }
 
     let childName = data?.name;
@@ -47,7 +59,7 @@ export const getActiveChildData = async () => {
             childName = await decryptData(childName);
         } catch {
             console.error("Could not decrypt child name.");
-            return { success: false };
+            return { success: false, error: "Could not decrypt child name." };
         }
     }
 

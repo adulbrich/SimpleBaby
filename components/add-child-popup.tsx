@@ -8,6 +8,10 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.addChild;
 
 
 export default function AddChildPopup(
@@ -19,6 +23,7 @@ export default function AddChildPopup(
         onChildNameUpdate,
         handleSave,
         handleCancel,
+        testID,
     } : {
         visible?: boolean;
         childName: string;
@@ -27,10 +32,11 @@ export default function AddChildPopup(
         onChildNameUpdate: (text: string) => void;
         handleSave: () => void;
         handleCancel?: () => void;
+        testID?: string;
     }
 ) {
     return (
-        <Modal visible={visible} transparent>
+        <Modal visible={visible} transparent testID={testID}>
             <TouchableWithoutFeedback
                 onPress={Keyboard.dismiss}
                 accessible={false}
@@ -53,18 +59,21 @@ export default function AddChildPopup(
                             onChangeText={onChildNameUpdate}
                             autoCapitalize='none'
                             keyboardType='default'
+                            testID={testIDs.nameEntry}
                         />
                         <Button
                             text='Save New Child'
                             action={handleSave}
                             textClass='font-bold'
                             buttonClass='button-normal mb-4'
+                            testID={testIDs.saveButton}
                         />
                         {handleCancel && <Button
                             text='Cancel'
                             action={handleCancel}
                             textClass='font-bold'
                             buttonClass='bg-red-600 border-gray-500'
+                            testID={testIDs.cancelButton}
                         />}
                     </View>
                 </BlurView>

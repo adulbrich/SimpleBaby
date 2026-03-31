@@ -18,7 +18,8 @@ export default function SwitchChildPopup(
         currentChild,
         hideCancelButton,
         handleSwitch,
-        handleCancel
+        handleCancel,
+        testID,
     } : {
         visible?: boolean;
         childNames: string[];
@@ -26,6 +27,7 @@ export default function SwitchChildPopup(
         hideCancelButton?: boolean;
         handleSwitch: (index: number) => void;
         handleCancel: () => void;
+        testID?: string;
     }
 ) {
     const [selected, setSelected] = useState<number>(-1);
@@ -36,7 +38,7 @@ export default function SwitchChildPopup(
     }, [childNames, currentChild]);
 
     return (
-        <Modal visible={visible} transparent onRequestClose={handleCancel}>
+        <Modal visible={visible} transparent onRequestClose={handleCancel} testID={testID}>
             <TouchableWithoutFeedback
                 onPress={Keyboard.dismiss}
                 accessible={false}

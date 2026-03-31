@@ -16,6 +16,7 @@ import SwitchChildPopup from '@/components/switch-child-popup';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
 import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
+import stringLib from "@/assets/stringLibrary.json";
 
 /**
  * Profile Screen
@@ -25,6 +26,7 @@ import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
  */
 
 const alertSound = require('../../assets/sounds/ui-pop.mp3');
+const testIDs = stringLib.testIDs.profile;
 
 export default function Profile() {
 
@@ -169,12 +171,12 @@ export default function Profile() {
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameGuest}>
                                 👶 {childName}
                             </Text>
                         ) : (
                             <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameButton}>
                                     👶 {childName}
                                 </Text>
                             </TouchableOpacity>
@@ -183,13 +185,13 @@ export default function Profile() {
                     { isGuest ? (
                         undefined
                     ) : loadingNames ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.loadingNames}>
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
                                 Loading Child Profiles...
                             </Text>
                         </View>
                     ) : namesError ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.namesError}>
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
                                 Error loading child names
                             </Text>
@@ -199,6 +201,7 @@ export default function Profile() {
                     ) : (
                         <TouchableOpacity
                             onPress={() => setShowSwitchChild(true)}
+                            testID={testIDs.switchChildButton}
                         >
                             <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
                                 <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
@@ -209,6 +212,7 @@ export default function Profile() {
                     )}
                     {!isGuest && <TouchableOpacity
                         onPress={() => setShowAddChild(true)}
+                        testID={testIDs.addChildButton}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
                             <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
@@ -235,6 +239,7 @@ export default function Profile() {
                                     'Please wait for an update.',
                                 )
                             }
+                            testID={testIDs.caretakersButton}
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
                                 Manage
@@ -256,6 +261,7 @@ export default function Profile() {
                                     player.play();
                                 }
                             }
+                            testID={testIDs.emailButton}
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
                                 {displayEmail}
@@ -273,6 +279,7 @@ export default function Profile() {
                                     'Please wait for an update.',
                                 )
                             }
+                            testID={testIDs.passwordButton}
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
                                 Change my password
@@ -290,6 +297,7 @@ export default function Profile() {
                                     'Please wait for an update.',
                                 )
                             }
+                            testID={testIDs.appVersionButton}
                         >
                             <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
                                 v0.1a
@@ -305,6 +313,7 @@ export default function Profile() {
                         action={handleSignOut}
                         buttonClass='bg-red-600 border-gray-500'
                         textClass='font-bold dark:text-white'
+                        testID={testIDs.signOutButton}
                     />
                 )}
             </View>
@@ -317,6 +326,7 @@ export default function Profile() {
                     setShowAddChild(false);
                     setNewChildName("");  // reset name
                 }}
+                testID={testIDs.addChildPopup}
             />
             <SwitchChildPopup
                 visible={showSwitchChild}
@@ -326,6 +336,7 @@ export default function Profile() {
                 handleCancel={() => {
                     setShowSwitchChild(false);
                 }}
+                testID={testIDs.switchChildPopup}
             />
         </SafeAreaView>
     );
