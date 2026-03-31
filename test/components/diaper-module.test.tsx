@@ -2,6 +2,7 @@ import DiaperModule from "@/components/diaper-module";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
+import CategoryModule from "@/components/category-module";
 
 
 jest.mock("@react-native-community/datetimepicker", () => {
@@ -13,6 +14,36 @@ jest.mock("@react-native-community/datetimepicker", () => {
     };
 });
 
+jest.mock("@/components/category-module", () => {
+    const Text = jest.requireActual("react-native").Text;
+    const CategoryModuleMock = jest.fn(
+        ({testID, selectedCategory}: {testID?: string; selectedCategory: string}) =>
+            (<Text testID={testID}>{selectedCategory}</Text>)
+    );
+    return CategoryModuleMock;
+});
+
+
+/*
+ *  setCategoryInput:
+ *      Reads update handlers from CategoryModule mocks
+ *      filters calls by a provided testID
+ *      Calls update handler with provided input
+*/
+async function setCategoryInput(
+    category: string,
+    testID: string,
+ ) {
+    // get calls to <CategoryModule/> matching provided test ID
+    const calls = (CategoryModule as jest.Mock).mock.calls.filter(
+        call => call[0].testID === testID  // filter calls by test id
+    );
+    // get update callback from most recent call
+    const onCategoryUpdate = calls.slice(-1)[0][0].onCategoryUpdate;
+
+    await act(() => onCategoryUpdate?.(category));
+}
+
 
 describe("Diaper component <DiaperModule/>", () => {
 
@@ -22,16 +53,11 @@ describe("Diaper component <DiaperModule/>", () => {
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
 
-    test("Renders input buttons", () => {
+    test("Renders inputs", () => {
         render(<DiaperModule/>);
 
-        expect(screen.getByTestId("diaper-consistency-wet-button")).toBeTruthy();
-        expect(screen.getByTestId("diaper-consistency-dry-button")).toBeTruthy();
-        expect(screen.getByTestId("diaper-consistency-mixed-button")).toBeTruthy();
-
-        expect(screen.getByTestId("diaper-amount-sm-button")).toBeTruthy();
-        expect(screen.getByTestId("diaper-amount-md-button")).toBeTruthy();
-        expect(screen.getByTestId("diaper-amount-lg-button")).toBeTruthy();
+        expect(screen.getByTestId("diaper-category-consistency-module")).toBeTruthy();
+        expect(screen.getByTestId("diaper-category-amount-module")).toBeTruthy();
         expect(screen.getByTestId("diaper-time-button")).toBeTruthy();
     });
 
@@ -43,26 +69,12 @@ describe("Diaper component <DiaperModule/>", () => {
         expect(onConsistencyUpdate).toHaveBeenCalledTimes(1);
         expect(onConsistencyUpdate.mock.calls[0][0]).toBe("Wet");
 
-        // switch to dry
-        await userEvent.press(screen.getByTestId("diaper-consistency-dry-button"));
+        const testConsistencyCategories = ["Dry", "Mixed", "Wet"];
 
-        // consistency should last have been changed to dry
-        expect(onConsistencyUpdate).toHaveBeenCalledTimes(2);
-        expect(onConsistencyUpdate.mock.calls[1][0]).toBe("Dry");
-
-        // switch to mixed
-        await userEvent.press(screen.getByTestId("diaper-consistency-mixed-button"));
-
-        // consistency should last have been changed to mixed
-        expect(onConsistencyUpdate).toHaveBeenCalledTimes(3);
-        expect(onConsistencyUpdate.mock.calls[2][0]).toBe("Mixed");
-
-        // switch back to wet
-        await userEvent.press(screen.getByTestId("diaper-consistency-wet-button"));
-
-        // consistency should last have been changed to wet
-        expect(onConsistencyUpdate).toHaveBeenCalledTimes(4);
-        expect(onConsistencyUpdate.mock.calls[3][0]).toBe("Wet");
+        for (const category of testConsistencyCategories) {
+            await setCategoryInput(category, "diaper-category-consistency-module");  // switch category
+            expect(onConsistencyUpdate.mock.lastCall[0]).toBe(category);
+        }
     });
 
     test("Changes amount", async () => {
@@ -73,31 +85,17 @@ describe("Diaper component <DiaperModule/>", () => {
         expect(onAmountUpdate).toHaveBeenCalledTimes(1);
         expect(onAmountUpdate.mock.calls[0][0]).toBe("SM");
 
-        // switch to medium
-        await userEvent.press(screen.getByTestId("diaper-amount-md-button"));
+        const testAmountCategories = ["MD", "LG", "SM"];
 
-        // amount should last have been changed to medium
-        expect(onAmountUpdate).toHaveBeenCalledTimes(2);
-        expect(onAmountUpdate.mock.calls[1][0]).toBe("MD");
-
-        // switch to large
-        await userEvent.press(screen.getByTestId("diaper-amount-lg-button"));
-
-        // amount should last have been changed to large
-        expect(onAmountUpdate).toHaveBeenCalledTimes(3);
-        expect(onAmountUpdate.mock.calls[2][0]).toBe("LG");
-
-        // switch back to small
-        await userEvent.press(screen.getByTestId("diaper-amount-sm-button"));
-
-        // amount should last have been changed to small
-        expect(onAmountUpdate).toHaveBeenCalledTimes(4);
-        expect(onAmountUpdate.mock.calls[3][0]).toBe("SM");
+        for (const category of testAmountCategories) {
+            await setCategoryInput(category, "diaper-category-amount-module");  // switch category
+            expect(onAmountUpdate.mock.lastCall[0]).toBe(category);
+        }
     });
 
     test("Shows/hides date picker (ios)", async () => {
         Platform.OS = "ios";
-        
+
         render(<DiaperModule/>);
 
         // Press change date button

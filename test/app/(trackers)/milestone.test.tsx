@@ -2,7 +2,7 @@ import Milestone from "@/app/(trackers)/milestone";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import { Alert, Platform } from "react-native";
 import { router } from "expo-router";
-import MilestoneCategory from "@/components/milestone-category";
+import CategoryModule from "@/components/category-module";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { launchImageLibraryAsync, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
 import { field, formatStringList, saveLog } from "@/library/log-functions";
@@ -17,13 +17,13 @@ jest.mock("@react-native-community/datetimepicker", () => {
     };
 });
 
-jest.mock("@/components/milestone-category", () => {
+jest.mock("@/components/category-module", () => {
     const Text = jest.requireActual("react-native").Text;
-    const MilestoneCategoryMock = jest.fn(
-        ({testID, category}: {testID?: string; category: string}) =>
-            (<Text testID={testID}>{category}</Text>)
+    const CategoryModuleMock = jest.fn(
+        ({testID, selectedCategory}: {testID?: string; selectedCategory: string}) =>
+            (<Text testID={testID}>{selectedCategory}</Text>)
     );
-    return MilestoneCategoryMock;
+    return CategoryModuleMock;
 });
 
 jest.mock("expo-image-picker", () => ({
@@ -57,7 +57,7 @@ jest.mock("@/library/log-functions", () => ({
 
 /*
  *  setmilestoneInputs:
- *      Reads update handlers from first call to MilestoneCategory mock
+ *      Reads update handlers from first call to CategoryModule mock
  *      Calls update handlers with provided inputs
  *      Sets other inputs by component testIDs
 */
@@ -77,10 +77,10 @@ async function setMilestoneInputs({
     };
     note?: string;
 }) {
-    // read parameters to first call of MilestoneCategory
+    // read parameters to first call of CategoryModule
     const {
         onCategoryUpdate,
-    } = (MilestoneCategory as jest.Mock).mock.calls[0][0];
+    } = (CategoryModule as jest.Mock).mock.calls[0][0];
 
     if (category) {
         await act(() => onCategoryUpdate?.(category));
@@ -124,7 +124,7 @@ describe("Track milestone screen", () => {
         // to clear the .mock.calls array
         (Alert.alert as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
-        (MilestoneCategory as jest.Mock).mockClear();
+        (CategoryModule as jest.Mock).mockClear();
         (DateTimePicker as jest.Mock).mockClear();
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
         (router.replace as jest.Mock).mockClear();

@@ -2,6 +2,7 @@ import HealthModule from "@/components/health-module";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
+import CategoryModule from "@/components/category-module";
 
 
 jest.mock("@react-native-community/datetimepicker", () => {
@@ -13,6 +14,30 @@ jest.mock("@react-native-community/datetimepicker", () => {
     };
 });
 
+jest.mock("@/components/category-module", () => {
+    const Text = jest.requireActual("react-native").Text;
+    const CategoryModuleMock = jest.fn(
+        ({testID, selectedCategory}: {testID?: string; selectedCategory: string}) =>
+            (<Text testID={testID}>{selectedCategory}</Text>)
+    );
+    return CategoryModuleMock;
+});
+
+
+/*
+ *  setCategoryInput:
+ *      Reads update handler from last call to CategoryModule
+ *      Calls update handler with provided input
+*/
+async function setCategoryInput(
+    category: string,
+ ) {
+    // get calls to <CategoryModule/>
+    const onCategoryUpdate = (CategoryModule as jest.Mock).mock.calls
+        .slice(-1)[0][0].onCategoryUpdate;  // get update callback from most recent call
+    await act(() => onCategoryUpdate?.(category));
+}
+
 
 describe("Health component <HealthModule/>", () => {
 
@@ -22,12 +47,10 @@ describe("Health component <HealthModule/>", () => {
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
     });
 
-    test("Renders category and date buttons", () => {
+    test("Renders category and date inputs", () => {
         render(<HealthModule/>);
 
-        expect(screen.getByTestId("health-category-growth-button")).toBeTruthy();
-        expect(screen.getByTestId("health-category-activity-button")).toBeTruthy();
-        expect(screen.getByTestId("health-category-meds-button")).toBeTruthy();
+        expect(screen.getByTestId("health-category-module")).toBeTruthy();
         expect(screen.getByTestId("health-date-button")).toBeTruthy();
     });
 
@@ -43,9 +66,7 @@ describe("Health component <HealthModule/>", () => {
     test("Renders activity inputs", async () => {
         render(<HealthModule/>);
         // switch to activity
-        await userEvent.press(
-            screen.getByTestId("health-category-activity-button")
-        );
+        await setCategoryInput("Activity");
 
         expect(screen.getByTestId("health-activity-type")).toBeTruthy();
         expect(screen.getByTestId("health-activity-duration")).toBeTruthy();
@@ -53,13 +74,29 @@ describe("Health component <HealthModule/>", () => {
 
     test("Renders meds inputs", async () => {
         render(<HealthModule/>);
-        // switch to activity
-        await userEvent.press(
-            screen.getByTestId("health-category-meds-button")
-        );
+        // switch to meds
+        await setCategoryInput("Meds");
 
         expect(screen.getByTestId("health-meds-name")).toBeTruthy();
         expect(screen.getByTestId("health-meds-amount")).toBeTruthy();
+    });
+
+    test("Renders vaccine inputs", async () => {
+        render(<HealthModule/>);
+        // switch to vaccine
+        await setCategoryInput("Vaccine");
+
+        expect(screen.getByTestId("health-vaccine-name")).toBeTruthy();
+        expect(screen.getByTestId("health-vaccine-location")).toBeTruthy();
+    });
+
+    test("Renders 'other' inputs", async () => {
+        render(<HealthModule/>);
+        // switch to other
+        await setCategoryInput("Other");
+
+        expect(screen.getByTestId("health-other-name")).toBeTruthy();
+        expect(screen.getByTestId("health-other-description")).toBeTruthy();
     });
 
     test("Shows/hides date picker (ios)", async () => {
@@ -154,26 +191,12 @@ describe("Health component <HealthModule/>", () => {
         expect(onCategoryUpdate).toHaveBeenCalledTimes(1);
         expect(onCategoryUpdate.mock.calls[0][0]).toBe("Growth");
 
-        // switch to activity
-        await userEvent.press(screen.getByTestId("health-category-activity-button"));
+        const testConsistencyCategories = ["Activity", "Meds", "Vaccine", "Other", "Growth"];
 
-        // category should last have been changed to activity
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(2);
-        expect(onCategoryUpdate.mock.calls[1][0]).toBe("Activity");
-
-        // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-meds-button"));
-
-        // category should last have been changed to meds
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(3);
-        expect(onCategoryUpdate.mock.calls[2][0]).toBe("Meds");
-
-        // switch back to growth
-        await userEvent.press(screen.getByTestId("health-category-growth-button"));
-
-        // category should last have been changed to growth
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(4);
-        expect(onCategoryUpdate.mock.calls[3][0]).toBe("Growth");
+        for (const category of testConsistencyCategories) {
+            await setCategoryInput(category);  // switch category
+            expect(onCategoryUpdate.mock.lastCall[0]).toBe(category);
+        }
     });
     
     test("Updates growth", async () => {
@@ -213,7 +236,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onActivityUpdate={onActivtityUpdate}/>);
 
         // switch to activity
-        await userEvent.press(screen.getByTestId("health-category-activity-button"));
+        await setCategoryInput("Activity");
 
         // growth should start with empty/default values. Use loose equality to compare objects
         expect(onActivtityUpdate).toHaveBeenCalledTimes(1);
@@ -238,7 +261,7 @@ describe("Health component <HealthModule/>", () => {
         
         render(<HealthModule/>);
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-meds-button"));
+        await setCategoryInput("Meds");
 
         // Press change time button
         await userEvent.press(screen.getByTestId("health-meds-time"));
@@ -264,7 +287,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
 
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-meds-button"));
+        await setCategoryInput("Meds");
         const timeAfterNow = new Date();
 
         // growth should start with empty/default values, except the time, which will be initialized to the current time
@@ -304,7 +327,7 @@ describe("Health component <HealthModule/>", () => {
 
         render(<HealthModule/>);
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-meds-button"));
+        await setCategoryInput("Meds");
 
         // ensure time picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -327,7 +350,7 @@ describe("Health component <HealthModule/>", () => {
         render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
 
         // switch to meds
-        await userEvent.press(screen.getByTestId("health-category-meds-button"));
+        await setCategoryInput("Meds");
         const timeAfterNow = new Date();
 
         // growth should start with empty/default values, except the time, which will be initialized to the current time
@@ -360,5 +383,59 @@ describe("Health component <HealthModule/>", () => {
             testAmount
         );
         expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, time_taken: testTimeTaken });
+    });
+    
+    test("Updates vaccine", async () => {
+        const testName = "test name";
+        const testLocation = "test location";
+        const onVaccineUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
+        render(<HealthModule onVaccineUpdate={onVaccineUpdate}/>);
+
+        // switch to vaccine
+        await setCategoryInput("Vaccine");
+
+        // growth should start with empty/default values. Use loose equality to compare objects
+        expect(onVaccineUpdate).toHaveBeenCalledTimes(1);
+        expect(onVaccineUpdate.mock.calls[0][0]).toEqual({ name: "", location: "" });
+
+        // Fill in inputs
+        // Callback should be called to update after each value is changed
+        await userEvent.type(
+            screen.getByTestId("health-vaccine-name"),
+            testName
+        );
+        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ name: testName, location: "" });
+        await userEvent.type(
+            screen.getByTestId("health-vaccine-location"),
+            testLocation
+        );
+        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ name: testName, location: testLocation });
+    });
+    
+    test("Updates 'other'", async () => {
+        const testName = "test name";
+        const testDescription = "test description";
+        const onOtherUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
+        render(<HealthModule onOtherUpdate={onOtherUpdate}/>);
+
+        // switch to other
+        await setCategoryInput("Other");
+
+        // growth should start with empty/default values. Use loose equality to compare objects
+        expect(onOtherUpdate).toHaveBeenCalledTimes(1);
+        expect(onOtherUpdate.mock.calls[0][0]).toEqual({ name: "", description: "" });
+
+        // Fill in inputs
+        // Callback should be called to update after each value is changed
+        await userEvent.type(
+            screen.getByTestId("health-other-name"),
+            testName
+        );
+        expect(onOtherUpdate).toHaveBeenLastCalledWith({ name: testName, description: "" });
+        await userEvent.type(
+            screen.getByTestId("health-other-description"),
+            testDescription
+        );
+        expect(onOtherUpdate).toHaveBeenLastCalledWith({ name: testName, description: testDescription });
     });
 });

@@ -2,6 +2,7 @@ import FeedingCategory from "@/components/feeding-category";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
+import CategoryModule from "@/components/category-module";
 
 
 jest.mock("@react-native-community/datetimepicker", () => {
@@ -12,6 +13,30 @@ jest.mock("@react-native-community/datetimepicker", () => {
         DateTimePickerAndroid: { open: jest.fn() },
     };
 });
+
+jest.mock("@/components/category-module", () => {
+    const Text = jest.requireActual("react-native").Text;
+    const CategoryModuleMock = jest.fn(
+        ({testID, selectedCategory}: {testID?: string; selectedCategory: string}) =>
+            (<Text testID={testID}>{selectedCategory}</Text>)
+    );
+    return CategoryModuleMock;
+});
+
+
+/*
+ *  setCategoryInput:
+ *      Reads update handler from last call to CategoryModule
+ *      Calls update handler with provided input
+*/
+async function setCategoryInput(
+    category: string,
+ ) {
+    // get calls to <CategoryModule/>
+    const onCategoryUpdate = (CategoryModule as jest.Mock).mock.calls
+        .slice(-1)[0][0].onCategoryUpdate;  // get update callback from most recent call
+    await act(() => onCategoryUpdate?.(category));
+}
 
 
 describe("Feeding component <FeedingCategory/>", () => {
@@ -26,10 +51,7 @@ describe("Feeding component <FeedingCategory/>", () => {
         // render with placeholder values
         render(<FeedingCategory category="Soft" itemName="" amount="" feedingTime={new Date()}/>);
 
-        expect(screen.getByTestId("feeding-category-liquid-button")).toBeTruthy();
-        expect(screen.getByTestId("feeding-category-soft-button")).toBeTruthy();
-        expect(screen.getByTestId("feeding-category-solid-button")).toBeTruthy();
-
+        expect(screen.getByTestId("feeding-category-module")).toBeTruthy();
         expect(screen.getByTestId("feeding-item-name")).toBeTruthy();
         expect(screen.getByTestId("feeding-amount")).toBeTruthy();
         expect(screen.getByTestId("feeding-time-button")).toBeTruthy();
@@ -40,26 +62,12 @@ describe("Feeding component <FeedingCategory/>", () => {
         // render with placeholder values, start with liquid category
         render(<FeedingCategory category="Liquid" itemName="" amount="" feedingTime={new Date()} onCategoryUpdate={onCategoryUpdate}/>);
 
-        // switch to soft
-        await userEvent.press(screen.getByTestId("feeding-category-soft-button"));
+        const testConsistencyCategories = ["Soft", "Solid", "Liquid"];
 
-        // category should last have been changed to soft
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(1);
-        expect(onCategoryUpdate.mock.calls[0][0]).toBe("Soft");
-
-        // switch to solid
-        await userEvent.press(screen.getByTestId("feeding-category-solid-button"));
-
-        // category should last have been changed to solid
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(2);
-        expect(onCategoryUpdate.mock.calls[1][0]).toBe("Solid");
-
-        // switch to liquid
-        await userEvent.press(screen.getByTestId("feeding-category-liquid-button"));
-
-        // category should last have been changed to liquid
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(3);
-        expect(onCategoryUpdate.mock.calls[2][0]).toBe("Liquid");
+        for (const category of testConsistencyCategories) {
+            await setCategoryInput(category);  // switch category
+            expect(onCategoryUpdate.mock.lastCall[0]).toBe(category);
+        }
     });
 
     test("Shows/hides date picker (ios)", async () => {

@@ -4,6 +4,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
+import CategoryModule from "@/components/category-module";
 
 /**
  * FeedingCategory component allows users to select a feeding category,
@@ -81,53 +82,18 @@ export default function FeedingCategory({
 
     return (
         <View className='flex-col gap-6' testID={testID}>
-            <View className='stopwatch-primary'>
-                <View className='items-start bottom-5 left-3'>
-                    <Text className='bg-gray-200 p-3 rounded-xl font'>
-                        🍽️ Choose Category
-                    </Text>
-                </View>
-                <View className='flex-row gap-4 justify-center mb-6'>
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            category === 'Liquid'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleCategoryPress('Liquid')}
-                        testID='feeding-category-liquid-button'
-                    >
-                        <Text className='scale-100 text-2xl'>🍼</Text>
-                        <Text className='feeding-category-text'>Liquid</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            category === 'Soft'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleCategoryPress('Soft')}
-                        testID='feeding-category-soft-button'
-                    >
-                        <Text className='scale-100 text-2xl'>🥣</Text>
-                        <Text className='feeding-category-text'>Soft</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        className={`feeding-category-button ${
-                            category === 'Solid'
-                                ? 'feeding-category-button-active'
-                                : ''
-                        }`}
-                        onPress={() => handleCategoryPress('Solid')}
-                        testID='feeding-category-solid-button'
-                    >
-                        <Text className='scale-100 text-2xl'>🥕</Text>
-                        <Text className='feeding-category-text'>Solid</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <CategoryModule
+                title="🍽️ Choose Category"
+                selectedCategory={category}
+                categoryList={[
+                    { label: "Liquid", icon: "🍼" },
+                    { label: "Soft", icon: "🥣" },
+                    { label: "Solid", icon: "🥕" },
+                ]}
+                onCategoryUpdate={handleCategoryPress}
+                testID="feeding-category-module"
+            />
 
             <View className='stopwatch-primary'>
                 <View className='items-start bottom-5 left-3'>
