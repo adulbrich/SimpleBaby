@@ -21,6 +21,8 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
 
@@ -168,7 +170,7 @@ export default function Nursing() {
 					? `${missingFields.slice(0, -1).join(", ")} or ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Nursing log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -247,7 +249,7 @@ export default function Nursing() {
 						<View className="bottom-5">
 							<View className="items-start top-5 left-3 z-10">
 								<Text className="bg-gray-200 p-3 rounded-xl font">
-									Add a note
+									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
 							<View className="p-4 pt-9 bg-white rounded-xl z-0">

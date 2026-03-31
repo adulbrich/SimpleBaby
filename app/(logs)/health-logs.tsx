@@ -164,6 +164,31 @@ const HealthLogsView: React.FC = () => {
 
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
+
+		const isBlank = (val: string | null) => val !== null && !val.trim();
+
+		const invalidByCategory =
+			(editingLog.category === "Growth" && (
+				isBlank(editingLog.growth_length) ||
+				isBlank(editingLog.growth_weight) ||
+				isBlank(editingLog.growth_head)
+			)) ||
+			(editingLog.category === "Activity" && (
+				isBlank(editingLog.activity_type) ||
+				isBlank(editingLog.activity_duration)
+			)) ||
+			(editingLog.category === "Meds" && (
+				isBlank(editingLog.meds_name) ||
+				isBlank(editingLog.meds_amount)
+			)) ||
+			(editingLog.category === "Vaccine" && isBlank(editingLog.vaccine_name)) ||
+			(editingLog.category === "Other" && isBlank(editingLog.other_name));
+
+		if (invalidByCategory) {
+			Alert.alert("Failed to Update Log", "One or more of your required fields is blank. Please try again.");
+			return;
+		}
+
 		try {
 			const updated = {
 				growth_length: editingLog.growth_length

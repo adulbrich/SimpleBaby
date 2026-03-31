@@ -20,6 +20,7 @@ import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
+import stringLib from "../../assets/stringLibrary.json";
 
 // Define the shape of the health log data object with optional nested properties
 interface HealthLog {
@@ -99,24 +100,24 @@ export default function Health() {
 
 		if (healthLog.category === "Growth") {
 			const missingFields = [];
-			if (!healthLog.growth?.length) missingFields.push("length");
-			if (!healthLog.growth?.weight) missingFields.push("weight");
-			if (!healthLog.growth?.head) missingFields.push("head");
+			if (!healthLog.growth?.length?.trim()) missingFields.push("length");
+			if (!healthLog.growth?.weight?.trim()) missingFields.push("weight");
+			if (!healthLog.growth?.head?.trim()) missingFields.push("head");
 			if (missingFields.length > 0) {
 				const formattedMissing =
 					missingFields.length > 1
 						? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 						: missingFields[0];
 				Alert.alert(
-					"Missing Information",
+					`${stringLib.errors.trackerMissingInfo}`,
 					`Failed to save the Growth Health log. You are missing the following fields: ${formattedMissing}.`,
 				);
 				return { success: false, error: "Missing required growth fields" };
 			}
 		} else if (healthLog.category === "Activity") {
 			const missingFields = [];
-			if (!healthLog.activity?.type) missingFields.push("type");
-			if (!healthLog.activity?.duration) missingFields.push("duration");
+			if (!healthLog.activity?.type?.trim()) missingFields.push("type");
+			if (!healthLog.activity?.duration?.trim()) missingFields.push("duration");
 			if (missingFields.length > 0) {
 				const formattedMissing =
 					missingFields.length > 1
@@ -130,8 +131,8 @@ export default function Health() {
 			}
 		} else if (healthLog.category === "Meds") {
 			const missingFields = [];
-			if (!healthLog.meds?.name) missingFields.push("name");
-			if (!healthLog.meds?.amount) missingFields.push("amount");
+			if (!healthLog.meds?.name?.trim()) missingFields.push("name");
+			if (!healthLog.meds?.amount?.trim()) missingFields.push("amount");
 			if (!healthLog.meds?.timeTaken) missingFields.push("time taken");
 			if (missingFields.length > 0) {
 				const formattedMissing =
@@ -145,7 +146,7 @@ export default function Health() {
 				return { success: false, error: "Missing required medicine fields" };
 			}
 		} else if (healthLog.category === "Vaccine") {
-			if (!healthLog.vaccine?.name) {
+			if (!healthLog.vaccine?.name?.trim()) {
 				Alert.alert(
 					"Missing Information",
 					"Failed to save the Vaccine Health log. Please provide at least a name for the vaccine received.",
@@ -153,7 +154,7 @@ export default function Health() {
 				return { success: false, error: "Missing required vaccine fields" };
 			}
 		} else if (healthLog.category === "Other") {
-			if (!healthLog.other?.name) {
+			if (!healthLog.other?.name?.trim()) {
 				Alert.alert(
 					"Missing Information",
 					"Failed to save the 'Other' Health log. Please provide at least a title for the health event.",
@@ -425,7 +426,7 @@ export default function Health() {
 					<View className="bottom-5 pt-5">
 						<View className="items-start top-5 left-3 z-10">
 							<Text className="bg-gray-200 p-3 rounded-xl font">
-								Add a note
+								{stringLib.uiLabels.noteLabel}
 							</Text>
 						</View>
 						<View className="p-4 pt-9 bg-white rounded-xl z-0">

@@ -29,6 +29,8 @@ import {
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 
+import stringLib from "../../assets/stringLibrary.json";
+
 export default function Milestone() {
 	const insets = useSafeAreaInsets();
 	const [showDatePicker, setShowDatePicker] = useState(false);
@@ -256,7 +258,7 @@ export default function Milestone() {
 	const handleSaveMilestoneLog = async () => {
 		if (isSaving) return;
 		
-		if (name && milestoneDate) {
+		if (name.trim() && milestoneDate) {
 			setIsSaving(true);
 			const result = await saveMilestoneLog();
 			if (result.success) {
@@ -268,14 +270,14 @@ export default function Milestone() {
 			setIsSaving(false);
 		} else {
 			const missingFields = [];
-			if (!name) missingFields.push("name");
+			if (!name.trim()) missingFields.push("name");
 			if (!milestoneDate) missingFields.push("date");
 			const formattedMissing =
 				missingFields.length > 1
 					? `${missingFields.slice(0, -1).join(", ")} and ${missingFields.slice(-1)}`
 					: missingFields[0];
 			Alert.alert(
-				"Missing Information",
+				`${stringLib.errors.trackerMissingInfo}`,
 				`Failed to save the Milestone log. You are missing the following fields: ${formattedMissing}.`,
 			);
 		}
@@ -408,7 +410,7 @@ export default function Milestone() {
 							testID="milestone-note"
 						>
 							<Text className="bg-gray-200 p-3 rounded-xl font">
-								Add a note
+								{stringLib.uiLabels.noteLabel}
 							</Text>
 						</View>
 						<View className="p-4 pt-9 bg-white rounded-xl z-0">
