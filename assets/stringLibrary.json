@@ -11,5 +11,38 @@
     "uiLabels": {
         "noteLabel": "Add a note",
         "manualEntryLabel": "Manual Entry"
+    },
+
+    "testIDs": {
+        "profile": {
+            "childNameGuest": "profile-child-name-guest",
+            "childNameButton": "profile-child-name",
+            "loadingNames": "profile-loading-names",
+            "namesError": "profile-names-error",
+            "switchChildButton": "profile-switch-child-button",
+            "addChildButton": "profile-add-child-button",
+            "caretakersButton": "profile-caretakers-button",
+            "emailButton": "profile-email-button",
+            "passwordButton": "profile-password-button",
+            "appVersionButton": "profile-app-version-button",
+            "signOutButton": "profile-sign-out-button",
+            "addChildPopup": "profile-add-child-popup",
+            "switchChildPopup": "profile-switch-child-popup"
+        },
+        "addChild": {
+            "popup": "add-child-popup",
+            "nameEntry": "add-child-name",
+            "saveButton": "add-child-save-button",
+            "cancelButton": "add-child-cancel-button"
+        },
+        "tabsIndex": {
+            "sleepButton": "sleep-button",
+            "nursingButton": "nursing-button",
+            "milestoneButton": "milestone-button",
+            "feedingButton": "feeding-button",
+            "diaperButton": "diaper-button",
+            "healthButton": "health-button",
+            "addChildPopup": "add-child-popup"
+        }
     }
 }
