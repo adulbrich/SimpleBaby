@@ -56,11 +56,6 @@
             "insert": "edit-log-insert"
         },
 
-        "listSelect": {
-            "listItem": "list-select-item",
-            "listItemSelected": "list-select-item-selected"
-        },
-
         "tabsIndex": {
             "sleepButton": "sleep-button",
             "nursingButton": "nursing-button",
