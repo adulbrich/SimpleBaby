@@ -281,7 +281,7 @@ const FeedingLogsView: React.FC = () => {
 			{/* Edit Modal */}
 			<EditLogPopup
 				popupVisible={editModalVisible}
-				hidePopup={() => setEditModalVisible(false)}
+				handleCancel={() => setEditModalVisible(false)}
 				title="Edit Feeding Log"
 				setLog={setEditingLog}
 				handleSubmit={handleSaveEdit}

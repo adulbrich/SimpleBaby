@@ -14,40 +14,51 @@ import { format } from "date-fns";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import stringLib from "@/assets/stringLibrary.json";
 
 
-type editFieldText = {
+const testIDs = stringLib.testIDs.editLog;
+
+
+export type editFieldText = {
     title: string;
     type: "text";
     value: string | null;
+    testID?: string;
 };
 
-type editFieldCategory = {
+export type editFieldCategory = {
     title: string;
     type: "category";
     categories: string[];
     value: string | null;
+    testID?: string;
 };
 
-type editFieldDateTime = {
+export type editFieldDateTime = {
     title: string;
     type: "date" | "time";
     value: Date;
+    buttonTestID?: string;
+    pickerTestID?: string;
+    doneButtonTestID?: string;
 };
 
-type editFieldDuration = {
+export type editFieldDuration = {
     title: string;
     type: "duration";
     value: string | null;
+    testID?: string;
 };
 
-type editFieldImage = {
+export type editFieldImage = {
     title: string;
     type: "image";
     value: string | null;
+    testID?: string;
 };
 
-type insert = {
+export type insert = {
     title: string | undefined;
     type: "insert";
     value: React.JSX.Element;
@@ -64,7 +75,7 @@ type editField =
 
 export default function EditLogPopup({
     popupVisible,
-    hidePopup,
+    handleCancel,
     title,
     editingLog,
     setLog,
@@ -72,7 +83,7 @@ export default function EditLogPopup({
     testID,
 } : {
     popupVisible: boolean;
-    hidePopup: () => void;
+    handleCancel: () => void;
     title: string;
     editingLog: Record<string, editField> | null;
     setLog: (updater: (prev: any) => any) => void;
@@ -110,13 +121,14 @@ export default function EditLogPopup({
                     !fieldInfo.categories ? []
                     : fieldInfo.categories.map((category: string) => ({ item: category }))
                 }
-                labelField={ "item" }
-                valueField={ "item" }
+                labelField={"item"}
+                valueField={"item"}
                 onChange={({ item }: { item: string }) =>
                     setLog((prev) => 
                         prev ? { ...prev, [fieldKey]: item } : prev,
                     )
                 }
+                testID={fieldInfo.testID}
             />
         </View>
     );
@@ -131,6 +143,7 @@ export default function EditLogPopup({
 					prev ? { ...prev, [fieldKey]: text } : prev,
                 )
             }
+            testID={fieldInfo.testID}
         />
     );
     
@@ -144,23 +157,25 @@ export default function EditLogPopup({
                     setDatePickerField(fieldKey);
                     setDatePickerData(fieldInfo);
                 }}
+                testID={fieldInfo.buttonTestID}
             >
                 <Text>{format(fieldInfo.value, fieldInfo.type === "date" ? "MMM dd, yyyy" : "hh:mm a")}</Text>
             </TouchableOpacity>
 
             {showDatePicker && datePickerData && (
                 <DateTimePicker
-                    value={new Date(datePickerData.value)}
+                    value={datePickerData.value}
                     mode={datePickerData.type}
                     display={Platform.OS === "ios" ? "spinner" : "default"}
                     onChange={(event: DateTimePickerEvent, selected?: Date) => {
-                            if (selected && event.type !== "dismissed") {
-                                setLog((prev) => 
-                                    prev ? { ...prev, [datePickerField]: selected } : prev,
-                                );
-                            }
-                            setShowDatePicker(false);
+                        if (selected && event.type !== "dismissed") {
+                            setLog((prev) => 
+                                prev ? { ...prev, [datePickerField]: selected } : prev,
+                            );
+                        }
+                        setShowDatePicker(false);
                     }}
+                    testID={fieldInfo.pickerTestID}
                 />
             )}
 
@@ -169,8 +184,9 @@ export default function EditLogPopup({
                     <TouchableOpacity
                         className="bg-gray-200 rounded-full px-4 py-2"
                         onPress={() => setShowDatePicker(false)}
+                        testID={fieldInfo.doneButtonTestID}
                     >
-                        <Text>Done</Text>
+                        <Text>{stringLib.uiLabels.iosCloseDateTimePicker}</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -188,31 +204,32 @@ export default function EditLogPopup({
 					prev ? { ...prev, [fieldKey]: toDuration(text) } : prev,
                 )
             }
-            onEndEditing={(e) => {
+            onEndEditing={() => {
                 // when the user finishes editing this input, add trailing 0's to fully convert to "HH:MM:SS"
-                // fetch this <TextInput/>'s current value as a duration:
-                const duration = toDuration((e.target as any).__internalInstanceHandle.pendingProps.value);
+                // get this <TextInput/>'s current value as a duration:
+                const duration = toDuration(fieldInfo.value || "");
                 setLog((prev) =>
 					prev ? { ...prev, [fieldKey]: duration + "00:00:00".slice(duration.length) } : prev,
                 );
             }}
-            onFocus={(e) => {
+            onFocus={() => {
                 // when the user selects this input, sanitize the existing input. If there was a decryption error, start with an empty input
-                const initial = (e.target as any).__internalInstanceHandle.pendingProps.value;  // fetch this <TextInput/>'s current value
+                const initial = fieldInfo.value || "";  // this <TextInput/>'s current displayed value
                 const updated = initial === "[Decryption Failed]: Error: ❌ Decryption failed" ? "" : toDuration(initial);
-                setLog((prev) =>
-					prev ? { ...prev, [fieldKey]: updated } : prev,
-                );
+                if (updated !== initial) {
+                    setLog((prev) =>
+                        prev ? { ...prev, [fieldKey]: updated } : prev,
+                    );
+                }
             }}
+            testID={fieldInfo.testID}
         />
     );
     
     // renderTextInput - open text field for the user to type into
     const renderImageInput = (fieldKey: string, fieldInfo: editFieldImage) => (
-        <Text className="text-xs text-gray-400 mt-1 mb-1">
-            Photos cannot be edited/updated yet in this menu. This feature
-            will be added in a later release. For now, please create a new
-            log.
+        <Text className="text-xs text-gray-400 mt-1 mb-1" testID={fieldInfo.testID}>
+            {stringLib.uiLabels.editPhotoMessage}
         </Text>
     );
     
@@ -246,7 +263,7 @@ export default function EditLogPopup({
             visible={popupVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={hidePopup}
+            onRequestClose={handleCancel}
             testID={testID}
         >
             <KeyboardAvoidingView
@@ -278,13 +295,15 @@ export default function EditLogPopup({
                         <View className="flex-row justify-end gap-3">
                             <TouchableOpacity
                                 className="bg-gray-200 rounded-full px-4 py-2"
-                                onPress={hidePopup}
+                                onPress={handleCancel}
+                                testID={testIDs.cancelButton}
                             >
                                 <Text>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 className="bg-green-500 rounded-full px-4 py-2"
                                 onPress={handleSubmit}
+                                testID={testIDs.saveButton}
                             >
                                 <Text className="text-white">Save</Text>
                             </TouchableOpacity>

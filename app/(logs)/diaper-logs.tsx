@@ -259,7 +259,7 @@ const DiaperLogsView: React.FC = () => {
 			{/* Edit Modal */}
 			<EditLogPopup
 				popupVisible={editModalVisible}
-				hidePopup={() => setEditModalVisible(false)}
+				handleCancel={() => setEditModalVisible(false)}
 				title="Edit Diaper Log"
 				setLog={setEditingLog}
 				handleSubmit={handleSaveEdit}

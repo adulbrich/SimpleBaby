@@ -11,7 +11,7 @@ jest.mock("expo-blur", () => ({
 }));
 
 
-describe("Profile screen", () => {
+describe("Add Child Popup", () => {
 
     test("Modal show/hides", async () => {
         // render with visible=false
