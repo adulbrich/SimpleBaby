@@ -336,7 +336,7 @@ const HealthLogsView: React.FC = () => {
 			{/* Edit Modal */}
 			<EditLogPopup
 				popupVisible={editModalVisible}
-				hidePopup={() => setEditModalVisible(false)}
+				handleCancel={() => setEditModalVisible(false)}
 				title={`Edit '${editingLog?.category}' Health Log`}
 				setLog={setEditingLog}
 				handleSubmit={handleSaveEdit}
