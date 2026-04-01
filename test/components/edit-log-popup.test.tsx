@@ -186,7 +186,7 @@ describe("Edit Log Popup", () => {
             (item: { [dropdownProps.data]: string}) => item[dropdownProps.labelField]
         );
         
-        expect(dropdownLabels).toEqual(testLog.category_input.categories)
+        expect(dropdownLabels).toEqual(testLog.category_input.categories);
     });
 
     test("Updates category", async () => {
