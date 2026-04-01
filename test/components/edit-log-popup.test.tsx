@@ -157,6 +157,23 @@ describe("Edit Log Popup", () => {
         expect(screen.getByTestId(testIDs.saveButton)).toBeTruthy();
     });
 
+    test("Renders field titles", async () => {
+        render(<EditLogPopup
+            popupVisible={true}
+            handleCancel={() => undefined}
+            title={""}
+            editingLog={testLog}
+            setLog={() => undefined}
+            handleSubmit={() => undefined}
+        />);
+
+        for (const { title } of Object.values(testLog)) {
+            if (title) {
+                expect(screen.getByText(title)).toBeTruthy();
+            }
+        }
+    });
+
     test("Displays category input value", async () => {
         render(<EditLogPopup
             popupVisible={true}
