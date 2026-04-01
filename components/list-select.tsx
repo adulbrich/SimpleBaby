@@ -3,6 +3,10 @@ import {
     FlatList,
     TouchableOpacity
 } from 'react-native';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.listSelect;
 
 
 export default function ListSelect(
@@ -22,6 +26,7 @@ export default function ListSelect(
             className={`rounded-lg p-2 border-[1px] shadow-sm m-2 ${
                 index === selected ? "bg-[#fff6c9] dark:bg-[#466755]" : "bg-gray-200"
             }`}
+            testID={`${selected === index ? testIDs.listItemSelected : testIDs.listItem}-${index}`}
         >
             <Text className={`text-lg`}>{item}</Text>
         </TouchableOpacity>
