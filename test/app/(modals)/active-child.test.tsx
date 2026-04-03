@@ -111,6 +111,25 @@ describe("Active Child screen", () => {
         expect((router.dismissTo as jest.Mock).mock.calls[0][0]).toBe("/(modals)/profile");
     });
 
+    test("Displays loading indicators", async () => {
+        const { promise: waitForChildData, resolve: resolveChildData } = manualPromise();
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // a Promise that can be manually resolved to:
+        // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */, created_at: /* truthy value */ }
+        (getActiveChildData as jest.Mock).mockReturnValueOnce(waitForChildData);
+
+        render(<ActiveChild/>);
+
+        // loading should be shown for both child name and created date
+        expect(screen.getAllByText("Loading...", { exact: false }).length).toBe(2);
+
+        // unblock getActiveChildData()
+        resolveChildData({ success: true, childName: true, childId: true, created_at: true });
+
+        // loading indicators should clear
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
+    });
+
     test("Displays child information", async () => {
         const testName = "test child name";
         const testCreated = "2000-1-1";
@@ -320,16 +339,46 @@ describe("Active Child screen", () => {
         expect((RenameChildPopup as jest.Mock).mock.lastCall[0].visible).toBe(false);
     });
 
+    test("Displays loading indicators after rename", async () => {
+        const { promise: waitForChildData, resolve: resolveChildData } = manualPromise();
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */ }
+        // then for a second call, which should occur after the user has submitted a new name:
+        // a Promise that can be manually resolved to:
+        // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */, created_at: /* truthy value */ }
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childName: true, childId: true })
+        ).mockReturnValueOnce(waitForChildData);
+
+        render(<ActiveChild/>);
+        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+
+        await userEvent.press(screen.getByTestId(testIDs.renameButton));
+
+        // submit new name
+        await act(async () => (RenameChildPopup as jest.Mock).mock.lastCall[0].handleSave());
+
+        // loading should be shown for both child name and created date
+        expect(screen.getAllByText("Loading...", { exact: false }).length).toBe(2);
+
+        // unblock getActiveChildData()
+        resolveChildData({ success: true, childName: true, childId: true, created_at: true });
+
+        // loading indicators should clear
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
+    });
+
     test("Refetches child name on successful rename", async () => {
+        const testName = "test old name";
         const testNewName = "test new name";
 
         // library/utils.ts -> getActiveChildData() should be mocked to return:
-        // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */ }
+        // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // then for a second call, which should occur after the user has submitted a new name:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
-            async () => ({ success: true, childName: true, childId: true })
+            async () => ({ success: true, childName: testName, childId: true })
         ).mockImplementationOnce(
             async () => ({ success: true, childName: testNewName, childId: true })
         );
@@ -337,7 +386,8 @@ describe("Active Child screen", () => {
         render(<ActiveChild/>);
         await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
 
-        // new name should not be present
+        // old name, but not new name, should be present
+        expect(screen.getByText(testName, { exact: false })).toBeTruthy();
         expect(() => screen.getByText(testNewName, { exact: false })).toThrow();
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
@@ -345,8 +395,9 @@ describe("Active Child screen", () => {
         // submit new name
         await act(async () => (RenameChildPopup as jest.Mock).mock.lastCall[0].handleSave());
 
-        // new name should be shown
-        expect(screen.getByText(testNewName, { exact: false }));
+        // new name, but not old name, should be shown
+        expect(screen.getByText(testNewName, { exact: false })).toBeTruthy();
+        expect(() => screen.getByText(testName, { exact: false })).toThrow();
     });
 
     test("Provides confirmation on delete", async () => {
