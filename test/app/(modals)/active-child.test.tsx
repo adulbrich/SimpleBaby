@@ -31,7 +31,7 @@ jest.mock("react-native", () => {
 });
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildData: jest.fn(async () => ({ success: true, childName: true, childId: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childName: true, childId: true, created_at: true })),
     formatName: jest.fn(),
     updateChildName: jest.fn(),
     getChildren: jest.fn(async () => [{ }, { }, { }]),
@@ -80,7 +80,7 @@ describe("Active Child screen", () => {
     test("Displays buttons", async () => {
         render(<ActiveChild/>);
 
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         expect(screen.getByTestId(testIDs.renameButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.deleteButton)).toBeTruthy();
@@ -142,7 +142,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         expect(screen.getByText(testName, { exact: false })).toBeTruthy();
         expect(screen.getByText((new Date(testCreated)).toDateString())).toBeTruthy();
@@ -159,7 +159,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         // popup should be hidden
         expect((RenameChildPopup as jest.Mock).mock.lastCall[0].visible).toBe(false);
@@ -186,7 +186,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
 
@@ -201,7 +201,7 @@ describe("Active Child screen", () => {
 
     test("Hides popup on cancel", async () => {
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         // popup should be hidden
         expect((RenameChildPopup as jest.Mock).mock.lastCall[0].visible).toBe(false);
@@ -230,7 +230,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         // popup should be hidden
         expect((RenameChildPopup as jest.Mock).mock.lastCall[0].visible).toBe(false);
@@ -267,7 +267,7 @@ describe("Active Child screen", () => {
         (formatName as jest.Mock).mockReturnValueOnce(testName);
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
 
@@ -298,7 +298,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
 
@@ -324,7 +324,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
 
@@ -351,7 +351,7 @@ describe("Active Child screen", () => {
         ).mockReturnValueOnce(waitForChildData);
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.renameButton));
 
@@ -384,7 +384,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         // old name, but not new name, should be present
         expect(screen.getByText(testName, { exact: false })).toBeTruthy();
@@ -411,7 +411,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -434,7 +434,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -456,7 +456,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -493,7 +493,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -527,7 +527,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -554,7 +554,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -587,7 +587,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -606,7 +606,7 @@ describe("Active Child screen", () => {
 
     test("Shows <SwitchChildPopup/>", async () => {
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -637,7 +637,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -669,7 +669,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -704,7 +704,7 @@ describe("Active Child screen", () => {
         ); */
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
@@ -743,7 +743,7 @@ describe("Active Child screen", () => {
         );
 
         render(<ActiveChild/>);
-        await waitFor(() => expect(() => screen.getByText("👶 Loading...")).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.deleteButton));
 
