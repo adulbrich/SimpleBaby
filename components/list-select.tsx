@@ -35,6 +35,7 @@ export default function ListSelect(
             renderItem={renderSelectButton}
             keyExtractor={(item) => item}
             contentContainerStyle={{ paddingBottom: 16 }}
+            testID={testID}
         />
     );
 };
