@@ -4,6 +4,10 @@ import {
 	Text,
 	View,
 } from "react-native";
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.logItem;
 
 
 type logTitle = {
@@ -32,7 +36,7 @@ type logImage = {
     uri: string;
 };
 
-type logRenderData =
+export type logRenderData =
     | logTitle
     | logItem
     | logText
@@ -49,7 +53,7 @@ export default function LogItem({
     buttonsDisabled,
     logData,
 }: {
-    id: string;
+    id?: string;
     onEdit: () => void;
     onDelete: () => void;
     buttonsDisabled?: boolean;
@@ -80,6 +84,7 @@ export default function LogItem({
                     console.log("❌ Image Failed to Load:", id, e.nativeEvent)
                 }
                 key={key}
+                testID={testIDs.image}
             />
         ) : undefined
     );
@@ -93,7 +98,7 @@ export default function LogItem({
                     className="px-3 py-2 rounded-full bg-blue-100"
                     onPress={onEdit}
                     disabled={buttonsDisabled}
-                    testID={`logs-edit-button-${id}`}
+                    testID={testIDs.editButton}
                 >
                     <Text className="text-blue-700">✏️ Edit</Text>
                 </Pressable>
@@ -101,7 +106,7 @@ export default function LogItem({
                     className="px-3 py-2 rounded-full bg-red-100"
                     onPress={onDelete}
                     disabled={buttonsDisabled}
-                    testID={`logs-delete-button-${id}`}
+                    testID={testIDs.deleteButton}
                 >
                     <Text className="text-red-700">🗑️ Delete</Text>
                 </Pressable>
