@@ -44,6 +44,13 @@
             "saveButton": "add-child-save-button",
             "cancelButton": "add-child-cancel-button"
         },
+
+        "logItem": {
+            "editButton": "log-item-edit-button",
+            "deleteButton": "log-item-delete-button",
+            "image": "log-item-image"
+        },
+
         "tabsIndex": {
             "sleepButton": "sleep-button",
             "nursingButton": "nursing-button",
