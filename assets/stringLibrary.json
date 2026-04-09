@@ -51,6 +51,13 @@
             "image": "log-item-image"
         },
 
+        "switchChild": {
+            "popup": "switch-child-popup",
+            "nameList": "switch-child-name-list",
+            "selectButton": "switch-child-select-button",
+            "cancelButton": "switch-child-cancel-button"
+        },
+
         "tabsIndex": {
             "sleepButton": "sleep-button",
             "nursingButton": "nursing-button",
