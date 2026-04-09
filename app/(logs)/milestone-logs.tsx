@@ -99,29 +99,29 @@ const MilestoneLogsView: React.FC = () => {
 				{ dbFieldName: "note", type: "string" },
 			]
 		);
-		if (!result.success) {
-			setError(result.error || "An unknown error occurred");
-			return;
+		if (result.success) {
+			setMilestoneLogs(result.data);
+			setActiveChildName(result.childName);
+
+			const signedPairs = await Promise.all(
+				result.data.map(async (log) => {
+					if (!log.photo_url) {
+						return [log.id, null] as const;
+					}
+					const signed = await getSignedPhotoUrl(log.photo_url);
+					return [log.id, signed] as const;
+				}),
+			);
+
+			const nextMap: Record<string, string> = {};
+			for (const [id, signed] of signedPairs) {
+				if (signed) nextMap[id] = signed;
+			}
+
+			setPhotoSignedUrls(nextMap);
+		} else {
+			setError(result.error);
 		}
-		setActiveChildName(result.childName);
-		setMilestoneLogs(result.data);
-
-		const signedPairs = await Promise.all(
-			result.data.map(async (log) => {
-				if (!log.photo_url) {
-					return [log.id, null] as const;
-				}
-				const signed = await getSignedPhotoUrl(log.photo_url);
-				return [log.id, signed] as const;
-			}),
-		);
-
-		const nextMap: Record<string, string> = {};
-		for (const [id, signed] of signedPairs) {
-			if (signed) nextMap[id] = signed;
-		}
-
-		setPhotoSignedUrls(nextMap);
 		setLoading(false);
 	}, [getSignedPhotoUrl, isGuest]);
 

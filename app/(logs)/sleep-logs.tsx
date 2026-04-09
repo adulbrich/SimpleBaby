@@ -49,7 +49,7 @@ const SleepLogsView: React.FC = () => {
 				{ dbFieldName: "id", type: "unencrypted" },
 				{ dbFieldName: "start_time", type: "date" },
 				{ dbFieldName: "end_time", type: "date" },
-				{ dbFieldName: "duration", type: "string" },
+				{ dbFieldName: "duration", type: "unencrypted" },
 				{ dbFieldName: "note", type: "string" },
 			]
 		);
