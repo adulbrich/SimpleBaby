@@ -65,6 +65,11 @@
             "insert": "edit-log-insert"
         },
 
+        "listSelect": {
+            "listItem": "list-select-item",
+            "listItemSelected": "list-select-item-selected"
+        },
+
         "logItem": {
             "editButton": "log-item-edit-button",
             "deleteButton": "log-item-delete-button",
