@@ -13,6 +13,11 @@ import RenameChildPopup from '@/components/rename-child-popup';
 import { formatName, getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.activeChild;
+
 
 /**
  * Active Child Screen
@@ -108,7 +113,7 @@ export default function ActiveChild() {
 
     const handleRenameChild = async () => {
         if (formatName(newChildName) === childName) {
-            Alert.alert("Keeping current name", "The name you entered is the same as your child's current name.");
+            Alert.alert(stringLib.warnings.renameChildSameName, stringLib.warnings.renameChildSameNameMessage);
             setShowRenameChild(false);
             return;
         }
@@ -142,8 +147,7 @@ export default function ActiveChild() {
                 setCreatedDate((new Date(result.created_at)).toDateString());
             }
         } catch {
-            Alert.alert("Could Not Retrieve Child Data",
-                "The information for the active child could not be retrieved. Restarting the app may solve the issue.");
+            Alert.alert(stringLib.errors.childData, stringLib.errors.childDataMessage);
             router.dismissTo("/(modals)/profile");  // send the user back to the profile page
         }
     };
@@ -170,6 +174,7 @@ export default function ActiveChild() {
                             setShowRenameChild(true);
                         }}
                         disabled={childId === ""}
+                        testID={testIDs.renameButton}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
                             <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
@@ -194,18 +199,16 @@ export default function ActiveChild() {
                     disabled={childId === ""}
                     buttonClass='bg-red-600 border-gray-500'
                     textClass='font-bold dark:text-white'
+                    testID={testIDs.deleteButton}
                 />
             </View>
             <RenameChildPopup
                 visible={showRenameChild}
                 childName={newChildName}
                 originalName={childName}
-                onChildNameUpdate={(name: string) => setNewChildName(name)}
+                onChildNameUpdate={setNewChildName}
                 handleSave={handleRenameChild}
-                handleCancel={() => {
-                    setShowRenameChild(false);
-                    setNewChildName("");  // reset name
-                }}
+                handleCancel={() => setShowRenameChild(false)}
             />
             <SwitchChildPopup
                 visible={showSelectChild}
@@ -213,7 +216,7 @@ export default function ActiveChild() {
                 currentChild={children[0]?.name}
                 hideCancelButton={true}
                 handleSwitch={handleSelectChild}
-                handleCancel={() => handleSelectChild(0)}
+                handleCancel={() => router.dismissTo("/(modals)/profile")}
             />
         </SafeAreaView>
     );

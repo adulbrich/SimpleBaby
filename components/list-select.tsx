@@ -10,10 +10,12 @@ export default function ListSelect(
         items,
         selected,
         onSelect,
+        testID,
     } : {
         items: string[];
         selected: number;
         onSelect: (item: number) => void;
+        testID?: string;
     }
 ) {
     const renderSelectButton = ({ item, index }: { item: string; index: number; }) => (
@@ -33,6 +35,7 @@ export default function ListSelect(
             renderItem={renderSelectButton}
             keyExtractor={(item) => item}
             contentContainerStyle={{ paddingBottom: 16 }}
+            testID={testID}
         />
     );
 };

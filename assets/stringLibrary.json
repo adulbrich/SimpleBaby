@@ -1,11 +1,15 @@
 {
     "errors": {
         "trackerMissingInfo": "Missing Information",
-        "logUpdateFailure": "Failed to update log"
+        "logUpdateFailure": "Failed to update log",
+        "childData": "Could Not Retrieve Child Data",
+        "childDataMessage": "The information for the active child could not be retrieved. Restarting the app may solve the issue."
     },
 
     "warnings": {
-        "logDeletionConfirmation": "Are you sure you want to delete this log?"
+        "logDeletionConfirmation": "Are you sure you want to delete this log?",
+        "renameChildSameName": "Keeping current name",
+        "renameChildSameNameMessage": "The name you entered is the same as your child's current name."
     },
 
     "uiLabels": {
@@ -16,6 +20,11 @@
     },
 
     "testIDs": {
+        "activeChild": {
+            "renameButton": "active-child-rename-button",
+            "deleteButton": "active-child-delete-button"
+        },
+
         "profile": {
             "childNameGuest": "profile-child-name-guest",
             "childNameButton": "profile-child-name",
@@ -54,6 +63,19 @@
             "durationInput": "edit-log-duration-input",
             "imageInput": "edit-log-image-input",
             "insert": "edit-log-insert"
+        },
+
+        "logItem": {
+            "editButton": "log-item-edit-button",
+            "deleteButton": "log-item-delete-button",
+            "image": "log-item-image"
+        },
+
+        "switchChild": {
+            "popup": "switch-child-popup",
+            "nameList": "switch-child-name-list",
+            "selectButton": "switch-child-select-button",
+            "cancelButton": "switch-child-cancel-button"
         },
 
         "tabsIndex": {
