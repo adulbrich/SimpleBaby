@@ -83,7 +83,6 @@ const SleepLogsView: React.FC = () => {
 				);
 
 				setSleepLogs(decrypted as SleepLog[]);
-				return;
 			} else {
 				const {
 					success,
@@ -193,7 +192,6 @@ const SleepLogsView: React.FC = () => {
 
 				await fetchSleepLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
 				const { error } = await supabase
 					.from("sleep_logs")

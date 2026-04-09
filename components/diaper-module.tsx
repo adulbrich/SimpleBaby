@@ -14,8 +14,8 @@ import CategoryModule from "@/components/category-module";
  * or amount updates.
  */
 
-type DiaperConsistency = 'Wet' | 'Dry' | 'Mixed'
-type DiaperAmount = 'SM' | 'MD' | 'LG'
+type DiaperConsistency = 'Wet' | 'Dry' | 'Mixed';
+type DiaperAmount = 'SM' | 'MD' | 'LG';
 
 export default function DiaperModule({
     onTimeUpdate,
@@ -23,10 +23,10 @@ export default function DiaperModule({
     onAmountUpdate,
     testID,
 }: {
-    onTimeUpdate?: (time: Date) => void
-    onConsistencyUpdate?: (consistency: DiaperConsistency) => void
-    onAmountUpdate?: (amount: DiaperAmount) => void
-    testID?: string
+    onTimeUpdate?: (time: Date) => void;
+    onConsistencyUpdate?: (consistency: DiaperConsistency) => void;
+    onAmountUpdate?: (amount: DiaperAmount) => void;
+    testID?: string;
 }) {
     const [changeTime, setChangeTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);

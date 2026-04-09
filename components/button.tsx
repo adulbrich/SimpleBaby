@@ -8,12 +8,12 @@ export default function Button({
     textClass,
     testID,
 }: {
-    text: string
-    action: () => void
-    buttonClass?: string
-    disabled?: boolean
-    textClass?: string
-    testID?: string
+    text: string;
+    action: () => void;
+    buttonClass?: string;
+    disabled?: boolean;
+    textClass?: string;
+    testID?: string;
 }) {
     return (
         <TouchableOpacity

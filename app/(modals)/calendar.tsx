@@ -123,17 +123,17 @@ export default function CalendarModal() {
                     data={logs}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({ item }) => (
-                    <View className="bg-white rounded-xl p-4 mb-3 shadow">
-                        <Text className="text-xs text-gray-500">
-                        {format(new Date(item.at), "h:mm a")}
-                        </Text>
+                        <View className="bg-white rounded-xl p-4 mb-3 shadow">
+                            <Text className="text-xs text-gray-500">
+                                {format(new Date(item.at), "h:mm a")}
+                            </Text>
 
-                        <Text className="text-base font-bold mt-1">{item.title}</Text>
+                            <Text className="text-base font-bold mt-1">{item.title}</Text>
 
-                        {!!item.details && (
-                        <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
-                        )}
-                    </View>
+                            {!!item.details && (
+                                <Text className="text-sm text-gray-700 mt-1">{item.details}</Text>
+                            )}
+                        </View>
                     )}
                 ></FlatList>
             )}

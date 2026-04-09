@@ -8,9 +8,9 @@ import TrackerButton from "@/components/tracker-button";
 import { useAuth } from "@/library/auth-provider";
 import {
 	createChild,
-	getActiveChildId,
+	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
-import { formatName, saveNewChild } from "@/library/utils";
+import { saveNewChild } from "@/library/utils";
 import AddChildPopup from "@/components/add-child-popup";
 import stringLib from "@/assets/stringLibrary.json";
 
@@ -55,10 +55,10 @@ export default function MainTab() {
 	const [childName, setChildName] = useState("");
 
 	const handleSaveChild = async () => {
-		// GUEST MODE: local-only
 		if (isGuest) {
+			// GUEST MODE: local-only
 			try {
-				await createChild(formatName(childName));
+				await createChild(childName);
 				setChildState(false);
 			} catch {
 				Alert.alert("Error", "Could not create the child in guest mode. Please try again");
@@ -85,7 +85,7 @@ export default function MainTab() {
 			if (loading) return;
 
 			if (isGuest) {
-				const activeId = await getActiveChildId();
+				const activeId = await getLocalActiveChildId();
 				if (!cancelled) {
 					setChildState(!activeId);
 				}
