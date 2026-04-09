@@ -117,11 +117,11 @@ const SignUpScreen: React.FC = () => {
                     behavior={'padding'}
                 >
                     <View className='flex-row gap-4'>
-                        <View className='grow'>
+                        <View className='flex-1'>
                             <Text className='text font-bold'>First Name</Text>
                             <TextInput
                                 className='text-input'
-                                placeholder='Enter your name'
+                                placeholder='Enter your first name'
                                 value={firstName}
                                 onChangeText={setFirstName}
                                 autoCapitalize='none'
@@ -129,7 +129,7 @@ const SignUpScreen: React.FC = () => {
                                 testID="sign-up-first-name"
                             />
                         </View>
-                        <View className='grow'>
+                        <View className='flex-1'>
                             <Text className='text font-bold'>Last Name</Text>
                             <TextInput
                                 className='text-input'
