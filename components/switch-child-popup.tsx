@@ -9,6 +9,10 @@ import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
 import ListSelect from './list-select';
 import { useEffect, useState } from 'react';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.switchChild;
 
 
 export default function SwitchChildPopup(
@@ -61,6 +65,7 @@ export default function SwitchChildPopup(
                                     items={childNames}
                                     selected={selected}
                                     onSelect={setSelected}
+                                    testID={testIDs.nameList}
                                 />
                             </View>
                             <Button
@@ -68,6 +73,7 @@ export default function SwitchChildPopup(
                                 action={() => handleSwitch(selected)}
                                 textClass='font-bold'
                                 buttonClass='button-normal mb-3 mt-3'
+                                testID={testIDs.selectButton}
                             />
                             { !hideCancelButton &&
                                 <Button
@@ -75,6 +81,7 @@ export default function SwitchChildPopup(
                                     action={handleCancel}
                                     textClass='font-bold'
                                     buttonClass='bg-red-600 border-gray-500'
+                                    testID={testIDs.cancelButton}
                                 />
                             }
                     </View>
