@@ -14,7 +14,9 @@
 
     "uiLabels": {
         "noteLabel": "Add a note",
-        "manualEntryLabel": "Manual Entry"
+        "manualEntryLabel": "Manual Entry",
+        "iosCloseDateTimePicker": "Done",
+        "editPhotoMessage": "Photos cannot be edited/updated yet in this menu. This feature will be added in a later release. For now, please create a new log."
     },
 
     "testIDs": {
@@ -38,11 +40,29 @@
             "addChildPopup": "profile-add-child-popup",
             "switchChildPopup": "profile-switch-child-popup"
         },
+
         "addChild": {
             "popup": "add-child-popup",
             "nameEntry": "add-child-name",
             "saveButton": "add-child-save-button",
             "cancelButton": "add-child-cancel-button"
+        },
+
+        "editLog": {
+            "popup": "edit-log-popup",
+            "cancelButton": "edit-log-cancel-button",
+            "saveButton": "edit-log-save-button",
+            "categoryInput": "edit-log-category-input",
+            "textInput": "edit-log-text-input",
+            "dateInputButton": "edit-log-date-input-button",
+            "dateDoneButton": "edit-log-date-done-button",
+            "timeInputButton": "edit-log-time-input-button",
+            "timeDoneButton": "edit-log-time-done-button",
+            "timePickerTestID": "edit-log-time-picker",
+            "datePickerTestID": "edit-log-date-picker",
+            "durationInput": "edit-log-duration-input",
+            "imageInput": "edit-log-image-input",
+            "insert": "edit-log-insert"
         },
 
         "logItem": {
