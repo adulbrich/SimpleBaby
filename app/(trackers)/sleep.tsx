@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Stopwatch from "@/components/stopwatch";
-import ManualEntry from "@/components/manual-entry-sleep";
+import ManualEntry from "@/components/sleep-manual-entry";
 import { router } from "expo-router";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
