@@ -7,21 +7,18 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 type MilestoneCategory =
 	| "Motor"
@@ -32,18 +29,12 @@ type MilestoneCategory =
 
 interface MilestoneLog {
 	id: string;
-	child_id: string;
 	title: string;
 	category: MilestoneCategory | null;
 	note: string | null;
 	achieved_at: Date;
 	photo_url: string | null;
-	source: string | null;
-	created_at: string;
-	updated_at: string;
 }
-
-type LocalMilestoneRow = LocalRow & Omit<MilestoneLog, "id"> & { child_id: string; };
 
 function isMilestoneCategory(val: string): val is MilestoneCategory {
     return ["Motor", "Language", "Social", "Cognitive", "Other"].includes(val as MilestoneCategory);
@@ -61,16 +52,6 @@ const MilestoneLogsView: React.FC = () => {
 		Record<string, string>
 	>({});
 	const { isGuest } = useAuth();
-
-    const safeDecrypt = async (value: string | null): Promise<string> => {
-        if (!value || !value.includes("U2FsdGVkX1")) return "";
-        try {
-            return await decryptData(value);
-        } catch (err) {
-            console.warn("⚠️ Decryption failed for:", value);
-            return `[Decryption Failed]: ${err}`;
-        }
-    };
 
 	const getSignedPhotoUrl = useCallback(
 		async (path: string): Promise<string | null> => {
@@ -102,82 +83,46 @@ const MilestoneLogsView: React.FC = () => {
 	);
 
 	const fetchMilestoneLogs = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError(null);
-
-			let data: any[] = [];
-
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (Guest Mode)");
-
-				// get & sort milestone logs descendingly
-				const rows = await listRows<LocalMilestoneRow>("milestone_logs");
-				data = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.achieved_at).getTime() -
-							new Date(a.achieved_at).getTime(),
-					);
-
-			} else {
-				const result = await getActiveChildData();
-				if (!result?.success || !result.childId) {
-					throw new Error(
-						result?.error
-							? String(result.error)
-							: "Failed to get active child ID",
-					);
-				}
-				setActiveChildName(result.childName);
-				const childId = String(result.childId);
-
-				const res = await supabase
-					.from("milestone_logs")
-					.select("*")
-					.eq("child_id", childId)
-					.order("achieved_at", { ascending: false });
-
-				if (res.error) throw res.error;
-				data = res.data || [];
-			}
-
-			const decryptedLogs = await Promise.all(
-				(data || []).map(async (entry) => ({
-					...entry,
-					title: await safeDecrypt(entry.title),
-					achieved_at: new Date(entry.achieved_at),
-					note: entry.note ? await safeDecrypt(entry.note) : "",
-				})),
-			);
-
-			const signedPairs = await Promise.all(
-				decryptedLogs.map(async (log) => {
-					if (!log.photo_url) {
-                        return [log.id, null] as const;
-                    }
-					const signed = await getSignedPhotoUrl(log.photo_url);
-					return [log.id, signed] as const;
-				}),
-			);
-
-			const nextMap: Record<string, string> = {};
-			for (const [id, signed] of signedPairs) {
-				if (signed) nextMap[id] = signed;
-			}
-
-			setPhotoSignedUrls(nextMap);
-			setMilestoneLogs(decryptedLogs);
-
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "An unknown error occurred",
-			);
-		} finally {
-			setLoading(false);
+		setLoading(true);
+		setError(null);
+			
+		const result = await fetchLogs<MilestoneLog>(
+			"milestone_logs",
+			isGuest,
+			"achieved_at",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "category", type: "unencrypted" },
+				{ dbFieldName: "title", type: "string" },
+				{ dbFieldName: "photo_url", type: "unencrypted" },
+				{ dbFieldName: "achieved_at", type: "date" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (!result.success) {
+			setError(result.error || "An unknown error occurred");
+			return;
 		}
+		setActiveChildName(result.childName);
+		setMilestoneLogs(result.data);
+
+		const signedPairs = await Promise.all(
+			result.data.map(async (log) => {
+				if (!log.photo_url) {
+					return [log.id, null] as const;
+				}
+				const signed = await getSignedPhotoUrl(log.photo_url);
+				return [log.id, signed] as const;
+			}),
+		);
+
+		const nextMap: Record<string, string> = {};
+		for (const [id, signed] of signedPairs) {
+			if (signed) nextMap[id] = signed;
+		}
+
+		setPhotoSignedUrls(nextMap);
+		setLoading(false);
 	}, [getSignedPhotoUrl, isGuest]);
 
 	useEffect(() => {

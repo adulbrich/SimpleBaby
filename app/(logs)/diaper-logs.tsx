@@ -7,32 +7,25 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { encryptData, decryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 interface DiaperLog {
 	id: string;
-	child_id: string;
 	consistency: string;
 	amount: string;
 	change_time: Date;
 	note: string | null;
 }
-
-type LocalDiaperRow = LocalRow & Omit<DiaperLog, "id">;
 
 const DiaperLogsView: React.FC = () => {
 	const [diaperLogs, setDiaperLogs] = useState<DiaperLog[]>([]);
@@ -44,88 +37,31 @@ const DiaperLogsView: React.FC = () => {
 	const [deleteAlertVisible, setDeleteAlertVisible] = useState(false);
 	const { isGuest } = useAuth();
 
-	const safeDecrypt = async (value: string | null): Promise<string> => {
-		if (!value || !value.includes("U2FsdGVkX1")) return "";
-		try {
-			return await decryptData(value);
-		} catch (err) {
-			console.warn("⚠️ Decryption failed for:", value);
-			return `[Decryption Failed]: ${err}`;
-		}
-	};
-
+	// Fetches diaper logs from Supabase or local storage for the active child.
 	const fetchDiaperLogs = useCallback(async () => {
 		setLoading(true);
 		setError(null);
 
-		try {
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (guest mode)");
-
-                // get & sort diaper logs descendingly
-				const rows = await listRows<LocalDiaperRow>("diaper_logs");
-				const childRows = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.change_time).getTime() -
-							new Date(a.change_time).getTime(),
-					);
-
-				const decrypted = await Promise.all(
-					childRows.map(async (entry) => ({
-						...entry,
-						consistency: await safeDecrypt(entry.consistency),
-						amount: await safeDecrypt(entry.amount),
-						change_time: new Date(entry.change_time),
-						note: entry.note ? await safeDecrypt(entry.note) : "",
-					})),
-				);
-
-				setDiaperLogs(decrypted as DiaperLog[]);
-				return;
-			} else {
-                const {
-				    success,
-				    childId,
-				    childName,
-				    error: childError,
-			    } = await getActiveChildData();
-                if (!success || !childId) {
-                    throw new Error(childError);
-                }
-
-                if (childName) setActiveChildName(childName);
-
-                const { data, error } = await supabase
-                    .from("diaper_logs")
-                    .select("*")
-                    .eq("child_id", childId)
-                    .order("change_time", { ascending: false });
-
-                if (error) throw error;
-
-                const decryptedLogs = await Promise.all(
-                    (data || []).map(async (entry) => ({
-                        ...entry,
-                        consistency: await safeDecrypt(entry.consistency),
-                        amount: await safeDecrypt(entry.amount),
-						change_time: new Date(entry.change_time),
-                        note: entry.note ? await safeDecrypt(entry.note) : "",
-                    })),
-                );
-
-                setDiaperLogs(decryptedLogs);
-            }
-		} catch (err) {
-			console.error("❌ Fetch or decryption error:", err);
-			setError(
-				err instanceof Error ? err.message : "An unknown error occurred",
-			);
-		} finally {
-			setLoading(false);
+		const result = await fetchLogs<DiaperLog>(
+			"diaper_logs",
+			isGuest,
+			"change_time",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "consistency", type: "string" },
+				{ dbFieldName: "amount", type: "string" },
+				{ dbFieldName: "change_time", type: "date" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (result.success) {
+			setDiaperLogs(result.data);
+			setActiveChildName(result.childName);
+		} else {
+			setError(result.error);
 		}
+
+		setLoading(false);
 	}, [isGuest]);
 
 	useEffect(() => {

@@ -7,21 +7,17 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 interface NursingLog {
 	id: string;
@@ -34,8 +30,6 @@ interface NursingLog {
 	right_amount: string | null;
 }
 
-type LocalNursingRow = LocalRow & Omit<NursingLog, "id">;
-
 const NursingLogsView: React.FC = () => {
 	const [nursingLogs, setNursingLogs] = useState<NursingLog[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -46,86 +40,32 @@ const NursingLogsView: React.FC = () => {
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
-	const safeDecrypt = async (value: string | null): Promise<string> => {
-		if (!value || !value.includes("U2FsdGVkX1")) return value || "";
-		try {
-			return await decryptData(value);
-		} catch (err) {
-			return `[Decryption Failed]: ${err}`;
-		}
-	};
-
 	const fetchNursingLogs = useCallback(async () => {
-		try {
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (Guest Mode)");
-
-                // get & sort nursing logs descendingly
-				const rows = await listRows<LocalNursingRow>("nursing_logs");
-				const childRows = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.logged_at).getTime() -
-                            new Date(a.logged_at).getTime(),
-					);
-
-				const decrypted = await Promise.all(
-					childRows.map(async (entry) => ({
-						...entry,
-						left_duration: await safeDecrypt(entry.left_duration),
-						right_duration: await safeDecrypt(entry.right_duration),
-						left_amount: await safeDecrypt(entry.left_amount),
-						right_amount: await safeDecrypt(entry.right_amount),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-
-				setNursingLogs(decrypted as NursingLog[]);
-				return;
-			} else {
-                const {
-                    success,
-                    childId,
-                    childName,
-                    error: childError,
-                } = await getActiveChildData();
-
-                if (!success || !childId) {
-                    throw new Error(childError);
-                }
-
-                if (childName) setActiveChildName(childName);
-
-                const { data, error } = await supabase
-                    .from("nursing_logs")
-                    .select("*")
-                    .eq("child_id", childId)
-                    .order("logged_at", { ascending: false });
-
-                if (error) throw error;
-
-                const decrypted = await Promise.all(
-                    (data || []).map(async (entry) => ({
-                        ...entry,
-                        left_duration: await safeDecrypt(entry.left_duration),
-                        right_duration: await safeDecrypt(entry.right_duration),
-                        left_amount: await safeDecrypt(entry.left_amount),
-                        right_amount: await safeDecrypt(entry.right_amount),
-                        note: await safeDecrypt(entry.note),
-                    })),
-                );
-
-                setNursingLogs(decrypted);
-            }
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "An unknown error occurred",
-			);
-		} finally {
-			setLoading(false);
+		setLoading(true);
+		setError(null);
+			
+		const result = await fetchLogs<NursingLog>(
+			"nursing_logs",
+			isGuest,
+			"logged_at",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "left_duration", type: "string" },
+				{ dbFieldName: "right_duration", type: "string" },
+				{ dbFieldName: "left_amount", type: "string" },
+				{ dbFieldName: "right_amount", type: "string" },
+				{ dbFieldName: "logged_at", type: "date" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (result.success) {
+			setNursingLogs(result.data);
+			setActiveChildName(result.childName);
+		} else {
+			setError(result.error);
 		}
+
+		setLoading(false);
 	}, [isGuest]);
 
 	useEffect(() => {
