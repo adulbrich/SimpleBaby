@@ -8,10 +8,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
  */
 export default function Stopwatch({
     onTimeUpdate,
-    testID
+    testID,
 }: {
-    onTimeUpdate: any,
-    testID?: string
+    onTimeUpdate: any;
+    testID?: string;
 }) {
     const [time, setTime] = useState(0);
     const [running, setRunning] = useState(false);
