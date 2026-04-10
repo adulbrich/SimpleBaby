@@ -37,24 +37,20 @@ export default function ActiveChild() {
 
     // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
-        try {
-            Alert.alert(
-                "Confirm Delete",
-                `Are you sure you want to delete ${childName}?`,
-                [{
-                    text: "Cancel",
-                    style: "cancel",
-                    isPreferred: true,
-                },
-                {
-                    text: "Confirm",
-                    style: "destructive",
-                    onPress: handleConfirmedDeleteChild,
-                }]
-            );
-        } catch (err) {
-            Alert.alert("Error", err instanceof Error ? err.message : 'An unknown error occurred');
-        }
+        Alert.alert(
+            "Confirm Delete",
+            `Are you sure you want to delete ${childName}?`,
+            [{
+                text: "Cancel",
+                style: "cancel",
+                isPreferred: true,
+            },
+            {
+                text: "Confirm",
+                style: "destructive",
+                onPress: handleConfirmedDeleteChild,
+            }]
+        );
     };
 
     // Handles second user request to delete a child, after confirmation
@@ -143,8 +139,8 @@ export default function ActiveChild() {
             }
             setChildName(result.childName);
             setChildId(result.childId);
-            if (result.created_at) {
-                setCreatedDate((new Date(result.created_at)).toDateString());
+            if (result.createdAt) {
+                setCreatedDate((new Date(result.createdAt)).toDateString());
             }
         } catch {
             Alert.alert(stringLib.errors.childData, stringLib.errors.childDataMessage);

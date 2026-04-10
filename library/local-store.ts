@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
 import { encryptData, decryptData } from "./crypto";
+import { formatName } from "./utils";
 
 export type TableName =
 	| "feeding_logs"
@@ -101,12 +102,13 @@ export async function listChildren(): Promise<Child[]> {
 // createChild()
 // creates a child object and adds it to the local db
 export async function createChild(name: string) {
-	if (!name.trim()) {
+    const formattedName = formatName(name);
+	if (!formattedName.trim()) {
 		throw new Error("Child name is required.");
 	}
 	try {
 		const children = await getJson<Child[]>(KEYS.children, []);
-		const encryptedName = await encryptData(name);
+		const encryptedName = await encryptData(formattedName);
 		const child: Child = {
 			id: uuidv4(),
 			name: encryptedName,

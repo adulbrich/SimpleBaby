@@ -3,7 +3,7 @@ import Sleep from "@/app/(trackers)/sleep";
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import Stopwatch from "@/components/stopwatch";
-import ManualEntry from "@/components/manual-entry-sleep";
+import ManualEntry from "@/components/sleep-manual-entry";
 import { field, saveLog } from "@/library/log-functions";
 
 jest.mock("expo-router", () => ({
@@ -24,7 +24,7 @@ jest.mock("@/components/stopwatch.tsx", () => {
     return SleepStopwatchMock;
 });
 
-jest.mock("@/components/manual-entry-sleep.tsx", () => {
+jest.mock("@/components/sleep-manual-entry.tsx", () => {
     const View = jest.requireActual("react-native").View;
     const ManualInputsMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
     return ManualInputsMock;

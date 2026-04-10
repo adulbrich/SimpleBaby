@@ -149,7 +149,7 @@ const MilestoneLogsView: React.FC = () => {
 					...entry,
 					title: await safeDecrypt(entry.title),
 					achieved_at: new Date(entry.achieved_at),
-					note: entry.note ? await safeDecrypt(entry.note) : "",
+					note: await safeDecrypt(entry.note),
 				})),
 			);
 
@@ -203,8 +203,7 @@ const MilestoneLogsView: React.FC = () => {
 
 		try {
 			const encryptedTitle = await encryptData(titlePlain);
-			const notePlain = editingLog.note?.trim();
-			const encryptedNote = notePlain ? await encryptData(notePlain) : null;
+			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
 
 			const patch = {
 				title: encryptedTitle,
@@ -221,7 +220,6 @@ const MilestoneLogsView: React.FC = () => {
 				}
 				await fetchMilestoneLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
                 const { error } = await supabase
                     .from("milestone_logs")
