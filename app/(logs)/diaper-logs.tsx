@@ -224,7 +224,7 @@ const DiaperLogsView: React.FC = () => {
 				{ type: "title", value: format(item.change_time, "MMM dd, yyyy") },
 				{ type: "text", value: format(item.change_time, "h:mm a") },
 				{ type: "item", label: "Consistency", value: item.consistency },
-				{ type: "item", label: "Size", value: item.amount },
+				{ type: "item", label: "Amount", value: item.amount },
 				{ type: "note", value: item.note},
 			]}
 		/>
