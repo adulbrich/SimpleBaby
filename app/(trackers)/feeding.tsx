@@ -95,7 +95,7 @@ export default function Feeding() {
 		}, isGuest, "feeding");
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Feeding log saved successfully!");
 		} else {
 			Alert.alert(`Failed to save feeding log: ${result.error}`);

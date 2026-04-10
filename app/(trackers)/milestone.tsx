@@ -165,7 +165,7 @@ export default function Milestone() {
 		}, isGuest, "milestone", setUploadingPhoto);
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Milestone log saved successfully!");
 		} else {
 			Alert.alert(`Failed to save milestone log: ${result.error}`);
