@@ -6,14 +6,11 @@ import NursingStopwatch from "@/components/nursing-stopwatch";
 import { field, saveLog } from "@/library/log-functions";
 
 
-jest.mock("expo-router", () => {
-    const replace = jest.fn();
-    return {
-        router: {
-            replace: replace,
-        },
-    };
-});
+jest.mock("expo-router", () => ({
+    router: {
+        dismissTo: jest.fn(),
+    },
+}));
 
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");
@@ -99,6 +96,7 @@ describe("Track nursing screen", () => {
         (NursingStopwatch as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
         (saveLog as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
     });
 
     test("Renders nursing tracking inputs", () => {
@@ -203,8 +201,8 @@ describe("Track nursing screen", () => {
         );
 
         // confirm that the expo-router was called to send the user back to the tracker page
-        expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((router.dismissTo as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
+        expect((router.dismissTo as jest.Mock)).toHaveBeenCalledTimes(1);
 
         // Alert.alert() called by app/(trackers)/nursing.tsx -> handleSaveNursingLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Nursing log saved successfully!`);
