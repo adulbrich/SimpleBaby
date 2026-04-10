@@ -138,7 +138,7 @@ describe("Active Child screen", () => {
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */, created_at: /* test string */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
-            async () => ({ success: true, childName: testName, childId: true, created_at: testCreated })
+            async () => ({ success: true, childName: testName, childId: true, createdAt: testCreated })
         );
 
         render(<ActiveChild/>);

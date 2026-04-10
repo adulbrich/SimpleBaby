@@ -276,31 +276,31 @@ export default function Milestone() {
 								</View>
 							)}
 
-                        <View className="ml-4 mr-4 flex-row items-center justify-between">
-							<Text className="feeding-module-label">Milestone Photo</Text>
-							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 items-center"
-								onPress={pickPhoto}
-								disabled={uploadingPhoto}
-								testID='milestone-photo-button'
-								>
-								<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
-							</TouchableOpacity>
-                        </View>
-						{(photoName || photoUri) && (
-							<View className="flex flex-col" accessible>
-								<Text className="text-sm text-gray-500 mt-2 text-center">
-									({photoName})
-								</Text>
+							<View className="ml-4 mr-4 flex-row items-center justify-between">
+								<Text className="feeding-module-label">Milestone Photo</Text>
 								<TouchableOpacity
-									onPress={handleRemovePhoto}
-									testID="remove-milestone-photo-button"
+									className="rounded-full p-4 bg-red-100 items-center"
+									onPress={pickPhoto}
+									disabled={uploadingPhoto}
+									testID='milestone-photo-button'
 								>
-									<Text className="text-center text-gray-500 underline">Remove Photo</Text>
+									<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
 								</TouchableOpacity>
 							</View>
-						)}
-                    </View>
+							{(photoName || photoUri) && (
+								<View className="flex flex-col" accessible>
+									<Text className="text-sm text-gray-500 mt-2 text-center">
+										({photoName})
+									</Text>
+									<TouchableOpacity
+										onPress={handleRemovePhoto}
+										testID="remove-milestone-photo-button"
+									>
+										<Text className="text-center text-gray-500 underline">Remove Photo</Text>
+									</TouchableOpacity>
+								</View>
+							)}
+						</View>
                     </View>
 
 					{/* Note input section */}

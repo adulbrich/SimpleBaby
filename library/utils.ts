@@ -11,13 +11,13 @@ export const getActiveChildData = async (): Promise<{
     error?: undefined;
     childId: string;
     childName: string;
-    created_at: string;
+    createdAt: string;
 } | {
     success: false;
     error: string;
     childId?: undefined;
     childName?: undefined;
-    created_at?: undefined;
+    createdAt?: undefined;
 }> => {
     // Get the current user
     const {
@@ -63,7 +63,7 @@ export const getActiveChildData = async (): Promise<{
         }
     }
 
-    return { success: true, childId: data.id, childName, created_at: data.created_at };
+    return { success: true, childId: data.id, childName, createdAt: data.created_at };
 };
 
 

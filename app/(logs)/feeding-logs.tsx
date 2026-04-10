@@ -111,24 +111,22 @@ const FeedingLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, category, item_name, amount, feeding_time, note } = editingLog;
-
-			if (!item_name.trim() || !amount.trim()) {
+			if (!editingLog.item_name.trim() || !editingLog.amount.trim()) {
 				Alert.alert("Failed to update log", "Please ensure the item name and amount are valid.");
 				return;
 			}
 
-			const encryptedCategory = await encryptData(category);
-			const encryptedItemName = await encryptData(item_name);
-			const encryptedAmount = await encryptData(amount);
-			const encryptedNote = note ? await encryptData(note) : null;
+			const encryptedCategory = await encryptData(editingLog.category);
+			const encryptedItemName = await encryptData(editingLog.item_name);
+			const encryptedAmount = await encryptData(editingLog.amount);
+			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
 
 			if (isGuest) {
-				const success = await updateRow("feeding_logs", id, {
+				const success = await updateRow("feeding_logs", editingLog.id, {
 					category: encryptedCategory,
 					item_name: encryptedItemName,
 					amount: encryptedAmount,
-					feeding_time: feeding_time.toISOString(),
+					feeding_time: editingLog.feeding_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -138,7 +136,6 @@ const FeedingLogsView: React.FC = () => {
 
 				await fetchFeedingLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
 				const { error } = await supabase
 					.from("feeding_logs")
@@ -146,10 +143,10 @@ const FeedingLogsView: React.FC = () => {
 						category: encryptedCategory,
 						item_name: encryptedItemName,
 						amount: encryptedAmount,
-						feeding_time: feeding_time.toISOString(),
+						feeding_time: editingLog.feeding_time.toISOString(),
 						note: encryptedNote,
 					})
-					.eq("id", id);
+					.eq("id", editingLog.id);
 
 				if (error) {
 					Alert.alert(stringLib.errors.logUpdateFailure);

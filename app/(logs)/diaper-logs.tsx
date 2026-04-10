@@ -105,17 +105,15 @@ const DiaperLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const { id, consistency, amount, change_time, note } = editingLog;
-
-			const encryptedConsistency = await encryptData(consistency);
-			const encryptedAmount = await encryptData(amount);
-			const encryptedNote = note ? await encryptData(note) : null;
+			const encryptedConsistency = await encryptData(editingLog.consistency);
+			const encryptedAmount = await encryptData(editingLog.amount);
+			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
 
 			if (isGuest) {
-				const success = await updateRow("diaper_logs", id, {
+				const success = await updateRow("diaper_logs", editingLog.id, {
 					consistency: encryptedConsistency,
 					amount: encryptedAmount,
-					change_time: change_time.toISOString(),
+					change_time: editingLog.change_time.toISOString(),
 					note: encryptedNote,
 				});
 				if (!success) {
@@ -125,17 +123,16 @@ const DiaperLogsView: React.FC = () => {
 
 				await fetchDiaperLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
                 const { error } = await supabase
                     .from("diaper_logs")
                     .update({
                         consistency: encryptedConsistency,
                         amount: encryptedAmount,
-						change_time: change_time.toISOString(),
+						change_time: editingLog.change_time.toISOString(),
                         note: encryptedNote,
                     })
-                    .eq("id", id);
+                    .eq("id", editingLog.id);
 
                 if (error) {
                     Alert.alert(stringLib.errors.logUpdateFailure);

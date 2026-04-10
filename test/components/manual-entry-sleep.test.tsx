@@ -1,4 +1,4 @@
-import ManualEntry from "@/components/manual-entry-sleep";
+import ManualEntry from "@/components/sleep-manual-entry";
 import { act, render, screen, userEvent } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";

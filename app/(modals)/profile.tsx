@@ -39,7 +39,7 @@ export default function Profile() {
     const [newChildName, setNewChildName] = useState("");
     const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
     const [loadingNames, setLoadingNames] = useState(true);
-    const [namesError, setNamesError] = useState<string | null>(null);
+    const [namesError, setNamesError] = useState<boolean>(false);
 
     const [childName, setChildName] = useState<string>('Loading...');
     const [displayName, setDisplayName] = useState<string>('');
@@ -56,15 +56,13 @@ export default function Profile() {
 
                 // Send them back to auth entry
                 router.replace("/");
-                return;
+            } else {
+                // Signed-in session sign-out: Supabase sign out
+                const { error } = await supabase.auth.signOut();
+
+                if (error) throw error;
+                router.replace("/");
             }
-
-            // Signed-in session sign-out: Supabase sign out
-            const { error } = await supabase.auth.signOut();
-
-            if (error) throw error;
-            router.replace("/");
-
         } catch (e: any) {
             Alert.alert("Sign out failed", e?.message ?? "Please try again.");
         }
@@ -113,8 +111,8 @@ export default function Profile() {
             const data = await getChildren();
 
             if (data) setChildren(data);
-        } catch (err) {
-            setNamesError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } catch {
+            setNamesError(true);
         } finally {
             setLoadingNames(false);
         };
