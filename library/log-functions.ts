@@ -7,6 +7,7 @@ import {
     listRows,
 } from "@/library/local-store";
 import supabase from "./supabase-client";
+import stringLib from "../assets/stringLibrary.json";
 
 
 export type field = {
@@ -223,7 +224,7 @@ async function safeDecrypt(value: string | null): Promise<string> {
         return await decryptData(value);
     } catch (err) {
         console.warn("⚠️ Decryption failed for:", value);
-        return `[Decryption Failed]: ${err}`;
+        return `${stringLib.errors.decryption}: ${(err as Error).message}`;
     }
 }
 
@@ -235,7 +236,7 @@ async function fetchLocalLogs(
     data: any[];
 }> {
     const childId = await getLocalActiveChildId();
-    if (!childId) throw new Error("No active child selected (guest mode)");
+    if (!childId) throw new Error(stringLib.errors.guestNoChild);
 
     // get & sort diaper logs descendingly
     const rows = await listRows(tableName);
@@ -285,7 +286,7 @@ export async function fetchLogs<LogType>(
     fields: (Omit<field, "value"> & { dbFieldName: keyof LogType })[],
 ): Promise<{
     success: true;
-    data: any[];
+    data: LogType[];
     childName: string | null;
 } | {
     success: false;

@@ -1,16 +1,22 @@
 import { getActiveChildData } from '@/library/utils';
 import supabase from "@/library/supabase-client";
-import { encryptData } from "@/library/crypto";
-import { saveLog, formatStringList, field } from '@/library/log-functions';
-import { getActiveChildId, insertRow, TableName } from '@/library/local-store';
+import { decryptData, encryptData } from "@/library/crypto";
+import { saveLog, formatStringList, field, fetchLogs } from '@/library/log-functions';
+import { getActiveChildId, insertRow, listRows, TableName } from '@/library/local-store';
+import stringLib from "../../assets/stringLibrary.json";
 
 
 jest.mock("@/library/supabase-client", () => {
     const insert = jest.fn(async () => ({ error: false }));
     const upload = jest.fn(async () => ({ data: {} }));
+    const order = jest.fn(async () => ({ data: [] }));
+    const eq = jest.fn(() => ({ order: order }));
     return ({
         from: jest.fn(() => ({
             insert: insert,
+            select: () => ({
+                eq: eq,
+            }),
         })),
         auth: {
             getUser: jest.fn(() => ({ data: { user: {} } })),
@@ -25,15 +31,17 @@ jest.mock("@/library/supabase-client", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string: string) => `Encrypted: ${string}`),
+    decryptData: jest.fn(async (string: string) => `Decrypted: ${string}`)
 }));
 
 jest.mock("@/library/utils", () => ({
-    getActiveChildData: jest.fn(async () => ({ success: true })),
+    getActiveChildData: jest.fn(async () => ({ success: true, childId: "x" })),
 }));
 
 jest.mock("@/library/local-store", () => ({
     getActiveChildId: jest.fn(async () => "x"),
     insertRow: jest.fn(async () => true),
+    listRows: jest.fn(async () => []),
 }));
 
 jest.mock("expo-crypto", () => ({}));
@@ -383,25 +391,6 @@ describe("saveLog()", () => {
 });
 
 
-describe("formatStringList()", () => {
-    test("one item", () =>
-        expect(formatStringList(["item 1"])).toBe("item 1")
-    );
-
-    test("two items", () =>
-        expect(formatStringList(["item 1", "item 2"])).toBe("item 1 and item 2")
-    );
-
-    test("three items", () =>
-        expect(formatStringList(["item 1", "item 2", "item 3"])).toBe("item 1, item 2 and item 3")
-    );
-    
-    test("four items", () =>
-        expect(formatStringList(["item 1", "item 2", "item 3", "item 4"])).toBe("item 1, item 2, item 3 and item 4")
-    );
-});
-
-
 async function imageLoadingState(
     uploadResult: any,
     saveLogResult: any,
@@ -506,3 +495,331 @@ async function savesTableName(isGuest: boolean) {
         }
     }
 }
+
+
+describe("formatStringList()", () => {
+    test("one item", () =>
+        expect(formatStringList(["item 1"])).toBe("item 1")
+    );
+
+    test("two items", () =>
+        expect(formatStringList(["item 1", "item 2"])).toBe("item 1 and item 2")
+    );
+
+    test("three items", () =>
+        expect(formatStringList(["item 1", "item 2", "item 3"])).toBe("item 1, item 2 and item 3")
+    );
+    
+    test("four items", () =>
+        expect(formatStringList(["item 1", "item 2", "item 3", "item 4"])).toBe("item 1, item 2, item 3 and item 4")
+    );
+});
+
+
+describe("fetchLogs()", () => {
+
+    beforeEach(() => {
+        // to clear the .mock.calls array
+        (listRows as jest.Mock).mockClear();
+        (supabase.from("").select().eq("", "").order as jest.Mock).mockClear();
+        (supabase.from("").select().eq as unknown as jest.Mock).mockClear();
+        (supabase.from as jest.Mock).mockClear();
+        // revert to original implementation
+        jest.spyOn(console, "error").mockRestore();
+        jest.spyOn(console, "warn").mockRestore();
+    });
+
+    test("Catch getActiveChildData() error (remote)", async () => {
+        const testErrorMessage = "test error message";
+    
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // { error: /* test error message */ }
+        // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
+            async () => ({ error: testErrorMessage })
+        );
+        await catchesError(false, testErrorMessage);
+    });
+
+    test("Catch supabase select error (remote)", async () => {
+        const testErrorMessage = "test supabase error message";
+    
+        // supabase.from().select().eq().order() should be mocked to return:
+        // { error: /* truthy value */ }
+        // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
+        (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
+            async () => ({ error: new Error(testErrorMessage) })
+        );
+        await catchesError(false, testErrorMessage);
+    });
+
+    test("Requests correct table name (remote)", async () => {
+        const testName = "test table name";
+
+        await fetchLogs(
+            testName as TableName,
+            false,
+            "",
+            []
+        );
+        expect(supabase.from).toHaveBeenCalledTimes(1);
+        expect((supabase.from as jest.Mock).mock.calls[0][0]).toBe(testName);
+    });
+
+    test("Requests filter by child id (remote)", async () => {
+        const testChildId = "test child id";
+    
+        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // { success: true, childId: /* test value */ }
+        // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
+        (getActiveChildData as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, childId: testChildId })
+        );
+
+        await fetchLogs(
+            "diaper_logs",
+            false,
+            "",
+            []
+        );
+        expect(supabase.from("").select().eq).toHaveBeenCalledTimes(1);
+        const eqCall = (supabase.from("").select().eq as unknown as jest.Mock).mock.calls[0];
+        expect(eqCall[0]).toBe("child_id");
+        expect(eqCall[1]).toBe(testChildId);
+    });
+
+    test("Requests descending sort (remote)", async () => {
+        const testsortField = "test sort field";
+
+        await fetchLogs(
+            "diaper_logs",
+            false,
+            testsortField,
+            []
+        );
+        expect(supabase.from("").select().eq("", "").order).toHaveBeenCalledTimes(1);
+        const eqCall = (supabase.from("").select().eq("", "").order as jest.Mock).mock.calls[0];
+        expect(eqCall[0]).toBe(testsortField);
+        expect(eqCall[1]).toEqual({ ascending: false });
+    });
+
+    test("Processes fields (remote)", async () => {
+        // supabase.from().select().eq().order() should be mocked to return:
+        // { data: /* test data */ }
+        // This should not cause any errors
+        const mockData = (testFetchLogs: any) => 
+            (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
+                async () => ({ data: testFetchLogs })
+            );
+        const childId = (await getActiveChildData()).childId;
+        processesFields(false, childId as string, mockData);
+    });
+
+    test("Indicates decryption error (remote)", async () => {
+        // supabase.from().select().eq().order() should be mocked to return:
+        // { data: /* test data */ }
+        // This should not cause any errors
+        const mockData = (testFetchLogs: any) => 
+            (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
+                async () => ({ data: testFetchLogs })
+            );
+        const childId = (await getActiveChildData()).childId;
+        catchesDecryptionError(false, childId as string, mockData);
+    });
+
+    test("Catch getActiveChildId() error (local)", async () => {
+        // library/local-store.ts -> getActiveChildId() should be mocked to return:
+        // null
+        // This should cause error handling in library/log-functions.ts -> fetchLocalLogs()
+        (getActiveChildId as jest.Mock).mockImplementationOnce(
+            async () => null
+        );
+        await catchesError(true, stringLib.errors.guestNoChild);
+    });
+
+    test("Requests correct table name (local)", async () => {
+        const testName = "test table name";
+
+        await fetchLogs(
+            testName as TableName,
+            true,
+            "",
+            []
+        );
+        expect(listRows).toHaveBeenCalledTimes(1);
+        expect((listRows as jest.Mock).mock.calls[0][0]).toBe(testName);
+    });
+
+    test("Returns no logs (local)", async () => {
+        // library/local-store.ts -> listRows() should be (already) mocked to return:
+        // []
+        // This should not cause any errors
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            true,
+            "",
+            [{ dbFieldName: "", type: "date" }]
+        );
+        expect(result.success).toBe(true);
+        expect((result as any).data).toEqual([]);
+    });
+
+    test("Filters logs by childID (local)", async () => {
+        const childId = await getActiveChildId();
+        const testFetchLogs = [
+            { sortField: (new Date()).toISOString(), child_id: childId },
+            { sortField: (new Date("2000-01-01")).toISOString(), child_id: null },
+            { sortField: (new Date((new Date()).getTime() - 100)).toISOString(), child_id: childId },
+        ];
+
+        // library/local-store.ts -> listRows() should be mocked to return test data
+        // This should not cause any errors
+        (listRows as jest.Mock).mockImplementationOnce(
+            async () => testFetchLogs
+        );
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            true,
+            "sortField",
+            [{ dbFieldName: "sortField", type: "date" }]
+        );
+        expect(result.success).toBe(true);
+        expect((result as any).data).toEqual(
+            testFetchLogs.filter(log => log.child_id).map(
+                ({ sortField }) => ({ sortField: new Date(sortField)})
+            )
+        );
+    });
+
+    test("Sorts logs (local)", async () => {
+        const childId = await getActiveChildId();
+        const testFetchLogs = [
+            { sortField: (new Date((new Date()).getTime() - 100)).toISOString(), child_id: childId },
+            { sortField: (new Date("2000-01-01")).toISOString(), child_id: childId },
+            { sortField: (new Date()).toISOString(), child_id: childId },
+        ];
+
+        // library/local-store.ts -> listRows() should be mocked to return test data
+        // This should not cause any errors
+        (listRows as jest.Mock).mockImplementationOnce(
+            async () => testFetchLogs
+        );
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            true,
+            "sortField",
+            [{ dbFieldName: "sortField", type: "date" }]
+        );
+        expect(result.success).toBe(true);
+        expect((result as any).data).toEqual(
+            testFetchLogs.map(
+                ({ sortField }) => ({ sortField: new Date(sortField)})
+            ).sort((a, b) =>
+                new Date(b.sortField).getTime() -
+                new Date(a.sortField).getTime()
+            )
+        );
+    });
+
+    test("Processes fields (local)", async () => {
+        // library/local-store.ts -> listRows() should be mocked to return test data
+        // This should not cause any errors
+        const mockData = (testFetchLogs: any) => 
+            (listRows as jest.Mock).mockImplementationOnce(
+                async () => testFetchLogs
+            );
+
+        const childId = await getActiveChildId();
+        await processesFields(true, childId as string, mockData);
+    });
+
+    test("Catches decryption error (local)", async () => {
+        // library/local-store.ts -> listRows() should be mocked to return test data
+        // This should not cause any errors
+        const mockData = (testFetchLogs: any) => 
+            (listRows as jest.Mock).mockImplementationOnce(
+                async () => testFetchLogs
+            );
+
+        const childId = await getActiveChildId();
+        await catchesDecryptionError(true, childId as string, mockData);
+    });
+
+
+    async function catchesError(isGuest: boolean, error: string) {
+        jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            isGuest,
+            "",
+            [{ dbFieldName: "", type: "date" }]
+        );
+        expect(result.success).toBe(false);
+        expect((result as any).error).toBe(error);
+    }
+
+    async function processesFields(isGuest: boolean, childId: string, mockData: (testData: any) => void) {
+        const testFetchLogs = [{
+            dateValue: (new Date()).toISOString(),
+            encryptedValue: "test encyrpted value U2FsdGVkX1",
+            plainValue: "test plain text value",
+            photoValue: "test photo value",
+            child_id: childId,
+        }];
+
+        mockData(testFetchLogs);  // mock test data
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            isGuest,
+            "dateValue",
+            [
+                { dbFieldName: "dateValue", type: "date" },
+                { dbFieldName: "encryptedValue", type: "string" },
+                { dbFieldName: "plainValue", type: "unencrypted" },
+                { dbFieldName: "photoValue", type: "photo" },
+            ]
+        );
+        expect(result.success).toBe(true);
+        expect((result as any).data).toEqual([{
+            dateValue: new Date(testFetchLogs[0].dateValue),
+            encryptedValue: await decryptData(testFetchLogs[0].encryptedValue),
+            plainValue: testFetchLogs[0].plainValue,
+            photoValue: testFetchLogs[0].photoValue,
+        }]);
+    }
+
+    async function catchesDecryptionError(isGuest: boolean, childId: string, mockData: (testData: any) => void) {
+        const testError = "test decryption error"
+        const testFetchLogs = [{
+            sortField: (new Date()).toISOString(),
+            encryptedValue: "test encyrpted value U2FsdGVkX1",
+            child_id: childId,
+        }];
+
+        jest.spyOn(console, "warn").mockImplementation(() => null);  // suppress console warnings from within the tested code
+
+        mockData(testFetchLogs);  // mock test data
+        // decryptData() should be mocked to throw an error
+        // This should cause error handling in library/log-functions.ts -> safeDecrypt()
+        (decryptData as jest.Mock).mockImplementationOnce(
+            async () => { throw new Error(testError); }
+        );
+
+        const result = await fetchLogs(
+            "diaper_logs",
+            isGuest,
+            "sortField",
+            [
+                { dbFieldName: "sortField", type: "date" },
+                { dbFieldName: "encryptedValue", type: "string" },
+            ]
+        );
+        expect(result.success).toBe(true);
+        expect((result as any).data[0].encryptedValue).toEqual(`${stringLib.errors.decryption}: ${testError}`);
+    }
+});
