@@ -59,14 +59,12 @@ jest.mock("@/library/local-store", () => ({
     listChildren: jest.fn(async () => [{ id: true }]),
 }));
 
-jest.mock("@/library/supabase-client", () => {
-    return ({
-        auth: {
-            signOut: jest.fn(async () => ({})),
-            updateUser: jest.fn(async () => ({})),
-        },
-    });
-});
+jest.mock("@/library/supabase-client", () => ({
+    auth: {
+        signOut: jest.fn(async () => ({})),
+        updateUser: jest.fn(async () => ({})),
+    },
+}));
 
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");

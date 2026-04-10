@@ -3,7 +3,7 @@ import MainTab from "@/app/(tabs)";
 import AddChildPopup from "@/components/add-child-popup";
 import { useAuth } from "@/library/auth-provider";
 import TrackerButton from "@/components/tracker-button";
-import { formatName, saveNewChild } from "@/library/utils";
+import { saveNewChild } from "@/library/utils";
 import { Alert } from "react-native";
 import { createChild, getActiveChildId } from "@/library/local-store";
 import stringLib from "@/assets/stringLibrary.json";
@@ -316,7 +316,7 @@ describe("Tracker screen (guest mode)", () => {
         await act(async () => (AddChildPopup as jest.Mock).mock.lastCall[0].handleSave());
 
         // ensure correct name was formatted and saved
-        expect((createChild as jest.Mock).mock.calls[0][0]).toBe(formatName(testName));
+        expect((createChild as jest.Mock).mock.calls[0][0]).toBe(testName);
     });
 
     test("Hides add child popup on successful save", async () => {

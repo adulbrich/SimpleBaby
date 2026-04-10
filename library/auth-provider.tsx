@@ -114,8 +114,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
                     setSession(null);
                     setIsGuest(await isGuestMode());
                 }
-            } catch {
-                // do nothing
             } finally {
                 setLoading(false);
             }

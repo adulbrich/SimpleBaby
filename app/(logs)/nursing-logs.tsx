@@ -118,7 +118,6 @@ const NursingLogsView: React.FC = () => {
 
 				await fetchNursingLogs();
 				setEditModalVisible(false);
-				return;
 			} else {
                 const { error } = await supabase
                     .from("nursing_logs")
@@ -133,7 +132,8 @@ const NursingLogsView: React.FC = () => {
                 await fetchNursingLogs();
                 setEditModalVisible(false);
             }
-		} catch {
+		} catch (err) {
+			console.error("❌ Encryption or update error:", err);
 			Alert.alert("Something went wrong during save.");
 		}
 	};
