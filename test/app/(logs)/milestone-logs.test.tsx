@@ -1,16 +1,13 @@
 import MilestoneLogsView from "@/app/(logs)/milestone-logs";
 import { render, screen, act } from "@testing-library/react-native";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
@@ -18,17 +15,11 @@ import { fetchLogs } from "@/library/log-functions";
 
 
 jest.mock("@/library/supabase-client", () => {
-    const select = jest.fn();
     const del = jest.fn(async () => ({}));
     const updateId = jest.fn(async () => ({}));
     const updateData = jest.fn(() => ({ eq: updateId }));
     return ({
         from: () => ({
-            select: () => ({
-                eq: () => ({
-                    order: select,
-                }),
-            }),
             delete: () => ({
                 eq: del,
             }),
@@ -39,11 +30,6 @@ jest.mock("@/library/supabase-client", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
-    decryptData: jest.fn(async (string) => string ? `Decrypted: ${string}` : ""),
-}));
-
-jest.mock("@/library/utils", () => ({
-    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -58,7 +44,6 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/local-store", () => ({
     getActiveChildId: jest.fn(),
-    listRows: jest.fn(),
     deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));

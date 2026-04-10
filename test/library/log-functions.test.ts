@@ -794,7 +794,7 @@ describe("fetchLogs()", () => {
     }
 
     async function catchesDecryptionError(isGuest: boolean, childId: string, mockData: (testData: any) => void) {
-        const testError = "test decryption error"
+        const testError = "test decryption error";
         const testFetchLogs = [{
             sortField: (new Date()).toISOString(),
             encryptedValue: "test encyrpted value U2FsdGVkX1",
