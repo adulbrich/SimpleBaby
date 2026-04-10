@@ -144,6 +144,7 @@ export default function EditLogPopup({
                 )
             }
             testID={fieldInfo.testID}
+            multiline={fieldInfo.title === "Note"}
         />
     );
     
