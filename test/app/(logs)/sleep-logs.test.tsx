@@ -48,7 +48,6 @@ jest.mock("@/library/auth-provider", () => ({
 }));
 
 jest.mock("@/library/local-store", () => ({
-    getActiveChildId: jest.fn(),
     deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));
