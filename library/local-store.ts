@@ -13,7 +13,7 @@ export type TableName =
 
 // KEYS
 // holds common keys necessary for interacting with the local db
-const KEYS = {
+export const KEYS = {
 	isGuest: "sb:isGuest",
 	guestId: "sb:guestId",
 	activeChildId: "sb:activeChildId",
