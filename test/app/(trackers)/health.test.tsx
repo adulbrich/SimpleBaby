@@ -5,9 +5,10 @@ import { router } from "expo-router";
 import HealthModule, { HealthCategory } from "@/components/health-module";
 import { field, formatStringList, saveLog } from "@/library/log-functions";
 
+
 jest.mock("expo-router", () => ({
     router: {
-        replace: jest.fn(),
+        dismissTo: jest.fn(),
     },
 }));
 
@@ -106,7 +107,7 @@ describe("Track health screen", () => {
         (HealthModule as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (saveLog as jest.Mock).mockClear();
     });
 
@@ -240,8 +241,8 @@ describe("Track health screen", () => {
         );
 
         // confirm that the expo-router was called to send the user back to the tracker page
-        expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((router.dismissTo as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
+        expect((router.dismissTo as jest.Mock)).toHaveBeenCalledTimes(1);
 
         // Alert.alert() called by app/(trackers)/health.tsx -> handleSaveHealthLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Success`);

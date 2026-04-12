@@ -158,7 +158,7 @@ export default function Health() {
 		}, isGuest, "health");
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Success", "Health log saved successfully!");
 		} else if (result.error) {
 			const errorMessage = String(result.error);

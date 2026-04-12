@@ -31,14 +31,11 @@ jest.mock("expo-image-picker", () => ({
     launchImageLibraryAsync: jest.fn(),
 }));
 
-jest.mock("expo-router", () => {
-    const replace = jest.fn();
-    return ({
-        router: {
-            replace: replace,
-        },
-    });
-});
+jest.mock("expo-router", () => ({
+    router: {
+        dismissTo: jest.fn(),
+    },
+}));
 
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");
@@ -127,7 +124,7 @@ describe("Track milestone screen", () => {
         (CategoryModule as jest.Mock).mockClear();
         (DateTimePicker as jest.Mock).mockClear();
         (DateTimePickerAndroid.open as jest.Mock).mockClear();
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (saveLog as jest.Mock).mockClear();
     });
 
@@ -318,8 +315,8 @@ describe("Track milestone screen", () => {
         );
 
         // confirm that the expo-router was called to send the user back to the tracker page
-        expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((router.dismissTo as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
+        expect((router.dismissTo as jest.Mock)).toHaveBeenCalledTimes(1);
 
         // Alert.alert() called by app/(trackers)/milestone.tsx -> handleSaveMilestoneLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Milestone log saved successfully!`);

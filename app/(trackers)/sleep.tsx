@@ -123,7 +123,7 @@ export default function Sleep() {
 		}, isGuest, "sleep");
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Sleep log saved successfully!");
 		} else {
 			Alert.alert(`Failed to save sleep log: ${result.error}`);

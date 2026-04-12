@@ -6,14 +6,11 @@ import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-categ
 import { field, formatStringList, saveLog } from "@/library/log-functions";
 
 
-jest.mock("expo-router", () => {
-    const replace = jest.fn();
-    return ({
-        router: {
-            replace: replace,
-        },
-    });
-});
+jest.mock("expo-router", () => ({
+    router: {
+        dismissTo: jest.fn(),
+    },
+}));
 
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");
@@ -102,7 +99,7 @@ describe("Track feeding screen", () => {
     beforeEach(() => {
         // to clear the .mock.calls array for each
         (Alert.alert as jest.Mock).mockClear();
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         jest.spyOn(console, "error").mockClear();
         (FeedingCategory as jest.Mock).mockClear();
         (saveLog as jest.Mock).mockClear();
@@ -241,8 +238,8 @@ describe("Track feeding screen", () => {
         );
 
         // confirm that the expo-router was called to send the user back to the tracker page
-        expect((router.replace as jest.Mock).mock.calls[0][0]).toBe(`/(tabs)`);
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((router.dismissTo as jest.Mock).mock.calls[0][0]).toBe(`/(tabs)`);
+        expect((router.dismissTo as jest.Mock)).toHaveBeenCalledTimes(1);
 
         // Alert.alert() called by app/(trackers)/feeding.tsx -> handleSaveFeedingLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Feeding log saved successfully!`);

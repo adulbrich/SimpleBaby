@@ -88,7 +88,7 @@ export default function Diaper() {
 		}, isGuest, "diaper");
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Diaper log saved successfully!");
 		} else {
 			Alert.alert(`Failed to save diaper log: ${result.error}`);

@@ -6,9 +6,10 @@ import Stopwatch from "@/components/stopwatch";
 import ManualEntry from "@/components/sleep-manual-entry";
 import { field, saveLog } from "@/library/log-functions";
 
+
 jest.mock("expo-router", () => ({
     router: {
-        replace: jest.fn(),
+        dismissTo: jest.fn(),
     },
 }));
 
@@ -93,6 +94,7 @@ describe("Track sleep screen", () => {
         (Stopwatch as jest.Mock).mockClear();
         (ManualEntry as jest.Mock).mockClear();
         (saveLog as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
     });
 
     test("Renders sleep tracking inputs", () => {
@@ -194,8 +196,8 @@ describe("Track sleep screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Sleep log saved successfully!");
 
         // confirm that the expo-router was called to send the user back to the tracker page
-        expect((router.replace as jest.Mock)).toHaveBeenCalledTimes(1);
-        expect((router.replace as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
+        expect((router.dismissTo as jest.Mock)).toHaveBeenCalledTimes(1);
+        expect((router.dismissTo as jest.Mock)).toHaveBeenLastCalledWith("/(tabs)");
     });
 
     test("Saves correct values (stopwatch)", async () => {

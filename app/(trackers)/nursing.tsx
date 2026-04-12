@@ -96,7 +96,7 @@ export default function Nursing() {
 		}, isGuest, "nursing");
 
 		if (result.success) {
-			router.replace("/(tabs)");
+			router.dismissTo("/(tabs)");
 			Alert.alert("Nursing log saved successfully!");
 		} else {
 			Alert.alert(`Failed to save nursing log: ${result.error}`);
