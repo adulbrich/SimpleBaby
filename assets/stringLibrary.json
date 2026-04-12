@@ -3,7 +3,9 @@
         "trackerMissingInfo": "Missing Information",
         "logUpdateFailure": "Failed to update log",
         "childData": "Could Not Retrieve Child Data",
-        "childDataMessage": "The information for the active child could not be retrieved. Restarting the app may solve the issue."
+        "childDataMessage": "The information for the active child could not be retrieved. Restarting the app may solve the issue.",
+        "guestNoChild": "No active child selected (guest mode)",
+        "decryption": "[Decryption Failed]"
     },
 
     "warnings": {

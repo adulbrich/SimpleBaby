@@ -7,32 +7,25 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 interface SleepLog {
 	id: string;
-	child_id: string;
 	start_time: Date;
 	end_time: Date;
 	duration: string | null;
 	note: string | null;
 }
-
-type LocalSleepRow = LocalRow & Omit<SleepLog, "id">;
 
 const SleepLogsView: React.FC = () => {
 	const [sleepLogs, setSleepLogs] = useState<SleepLog[]>([]);
@@ -44,85 +37,30 @@ const SleepLogsView: React.FC = () => {
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 	const { isGuest } = useAuth();
 
-	const safeDecrypt = async (value: string | null): Promise<string> => {
-		if (!value || !value.includes("U2FsdGVkX1")) return value || "";
-		try {
-			return await decryptData(value);
-		} catch (err) {
-			console.warn("⚠️ Decryption failed for:", value);
-			return `[Decryption Failed]: ${err}`;
-		}
-	};
-
 	const fetchSleepLogs = useCallback(async () => {
 		setLoading(true);
 		setError(null);
-
-		try {
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (Guest Mode)");
-
-                // get & sort sleep logs descendingly
-				const rows = await listRows<LocalSleepRow>("sleep_logs");
-				const childRows = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.start_time).getTime() -
-							new Date(a.start_time).getTime(),
-					);
-
-				const decrypted = await Promise.all(
-					childRows.map(async (entry) => ({
-						...entry,
-						start_time: new Date(entry.start_time),
-						end_time: new Date(entry.end_time),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-
-				setSleepLogs(decrypted as SleepLog[]);
-			} else {
-				const {
-					success,
-					childId,
-					childName,
-					error: childError,
-				} = await getActiveChildData();
-				if (!success || !childId) {
-					throw new Error(childError);
-				}
-
-				if (childName) setActiveChildName(childName);
-
-				const { data, error } = await supabase
-					.from("sleep_logs")
-					.select("*")
-					.eq("child_id", childId)
-					.order("start_time", { ascending: false });
-
-				if (error) throw error;
-
-				const decrypted = await Promise.all(
-					(data || []).map(async (entry) => ({
-						...entry,
-						start_time: new Date(entry.start_time),
-						end_time: new Date(entry.end_time),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-
-				setSleepLogs(decrypted);
-			}
-		} catch (err) {
-			console.error("❌ Fetch or decryption error:", err);
-			setError(
-				err instanceof Error ? err.message : "An unknown error occurred",
-			);
-		} finally {
-			setLoading(false);
+				
+		const result = await fetchLogs<SleepLog>(
+			"sleep_logs",
+			isGuest,
+			"start_time",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "start_time", type: "date" },
+				{ dbFieldName: "end_time", type: "date" },
+				{ dbFieldName: "duration", type: "unencrypted" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (result.success) {
+			setSleepLogs(result.data);
+			setActiveChildName(result.childName);
+		} else {
+			setError(result.error);
 		}
+
+		setLoading(false);
 	}, [isGuest]);
 
 	useEffect(() => {

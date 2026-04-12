@@ -7,21 +7,18 @@ import {
 	Alert,
 } from "react-native";
 import { format } from "date-fns";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { encryptData, decryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 interface FeedingLog {
 	id: string;
@@ -33,8 +30,6 @@ interface FeedingLog {
 	note: string | null;
 }
 
-type LocalFeedingRow = LocalRow & Omit<FeedingLog, "id">;
-
 const FeedingLogsView: React.FC = () => {
 	const [feedingLogs, setFeedingLogs] = useState<FeedingLog[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -45,93 +40,32 @@ const FeedingLogsView: React.FC = () => {
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
-	const safeDecrypt = async (value: string | null): Promise<string> => {
-		if (!value || !value.includes("U2FsdGVkX1")) return "";
-		try {
-			return await decryptData(value);
-		} catch (err) {
-			console.warn("⚠️ Decryption failed for:", value);
-			return `[Decryption Failed]: ${err}`;
-		}
-	};
-
-	/**
-	 * Fetches feeding logs from Supabase for the active child.
-	 * Handles child ID resolution and fetch errors.
-	 */
+	// Fetches feeding logs from Supabase or local storage for the active child.
 	const fetchFeedingLogs = useCallback(async () => {
 		setLoading(true);
 		setError(null);
-
-		try {
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (Guest Mode)");
-
-                // get & sort feeding logs descendingly
-				const rows = await listRows<LocalFeedingRow>("feeding_logs");
-				const childRows = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) =>
-							new Date(b.feeding_time).getTime() -
-							new Date(a.feeding_time).getTime(),
-					);
-
-				const decryptedLogs = await Promise.all(
-					childRows.map(async (entry) => ({
-						...entry,
-						category: await safeDecrypt(entry.category),
-						item_name: await safeDecrypt(entry.item_name),
-						amount: await safeDecrypt(entry.amount),
-						feeding_time: new Date(entry.feeding_time),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-
-				setFeedingLogs(decryptedLogs as FeedingLog[]);
-			} else {
-				const {
-					success,
-					childId,
-					childName,
-					error: childError,
-				} = await getActiveChildData();
-				if (!success || !childId) {
-					throw new Error(childError);
-				}
-				if (childName) setActiveChildName(childName);
-
-				// Query diaper logs from Supabase and sort by most recent change time
-				const { data, error } = await supabase
-					.from("feeding_logs")
-					.select("*")
-					.eq("child_id", childId)
-					.order("feeding_time", { ascending: false });
-
-				if (error) throw error;
-
-				const decryptedLogs = await Promise.all(
-					(data || []).map(async (entry) => ({
-						...entry,
-						category: await safeDecrypt(entry.category),
-						item_name: await safeDecrypt(entry.item_name),
-						amount: await safeDecrypt(entry.amount),
-						feeding_time: new Date(entry.feeding_time),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-
-				setFeedingLogs(decryptedLogs);
-			}
-		} catch (err) {
-			console.error("❌ Fetch or decryption error:", err);
-			setError(
-				err instanceof Error ? err.message : "An unknown error occurred",
-			);
-		} finally {
-			setLoading(false);
+		
+		const result = await fetchLogs<FeedingLog>(
+			"feeding_logs",
+			isGuest,
+			"feeding_time",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "category", type: "string" },
+				{ dbFieldName: "item_name", type: "string" },
+				{ dbFieldName: "amount", type: "string" },
+				{ dbFieldName: "feeding_time", type: "date" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (result.success) {
+			setFeedingLogs(result.data);
+			setActiveChildName(result.childName);
+		} else {
+			setError(result.error);
 		}
+
+		setLoading(false);
 	}, [isGuest]);
 
 	useEffect(() => {

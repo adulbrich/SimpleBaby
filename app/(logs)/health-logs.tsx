@@ -6,26 +6,22 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { format } from "date-fns";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
-	LocalRow,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 interface HealthLog {
 	id: string;
-	child_id: string;
 	category: string;
 	date: Date;
 	growth_length: string | null;
@@ -43,10 +39,8 @@ interface HealthLog {
 	note: string | null;
 }
 
-type LocalHealthRow = LocalRow & Omit<HealthLog, "id">;
-
 const HealthLogsView: React.FC = () => {
-	const [logs, setLogs] = useState<HealthLog[]>([]);
+	const [healthLogs, setHealthLogs] = useState<HealthLog[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [editingLog, setEditingLog] = useState<HealthLog | null>(null);
@@ -55,103 +49,40 @@ const HealthLogsView: React.FC = () => {
 	const { isGuest } = useAuth();
 	const [activeChildName, setActiveChildName] = useState<string | null>(null);
 
-	const safeDecrypt = async (value: string | null): Promise<string> => {
-		if (!value || !value.includes("U2FsdGVkX1")) return "";
-		try {
-			return await decryptData(value);
-		} catch (err) {
-			return `[Decryption Failed]: ${err}`;
-		}
-	};
-
 	const fetchHealthLogs = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError(null);
-
-			if (isGuest) {
-				const childId = await getLocalActiveChildId();
-				if (!childId) throw new Error("No active child selected (Guest Mode)");
-
-                // get & sort health logs descendingly
-				const rows = await listRows<LocalHealthRow>("health_logs");
-				const childRows = rows
-					.filter((r) => r.child_id === childId)
-					.sort(
-						(a, b) => 
-                            new Date(b.date).getTime() - 
-                            new Date(a.date).getTime(),
-					);
-
-				const decrypted = await Promise.all(
-					childRows.map(async (entry) => ({
-						...entry,
-						growth_length: await safeDecrypt(entry.growth_length),
-						growth_weight: await safeDecrypt(entry.growth_weight),
-						growth_head: await safeDecrypt(entry.growth_head),
-						activity_type: await safeDecrypt(entry.activity_type),
-						activity_duration: await safeDecrypt(entry.activity_duration),
-						meds_name: await safeDecrypt(entry.meds_name),
-						meds_amount: await safeDecrypt(entry.meds_amount),
-						vaccine_name: await safeDecrypt(entry.vaccine_name),
-						vaccine_location: await safeDecrypt(entry.vaccine_location),
-						other_name: await safeDecrypt(entry.other_name),
-						other_description: await safeDecrypt(entry.other_description),
-						date: new Date(entry.date),
-						note: await safeDecrypt(entry.note),
-					})),
-				);
-				setLogs(decrypted);
-			} else {
-                const {
-                    success,
-                    childId,
-                    childName,
-                    error: childError,
-                } = await getActiveChildData();
-                if (!success || !childId) {
-                    throw new Error(childError);
-                }
-
-                if (childName) setActiveChildName(childName);
-
-                const { data, error } = await supabase
-                    .from("health_logs")
-                    .select("*")
-                    .eq("child_id", childId)
-                    .order("date", { ascending: false });
-
-                if (error) {
-                    throw error;
-                }
-
-                const decrypted = await Promise.all(
-                    (data || []).map(async (entry) => ({
-                        ...entry,
-                        growth_length: await safeDecrypt(entry.growth_length),
-                        growth_weight: await safeDecrypt(entry.growth_weight),
-                        growth_head: await safeDecrypt(entry.growth_head),
-                        activity_type: await safeDecrypt(entry.activity_type),
-                        activity_duration: await safeDecrypt(entry.activity_duration),
-                        meds_name: await safeDecrypt(entry.meds_name),
-                        meds_amount: await safeDecrypt(entry.meds_amount),
-                        vaccine_name: await safeDecrypt(entry.vaccine_name),
-                        vaccine_location: await safeDecrypt(entry.vaccine_location),
-                        other_name: await safeDecrypt(entry.other_name),
-                        other_description: await safeDecrypt(entry.other_description),
-						date: new Date(entry.date),
-                        note: await safeDecrypt(entry.note),
-                    })),
-                );
-
-                setLogs(decrypted);
-            }
-		} catch (err) {
-			console.error("❌ Fetch or decryption error:", err);
-			setError(err instanceof Error ? err.message : "An unknown error occurred");
-		} finally {
-			setLoading(false);
+		setLoading(true);
+		setError(null);
+				
+		const result = await fetchLogs<HealthLog>(
+			"health_logs",
+			isGuest,
+			"date",
+			[
+				{ dbFieldName: "id", type: "unencrypted" },
+				{ dbFieldName: "category", type: "unencrypted" },
+				{ dbFieldName: "growth_length", type: "string" },
+				{ dbFieldName: "growth_weight", type: "string" },
+				{ dbFieldName: "growth_head", type: "string" },
+				{ dbFieldName: "activity_type", type: "string" },
+				{ dbFieldName: "activity_duration", type: "string" },
+				{ dbFieldName: "meds_name", type: "string" },
+				{ dbFieldName: "meds_amount", type: "string" },
+				{ dbFieldName: "vaccine_name", type: "string" },
+				{ dbFieldName: "vaccine_location", type: "string" },
+				{ dbFieldName: "other_name", type: "string" },
+				{ dbFieldName: "other_description", type: "string" },
+				{ dbFieldName: "date", type: "date" },
+				{ dbFieldName: "note", type: "string" },
+			]
+		);
+		if (result.success) {
+			setHealthLogs(result.data);
+			setActiveChildName(result.childName);
+		} else {
+			setError(result.error);
 		}
+
+		setLoading(false);
 	}, [isGuest]);
 
 	useEffect(() => {
@@ -265,7 +196,7 @@ const HealthLogsView: React.FC = () => {
 							Alert.alert("Error deleting log");
 							return;
 						}
-						setLogs((prev) => prev.filter((log) => log.id !== id));
+						setHealthLogs((prev) => prev.filter((log) => log.id !== id));
 					} else {
                         const { error } = await supabase
                             .from("health_logs")
@@ -275,7 +206,7 @@ const HealthLogsView: React.FC = () => {
                             Alert.alert("Error deleting log");
                             return;
                         }
-                        setLogs((prev) => prev.filter((log) => log.id !== id));
+                        setHealthLogs((prev) => prev.filter((log) => log.id !== id));
                     }
 					setDeleteAlertVisible(false);
 				},
@@ -318,14 +249,14 @@ const HealthLogsView: React.FC = () => {
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
 				<Text className="text-red-600 text-center" testID="health-logs-loading-error">Error: {error}</Text>
-			) : logs.length === 0 ? (
+			) : healthLogs.length === 0 ? (
 				<Text>
 					You don&apos;t have any health logs
 					{activeChildName ? ` for ${activeChildName}` : ""} yet!
 				</Text>
 			) : (
 				<FlatList
-					data={logs}
+					data={healthLogs}
 					renderItem={renderLog}
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{ paddingBottom: 16 }}

@@ -1,11 +1,13 @@
-import { encryptData } from "./crypto";
+import { decryptData, encryptData } from "./crypto";
 import { getActiveChildData } from "@/library/utils";
 import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
     TableName,
+    listRows,
 } from "@/library/local-store";
 import supabase from "./supabase-client";
+import stringLib from "../assets/stringLibrary.json";
 
 
 export type field = {
@@ -174,7 +176,6 @@ async function encryptField(field: field): Promise<string | null> {
 }
 
 
-
 // Get active child ID, determine save location, and begin to create the diaper log
 export async function saveLog(
     logData: logData,
@@ -214,4 +215,105 @@ export function formatStringList(strings: string[]): string {
     return strings.length > 1
             ? `${strings.slice(0, -1).join(", ")} and ${strings.slice(-1)}`
             : strings[0];
+}
+
+
+async function safeDecrypt(value: string | null): Promise<string> {
+    if (!value || !value.includes("U2FsdGVkX1")) return "";
+    try {
+        return await decryptData(value);
+    } catch (err) {
+        console.warn("⚠️ Decryption failed for:", value);
+        return `${stringLib.errors.decryption}: ${(err as Error).message}`;
+    }
+}
+
+
+async function fetchLocalLogs(
+    tableName: TableName,
+    orderField: string,
+): Promise<{
+    data: any[];
+}> {
+    const childId = await getLocalActiveChildId();
+    if (!childId) throw new Error(stringLib.errors.guestNoChild);
+
+    // get & sort diaper logs descendingly
+    const rows = await listRows(tableName);
+    const data = rows
+        .filter((r) => r.child_id === childId)
+        .sort(
+            (a, b) =>
+                new Date(b[orderField]).getTime() -
+                new Date(a[orderField]).getTime(),
+        );
+    return { data };
+}
+
+
+async function fetchRemoteLogs(
+    tableName: TableName,
+    orderField: string,
+): Promise<{
+    data: any[];
+    childName: string;
+}> {
+    const {
+        success,
+        childId,
+        childName,
+        error: childError,
+    } = await getActiveChildData();
+    if (!success || !childId) {
+        throw new Error(childError);
+    }
+
+    const { data, error } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("child_id", childId)
+        .order(orderField, { ascending: false });
+
+    if (error) throw error;
+    return { data, childName };
+}
+
+
+export async function fetchLogs<LogType>(
+    tableName: TableName,
+    isGuest: boolean,
+    orderField: keyof LogType & string,  // this must reference an unencrypted date field in the database
+    fields: (Omit<field, "value"> & { dbFieldName: keyof LogType })[],
+): Promise<{
+    success: true;
+    data: LogType[];
+    childName: string | null;
+} | {
+    success: false;
+    error: string;
+}> {
+    try {
+        const result = isGuest ?
+            await fetchLocalLogs(tableName, orderField) :
+            await fetchRemoteLogs(tableName, orderField);
+
+        // decrypt encrypted fields, and covert date fields into Date objects
+        const decryptedLogs = await Promise.all(
+            (result.data || []).map(async entry => Object.fromEntries(
+                await Promise.all(fields.map(
+                    async ({ dbFieldName, type }) => [
+                        dbFieldName,
+                        type === "string" ? await safeDecrypt(entry[dbFieldName])
+                        : type === "date" ? new Date(entry[dbFieldName])
+                        : entry[dbFieldName]  // don't decrypt "unencrypted" or "photo" fields
+                    ]
+                ))
+            ))
+        );
+
+        return { success: true, data: decryptedLogs, childName: (result as any).childName || null };
+    } catch (err) {
+		console.error("❌ Fetch or decryption error:", err);
+        return { success: false, error: (err as Error).message };
+    }
 }

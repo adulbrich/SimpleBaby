@@ -1,33 +1,25 @@
 import SleepLogsView from "@/app/(logs)/sleep-logs";
 import { render, screen, act } from "@testing-library/react-native";
-import { getActiveChildData } from "@/library/utils";
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
+import { encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import {
-	listRows,
 	updateRow,
 	deleteRow,
-	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
+import { fetchLogs } from "@/library/log-functions";
 
 
 jest.mock("@/library/supabase-client", () => {
-    const select = jest.fn();
     const del = jest.fn(async () => ({}));
     const updateId = jest.fn(async () => ({}));
     const updateData = jest.fn(() => ({ eq: updateId }));
     return ({
         from: () => ({
-            select: () => ({
-                eq: () => ({
-                    order: select,
-                }),
-            }),
             delete: () => ({
                 eq: del,
             }),
@@ -43,11 +35,6 @@ jest.mock("@/components/edit-log-popup", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string) => `Encrypted: ${string}`),
-    decryptData: jest.fn(async (string) => string ? `Decrypted: ${string}` : ""),
-}));
-
-jest.mock("@/library/utils", () => ({
-    getActiveChildData: jest.fn(async () => ({ success: true, childId: true })),
 }));
 
 jest.mock("react-native", () => {
@@ -61,8 +48,6 @@ jest.mock("@/library/auth-provider", () => ({
 }));
 
 jest.mock("@/library/local-store", () => ({
-    getActiveChildId: jest.fn(),
-    listRows: jest.fn(),
     deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));
@@ -72,34 +57,29 @@ jest.mock("@/components/log-item.tsx", () => {
     return jest.fn(({id}: {id?: string}) => (<View testID={`log-item-${id}`}></View>));
 });
 
+jest.mock("@/library/log-functions", () => ({
+    fetchLogs: jest.fn(),
+}));
+
 
 const NOW = (new Date).getTime();
-const TEST_CHILD_ID = "test child id";
 const TEST_LOGS = [{
     id: "test log id 1",
-    child_id: TEST_CHILD_ID,
-    start_time: (new Date(NOW - 2*24*60*60*1000 - 60*1000)).toISOString(),
-    end_time: (new Date(NOW - 2*24*60*60*1000)).toISOString(),
-    duration: "test duration 1 U2FsdGVkX1",
-    note: "test note 1 U2FsdGVkX1",
+    start_time: new Date(NOW - 2*24*60*60*1000 - 60*1000),
+    end_time: new Date(NOW - 2*24*60*60*1000),
+    duration: "test duration 1",
+    note: "test note 1",
 }, {
     id: "test log id 2",
-    child_id: TEST_CHILD_ID,
-    start_time: (new Date(NOW + 5*60*1000)).toISOString(),
-    end_time: (new Date(NOW + 7*60*1000)).toISOString(),
-    duration: "test duration 2 U2FsdGVkX1",
+    start_time: new Date(NOW + 5*60*1000),
+    end_time: new Date(NOW + 7*60*1000),
+    duration: "test duration 2",
     note: "",
 }];
 
 // set default mocks to return test data
-(supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
-    async () => ({ data: TEST_LOGS })
-);
-(listRows as jest.Mock).mockImplementation(
-    async () => TEST_LOGS
-);
-(getLocalActiveChildId as jest.Mock).mockImplementation(
-    async () => TEST_CHILD_ID
+(fetchLogs as jest.Mock).mockImplementation(
+    async () => ({ success: true, data: TEST_LOGS })
 );
 
 
@@ -130,63 +110,63 @@ describe("Sleep logs screen", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getActiveChildData() error", async () => {
-        const testErrorMessage = "testErrorGetID";
-    
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
-        // { success: /* falsy value */, error: /* string */ }
-        // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs()
-        (getActiveChildData as jest.Mock).mockImplementationOnce(
-            async () => ({ success: false, error: testErrorMessage })
-        );
-        await catchLoadingError(testErrorMessage);
-    });
-
-    test("Catch supabase select error", async () => {
+    test("Catch fetchLogs() error", async () => {
         const testErrorMessage = "test error";
     
-        // supabase.from().select().eq().order() should be mocked to return:
-        // { error: /* truthy value */ }
+        // library/log-functions.ts -> fetchLogs() should be mocked to return:
+        // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs()
-        (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
-            async () => ({ error: new Error(testErrorMessage) })
+        (fetchLogs as jest.Mock).mockImplementationOnce(
+            async () => ({ success: false, error: testErrorMessage })
         );
-        await catchLoadingError(testErrorMessage);
+
+        jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
+
+        render(<SleepLogsView/>);
+
+        expect(await screen.findByTestId("sleep-logs-loading-error")).toBeTruthy();  // wait for loading to finish
+        expect(screen.getByText(testErrorMessage, {exact: false})).toBeTruthy();  // specific error is displayed
     });
 
     test("Renders no logs (generic)", async () => {
-        // supabase.from().select().eq().order() should be mocked to return:
-        // { data: /* falsy value */ }
+        // library/log-functions.ts -> fetchLogs() should be mocked to return:
+        // { success: /* truthy value */, data: /* falsy value */ }
         // This should cause a notification to the user of no logs found to be displayed
-        (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
-            async () => ({})
+        (fetchLogs as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, data: [] })
         );
         await catchNoLogs("You don't have any sleep logs yet!");
     });
 
     test("Renders no logs (specific child)", async () => {
         const testChildName = "test child name";
-        // supabase.from().select().eq().order() should be mocked to return:
-        // { data: /* falsy value */ }
-        // This should cause a notification to the user of no logs found to be displayed
-        (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
-            async () => ({})
-        );
-        
-        // library/utils -> getActiveChildData() should be mocked to return:
-        // { success: /* truthy value */, childId: /* truthy value */, childName: /* test value */ }
-        // This is to track the test value passed as childName
-        (getActiveChildData as jest.Mock).mockImplementationOnce(
-            async () => ({ success: true, childId: true, childName: testChildName })
+        // library/log-functions.ts -> fetchLogs() should be mocked to return:
+        // { success: /* truthy value */, data: /* falsy value */, childName: /* truthy string */ }
+        // This should cause a notification to the user of no logs found to be displayed with the child name
+        (fetchLogs as jest.Mock).mockImplementationOnce(
+            async () => ({ success: true, data: [], childName: testChildName })
         );
         await catchNoLogs(`You don't have any sleep logs for ${testChildName} yet!`);
     });
 
     test("Renders log buttons", rendersLogItems);
 
-    test("Catches decryption error", catchDecryptionError);
+    test("Renders log values", async () => {
+        render(<SleepLogsView/>);
+        await screen.findByTestId("sleep-logs");  // wait for log list to render
 
-    test("Renders log values", rendersLogs);
+        for (const log of TEST_LOGS) {
+            const logItems = (LogItem as jest.Mock).mock.calls;
+            const logItemProps = logItems.find(call => call[0].id === log.id)[0];
+            const displayValues = logItemProps.logData.map((item: any) => item.value);
+            
+            expect(displayValues.includes(format(new Date(log.start_time), 'MMM dd, yyyy'))).toBeTruthy();
+            expect(displayValues.includes(format(new Date(log.start_time), 'h:mm a'))).toBeTruthy();
+            expect(displayValues.includes(format(new Date(log.end_time), 'h:mm a'))).toBeTruthy();
+            expect(displayValues.includes(log.duration)).toBeTruthy();
+            if (log.note) expect(displayValues.includes(log.note)).toBeTruthy();
+        }
+    });
 
     test("Displays delete log confirmation", async () => {
         render(<SleepLogsView/>);
@@ -239,10 +219,10 @@ describe("Sleep logs screen", () => {
             const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
             
             // check field values
-            expect(editingLog.start_time.value.toISOString()).toBe(log.start_time);
-            expect(editingLog.end_time.value.toISOString()).toBe(log.end_time);
+            expect(editingLog.start_time.value).toBe(log.start_time);
+            expect(editingLog.end_time.value).toBe(log.end_time);
             expect(editingLog.duration.value).toBe(log.duration);
-            expect(editingLog.note.value).toBe(await decryptData(log.note));
+            expect(editingLog.note.value).toBe(log.note);
         }
     });
 
@@ -292,11 +272,7 @@ describe("Sleep logs screen", () => {
         1
     ));
 
-    test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
-        (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementation(
-            async () => ({ data: newLogs })
-        );
-    }));
+    test("Updates displayed logs", async () => updateDisplayedLogs());
 });
 
 
@@ -316,41 +292,7 @@ describe("sleep logs screen (guest mode)", () => {
         jest.spyOn(console, "error").mockRestore();
     });
 
-    test("Catch getLocalActiveChildId() error", async () => {
-        const testErrorMessage = "testErrorGetID";
-        // library/local-store.ts -> getActiveChildId() should be mocked to throw an error
-        // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs()
-        (getLocalActiveChildId as jest.Mock).mockImplementationOnce(
-            async () => { throw new Error(testErrorMessage); }
-        );
-        await catchLoadingError(testErrorMessage);
-    });
-
-    test("Catch invalid childID", async () => {
-        // library/local-store.ts -> getActiveChildId() should be mocked to return:
-        // /* falsy value */
-        // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs()
-        (getLocalActiveChildId as jest.Mock).mockImplementationOnce(
-            async () => false
-        );
-        await catchInvalidChildId();
-    });
-
-    test("Renders no logs (generic)", async () => {
-        // library/local-store.ts -> listRows() should be mocked to return:
-        // []
-        // This should cause a notification to the user of no logs found to be displayed
-        (listRows as jest.Mock).mockImplementationOnce(
-            async () => []
-        );
-        await catchNoLogs("You don't have any sleep logs yet!");
-    });
-
     test("Renders log buttons (guest)", rendersLogItems);
-
-    test("Catches decryption error (guest)", catchDecryptionError);
-
-    test("Renders log values (guest)", rendersLogs);
 
     test("Catches delete log error (guest)", async () => catchDeleteError(() =>
         // library/local-store.ts -> deleteRow() should be mocked to return:
@@ -379,31 +321,9 @@ describe("sleep logs screen (guest mode)", () => {
         1  // updateRow() is called wit the log id as the 2nd argument
     ));
 
-    test("Updates displayed logs", async () => updateDisplayedLogs((newLogs) => {
-        (listRows as jest.Mock).mockImplementationOnce(
-            async () => newLogs
-        );
-    }));
+    test("Updates displayed logs", async () => updateDisplayedLogs());
 });
 
-
-async function catchLoadingError(testErrorMessage: string) {
-    jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
-
-    render(<SleepLogsView/>);
-
-    expect(await screen.findByTestId("sleep-logs-loading-error")).toBeTruthy();  // wait for loading to finish
-    expect(screen.getByText(testErrorMessage, {exact: false})).toBeTruthy();  // specific error is displayed
-}
-
-async function catchInvalidChildId() {
-    jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
-
-    render(<SleepLogsView/>);
-
-    expect(await screen.findByTestId("sleep-logs-loading-error")).toBeTruthy();  // wait for loading to finish
-    expect(screen.getByText("No active child selected (guest mode)", {exact: false})).toBeTruthy();  // error is displayed
-}
 
 async function catchNoLogs(message: string) {
     render(<SleepLogsView/>);
@@ -416,44 +336,6 @@ async function rendersLogItems() {
 
     for (const log of TEST_LOGS) {
         expect(screen.getByTestId(`log-item-${log.id}`)).toBeTruthy();
-    }
-}
-
-async function catchDecryptionError() {
-    const testError = new Error("test error");
-
-    // library/crypto -> decryptData() should be mocked to throw an error
-    // This should cause error handling in app/(logs)/sleep-logs.tsx -> fetchSleepLogs() -> safeDecrypt()
-    (decryptData as jest.Mock).mockImplementationOnce(
-        async () => { throw testError; }
-    );
-
-    jest.spyOn(console, "warn").mockImplementation(() => null);  // suppress console warnings from within the tested code
-    
-    render(<SleepLogsView/>);
-    await screen.findByTestId("sleep-logs");  // wait for log list to render
-
-    const logItems = (LogItem as jest.Mock).mock.calls;
-    const logItemProps = logItems.find(call => call[0].id === TEST_LOGS[0].id)[0];
-    const displayValues = logItemProps.logData.map((item: any) => item.value);
-
-    expect(displayValues.includes(`[Decryption Failed]: ${testError}`)).toBeTruthy();
-}
-
-async function rendersLogs() {
-    render(<SleepLogsView/>);
-    await screen.findByTestId("sleep-logs");  // wait for log list to render
-
-    for (const log of TEST_LOGS) {
-        const logItems = (LogItem as jest.Mock).mock.calls;
-        const logItemProps = logItems.find(call => call[0].id === log.id)[0];
-        const displayValues = logItemProps.logData.map((item: any) => item.value);
-        
-        expect(displayValues.includes(format(new Date(log.start_time), 'MMM dd, yyyy'))).toBeTruthy();
-        expect(displayValues.includes(format(new Date(log.start_time), 'h:mm a'))).toBeTruthy();
-        expect(displayValues.includes(format(new Date(log.end_time), 'h:mm a'))).toBeTruthy();
-        expect(displayValues.includes(log.duration)).toBeTruthy();
-        if (log.note) expect(displayValues.includes(await decryptData(log.note))).toBeTruthy();
     }
 }
 
@@ -572,16 +454,15 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
     }
 }
 
-async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
+async function updateDisplayedLogs() {
     const log = TEST_LOGS[0];  // use any log
 
     const editedLog = {
         id: "test log id 1",
-        child_id: "test child id",
-        start_time: (new Date(NOW - 4*24*60*60*1000 - 4*60*1000)).toISOString(),
-        end_time: (new Date(NOW - 4*24*60*60*1000 - 3*60*1000)).toISOString(),
-        duration: "edited duration U2FsdGVkX1",
-        note: "edited note U2FsdGVkX1",
+        start_time: new Date(NOW - 4*24*60*60*1000 - 4*60*1000),
+        end_time: new Date(NOW - 4*24*60*60*1000 - 3*60*1000),
+        duration: "edited duration",
+        note: "edited note",
     };
     const updatedLogs = [editedLog].concat(  // join new edited log
         TEST_LOGS.filter((item) => item !== log)  // and remove previous log
@@ -593,8 +474,12 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
     // open edit log pop-up
     await pressButton(log.id, "edit");
 
-    // update the mock to return 'updated' logs
-    mockFetchLogs(updatedLogs);
+    // library/log-functions.ts -> fetchLogs() should be mocked to return:
+    // { success: /* truthy value */, data: /* updated logs */ }
+    // This should not cause any errors
+    (fetchLogs as jest.Mock).mockImplementationOnce(
+        async () => ({ success: true, data: updatedLogs })
+    );
 
     // clear the calls of <LogItem/> to track which items are re-rendered from this point onwards
     (LogItem as jest.Mock).mockClear();
@@ -612,12 +497,12 @@ async function updateDisplayedLogs(mockFetchLogs: (newLogs: object) => void) {
         expect(displayValues.includes(format(editedLog.start_time, "h:mm a"))).toBeTruthy();
         expect(displayValues.includes(format(editedLog.end_time, "h:mm a"))).toBeTruthy();
         expect(displayValues.includes(editedLog.duration)).toBeTruthy();
-        expect(displayValues.includes(await decryptData(editedLog.note))).toBeTruthy();
+        expect(displayValues.includes(editedLog.note)).toBeTruthy();
         // ...and that the previous values are not
         expect(displayValues.includes(format(log.start_time, "MMM dd, yyyy"))).toBeFalsy();
         expect(displayValues.includes(format(log.start_time, "h:mm a"))).toBeFalsy();
         expect(displayValues.includes(format(log.end_time, "h:mm a"))).toBeFalsy();
         expect(displayValues.includes(log.duration)).toBeFalsy();
-        expect(displayValues.includes(await decryptData(log.note))).toBeFalsy();
+        expect(displayValues.includes(log.note)).toBeFalsy();
     });
 }
