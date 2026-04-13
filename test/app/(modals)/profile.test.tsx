@@ -2,7 +2,7 @@ import { render, screen, userEvent, act, waitFor } from "@testing-library/react-
 import { router } from "expo-router";
 import Profile from "@/app/(modals)/profile";
 import { useAuth } from "@/library/auth-provider";
-import { getActiveChildData, getChildren, saveNewChild } from "@/library/utils";
+import { getActiveChildData, getChildren, saveNewChild } from "@/library/remote-store";
 import supabase from "@/library/supabase-client";
 import { Alert } from "react-native";
 import AddChildPopup from "@/components/add-child-popup";

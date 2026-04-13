@@ -15,7 +15,7 @@ import AddChildPopup from '@/components/add-child-popup';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
+import { getActiveChildData, getChildren, saveNewChild } from '@/library/remote-store';
 import stringLib from "@/assets/stringLibrary.json";
 
 /**

@@ -3,7 +3,7 @@ import { Calendar } from "react-native-calendars";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
-import { getActiveChildData } from '@/library/utils';
+import { getActiveChildData } from '@/library/remote-store';
 import { useAuth } from '@/library/auth-provider';
 
 function toYMD(d: Date) {

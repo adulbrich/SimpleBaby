@@ -3,7 +3,7 @@ import MainTab from "@/app/(tabs)";
 import AddChildPopup from "@/components/add-child-popup";
 import { useAuth } from "@/library/auth-provider";
 import TrackerButton from "@/components/tracker-button";
-import { saveNewChild } from "@/library/utils";
+import { saveNewChild } from "@/library/remote-store";
 import { Alert } from "react-native";
 import { createChild, getActiveChildId } from "@/library/local-store";
 import stringLib from "@/assets/stringLibrary.json";

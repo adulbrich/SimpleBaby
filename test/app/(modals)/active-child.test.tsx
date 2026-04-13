@@ -4,7 +4,7 @@ import stringLib from "@/assets/stringLibrary.json";
 import { Alert } from "react-native";
 import RenameChildPopup from "@/components/rename-child-popup";
 import SwitchChildPopup from "@/components/switch-child-popup";
-import { deleteChild, formatName, getActiveChildData, getChildren, updateChildName } from "@/library/utils";
+import { deleteChild, formatName, getActiveChildData, getChildren, updateChildName } from "@/library/remote-store";
 import { router } from "expo-router";
 import supabase from "@/library/supabase-client";
 

@@ -1,5 +1,5 @@
 import { decryptData, encryptData } from "./crypto";
-import { getActiveChildData } from "@/library/utils";
+import { getActiveChildData } from "@/library/remote-store";
 import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,

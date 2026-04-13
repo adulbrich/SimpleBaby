@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import RenameChildPopup from '@/components/rename-child-popup';
-import { formatName, getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/utils';
+import { formatName, getActiveChildData, updateChildName, getChildren, deleteChild } from '@/library/remote-store';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import stringLib from "@/assets/stringLibrary.json";
