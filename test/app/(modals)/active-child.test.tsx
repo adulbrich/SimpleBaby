@@ -4,7 +4,8 @@ import stringLib from "@/assets/stringLibrary.json";
 import { Alert } from "react-native";
 import RenameChildPopup from "@/components/rename-child-popup";
 import SwitchChildPopup from "@/components/switch-child-popup";
-import { deleteChild, formatName, getActiveChildData, getChildren, updateChildName } from "@/library/remote-store";
+import { deleteChild, getActiveChildData, getChildren, updateChildName } from "@/library/remote-store";
+import { formatName } from "@/library/utils";
 import { router } from "expo-router";
 import supabase from "@/library/supabase-client";
 
@@ -32,10 +33,13 @@ jest.mock("react-native", () => {
 
 jest.mock("@/library/remote-store", () => ({
     getActiveChildData: jest.fn(async () => ({ success: true, childName: true, childId: true, created_at: true })),
-    formatName: jest.fn(),
     updateChildName: jest.fn(),
     getChildren: jest.fn(async () => [{ }, { }, { }]),
     deleteChild: jest.fn(),
+}));
+
+jest.mock("@/library/utils", () => ({
+    formatName: jest.fn(),
 }));
 
 jest.mock("@/library/supabase-client", () => ({
@@ -261,7 +265,7 @@ describe("Active Child screen", () => {
             async () => ({ success: true, childName: testName, childId: true })
         );
 
-        // library/remote-store.ts -> formatName() should be mocked to return:
+        // library/utils.ts -> formatName() should be mocked to return:
         // /* test string matching getActiveChildData().childName */
         // this should cause error handling in app/(modals)/active-child.tsx -> handleRenameChild()
         (formatName as jest.Mock).mockReturnValueOnce(testName);

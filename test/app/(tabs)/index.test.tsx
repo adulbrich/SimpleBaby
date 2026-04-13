@@ -48,7 +48,6 @@ jest.mock("@/components/tracker-button", () => {
 });
 
 jest.mock("@/library/remote-store", () => ({
-    formatName: jest.fn((name: string) => `Formatted name: ${name}`),
     saveNewChild: jest.fn(),
 }));
 

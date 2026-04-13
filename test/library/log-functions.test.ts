@@ -1,7 +1,7 @@
 import { getActiveChildData } from '@/library/remote-store';
 import supabase from "@/library/supabase-client";
-import { decryptData, encryptData } from "@/library/crypto";
-import { saveLog, formatStringList, field, fetchLogs } from '@/library/log-functions';
+import { encryptData, safeDecrypt } from "@/library/crypto";
+import { saveLog, field, fetchLogs } from '@/library/log-functions';
 import { getActiveChildId, insertRow, listRows, TableName } from '@/library/local-store';
 import stringLib from "../../assets/stringLibrary.json";
 
@@ -31,7 +31,7 @@ jest.mock("@/library/supabase-client", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string: string) => `Encrypted: ${string}`),
-    decryptData: jest.fn(async (string: string) => `Decrypted: ${string}`)
+    safeDecrypt: jest.fn(async (string: string) => `Decrypted: ${string}`)
 }));
 
 jest.mock("@/library/remote-store", () => ({
@@ -497,25 +497,6 @@ async function savesTableName(isGuest: boolean) {
 }
 
 
-describe("formatStringList()", () => {
-    test("one item", () =>
-        expect(formatStringList(["item 1"])).toBe("item 1")
-    );
-
-    test("two items", () =>
-        expect(formatStringList(["item 1", "item 2"])).toBe("item 1 and item 2")
-    );
-
-    test("three items", () =>
-        expect(formatStringList(["item 1", "item 2", "item 3"])).toBe("item 1, item 2 and item 3")
-    );
-    
-    test("four items", () =>
-        expect(formatStringList(["item 1", "item 2", "item 3", "item 4"])).toBe("item 1, item 2, item 3 and item 4")
-    );
-});
-
-
 describe("fetchLogs()", () => {
 
     beforeEach(() => {
@@ -613,18 +594,6 @@ describe("fetchLogs()", () => {
             );
         const childId = (await getActiveChildData()).childId;
         processesFields(false, childId as string, mockData);
-    });
-
-    test("Indicates decryption error (remote)", async () => {
-        // supabase.from().select().eq().order() should be mocked to return:
-        // { data: /* test data */ }
-        // This should not cause any errors
-        const mockData = (testFetchLogs: any) => 
-            (supabase.from("").select().eq("", "").order as jest.Mock).mockImplementationOnce(
-                async () => ({ data: testFetchLogs })
-            );
-        const childId = (await getActiveChildData()).childId;
-        catchesDecryptionError(false, childId as string, mockData);
     });
 
     test("Catch getActiveChildId() error (local)", async () => {
@@ -736,18 +705,6 @@ describe("fetchLogs()", () => {
         await processesFields(true, childId as string, mockData);
     });
 
-    test("Catches decryption error (local)", async () => {
-        // library/local-store.ts -> listRows() should be mocked to return test data
-        // This should not cause any errors
-        const mockData = (testFetchLogs: any) => 
-            (listRows as jest.Mock).mockImplementationOnce(
-                async () => testFetchLogs
-            );
-
-        const childId = await getActiveChildId();
-        await catchesDecryptionError(true, childId as string, mockData);
-    });
-
 
     async function catchesError(isGuest: boolean, error: string) {
         jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
@@ -787,39 +744,9 @@ describe("fetchLogs()", () => {
         expect(result.success).toBe(true);
         expect((result as any).data).toEqual([{
             dateValue: new Date(testFetchLogs[0].dateValue),
-            encryptedValue: await decryptData(testFetchLogs[0].encryptedValue),
+            encryptedValue: await safeDecrypt(testFetchLogs[0].encryptedValue),
             plainValue: testFetchLogs[0].plainValue,
             photoValue: testFetchLogs[0].photoValue,
         }]);
-    }
-
-    async function catchesDecryptionError(isGuest: boolean, childId: string, mockData: (testData: any) => void) {
-        const testError = "test decryption error";
-        const testFetchLogs = [{
-            sortField: (new Date()).toISOString(),
-            encryptedValue: "test encyrpted value U2FsdGVkX1",
-            child_id: childId,
-        }];
-
-        jest.spyOn(console, "warn").mockImplementation(() => null);  // suppress console warnings from within the tested code
-
-        mockData(testFetchLogs);  // mock test data
-        // decryptData() should be mocked to throw an error
-        // This should cause error handling in library/log-functions.ts -> safeDecrypt()
-        (decryptData as jest.Mock).mockImplementationOnce(
-            async () => { throw new Error(testError); }
-        );
-
-        const result = await fetchLogs(
-            "diaper_logs",
-            isGuest,
-            "sortField",
-            [
-                { dbFieldName: "sortField", type: "date" },
-                { dbFieldName: "encryptedValue", type: "string" },
-            ]
-        );
-        expect(result.success).toBe(true);
-        expect((result as any).data[0].encryptedValue).toEqual(`${stringLib.errors.decryption}: ${testError}`);
     }
 });

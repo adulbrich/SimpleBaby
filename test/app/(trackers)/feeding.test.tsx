@@ -3,7 +3,8 @@ import Feeding from "@/app/(trackers)/feeding";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 
 jest.mock("expo-router", () => ({
@@ -40,6 +41,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 

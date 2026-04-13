@@ -19,7 +19,7 @@ jest.mock("@/library/crypto", () => ({
     decryptData: jest.fn(string => `Decrypted: ${string}`),
 }));
 
-jest.mock("@/library/remote-store", () => ({
+jest.mock("@/library/utils", () => ({
     formatName: jest.fn(name => name),
 }));
 

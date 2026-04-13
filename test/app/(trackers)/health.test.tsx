@@ -3,7 +3,8 @@ import Health from "@/app/(trackers)/health";
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import HealthModule, { HealthCategory } from "@/components/health-module";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 
 jest.mock("expo-router", () => ({
@@ -30,6 +31,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 

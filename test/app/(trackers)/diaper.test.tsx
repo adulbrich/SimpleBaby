@@ -3,7 +3,8 @@ import { render, screen, userEvent, act } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import DiaperModule from "@/components/diaper-module";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 
 jest.mock("expo-router", () => ({
@@ -30,6 +31,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 

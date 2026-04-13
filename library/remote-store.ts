@@ -1,10 +1,6 @@
 import supabase from './supabase-client';
 import { encryptData, decryptData } from './crypto';
-
-export function formatName(text: string) {
-    const trimmed = text.trim();
-    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-}
+import { formatName } from './utils';
 
 export const getActiveChildData = async (): Promise<{
     success: true;
