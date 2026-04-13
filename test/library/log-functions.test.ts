@@ -31,7 +31,7 @@ jest.mock("@/library/supabase-client", () => {
 
 jest.mock("@/library/crypto", () => ({
     encryptData: jest.fn(async (string: string) => `Encrypted: ${string}`),
-    safeDecrypt: jest.fn(async (string: string) => `Decrypted: ${string}`)
+    safeDecrypt: jest.fn(async (string: string) => `Decrypted: ${string}`),
 }));
 
 jest.mock("@/library/remote-store", () => ({

@@ -1,6 +1,6 @@
 import supabase from './supabase-client';
 import { encryptData, decryptData } from './crypto';
-import { formatName } from './utils';
+import { formatName } from '@/library/utils';
 
 export const getActiveChildData = async (): Promise<{
     success: true;
