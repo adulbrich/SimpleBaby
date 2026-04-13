@@ -93,11 +93,11 @@ describe("saveLog()", () => {
         expect((result as any).error).toBe("Encryption error");
     });
     
-    test("catch utils.ts->getActiveChildData() error", async () => {
+    test("catch getActiveChildData() error", async () => {
         const testErrorMessage = "test error get";
         const testLogType = "test log type";
 
-        // library/utils.ts -> getActiveChild() should be mocked to return:
+        // library/remote-store.ts -> getActiveChild() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in library/log-functions -> saveLog()
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -267,7 +267,7 @@ describe("saveLog()", () => {
             expectedValue: testPhotoPath,
         }]);
 
-        // mock library/utils.ts -> getActiveChildData() to return the test child ID
+        // mock library/remote-store.ts -> getActiveChildData() to return the test child ID
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childId: testID })
         );
@@ -318,7 +318,7 @@ describe("saveLog()", () => {
     test("catch local-store.ts->insertRow() error", async () => {
         const testLogType = "test log type";
 
-        // library/utils.ts -> insertRow() should be mocked to return:
+        // library/remote-store.ts -> insertRow() should be mocked to return:
         // /* falsy value */
         // This should cause error handling in library/log-functions -> createGuestLog()
         (insertRow as jest.Mock).mockImplementationOnce(
@@ -532,7 +532,7 @@ describe("fetchLogs()", () => {
     test("Catch getActiveChildData() error (remote)", async () => {
         const testErrorMessage = "test error message";
     
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { error: /* test error message */ }
         // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -569,7 +569,7 @@ describe("fetchLogs()", () => {
     test("Requests filter by child id (remote)", async () => {
         const testChildId = "test child id";
     
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: true, childId: /* test value */ }
         // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
         (getActiveChildData as jest.Mock).mockImplementationOnce(

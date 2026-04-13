@@ -87,7 +87,7 @@ describe("Active Child screen", () => {
     });
 
     test("Catch child information error", async () => {
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* falsy value */ }
         // this should cause error handling in app/(modals)/active-child.tsx -> loadChildData()
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -113,7 +113,7 @@ describe("Active Child screen", () => {
 
     test("Displays loading indicators", async () => {
         const { promise: waitForChildData, resolve: resolveChildData } = manualPromise();
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // a Promise that can be manually resolved to:
         // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */, created_at: /* truthy value */ }
         (getActiveChildData as jest.Mock).mockReturnValueOnce(waitForChildData);
@@ -134,7 +134,7 @@ describe("Active Child screen", () => {
         const testName = "test child name";
         const testCreated = "2000-1-1";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */, created_at: /* test string */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -151,7 +151,7 @@ describe("Active Child screen", () => {
     test("Displays rename child popup with current name", async () => {
         const testName = "test child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -178,7 +178,7 @@ describe("Active Child screen", () => {
         const testName = "test child name";
         const testNewName = "test new child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -222,7 +222,7 @@ describe("Active Child screen", () => {
         const testName = "test child name";
         const testNewName = "test new child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -254,14 +254,14 @@ describe("Active Child screen", () => {
     test("Catches rename to same name", async () => {
         const testName = "test child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: testName, childId: true })
         );
 
-        // library/utils.ts -> formatName() should be mocked to return:
+        // library/remote-store.ts -> formatName() should be mocked to return:
         // /* test string matching getActiveChildData().childName */
         // this should cause error handling in app/(modals)/active-child.tsx -> handleRenameChild()
         (formatName as jest.Mock).mockReturnValueOnce(testName);
@@ -284,14 +284,14 @@ describe("Active Child screen", () => {
     test("Catches updateChildName() error", async () => {
         const testError = "test error message";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* truthy value */, childId: /* test string */ }
         // this should not cause any errors
         /* (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: true, childId: testID })
         ); */
 
-        // library/utils.ts -> updateChildName() should be mocked to throw an error
+        // library/remote-store.ts -> updateChildName() should be mocked to throw an error
         // this should cause error handling in app/(modals)/active-child.tsx -> handleRenameChild()
         (updateChildName as jest.Mock).mockImplementationOnce(
             async () => { throw new Error(testError); }
@@ -316,7 +316,7 @@ describe("Active Child screen", () => {
         const testNewName = "test new child name";
         const testID = "test child id";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* truthy value */, childId: /* test string */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -341,7 +341,7 @@ describe("Active Child screen", () => {
 
     test("Displays loading indicators after rename", async () => {
         const { promise: waitForChildData, resolve: resolveChildData } = manualPromise();
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* truthy value */, childId: /* truthy value */ }
         // then for a second call, which should occur after the user has submitted a new name:
         // a Promise that can be manually resolved to:
@@ -372,7 +372,7 @@ describe("Active Child screen", () => {
         const testName = "test old name";
         const testNewName = "test new name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // then for a second call, which should occur after the user has submitted a new name:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
@@ -403,7 +403,7 @@ describe("Active Child screen", () => {
     test("Provides confirmation on delete", async () => {
         const testName = "test new child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
@@ -427,7 +427,7 @@ describe("Active Child screen", () => {
     test("Catch getChildren() error", async () => {
         const testError = "test error message";
 
-        // library/utils.ts -> getChildren() should be mocked to throw an error
+        // library/remote-store.ts -> getChildren() should be mocked to throw an error
         // this should cause error handling in app/(modals)/active-child.tsx -> handleConfirmedDeleteChild()
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => { throw new Error(testError); }
@@ -449,7 +449,7 @@ describe("Active Child screen", () => {
     test("Catch deleteChild() error", async () => {
         const testError = "test error message";
 
-        // library/utils.ts -> deleteChild() should be mocked to throw an error
+        // library/remote-store.ts -> deleteChild() should be mocked to throw an error
         // this should cause error handling in app/(modals)/active-child.tsx -> handleConfirmedDeleteChild()
         (deleteChild as jest.Mock).mockImplementationOnce(
             async () => { throw new Error(testError); }
@@ -472,14 +472,14 @@ describe("Active Child screen", () => {
         const testError = "test error message";
         const testName = "test new child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: testName, childId: true })
         );
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(
@@ -512,14 +512,14 @@ describe("Active Child screen", () => {
     test("Handles delete only child", async () => {
         const testName = "test new child name";
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: testName, childId: true })
         );
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(
@@ -572,14 +572,14 @@ describe("Active Child screen", () => {
             { name: true, id: "test child id 2" },
         ];
 
-        // library/utils.ts -> getActiveChildData() should be mocked to return:
+        // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: /* truthy value */, childName: /* test string */, childId: /* truthy value */ }
         // this should not cause any errors
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: testChildren[0].name, childId: true })
         );
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* any */, id: /* string */ }], with exactly one item with name !== getActiveChildData().childName
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(
@@ -629,7 +629,7 @@ describe("Active Child screen", () => {
             { name: "test child name 3", id: "test child id 3" },
         ];
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(
@@ -661,7 +661,7 @@ describe("Active Child screen", () => {
             { name: "test child name 3", id: "test child id 3" },
         ];
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(
@@ -696,7 +696,7 @@ describe("Active Child screen", () => {
     test("Catch updateUser() error (select new active child)", async () => {
         const testError = "test error message";
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         /* (getChildren as jest.Mock).mockImplementationOnce(
@@ -735,7 +735,7 @@ describe("Active Child screen", () => {
         ];
         const testSwitchIndex = 2;  // a number to index testChildren
 
-        // library/utils.ts -> getChildren() should be mocked to return:
+        // library/remote-store.ts -> getChildren() should be mocked to return:
         // [{ name: /* getActiveChildData().childName */ }]
         // this should not cause any errors
         (getChildren as jest.Mock).mockImplementationOnce(

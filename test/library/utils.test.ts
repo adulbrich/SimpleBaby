@@ -28,7 +28,7 @@ jest.mock("@/library/crypto", () => ({
 }));
 
 
-describe("Utils: getActiveChildData", () => {
+describe("Remote Store: getActiveChildData", () => {
 
     test("Catches no active user", async () => {
         (supabase.auth.getUser as jest.Mock).mockReturnValueOnce({data: {}});
