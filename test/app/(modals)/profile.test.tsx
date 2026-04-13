@@ -48,7 +48,7 @@ jest.mock("@/library/auth-provider", () => {
     };
 });
 
-jest.mock("@/library/utils", () => ({
+jest.mock("@/library/remote-store", () => ({
     getActiveChildData: jest.fn(async () => ({ success: true })),
     getChildren: jest.fn(),
     saveNewChild: jest.fn(),

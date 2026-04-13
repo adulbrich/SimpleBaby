@@ -30,7 +30,7 @@ jest.mock("react-native", () => {
     return module;
 });
 
-jest.mock("@/library/utils", () => ({
+jest.mock("@/library/remote-store", () => ({
     getActiveChildData: jest.fn(async () => ({ success: true, childName: true, childId: true, created_at: true })),
     formatName: jest.fn(),
     updateChildName: jest.fn(),

@@ -34,7 +34,7 @@ jest.mock("@/library/crypto", () => ({
     decryptData: jest.fn(async (string: string) => `Decrypted: ${string}`)
 }));
 
-jest.mock("@/library/utils", () => ({
+jest.mock("@/library/remote-store", () => ({
     getActiveChildData: jest.fn(async () => ({ success: true, childId: "x" })),
 }));
 
