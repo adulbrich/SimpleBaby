@@ -36,6 +36,6 @@ describe("Settings screen", () => {
         // press tos button
         await userEvent.press(screen.getByTestId("settings-privacy-button"));
         
-        expect((router.push as jest.Mock).mock.calls[0][0]).toBe("/(modals)/privacypolicy");
+        expect((router.push as jest.Mock).mock.calls[0][0]).toBe("/(modals)/privacy-policy");
     });
 });
