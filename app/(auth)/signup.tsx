@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAuth } from '@/library/auth-provider';
+import { formatStringList } from '@/library/log-functions';
 
 const SignUpScreen: React.FC = () => {
     const [email, setEmail] = React.useState('');
@@ -29,19 +30,16 @@ const SignUpScreen: React.FC = () => {
 
     const handleSignUp = async () => {
         // Validate that all fields are filled in
-        if (
-            !email ||
-            !firstName ||
-            !lastName ||
-            !password ||
-            !confirmPassword
-        ) {
-            Alert.alert('All fields are required.');
-            return;
-        }
+		const missingFields = [];
+		if (!email.trim()) missingFields.push("email");
+		if (!firstName.trim()) missingFields.push("first name");
+		if (!lastName.trim()) missingFields.push("last name");
+		if (!password.trim()) missingFields.push("password");
+		else if (!confirmPassword.trim()) missingFields.push("confirmed password");
 
-        if (firstName.trim().length === 0 || lastName.trim().length === 0) {
-            Alert.alert("Please enter a valid name!");
+        if (missingFields.length > 0) {
+            const formattedMissing = formatStringList(missingFields);
+            Alert.alert('All fields are required.', `Please provide the following fields: ${formattedMissing}.`);
             return;
         }
 
@@ -70,7 +68,6 @@ const SignUpScreen: React.FC = () => {
                 }
             } else {
                 // if successful, sign in automatically
-                setLoading(true);
                 const response = await signIn(email, password);
                 setLoading(false);
                 if (response.error) {

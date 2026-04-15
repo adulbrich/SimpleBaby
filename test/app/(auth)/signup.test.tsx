@@ -14,6 +14,8 @@ jest.mock("@/library/auth-provider", () => ({
   }),
 }));
 
+jest.mock("@/library/log-functions", () => ({}));
+
 
 describe("Create Account screen", () => {
     test("Render input fields", () => {
