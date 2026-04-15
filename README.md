@@ -271,3 +271,6 @@ The following are missing features or known issues, both big and small, that wou
 *   [ ] Non-descriptive error messages
 *   [ ] `KeyboardAvoidingView` causing scrolling issues when creating logs
 
+-------
+#### © Alex Ulbrich - 2024-2026
+(Developed by Bryant Shitabata, Jacob Cocheu, James Grant, Michael Nunzio, Nathan Johnston, Sonny Box, Srija Palla, and Yahir Gonzalez)
