@@ -329,21 +329,21 @@ export function handleDeleteLog<LogType extends { id: string }>(
     updateLogs: React.Dispatch<React.SetStateAction<LogType[]>>,
 ) {
     const confirmDeleteLog = async () => {
-        if (isGuest) {
-            const success = await deleteRow(tableName, logId);
-            if (!success) {
-                Alert.alert("Error deleting log");
-            }
-        } else {
-            const { error } = await supabase
+        const success = isGuest ? (
+            await deleteRow(tableName, logId)
+        ) : (
+            !(await supabase
                 .from(tableName)
                 .delete()
-                .eq("id", logId);
-            if (error) {
-                Alert.alert("Error deleting log");
-            }
+                .eq("id", logId)).error
+        );
+
+        if (success) {
+            updateLogs((prev) => prev.filter((log) => log.id !== logId));
+        } else {
+            Alert.alert("Error deleting log");
         }
-        updateLogs((prev) => prev.filter((log) => log.id !== logId));
+
         setAlertVisible(false);  // record that the alert is being closed
     };
 
