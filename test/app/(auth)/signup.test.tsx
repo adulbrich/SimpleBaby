@@ -4,6 +4,11 @@ import { router } from "expo-router";
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import { formatStringList } from "@/library/log-functions";
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.signUp;
+
 
 jest.mock("expo-router", () => ({
     router: {
@@ -51,31 +56,31 @@ async function fillInputs({
 }) {
     if (email) {
         await userEvent.type(
-            screen.getByTestId("sign-up-email"),
+            screen.getByTestId(testIDs.email),
             email
         );
     }
     if (firstName) {
         await userEvent.type(
-            screen.getByTestId("sign-up-first-name"),
+            screen.getByTestId(testIDs.firstName),
             firstName
         );
     }
     if (lastName) {
         await userEvent.type(
-            screen.getByTestId("sign-up-last-name"),
+            screen.getByTestId(testIDs.lastName),
             lastName
         );
     }
     if (passwordInitial) {
         await userEvent.type(
-            screen.getByTestId("sign-up-password-initial"),
+            screen.getByTestId(testIDs.passwordInitial),
             passwordInitial
         );
     }
     if (passwordConfirmed) {
         await userEvent.type(
-            screen.getByTestId("sign-up-password-confirm"),
+            screen.getByTestId(testIDs.passwordConfirm),
             passwordConfirmed
         );
     }
@@ -106,27 +111,27 @@ describe("Create Account screen", () => {
     test("Render input fields", () => {
         render(<SignUpScreen/>);
 
-        expect(screen.getByTestId("sign-up-first-name")).toBeTruthy();
-        expect(screen.getByTestId("sign-up-last-name")).toBeTruthy();
-        expect(screen.getByTestId("sign-up-email")).toBeTruthy();
-        expect(screen.getByTestId("sign-up-password-initial")).toBeTruthy();
-        expect(screen.getByTestId("sign-up-password-confirm")).toBeTruthy();
+        expect(screen.getByTestId(testIDs.firstName)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.lastName)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.email)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.passwordInitial)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.passwordConfirm)).toBeTruthy();
     });
 
     test("Render nav buttons", () => {
         render(<SignUpScreen/>);
 
-        expect(screen.getByTestId("sign-up-password-visibility")).toBeTruthy();
-        expect(screen.getByTestId("sign-up-forgot-password")).toBeTruthy();
-        expect(screen.getByTestId("sign-up")).toBeTruthy();
-        expect(screen.getByTestId("sign-in")).toBeTruthy();
-        expect(screen.getByTestId("guest-button")).toBeTruthy();
+        expect(screen.getByTestId(testIDs.passwordVisibility)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.forgotPassword)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.signUpButton)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.signInButton)).toBeTruthy();
+        expect(screen.getByTestId(testIDs.guestButton)).toBeTruthy();
     });
 
     test("Redirects to sign in screen", async () => {
         render(<SignUpScreen/>);
 
-        await userEvent.press(screen.getByTestId("sign-in"));
+        await userEvent.press(screen.getByTestId(testIDs.signInButton));
 
         expect(router.replace).toHaveBeenCalledTimes(1);
         expect((router.replace as jest.Mock).mock.calls[0][0]).toBe("/signin");
@@ -135,7 +140,7 @@ describe("Create Account screen", () => {
     test("Redirects to guest screen", async () => {
         render(<SignUpScreen/>);
 
-        await userEvent.press(screen.getByTestId("guest-button"));
+        await userEvent.press(screen.getByTestId(testIDs.guestButton));
 
         expect(router.push).toHaveBeenCalledTimes(1);
         expect((router.push as jest.Mock).mock.calls[0][0]).toBe("/guest");
@@ -152,33 +157,33 @@ describe("Create Account screen", () => {
         render(<SignUpScreen/>);
 
         // fill in one input at a time, and attempt to submit between each
-        await userEvent.press(screen.getByTestId("sign-up"));
-        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe('All fields are required.');
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(stringLib.errors.missingFields);
         expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Please provide the following fields: ${testList}.`);
         expect((formatStringList as jest.Mock).mock.lastCall[0])
             .toEqual(["email", "first name", "last name", "password"]);
 
         await fillInputs({ lastName: "x" });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((formatStringList as jest.Mock).mock.lastCall[0])
             .toEqual(["email", "first name", "password"]);
 
         await fillInputs({ passwordInitial: "x" });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((formatStringList as jest.Mock).mock.lastCall[0])
             .toEqual(["email", "first name", "confirmed password"]);
 
         await fillInputs({ email: "x" });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((formatStringList as jest.Mock).mock.lastCall[0])
             .toEqual(["first name", "confirmed password"]);
 
         await fillInputs({ firstName: "x" });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((formatStringList as jest.Mock).mock.lastCall[0])
             .toEqual(["confirmed password"]);
     });
@@ -195,10 +200,10 @@ describe("Create Account screen", () => {
             passwordConfirmed: "pass2",
         });
 
-        expect(screen.getByTestId("password-error")).toBeTruthy();
+        expect(screen.getByTestId(testIDs.passwordError)).toBeTruthy();
 
-        await userEvent.press(screen.getByTestId("sign-up"));
-        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe('Passwords do not match.');
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
+        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe(stringLib.errors.mismatchedPasswords);
     });
 
     test("Submits correct user data", async () => {
@@ -215,7 +220,7 @@ describe("Create Account screen", () => {
         // fill in test inputs
         await fillInputs(testInputs);
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((useAuth().signUp as jest.Mock).mock.calls[0][0]).toBe(testInputs.email);
         expect((useAuth().signUp as jest.Mock).mock.calls[0][1]).toBe(testInputs.passwordInitial);
         expect((useAuth().signUp as jest.Mock).mock.calls[0][2]).toBe(testInputs.firstName);
@@ -242,17 +247,18 @@ describe("Create Account screen", () => {
             passwordConfirmed: "x",
         });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
-        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe('Sign Up Error');
-        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe('That email is already in use. Please try again.');
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
+        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe(stringLib.errors.signUp);
+        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe(stringLib.errors.emailInUse);
     });
 
     test("Catch generic signUp() error", async () => {
+        const testErrorMessage = "test sign in error";
         // library/auth-provider.ts -> signUp() should be mocked to return:
-        // { error: Error }
+        // { error: Error(/* test string */) }
         // This should cause error handling in app/(auth)/signup.tsx -> handleSignUp()
         (useAuth().signUp as jest.Mock).mockImplementationOnce(
-            async () => ({ error: new Error() })
+            async () => ({ error: new Error(testErrorMessage) })
         );
 
         render(<SignUpScreen/>);
@@ -266,17 +272,18 @@ describe("Create Account screen", () => {
             passwordConfirmed: "x",
         });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
-        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe('Sign Up Error');
-        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe('An unknown error occurred during sign up.');
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
+        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe(stringLib.errors.signUp);
+        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe(testErrorMessage);
     });
 
     test("Catch signIn() error", async () => {
+        const testErrorMessage = "test sign in error";
         // library/auth-provider.ts -> signIn() should be mocked to return:
-        // { error: Error }
+        // { error: Error(/* test string */) }
         // This should cause error handling in app/(auth)/signup.tsx -> handleSignUp()
         (useAuth().signIn as jest.Mock).mockImplementationOnce(
-            async () => ({ error: new Error() })
+            async () => ({ error: new Error(testErrorMessage) })
         );
 
         render(<SignUpScreen/>);
@@ -290,9 +297,9 @@ describe("Create Account screen", () => {
             passwordConfirmed: "x",
         });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
-        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe('Sign In Error');
-        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe('An error occurred while signing in.');
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
+        expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe(stringLib.errors.signIn);
+        expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe(testErrorMessage);
     });
 
     test("Redirects to home page on success", async () => {
@@ -307,7 +314,7 @@ describe("Create Account screen", () => {
             passwordConfirmed: "x",
         });
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
         expect((router.replace as jest.Mock).mock.calls[0][0]).toBe("/(tabs)");
     });
 
@@ -341,26 +348,26 @@ describe("Create Account screen", () => {
             passwordInitial: "x",
             passwordConfirmed: "x",
         });
-        expect(screen.getByText("Sign Up")).toBeTruthy();
+        expect(screen.getByText(stringLib.uiLabels.signUpButton)).toBeTruthy();
 
-        await userEvent.press(screen.getByTestId("sign-up"));
+        await userEvent.press(screen.getByTestId(testIDs.signUpButton));
 
         // wait for library/auth-provider.tsx -> signUp() to be called
         await waitForSignUpCalled;
         // the sign up button label should indicate loading
-        expect(() => screen.getByText("Sign Up")).toThrow();
-        expect(screen.getByText("Signing up...")).toBeTruthy();
+        expect(() => screen.getByText(stringLib.uiLabels.signUpButton)).toThrow();
+        expect(screen.getByText(stringLib.uiLabels.signUpButtonLoading)).toBeTruthy();
         await act(async () => resolveSignUp({}));  // unblock signUp()
 
         // wait for library/auth-provider.tsx -> signIn() to be called
         await waitForSignInCalled;
         // the sign up button label should indicate loading
-        expect(() => screen.getByText("Sign Up")).toThrow();
-        expect(screen.getByText("Signing up...")).toBeTruthy();
+        expect(() => screen.getByText(stringLib.uiLabels.signUpButton)).toThrow();
+        expect(screen.getByText(stringLib.uiLabels.signUpButtonLoading)).toBeTruthy();
         await act(async () => resolveSignIn({}));  // unblock signIn()
 
         // the sign up button label should no longer indicate loading
-        expect(screen.getByText("Sign Up")).toBeTruthy();
-        expect(() => screen.getByText("Signing up...")).toThrow();
+        expect(screen.getByText(stringLib.uiLabels.signUpButton)).toBeTruthy();
+        expect(() => screen.getByText(stringLib.uiLabels.signUpButtonLoading)).toThrow();
     });
 });
