@@ -37,7 +37,6 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
-    formatStringList: jest.fn(),
 }));
 
 

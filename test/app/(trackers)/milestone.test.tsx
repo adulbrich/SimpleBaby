@@ -259,7 +259,7 @@ describe("Track milestone screen", () => {
 
         render(<Milestone/>);
 
-        // library/log-functions.ts -> formatStringList() should be mocked to return a test string
+        // library/utils.ts -> formatStringList() should be mocked to return a test string
         // This is to ensure its return value is displayed properly
         (formatStringList as jest.Mock).mockImplementationOnce(
             () => testFormattedList
