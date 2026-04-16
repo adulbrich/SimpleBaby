@@ -269,7 +269,7 @@ The following are missing features or known issues, both big and small, that wou
 *   [ ] Fix the iOS-exclusive child management bug (see open issue in the repo)
 *   [ ] Buttons push multiple requests to the database or navigation stack when loading (see open issues)
 *   [ ] Non-descriptive error messages
-*   [ ] `KeyboardAvoidingView` causing scrolling issues when creating logs
+*   [ ] Use of `isTyping` state and `translate-y` tailwind class causing scrolling issues when creating logs
 
 -------
 #### © Alex Ulbrich - 2024-2026
