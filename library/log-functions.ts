@@ -5,9 +5,11 @@ import {
 	getActiveChildId as getLocalActiveChildId,
     TableName,
     listRows,
+    deleteRow,
 } from "@/library/local-store";
 import supabase from "./supabase-client";
 import stringLib from "../assets/stringLibrary.json";
+import { Alert } from "react-native";
 
 
 export type field = {
@@ -299,3 +301,37 @@ export async function fetchLogs<LogType>(
         return { success: false, error: (err as Error).message };
     }
 }
+
+
+export function handleDeleteLog<LogType extends { id: string }>(
+    tableName: TableName,
+    logId: string,
+    isGuest: boolean,
+    setAlertVisible: React.Dispatch<React.SetStateAction<boolean>>,
+    updateLogs: React.Dispatch<React.SetStateAction<LogType[]>>,
+) {
+    const confirmDeleteLog = async () => {
+        const success = isGuest ? (
+            await deleteRow(tableName, logId)
+        ) : (
+            !(await supabase
+                .from(tableName)
+                .delete()
+                .eq("id", logId)).error
+        );
+
+        if (success) {
+            updateLogs((prev) => prev.filter((log) => log.id !== logId));
+        } else {
+            Alert.alert("Error deleting log");
+        }
+
+        setAlertVisible(false);  // record that the alert is being closed
+    };
+
+    setAlertVisible(true);  // record that the alert is being shown
+    Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
+        { text: "Cancel", style: "cancel", onPress: () => { setAlertVisible(false); } },
+        { text: "Delete", style: "destructive", onPress: confirmDeleteLog },
+    ]);
+};

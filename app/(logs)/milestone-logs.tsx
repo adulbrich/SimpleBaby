@@ -10,15 +10,11 @@ import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	updateRow,
-	deleteRow,
-} from "@/library/local-store";
+import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
-import { fetchLogs } from "@/library/log-functions";
+import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 
 type MilestoneCategory =
 	| "Motor"
@@ -185,43 +181,6 @@ const MilestoneLogsView: React.FC = () => {
 		}
 	};
 
-	const handleDelete = async (id: string) => {
-		setDeleteAlertVisible(true);
-		Alert.alert(
-			"Delete Entry",
-			stringLib.warnings.logDeletionConfirmation,
-			[
-				{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
-				{
-					text: "Delete",
-					style: "destructive",
-					onPress: async () => {
-						if (isGuest) {
-							const success = await deleteRow("milestone_logs", id);
-							if (!success) {
-								Alert.alert("Error deleting log");
-								return;
-							}
-							setMilestoneLogs((prev) => prev.filter((m) => m.id !== id));
-							return;
-						} else {
-                            const { error } = await supabase
-                                .from("milestone_logs")
-                                .delete()
-                                .eq("id", id);
-                            if (error) {
-                                Alert.alert("Error deleting log");
-                                return;
-                            }
-                            setMilestoneLogs((prev) => prev.filter((log) => log.id !== id));
-                        }
-						setDeleteAlertVisible(false);
-					},
-				},
-			],
-		);
-	};
-
 	const renderMilestoneItem = ({ item }: { item: MilestoneLog }) => {
 		const hasValidDate = !isNaN(item.achieved_at.getTime());
 
@@ -232,7 +191,13 @@ const MilestoneLogsView: React.FC = () => {
 					setEditModalVisible(true);
 					setEditingLog(item);
 				}}
-				onDelete={() => handleDelete(item.id)}
+				onDelete={() => handleDeleteLog<MilestoneLog>(
+					"milestone_logs",
+					item.id,
+					isGuest,
+					setDeleteAlertVisible,
+					setMilestoneLogs,
+				)}
 				buttonsDisabled={editModalVisible || deleteAlertVisible}
 				logData={[
 					{ type: "title", value: item.title },

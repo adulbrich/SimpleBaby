@@ -1,9 +1,21 @@
 import { getActiveChildData } from '@/library/remote-store';
 import supabase from "@/library/supabase-client";
 import { encryptData, safeDecrypt } from "@/library/crypto";
-import { saveLog, field, fetchLogs } from '@/library/log-functions';
-import { getActiveChildId, insertRow, listRows, TableName } from '@/library/local-store';
+import {
+    field,
+    saveLog,
+    fetchLogs,
+    handleDeleteLog,
+} from '@/library/log-functions';
+import {
+    TableName,
+    deleteRow,
+    getActiveChildId,
+    insertRow,
+    listRows,
+} from '@/library/local-store';
 import stringLib from "../../assets/stringLibrary.json";
+import { Alert } from 'react-native';
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -11,11 +23,15 @@ jest.mock("@/library/supabase-client", () => {
     const upload = jest.fn(async () => ({ data: {} }));
     const order = jest.fn(async () => ({ data: [] }));
     const eq = jest.fn(() => ({ order: order }));
+    const del = jest.fn(async () => ({}));
     return ({
         from: jest.fn(() => ({
             insert: insert,
             select: () => ({
                 eq: eq,
+            }),
+            delete: () => ({
+                eq: del,
             }),
         })),
         auth: {
@@ -42,9 +58,16 @@ jest.mock("@/library/local-store", () => ({
     getActiveChildId: jest.fn(async () => "x"),
     insertRow: jest.fn(async () => true),
     listRows: jest.fn(async () => []),
+    deleteRow: jest.fn(async () => true),
 }));
 
 jest.mock("expo-crypto", () => ({}));
+
+jest.mock("react-native", () => {
+    const module = jest.requireActual("react-native");
+    module.Alert.alert = jest.fn();
+    return module;
+});
 
 // mock fetch()
 (global.fetch as any) = jest.fn(async () => ({
@@ -62,7 +85,7 @@ describe("saveLog()", () => {
         // allow console warnings by default
         jest.spyOn(console, "error").mockRestore();
     });
-    
+
     test("catch encryption error", async () => {
         const testErrorMessage = "test error encryption";
         const testError = new Error(testErrorMessage);
@@ -92,7 +115,7 @@ describe("saveLog()", () => {
         expect(result.success).toBe(false);
         expect((result as any).error).toBe("Encryption error");
     });
-    
+
     test("catch getActiveChildData() error", async () => {
         const testErrorMessage = "test error get";
         const testLogType = "test log type";
@@ -119,7 +142,7 @@ describe("saveLog()", () => {
         expect((console.error as jest.Mock).mock.calls[0][0]).toBe(`Error creating ${testLogType} log:`);
         expect((console.error as jest.Mock).mock.calls[0][1]).toBe(testErrorMessage);
     });
-    
+
     test("catch supabase insert error", async () => {
         const testError = new Error("test error insert");
         const testLogType = "test log type";
@@ -146,11 +169,11 @@ describe("saveLog()", () => {
         expect(result.success).toBe(false);
         expect((result as any).error).toBe(testError.message);
     });
-    
+
     test("Updates image saving state (success)", async () =>
         await imageLoadingState({ data: {} }, { success: true })
     );
-    
+
     test("Updates image saving state (error)", async () => {
         const testError = new Error("test error upload");
         jest.spyOn(console, "error").mockImplementation(() => null);  // suppress console warnings from within the tested code
@@ -162,7 +185,7 @@ describe("saveLog()", () => {
         expect((console.error as jest.Mock).mock.calls[0][0]).toBe(`Photo upload failed`);
         expect((console.error as jest.Mock).mock.calls[0][1]).toBe(testError);
     });
-    
+
     test("Catches image getUser() error", async () => {
         const testErrorMessage = "test error user";
 
@@ -185,7 +208,7 @@ describe("saveLog()", () => {
 
         await imageError("User not authenticated");
     });
-    
+
     test("Catches image fetch() error", async () => {
         const testErrorMessage = "test error fetch";
 
@@ -197,7 +220,7 @@ describe("saveLog()", () => {
 
         await imageError(testErrorMessage);
     });
-    
+
     test("Catches image arrayBuffer() error", async () => {
         const testErrorMessage = "test error array buffer";
 
@@ -211,7 +234,7 @@ describe("saveLog()", () => {
 
         await imageError(testErrorMessage);
     });
-    
+
     test("Catches image empty arrayBuffer error", async () => {
         // fetch().arrayBuffer() should be mocked to return an empty array buffer
         // This should cause error handling in library/log-functions -> uploadPhoto()
@@ -223,7 +246,7 @@ describe("saveLog()", () => {
 
         await imageError("Selected photo is empty (0 bytes). Check the URI source.");
     });
-    
+
     test("Catches image upload() error", async () => {
         const testErrorMessage = "test error upload";
 
@@ -293,11 +316,11 @@ describe("saveLog()", () => {
             expect(insertedObject[dbFieldName]).toBe(expectedValue);
         }
     });
-    
+
     test("saves correct table name (remote)", async () =>
         savesTableName(false)
     );
-    
+
     test("catch local-store.ts->getActiveChildId() error", async () => {
         // library/local-store.ts -> getActiveChildId() should be mocked to return:
         // /* falsy value */
@@ -314,7 +337,7 @@ describe("saveLog()", () => {
         expect(result.success).toBe(false);
         expect((result as any).error).toBe("No active child set (guest mode)");
     });
-    
+
     test("catch local-store.ts->insertRow() error", async () => {
         const testLogType = "test log type";
 
@@ -384,7 +407,7 @@ describe("saveLog()", () => {
             expect(insertedObject[dbFieldName]).toBe(expectedValue);
         }
     });
-    
+
     test("saves correct table name (local)", async () =>
         savesTableName(true)
     );
@@ -512,7 +535,7 @@ describe("fetchLogs()", () => {
 
     test("Catch getActiveChildData() error (remote)", async () => {
         const testErrorMessage = "test error message";
-    
+
         // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { error: /* test error message */ }
         // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
@@ -524,7 +547,7 @@ describe("fetchLogs()", () => {
 
     test("Catch supabase select error (remote)", async () => {
         const testErrorMessage = "test supabase error message";
-    
+
         // supabase.from().select().eq().order() should be mocked to return:
         // { error: /* truthy value */ }
         // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
@@ -549,7 +572,7 @@ describe("fetchLogs()", () => {
 
     test("Requests filter by child id (remote)", async () => {
         const testChildId = "test child id";
-    
+
         // library/remote-store.ts -> getActiveChildData() should be mocked to return:
         // { success: true, childId: /* test value */ }
         // This should cause error handling in library/log-functions.ts -> fetchRemoteLogs()
@@ -748,5 +771,185 @@ describe("fetchLogs()", () => {
             plainValue: testFetchLogs[0].plainValue,
             photoValue: testFetchLogs[0].photoValue,
         }]);
+    }
+});
+
+
+describe("handleDeleteLog()", () => {
+
+    beforeEach(() => {
+        // to clear the .mock.calls array
+        (Alert.alert as jest.Mock).mockClear();
+        (deleteRow as jest.Mock).mockClear();
+        (supabase.from("").delete().eq as unknown as jest.Mock).mockClear();
+        (supabase.from as jest.Mock).mockClear();
+    });
+
+    test("Shows alert", () => {
+        handleDeleteLog(
+            "diaper_logs",
+            "",
+            false,
+            () => undefined,
+            () => undefined,
+        );
+
+        expect(Alert.alert).toHaveBeenCalledTimes(1);
+        expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Delete Entry");
+        expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe("Are you sure you want to delete this log?");
+        expect((Alert.alert as jest.Mock).mock.calls[0][2][0].text).toBe("Cancel");  // cancel button
+        expect((Alert.alert as jest.Mock).mock.calls[0][2][1].text).toBe("Delete");  // delete button
+    });
+
+    test("Calls setAlertVisible with true", () => {
+        const setAlertVisible = jest.fn();
+        handleDeleteLog(
+            "diaper_logs",
+            "",
+            false,
+            setAlertVisible,
+            () => undefined,
+        );
+
+        expect(setAlertVisible).toHaveBeenCalledTimes(1);
+        expect(setAlertVisible.mock.calls[0][0]).toBe(true);
+    });
+
+    test("Calls setAlertVisible with false on cancel", async () => {
+        const setAlertVisible = jest.fn();
+        handleDeleteLog(
+            "diaper_logs",
+            "",
+            false,
+            setAlertVisible,
+            () => undefined,
+        );
+
+        const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2] as any[];
+        const cancelHandler = alertButtons.find(button => button.text === "Cancel").onPress;
+        await cancelHandler();
+
+        expect(setAlertVisible).toHaveBeenCalledTimes(2);
+        expect(setAlertVisible.mock.calls[1][0]).toBe(false);
+    });
+
+    test("Calls deleteRow() with expected values", async () => {
+        const testTable = "test table name";
+        const testLogId = "test log ID";
+
+        handleDeleteLog(
+            testTable as TableName,
+            testLogId,
+            true,
+            () => undefined,
+            () => undefined,
+        );
+
+        const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2] as any[];
+        const confirmHandler = alertButtons.find(button => button.text === "Delete").onPress;
+        await confirmHandler();
+
+        expect(deleteRow as jest.Mock).toHaveBeenCalledTimes(1);
+        expect((deleteRow as jest.Mock).mock.calls[0][0]).toBe(testTable);
+        expect((deleteRow as jest.Mock).mock.calls[0][1]).toBe(testLogId);
+    });
+
+    test("Catches deleteRow() error", async () => {
+        // library/utils.ts -> deleteRow() should be mocked to return:
+        // false
+        // this should cause error handling in library/log-functions -> handleDeleteLog() -> confirmDeleteLog()
+        (deleteRow as jest.Mock).mockImplementationOnce(
+            async () => false
+        );
+        catchesDeleteError(true);
+    });
+
+    test("Calls supabase with expected values", async () => {
+        const testTable = "test table name";
+        const testLogId = "test log ID";
+
+        handleDeleteLog(
+            testTable as TableName,
+            testLogId,
+            false,
+            () => undefined,
+            () => undefined,
+        );
+
+        const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2] as any[];
+        const confirmHandler = alertButtons.find(button => button.text === "Delete").onPress;
+        await confirmHandler();
+
+        expect(supabase.from as jest.Mock).toHaveBeenCalledTimes(1);
+        expect((supabase.from as jest.Mock).mock.calls[0][0]).toBe(testTable);
+        expect((supabase.from("").delete().eq as unknown as jest.Mock).mock.calls[0][0]).toBe("id");
+        expect((supabase.from("").delete().eq as unknown as jest.Mock).mock.calls[0][1]).toBe(testLogId);
+    });
+
+    test("Catches supabase error", async () => {
+        // supabase.from().delete().eq() should be mocked to return:
+        // { error: /* truthy value */ }
+        // this should cause error handling in library/log-functions -> handleDeleteLog() -> confirmDeleteLog()
+        (supabase.from("").delete().eq as unknown as jest.Mock).mockImplementationOnce(
+            async () => ({ error: true })
+        );
+        catchesDeleteError(false);
+    });
+
+    test("updates logs on successful delete", async () => {
+        const testDeleteId = "test delete ID";
+        const testLogs = [
+            { id: "test ID 1" },
+            { id: testDeleteId },
+            { id: "test ID 2" },
+            { id: "test ID 3" },
+        ];
+        const testRemainingLogs = testLogs.filter(log => log.id !== testDeleteId);
+
+        const setAlertVisible = jest.fn();
+        const updateLogs = jest.fn();
+        handleDeleteLog(
+            "diaper_logs",
+            testDeleteId,
+            false,
+            setAlertVisible,
+            updateLogs,
+        );
+
+        const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2] as any[];
+        const confirmHandler = alertButtons.find(button => button.text === "Delete").onPress;
+        await confirmHandler();
+
+        expect(setAlertVisible).toHaveBeenCalledTimes(2);
+        expect(setAlertVisible.mock.calls[1][0]).toBe(false);  // alert should have been closed
+
+        // update logs should have been called with an updater function to pass to a useState() updater
+        expect(updateLogs).toHaveBeenCalledTimes(1);
+        expect(updateLogs.mock.calls[0][0]([])).toEqual([]);
+        expect(updateLogs.mock.calls[0][0](testLogs)).toEqual(testRemainingLogs);
+        expect(updateLogs.mock.calls[0][0](testRemainingLogs)).toEqual(testRemainingLogs);
+    });
+
+    async function catchesDeleteError(isguest: boolean) {
+        const setAlertVisible = jest.fn();
+        const updateLogs = jest.fn();
+        handleDeleteLog(
+            "diaper_logs",
+            "",
+            isguest,
+            setAlertVisible,
+            updateLogs,
+        );
+
+        const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2] as any[];
+        const confirmHandler = alertButtons.find(button => button.text === "Delete").onPress;
+        await confirmHandler();
+
+        expect(Alert.alert).toHaveBeenCalledTimes(2);
+        expect((Alert.alert as jest.Mock).mock.calls[1][0]).toBe("Error deleting log");
+
+        expect(setAlertVisible).toHaveBeenCalledTimes(2);
+        expect(setAlertVisible.mock.calls[1][0]).toBe(false);  // alert should have been closed
+        expect(updateLogs).toHaveBeenCalledTimes(0);  // logs should not have been updated
     }
 });
