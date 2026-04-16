@@ -267,14 +267,13 @@ export default function Health() {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 			{/*ScrollView Prevents items from flowing off page on small devices*/}
-
-			<View
-				className={`main-container justify-between transition-all ${
-					isTyping ? "-translate-y-[40%]" : "translate-y-0"
-				}`}
-				style={{ paddingBottom: insets.bottom }}
-			>
-				<ScrollView>
+			<ScrollView>
+				<View
+					className={`main-container justify-between gap-6 transition-all duration-300 transition-all ${
+						isTyping ? "-translate-y-[40%]" : "translate-y-0"
+					}`}
+					style={{ paddingBottom: insets.bottom }}
+				>
 					{/* Render the health input form module with update handlers */}
 					<HealthModule
 						key={`health-module-${reset}`}
@@ -288,16 +287,15 @@ export default function Health() {
 						testID="health-main-inputs"
 					/>
 					{/* Multiline input for additional notes */}
-					<View className="bottom-5 pt-5">
-						<View className="items-start top-5 left-3 z-10">
-							<Text className="bg-gray-200 p-3 rounded-xl font">
+					<View className='tracker-section'>
+						<View className='tracker-section-label'>
+							<Text className='tracker-section-label-text'>
 								{stringLib.uiLabels.noteLabel}
 							</Text>
 						</View>
-						<View className="p-4 pt-9 bg-white rounded-xl z-0">
+						<View className='ml-4 mr-4 mb-6'>
 							<TextInput
-								className=""
-								placeholderTextColor={"#aaa"}
+								className='text-input-note'
 								placeholder={`i.e. ${
 									healthLog.category === "Growth"
 										? "growth is steady"
@@ -319,28 +317,28 @@ export default function Health() {
 								testID="health-note-entry"
 							/>
 						</View>
-
-						{/* Action buttons to save or reset form */}
-						<View className="flex-row gap-2 pb-5 pt-5">
-							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 grow"
-								onPress={handleSaveHealthLog}
-								disabled={isSaving}
-								testID="health-save-log-button"
-							>
-								<Text>➕ Add to log</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 items-center"
-								onPress={() => handleResetFields()}
-								testID="health-reset-form-button"
-							>
-								<Text>🗑️ Reset fields</Text>
-							</TouchableOpacity>
-						</View>
 					</View>
-				</ScrollView>
-			</View>
+
+					{/* Action buttons to save or reset form */}
+					<View className="flex-row gap-2 pb-5 pt-3">
+						<TouchableOpacity
+							className="tracker-button-save"
+							onPress={handleSaveHealthLog}
+							disabled={isSaving}
+							testID="health-save-log-button"
+						>
+							<Text className="tracker-form-button-text">➕ Add to log</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							className="tracker-button-reset"
+							onPress={() => handleResetFields()}
+							testID="health-reset-form-button"
+						>
+							<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</ScrollView>
 		</TouchableWithoutFeedback>
 	);
 }

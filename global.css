@@ -9,14 +9,6 @@
     --color-accent: #f97316;
 } */
 
-.manual-primary {
-    @apply bg-white dark:bg-[#2c4a4d] rounded-xl mt-5 flex-col;
-}
-
-.manual-foregound-text {
-    @apply text-xl dark:text-white;
-}
-
 .stopwatch-clock {
     @apply text-[5rem] scale-100 dark:text-[#edf7c8] tabular-nums;
 }
@@ -151,8 +143,49 @@
     placeholder:text-gray-300 dark:focus:border-orange-200;
 }
 
-.feeding-module-label {
+.text-input-note {
+    @apply dark:text-white border-gray-700 rounded-xl scale-100 focus:border-[#549461] dark:border-gray-300
+    placeholder:text-gray-300 dark:focus:border-orange-200;
+}
+
+.tracker-input-label {
     @apply font-bold dark:text-white scale-100 text-lg pb-1;
+}
+
+.tracker-section {
+    @apply bg-white dark:bg-[#3a645a] rounded-xl mt-5 flex-col;
+}
+
+.tracker-section-label {
+    @apply items-start relative bottom-5 left-3;
+}
+
+.tracker-section-label-text {
+    @apply bg-gray-200 p-3 rounded-xl dark:bg-gray-800 dark:text-gray-100;
+}
+
+.tracker-input-button {
+    @apply flex-row rounded-full bg-red-100 items-center gap-2 dark:bg-gray-900;
+}
+
+.tracker-input-subbutton {
+    @apply rounded-full bg-red-50 p-4 dark:bg-gray-800;
+}
+
+.tracker-input-text {
+    @apply text-black dark:text-gray-200;
+}
+
+.tracker-button-save {
+    @apply rounded-full p-4 bg-red-100 grow dark:bg-green-800;
+}
+
+.tracker-button-reset {
+    @apply rounded-full p-4 bg-red-100 items-center dark:bg-red-900;
+}
+
+.tracker-form-button-text {
+    @apply text-black dark:text-gray-100;
 }
 
 .transition-padding {
@@ -233,37 +266,53 @@
 }
 
 .profile-item {
-    @apply bg-gray-200 rounded-full flex-row justify-between gap-4;
+    @apply bg-gray-200 dark:bg-gray-800 rounded-full flex-row justify-between gap-4;
+}
+
+.profile-bubble-base {
+    @apply p-4 scale-100 bg-white rounded-full border-[1px] border-gray-300 dark:bg-[#466755] dark:border-gray-700;
 }
 
 .profile-child-name-label {
-    @apply p-4 text-2xl scale-100 border-[1px] border-transparent;
+    @apply p-4 text-2xl scale-100 border-[1px] border-transparent dark:text-gray-100;
 }
 
 .profile-child-name {
-    @apply p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000];
+    @apply profile-bubble-base text-2xl text-[#f9a000] dark:text-orange-100;
 }
 
 .profile-item-text {
-    @apply p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300;
+    @apply profile-bubble-base text-lg text-black dark:text-gray-200;
 }
 
-.profile-value {
+.profile-value-base {
     @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace;
 }
 
+.profile-value {
+    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace dark:text-gray-100;
+}
+
 .profile-value-link {
-    @apply profile-value text-blue-500;
+    @apply profile-value-base text-blue-500 dark:text-blue-300;
+}
+
+.profile-value-light {
+    @apply profile-value-base text-gray-500 dark:text-gray-400;
 }
 
 .list-select-base {
-    @apply rounded-lg p-2 border-[1px] shadow-sm m-2;
+    @apply rounded-lg p-2 border-[1px] shadow-sm m-2 border-black dark:border-gray-700;
 }
 
 .list-select-item {
-    @apply list-select-base bg-gray-200;
+    @apply list-select-base bg-gray-200 dark:bg-gray-800;
 }
 
 .list-select-item-selected {
     @apply list-select-base bg-[#fff6c9] dark:bg-[#466755];
+}
+
+.list-select-text {
+    @apply text-lg text-black dark:text-gray-100;
 }

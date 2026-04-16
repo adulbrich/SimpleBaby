@@ -297,7 +297,7 @@ export default function Profile() {
                             }
                             testID={testIDs.appVersionButton}
                         >
-                            <Text className='profile-value text-gray-500'>
+                            <Text className='profile-value-light'>
                                 v0.1a
                             </Text>
                         </TouchableOpacity>

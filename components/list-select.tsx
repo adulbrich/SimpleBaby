@@ -28,7 +28,7 @@ export default function ListSelect(
             className={index === selected ? "list-select-item-selected" : "list-select-item"}
             testID={`${selected === index ? testIDs.listItemSelected : testIDs.listItem}-${index}`}
         >
-            <Text className={`text-lg`}>{item}</Text>
+            <Text className={"list-select-text"}>{item}</Text>
         </TouchableOpacity>
     );
 

@@ -153,10 +153,10 @@ export default function ActiveChild() {
     }, []);
 
     return (
-        <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
+        <SafeAreaView className='modal-container flex-col justify-between flex-grow'>
             <ScrollView>
                 <View className='flex-col gap-4'>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
+                    <View className='profile-item'>
                         <Text className='profile-child-name-label'>
                             Name
                         </Text>
@@ -172,7 +172,7 @@ export default function ActiveChild() {
                         disabled={childId === ""}
                         testID={testIDs.renameButton}
                     >
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
+                        <View className='profile-item mb-8'>
                             <Text className='profile-child-name-label'>
                                 ✏️ Rename
                             </Text>
@@ -182,7 +182,7 @@ export default function ActiveChild() {
                         <Text className='profile-item-text'>
                             📆 Created On
                         </Text>
-                        <Text className='profile-value text-gray-500'>
+                        <Text className='profile-value-light'>
                             {createdDate}
                         </Text>
                     </View>

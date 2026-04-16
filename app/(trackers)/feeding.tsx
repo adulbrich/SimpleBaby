@@ -138,18 +138,15 @@ export default function Feeding() {
 							testID="feeding-data-entry"
 						/>
 						{/* Note input section */}
-						<View className="bottom-5">
-							<View
-								className="items-start top-5 left-3 z-10"
-								testID="feeding-note"
-							>
-								<Text className="bg-gray-200 p-3 rounded-xl font">
+						<View className='tracker-section'>
+							<View className='tracker-section-label'>
+								<Text className='tracker-section-label-text'>
 									{stringLib.uiLabels.noteLabel}
 								</Text>
 							</View>
-							<View className="p-4 pt-9 bg-white rounded-xl z-0">
+							<View className='ml-4 mr-4 mb-6'>
 								<TextInput
-									placeholderTextColor={"#aaa"}
+									className='text-input-note'
 									placeholder="i.e. does not like pureed carrots"
 									multiline={true}
 									maxLength={200}
@@ -164,19 +161,19 @@ export default function Feeding() {
 						{/* Action buttons for saving and resetting form */}
 						<View className="flex-row gap-2 pb-5">
 							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 grow"
+								className="tracker-button-save"
 								onPress={handleSaveFeedingLog}
 								testID="feeding-save-log-button"
 								disabled={isSaving}
 							>
-								<Text>➕ Add to log</Text>
+								<Text className="tracker-form-button-text">➕ Add to log</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 items-center"
+								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="feeding-reset-form-button"
 							>
-								<Text>🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
