@@ -100,8 +100,6 @@ const SignUpScreen: React.FC = () => {
         !passwordsMatch && confirmPassword ? styles.errorInput : {},
     ];
 
-    const buttonTextClass = 'font-semibold';
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <SafeAreaView className='main-container flex-col justify-end'>
@@ -115,7 +113,7 @@ const SignUpScreen: React.FC = () => {
                 >
                     <View className='flex-row gap-4'>
                         <View className='flex-1'>
-                            <Text className='text font-bold'>First Name</Text>
+                            <Text className='auth-label'>First Name</Text>
                             <TextInput
                                 className='text-input'
                                 placeholder='Enter your first name'
@@ -127,7 +125,7 @@ const SignUpScreen: React.FC = () => {
                             />
                         </View>
                         <View className='flex-1'>
-                            <Text className='text font-bold'>Last Name</Text>
+                            <Text className='auth-label'>Last Name</Text>
                             <TextInput
                                 className='text-input'
                                 placeholder='Enter your last name'
@@ -139,8 +137,8 @@ const SignUpScreen: React.FC = () => {
                             />
                         </View>
                     </View>
-                    <View className=''>
-                        <Text className='text font-bold'>Email</Text>
+                    <View>
+                        <Text className='auth-label'>Email</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your email'
@@ -151,8 +149,8 @@ const SignUpScreen: React.FC = () => {
                             testID="sign-up-email"
                         />
                     </View>
-                    <View className=''>
-                        <Text className='text font-bold'>Password</Text>
+                    <View>
+                        <Text className='auth-label'>Password</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your password'
@@ -163,7 +161,7 @@ const SignUpScreen: React.FC = () => {
                         />
                     </View>
                     <View>
-                        <Text className='text font-bold'>Confirm Password</Text>
+                        <Text className='auth-label'>Confirm Password</Text>
                         <TextInput
                             style={getPasswordInputStyle()}
                             className='text-input'
@@ -185,10 +183,9 @@ const SignUpScreen: React.FC = () => {
                     <View className='flex-row mt-2 justify-between mb-5'>
                         <TouchableOpacity
                             onPress={() => setPasswordHidden(!passwordHidden)}
-                            className=''
                             testID="sign-up-password-visibility"
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 {passwordHidden
                                     ? 'Show Passwords'
                                     : 'Hide Passwords'}
@@ -198,7 +195,7 @@ const SignUpScreen: React.FC = () => {
                             onPress={() => Alert.alert('Not yet implemented.')}
                             testID="sign-up-forgot-password"
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 Forgot your password?
                             </Text>
                         </TouchableOpacity>
@@ -208,21 +205,18 @@ const SignUpScreen: React.FC = () => {
                     <Button
                         text={loading ? 'Signing up...' : 'Sign Up'}
                         action={handleSignUp}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
                         testID="sign-up"
                     />
                     <Button
                         text='Sign In Instead'
                         action={handleSignIn}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
                         testID="sign-in"
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
                         testID="guest-button"
                     />

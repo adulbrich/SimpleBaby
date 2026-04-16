@@ -161,20 +161,20 @@ export default function Profile() {
     }, [session]);
 
     return (
-        <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
+        <SafeAreaView className='modal-container flex-col justify-between flex-grow'>
             <ScrollView>
                 <View className='flex-col gap-4'>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                    <View className='profile-item'>
+                        <Text className='profile-child-name-label'>
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameGuest}>
+                            <Text className='profile-child-name' testID={testIDs.childNameGuest}>
                                 👶 {childName}
                             </Text>
                         ) : (
                             <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameButton}>
+                                <Text className='profile-child-name' testID={testIDs.childNameButton}>
                                     👶 {childName}
                                 </Text>
                             </TouchableOpacity>
@@ -183,14 +183,14 @@ export default function Profile() {
                     { isGuest ? (
                         undefined
                     ) : loadingNames ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.loadingNames}>
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
+                        <View className='profile-item' testID={testIDs.loadingNames}>
+                            <Text className='profile-value'>
                                 Loading Child Profiles...
                             </Text>
                         </View>
                     ) : namesError ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.namesError}>
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
+                        <View className='profile-item' testID={testIDs.namesError}>
+                            <Text className='profile-value text-red-600'>
                                 Error loading child names
                             </Text>
                         </View>
@@ -201,8 +201,8 @@ export default function Profile() {
                             onPress={() => setShowSwitchChild(true)}
                             testID={testIDs.switchChildButton}
                         >
-                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                                <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                            <View className='profile-item'>
+                                <Text className='profile-child-name-label'>
                                     🔃 Switch Child
                                 </Text>
                             </View>
@@ -212,22 +212,22 @@ export default function Profile() {
                         onPress={() => setShowAddChild(true)}
                         testID={testIDs.addChildButton}
                     >
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
-                            <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                        <View className='profile-item mb-8'>
+                            <Text className='profile-child-name-label'>
                                 ✚ Add Child
                             </Text>
                         </View>
                     </TouchableOpacity>}
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             👤 Name
                         </Text>
-                        <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
+                        <Text className='profile-value'>
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             👪 Caretakers
                         </Text>
                         <TouchableOpacity
@@ -239,13 +239,13 @@ export default function Profile() {
                             }
                             testID={testIDs.caretakersButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text className='profile-value-link'>
                                 Manage
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             📧 Email
                         </Text>
                         <TouchableOpacity
@@ -261,13 +261,13 @@ export default function Profile() {
                             }
                             testID={testIDs.emailButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text className='profile-value-link'>
                                 {displayEmail}
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             🔑 Password
                         </Text>
                         <TouchableOpacity
@@ -279,13 +279,13 @@ export default function Profile() {
                             }
                             testID={testIDs.passwordButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text className='profile-value-link'>
                                 Change my password
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             🤖 App Version
                         </Text>
                         <TouchableOpacity
@@ -297,7 +297,7 @@ export default function Profile() {
                             }
                             testID={testIDs.appVersionButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
+                            <Text className='profile-value text-gray-500'>
                                 v0.1a
                             </Text>
                         </TouchableOpacity>
@@ -309,8 +309,7 @@ export default function Profile() {
                     <Button
                         text={signOutLabel}
                         action={handleSignOut}
-                        buttonClass='bg-red-600 border-gray-500'
-                        textClass='font-bold dark:text-white'
+                        buttonClass='button-red'
                         testID={testIDs.signOutButton}
                     />
                 )}

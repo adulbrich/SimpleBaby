@@ -157,10 +157,10 @@ export default function ActiveChild() {
             <ScrollView>
                 <View className='flex-col gap-4'>
                     <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                        <Text className='profile-child-name-label'>
                             Name
                         </Text>
-                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                        <Text className='profile-child-name'>
                             👶 {childName}
                         </Text>
                     </View>
@@ -173,16 +173,16 @@ export default function ActiveChild() {
                         testID={testIDs.renameButton}
                     >
                         <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
-                            <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                            <Text className='profile-child-name-label'>
                                 ✏️ Rename
                             </Text>
                         </View>
                     </TouchableOpacity>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             📆 Created On
                         </Text>
-                        <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
+                        <Text className='profile-value text-gray-500'>
                             {createdDate}
                         </Text>
                     </View>
@@ -193,8 +193,7 @@ export default function ActiveChild() {
                     text='Delete Child'
                     action={handleDeleteChild}
                     disabled={childId === ""}
-                    buttonClass='bg-red-600 border-gray-500'
-                    textClass='font-bold dark:text-white'
+                    buttonClass='button-red'
                     testID={testIDs.deleteButton}
                 />
             </View>

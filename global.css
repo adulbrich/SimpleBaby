@@ -9,10 +9,6 @@
     --color-accent: #f97316;
 } */
 
-.app-heading {
-    @apply text-xl scale-100;
-}
-
 .manual-primary {
     @apply bg-white dark:bg-[#2c4a4d] rounded-xl mt-5 flex-col;
 }
@@ -101,10 +97,6 @@
     @apply bg-blue-100 rounded-3xl align-middle items-center p-3 pb-4 text-wrap max-h-[175px];
 }
 
-.button-2 {
-    @apply p-6 rounded-3xl;
-}
-
 .heading {
     @apply text-5xl mb-2 scale-100 font-bold dark:text-white;
 }
@@ -121,6 +113,14 @@
     @apply p-4 dark:bg-[#0b2218] bg-[#fff5e4] h-full w-full transition-colors;
 }
 
+.modal-container {
+    @apply p-4 dark:bg-[#0b2218] bg-gray-100;
+}
+
+.popup {
+    @apply p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600;
+}
+
 .button {
     @apply rounded-full p-5 border-[1px] shadow-sm;
 }
@@ -134,7 +134,7 @@
 }
 
 .button-text {
-    @apply text-base text-white text-center dark:text-gray-700;
+    @apply text-base text-white text-center dark:text-gray-700 font-semibold;
 }
 
 .text {
@@ -167,13 +167,17 @@
     dark:border-[#152619] ios:drop-shadow-sm android:shadow-md;
 }
 
-.tracker-bar-label {
+.log-button-label {
     @apply text-lg scale-100 font-bold text-yellow-800 dark:text-[#dbf9dd];
 }
 
-.tracker-bar {
+.log-button {
     @apply bg-[#fff6c9] dark:bg-[#466755] flex-row items-center justify-between p-4 gap-2 rounded-[2rem] border-2 border-[#c4b798]
     dark:border-[#152619] ios:drop-shadow-sm android:shadow-md;
+}
+
+.log-button-icon {
+    @apply text-[3rem] scale-100;
 }
 
 .tracker-label {
@@ -184,12 +188,82 @@
     @apply text-[4.5rem] scale-100;
 }
 
-.tos-text {
-    margin-top: 2;
-    margin-bottom: 2;
+.auth-label {
+    @apply text font-bold;
+}
+
+.settings-item {
+    @apply p-4 gap-4 mb-1 bg-white;
+}
+
+.settings-item-row {
+    @apply settings-item flex-row justify-between;
+}
+
+.settings-label {
+    @apply text-lg font-bold text-left;
+}
+
+.about-title {
+    @apply text-4xl font-bold text-center mt-8 text-black dark:text-white;
+}
+
+.about-subtitle {
+    @apply text-lg text-center text-gray-700 dark:text-gray-300;
+}
+
+.about-label {
+    @apply text-2xl font-bold mb-3 mt-8 text-black dark:text-white;
+}
+
+.about-text {
+    @apply text-lg text-gray-700 dark:text-gray-300;
+}
+
+.about-footer {
+    @apply text-base italic text-center text-gray-700 dark:text-gray-300;
 }
 
 .tos-heading {
-    font-size: 24;
-    color:rgb(48, 30, 99);
+    @apply text-3xl text-violet-950 dark:text-gray-200;
+}
+
+.tos-text {
+    @apply mt-1 mb-1 dark:text-gray-300;
+}
+
+.profile-item {
+    @apply bg-gray-200 rounded-full flex-row justify-between gap-4;
+}
+
+.profile-child-name-label {
+    @apply p-4 text-2xl scale-100 border-[1px] border-transparent;
+}
+
+.profile-child-name {
+    @apply p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000];
+}
+
+.profile-item-text {
+    @apply p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300;
+}
+
+.profile-value {
+    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace;
+}
+
+.profile-value-link {
+    @apply profile-value text-blue-500;
+}
+
+.list-select-base {
+    @apply rounded-lg p-2 border-[1px] shadow-sm m-2;
+}
+
+.list-select-item {
+    @apply list-select-base bg-gray-200;
+}
+
+.list-select-item-selected {
+    @apply list-select-base bg-[#fff6c9] dark:bg-[#466755];
 }

@@ -33,16 +33,15 @@ export default function Tab() {
                     {bars.map((bars, key) => (
                         <TouchableOpacity
                             onPress={() => router.push(bars.link)}
-                            className='group'
                             key={key}
                             testID={bars.testID}
                         >
-                            <View className='tracker-bar'>
+                            <View className='log-button'>
                                 <View className='flex-row justify-center items-center gap-4'>
-                                    <Text className='text-[3rem] scale-100 '>
+                                    <Text className='log-button-icon'>
                                         {bars.icon}
                                     </Text>
-                                    <Text className='tracker-bar-label'>
+                                    <Text className='log-button-label'>
                                         {bars.label}
                                     </Text>
                                 </View>

@@ -25,9 +25,7 @@ export default function ListSelect(
     const renderSelectButton = ({ item, index }: { item: string; index: number; }) => (
         <TouchableOpacity
             onPress={() => onSelect(index)}
-            className={`rounded-lg p-2 border-[1px] shadow-sm m-2 ${
-                index === selected ? "bg-[#fff6c9] dark:bg-[#466755]" : "bg-gray-200"
-            }`}
+            className={index === selected ? "list-select-item-selected" : "list-select-item"}
             testID={`${selected === index ? testIDs.listItemSelected : testIDs.listItem}-${index}`}
         >
             <Text className={`text-lg`}>{item}</Text>
