@@ -89,7 +89,7 @@ SimpleBaby allows users to record and view various activities and milestones for
 
 **Key Functions:**
 *   **Logging Activities:** Users can log events such as feedings (type, amount, duration), sleep periods (start and end times), diaper changes (type), developmental milestones (including photo uploads).
-*   **Viewing Logs:** A history of logged events can be viewed, typically in a chronological list or potentially summarized.
+*   **Viewing Logs:** A history of logged events can be viewed in a chronological list.
 *   **Calendar:** Users can view a monthly calendar that details logs they have created for each day.
 *   **Child Management:** Users will be able to add, remove, and switch between profiles to log info for multiple children.
 *   **Guest Mode:** Users can log into the app in Guest Mode, allowing them to log data in a secure local database without having to sign up for an account.
