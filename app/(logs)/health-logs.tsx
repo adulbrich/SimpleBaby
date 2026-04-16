@@ -10,15 +10,11 @@ import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { format } from "date-fns";
 import { useAuth } from "@/library/auth-provider";
-import {
-	updateRow,
-	deleteRow,
-} from "@/library/local-store";
+import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
-import { fetchLogs } from "@/library/log-functions";
+import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 
 interface HealthLog {
 	id: string;
@@ -182,38 +178,6 @@ const HealthLogsView: React.FC = () => {
 		}
 	};
 
-	const handleDelete = async (id: string) => {
-		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
-			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
-			{
-				text: "Delete",
-				style: "destructive",
-				onPress: async () => {
-					if (isGuest) {
-						const success = await deleteRow("health_logs", id);
-						if (!success) {
-							Alert.alert("Error deleting log");
-							return;
-						}
-						setHealthLogs((prev) => prev.filter((log) => log.id !== id));
-					} else {
-                        const { error } = await supabase
-                            .from("health_logs")
-                            .delete()
-                            .eq("id", id);
-                        if (error) {
-                            Alert.alert("Error deleting log");
-                            return;
-                        }
-                        setHealthLogs((prev) => prev.filter((log) => log.id !== id));
-                    }
-					setDeleteAlertVisible(false);
-				},
-			},
-		]);
-	};
-
 	const renderLog = ({ item }: { item: HealthLog }) => (
 		<LogItem
 			id={item.id}
@@ -221,7 +185,13 @@ const HealthLogsView: React.FC = () => {
 				setEditModalVisible(true);
 				setEditingLog(item);
 			}}
-			onDelete={() => handleDelete(item.id)}
+			onDelete={() => handleDeleteLog<HealthLog>(
+				"health_logs",
+				item.id,
+				isGuest,
+				setDeleteAlertVisible,
+				setHealthLogs,
+			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
 				{ type: "title", value: item.category },
