@@ -55,7 +55,7 @@ This project uses Jest as the backbone of its testing suite. Tests are created t
 ```
 npx jest
 ```
-This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in `jest.config.js` and `/test/setup.ts`. All pull requests to the repository must pass these tests before they can be merged into the `main` branch.
+This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in the `/test` folder. All pull requests to the repository must pass these tests before they can be merged into the `main` branch.
 
 ## Technical Documentation (Developer-Focused)
 This section focuses on the technical aspects relevant to developers working on the project.
@@ -88,7 +88,7 @@ For more details on local Supabase development, refer to the official Supabase d
 SimpleBaby allows users to record and view various activities and milestones for their baby.
 
 **Key Functions:**
-*   **Logging Activities:** Users can log events such as feedings (type, amount, duration), sleep periods (start and end times), diaper changes (type), developmental milestones (including photo uploads).
+*   **Logging Activities:** Users can log events such as feedings (type, amount, duration), sleep periods (start and end times), diaper changes (type), developmental milestones (including photo uploads), nursing activity, and health milestones.
 *   **Viewing Logs:** A history of logged events can be viewed in a chronological list.
 *   **Calendar:** Users can view a monthly calendar that details logs they have created for each day.
 *   **Child Management:** Users can add, remove, and switch between profiles to log info for multiple children.
@@ -99,7 +99,7 @@ SimpleBaby allows users to record and view various activities and milestones for
 2.  Navigate to the desired tracking section (e.g., "Feedings", "Sleep", "Diapers").
 3.  Input the relevant details for the activity.
 4.  Save the entry.
-5.  View past entries in a "Logs" or "History" section.
+5.  View past entries in a "Logs" or "Calendar" section.
 
 ## API Documentation
 The application interacts with a Supabase backend. The primary API interaction points are:
@@ -270,6 +270,7 @@ The following are missing features or known issues, both big and small, that wou
 *   [ ] Buttons push multiple requests to the database or navigation stack when loading (see open issues)
 *   [ ] Non-descriptive error messages
 *   [ ] Use of `isTyping` state and `translate-y` tailwind class causing scrolling issues when creating logs
+*   [ ] Add loading indicators for async button presses
 
 -------
 #### © Alex Ulbrich - 2024-2026
