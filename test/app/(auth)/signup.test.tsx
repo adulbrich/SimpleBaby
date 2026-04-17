@@ -3,7 +3,7 @@ import SignUpScreen from "@/app/(auth)/signup";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
-import { formatStringList } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 import stringLib from "@/assets/stringLibrary.json";
 
 
@@ -28,15 +28,13 @@ jest.mock("@/library/auth-provider", () => {
     };
 });
 
-jest.mock("@/library/log-functions", () => ({}));
-
 jest.mock("react-native", () => {
     const module = jest.requireActual("react-native");
     module.Alert.alert = jest.fn();
     return module;
 });
 
-jest.mock("@/library/log-functions", () => ({
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 

@@ -13,7 +13,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import DiaperModule from "@/components/diaper-module";
 import { useAuth } from "@/library/auth-provider";
-import { formatStringList, saveLog } from "@/library/log-functions";
+import { saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 import stringLib from "../../assets/stringLibrary.json";
 

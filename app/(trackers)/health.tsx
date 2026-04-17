@@ -20,7 +20,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/library/auth-provider";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 import stringLib from "../../assets/stringLibrary.json";
 
 // Define the shape of the health log data object with varying nested properties

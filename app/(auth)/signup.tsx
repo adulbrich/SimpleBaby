@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAuth } from '@/library/auth-provider';
-import { formatStringList } from '@/library/log-functions';
+import { formatStringList } from '@/library/utils';
 import stringLib from "@/assets/stringLibrary.json";
 
 
