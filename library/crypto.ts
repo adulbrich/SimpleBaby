@@ -2,6 +2,7 @@ import CryptoES from "crypto-es";
 import * as Crypto from "expo-crypto";
 import { Buffer } from "buffer";
 import { getEncryptionKey } from "./supabase-client";
+import stringLib from "../assets/stringLibrary.json";
 
 /**
  * Generates a 16-byte IV using Expo's Crypto API.
@@ -66,6 +67,18 @@ export const decryptData = async (ciphertext: string): Promise<string> => {
 	console.log("🔑 Decrypted Data:", decrypted);
 	return decrypted;
 };
+
+
+// safeDecrypt(): a wrapper of decryptData() to catch and handle any errors
+export async function safeDecrypt(value: string | null): Promise<string> {
+    if (!value || !value.includes("U2FsdGVkX1")) return value || "";
+    try {
+        return await decryptData(value);
+    } catch (err) {
+        console.warn("⚠️ Decryption failed for:", value);
+        return `${stringLib.errors.decryption}: ${(err as Error).message}`;
+    }
+}
 
 export default {
 	encryptData,

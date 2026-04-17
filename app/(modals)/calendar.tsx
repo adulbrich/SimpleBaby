@@ -3,12 +3,9 @@ import { Calendar } from "react-native-calendars";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
-import { getActiveChildData } from '@/library/utils';
+import { getActiveChildData } from '@/library/remote-store';
 import { useAuth } from '@/library/auth-provider';
-
-function toYMD(d: Date) {
-    return format(d, "yyyy-MM-dd");
-}
+import { toYMD } from '@/library/utils';
 
 export default function CalendarModal() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
