@@ -38,7 +38,7 @@ export default function AboutScreen() {
                 </Text>
 
                 {/* Mission Statement */}
-                <Text className='about-footer mt-16'>
+                <Text className='aside-text mt-16'>
                     Designed to make baby tracking simple and stress-free. 💛
                 </Text>
             </View>

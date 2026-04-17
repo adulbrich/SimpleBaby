@@ -253,7 +253,7 @@
     @apply text-lg text-gray-700 dark:text-gray-300;
 }
 
-.about-footer {
+.aside-text {
     @apply text-base italic text-center text-gray-700 dark:text-gray-300;
 }
 
@@ -315,4 +315,76 @@
 
 .list-select-text {
     @apply text-lg text-black dark:text-gray-100;
+}
+
+.logs-heading {
+    @apply text-2xl font-bold mb-4 dark:text-gray-200;
+}
+
+.logs-error {
+    @apply text-lg text-red-600 text-center;
+}
+
+.log-item {
+    @apply bg-white dark:bg-[#3a645a] rounded-xl p-4 mb-4 shadow;
+}
+
+.log-title {
+    @apply dark:text-white text-lg font-bold mb-2;
+}
+
+.log-item-text {
+    @apply dark:text-gray-100 text-base mb-1;
+}
+
+.log-note {
+    @apply dark:text-gray-200 text-sm italic text-gray-500 mt-1;
+}
+
+.log-button-edit {
+    @apply px-3 py-2 rounded-full bg-blue-100 dark:bg-blue-950;
+}
+
+.log-button-delete {
+    @apply px-3 py-2 rounded-full bg-red-100 dark:bg-red-950;
+}
+
+.log-button-edit-text {
+    @apply text-blue-700 dark:text-blue-100;
+}
+
+.log-button-delete-text {
+    @apply text-red-700 dark:text-red-200;
+}
+
+.log-button-save {
+    @apply bg-green-500 rounded-full px-4 py-2 dark:bg-green-900;
+}
+
+.log-button-cancel {
+    @apply bg-gray-200 rounded-full px-4 py-2 dark:bg-gray-900;
+}
+
+.log-button-save-text {
+    @apply text-white;
+}
+
+.log-button-cancel-text {
+    @apply text-black dark:text-white;
+}
+
+.log-edit-title {
+    @apply text-xl font-bold mb-4 dark:text-white;
+}
+
+.log-edit-label {
+    @apply text-sm text-gray-500 mb-1 dark:text-gray-300;
+}
+
+.log-edit-text {
+    @apply dark:text-white;
+}
+
+.log-edit-box {
+    @apply border border-gray-300 rounded-xl px-3 py-2 mb-3 dark:text-white;
 }
