@@ -63,7 +63,7 @@ const SignUpScreen: React.FC = () => {
                 if (message === "User already registered") {
                     Alert.alert(
                         stringLib.errors.signUp,
-                       stringLib.errors.emailInUse 
+                        stringLib.errors.emailInUse
                     );
                 } else {
                     Alert.alert(
