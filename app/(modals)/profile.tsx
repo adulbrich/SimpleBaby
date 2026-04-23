@@ -169,12 +169,12 @@ export default function Profile() {
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameGuest}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='shrink p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameGuest}>
                                 👶 {childName}
                             </Text>
                         ) : (
-                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameButton}>
+                            <TouchableOpacity className='shrink' onPress={() => router.push("/(modals)/active-child")}>
+                                <Text numberOfLines={1} ellipsizeMode="tail" className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameButton}>
                                     👶 {childName}
                                 </Text>
                             </TouchableOpacity>
@@ -222,7 +222,7 @@ export default function Profile() {
                         <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
                             👤 Name
                         </Text>
-                        <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
+                        <Text numberOfLines={1} ellipsizeMode='tail' className='shrink p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
@@ -261,7 +261,7 @@ export default function Profile() {
                             }
                             testID={testIDs.emailButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='shrink p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
                                 {displayEmail}
                             </Text>
                         </TouchableOpacity>
