@@ -120,6 +120,7 @@ export default function SignInScreen() {
                         action={handleSignIn}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-button'
                     />
                     <Button
@@ -127,6 +128,7 @@ export default function SignInScreen() {
                         action={handleSignUp}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-sign-up-button'
                     />
                     <Button
@@ -134,6 +136,7 @@ export default function SignInScreen() {
                         action={handleGuest}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-guest-button'
                     />
                 </View>
