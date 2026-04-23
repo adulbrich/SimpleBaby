@@ -161,7 +161,7 @@ export default function ActiveChild() {
                         <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
                             Name
                         </Text>
-                        <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
+                        <Text numberOfLines={1} ellipsizeMode="tail" className='shrink p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]'>
                             👶 {childName}
                         </Text>
                     </View>
