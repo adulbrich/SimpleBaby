@@ -210,6 +210,7 @@ const SignUpScreen: React.FC = () => {
                         action={handleSignUp}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID="sign-up"
                     />
                     <Button
@@ -217,6 +218,7 @@ const SignUpScreen: React.FC = () => {
                         action={handleSignIn}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID="sign-in"
                     />
                     <Button
@@ -224,6 +226,7 @@ const SignUpScreen: React.FC = () => {
                         action={handleGuest}
                         textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID="guest-button"
                     />
                 </View>
