@@ -178,7 +178,7 @@ export default function Nursing() {
 							note={note}
 							setNote={setNote}
 							setIsTyping={setIsTyping}
-							placeholder="e.g. difficulties with latching or signs of poor latching"
+							placeholder={stringLib.uiLabels.nursingNotePlaceholder}
 							testID="nursing-note-entry"
 						/>
 						{/* Bottom Buttons */}

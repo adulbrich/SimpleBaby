@@ -173,7 +173,7 @@ export default function Sleep() {
 							note={note}
 							setNote={setNote}
 							setIsTyping={setIsTyping}
-							placeholder="e.g. baby was squirming often"
+							placeholder={stringLib.uiLabels.sleepNotePlaceholder}
 							testID="sleep-note-entry"
 						/>
 

@@ -307,7 +307,7 @@ export default function Milestone() {
 							note={note}
 							setNote={setNote}
 							setIsTyping={setIsTyping}
-							placeholder="e.g., took first steps from the table"
+							placeholder={stringLib.uiLabels.milestoneNotePlaceholder}
 							testID="milestone-note-entry"
 						/>
 

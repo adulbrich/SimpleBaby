@@ -142,7 +142,7 @@ export default function Feeding() {
 							note={note}
 							setNote={setNote}
 							setIsTyping={setIsTyping}
-							placeholder="e.g. does not like pureed carrots"
+							placeholder={stringLib.uiLabels.feedingNotePlaceholder}
 							testID="feeding-note-entry"
 						/>
 						{/* Action buttons for saving and resetting form */}

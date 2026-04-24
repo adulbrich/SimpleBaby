@@ -297,13 +297,13 @@ export default function Health() {
 							}))
 						}
 						setIsTyping={setIsTyping}
-						placeholder={`e.g. ${
-							healthLog.category === "Growth" ? "growth is steady" :
-							healthLog.category === "Activity" ? "enjoyed tummy time" :
-							healthLog.category === "Meds" ? "took medicine without fuss" :
-							healthLog.category === "Vaccine" ? "was fussier for a day" :
-							"realignment surgery for fracture"
-						}`}
+						placeholder={
+							healthLog.category === "Growth" ? stringLib.uiLabels.healthGrowthNotePlaceholder :
+							healthLog.category === "Activity" ? stringLib.uiLabels.healthActivityNotePlaceholder :
+							healthLog.category === "Meds" ? stringLib.uiLabels.healthMedsNotePlaceholder :
+							healthLog.category === "Vaccine" ? stringLib.uiLabels.healthVaccineNotePlaceholder :
+							stringLib.uiLabels.healthOtherNotePlaceholder
+						}
 						testID="health-note-entry"
 					/>
 

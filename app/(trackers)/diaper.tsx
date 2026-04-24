@@ -134,7 +134,7 @@ export default function Diaper() {
 							note={note}
 							setNote={setNote}
 							setIsTyping={setIsTyping}
-							placeholder="e.g. really messy"
+							placeholder={stringLib.uiLabels.diaperNotePlaceholder}
 							testID="diaper-note-entry"
 						/>
 						{/* Action buttons row */}
