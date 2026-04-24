@@ -89,9 +89,9 @@ export default function NursingStopwatch({
     const activeTime = activeSide === 'left' ? leftTime : rightTime;
 
     return (
-        <View className='stopwatch-primary' testID={testID} >
-            <View className='items-start bottom-5 left-3'>
-                <Text className='bg-gray-200 p-3 rounded-xl font'>
+        <View className='tracker-section' testID={testID} >
+            <View className='tracker-section-label'>
+                <Text className='tracker-section-label-text'>
                     ⏱️ Nursing Stopwatch
                 </Text>
             </View>

@@ -17,8 +17,6 @@ export default function GuestScreen() {
         }
     };
 
-    const buttonTextClass = 'font-semibold';
-
     return (
         <SafeAreaView className='main-container flex-col justify-end'>
             <View className='mb-5'>
@@ -61,14 +59,12 @@ export default function GuestScreen() {
                 <Button
                     text='Cancel'
                     action={() => router.back()}
-                    textClass={buttonTextClass}
                     buttonClass='button-red'
                     testID='guest-cancel-button'
                 />
                 <Button
                     text='Continue'
                     action={handleGuest}
-                    textClass={buttonTextClass}
                     buttonClass='button-normal'
                     testID='guest-continue-button'
                 />
