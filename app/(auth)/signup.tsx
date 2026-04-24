@@ -211,34 +211,22 @@ const SignUpScreen: React.FC = () => {
                         text={loading ? stringLib.uiLabels.signUpButtonLoading : stringLib.uiLabels.signUpButton}
                         action={handleSignUp}
                         buttonClass='button-normal'
-<<<<<<< kan-255/fix-multiple-signups
                         disabled={loading}
-                        testID="sign-up"
-=======
                         testID={testIDs.signUpButton}
->>>>>>> main
                     />
                     <Button
                         text='Sign In Instead'
                         action={handleSignIn}
                         buttonClass='button-normal'
-<<<<<<< kan-255/fix-multiple-signups
                         disabled={loading}
-                        testID="sign-in"
-=======
                         testID={testIDs.signInButton}
->>>>>>> main
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
                         buttonClass='button-normal'
-<<<<<<< kan-255/fix-multiple-signups
                         disabled={loading}
-                        testID="guest-button"
-=======
                         testID={testIDs.guestButton}
->>>>>>> main
                     />
                 </View>
             </SafeAreaView>
