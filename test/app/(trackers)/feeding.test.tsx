@@ -5,6 +5,7 @@ import { Alert } from "react-native";
 import FeedingCategory, { FeedingCategoryList } from '@/components/feeding-category';
 import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("expo-router", () => ({
@@ -33,6 +34,12 @@ jest.mock("@/components/feeding-category.tsx", () => {
         </View>
     ));
     return FeedingCategoryMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("@/library/auth-provider", () => ({
@@ -88,12 +95,11 @@ async function setFeedingInputs({
         await act(() => onTimeUpdate?.(time));
     }
 
-    // type into <TextInput/> components for note
-    if (note != null) {
-        await userEvent.type(
-            screen.getByTestId("feeding-note-entry"),
-            note
-        );
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -143,7 +149,7 @@ describe("Track feeding screen", () => {
         expect(screen.getByDisplayValue(testCategory)).toBeTruthy();
         expect(screen.getByDisplayValue(testName)).toBeTruthy();
         expect(screen.getByDisplayValue(testAmount)).toBeTruthy();
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);
 
         await userEvent.press(screen.getByTestId("feeding-reset-form-button"));
 
@@ -151,7 +157,7 @@ describe("Track feeding screen", () => {
         expect(screen.queryByDisplayValue(testCategory)).toBeNull();
         expect(screen.queryByDisplayValue(testName)).toBeNull();
         expect(screen.queryByDisplayValue(testAmount)).toBeNull();
-        expect(screen.queryByDisplayValue(testNote)).toBeNull();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
     });
     
     test("Catch unfilled inputs", async () => {

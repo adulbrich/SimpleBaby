@@ -1,7 +1,6 @@
 import {
 	Text,
 	View,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -17,8 +16,8 @@ import FeedingCategory, {
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
-
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
@@ -139,26 +138,13 @@ export default function Feeding() {
 							testID="feeding-data-entry"
 						/>
 						{/* Note input section */}
-						<View className='tracker-section'>
-							<View className='tracker-section-label'>
-								<Text className='tracker-section-label-text'>
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className='ml-4 mr-4 mb-6'>
-								<TextInput
-									className='text-input-note'
-									placeholder="i.e. does not like pureed carrots"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="feeding-note-entry"
-								/>
-							</View>
-						</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder="e.g. does not like pureed carrots"
+							testID="feeding-note-entry"
+						/>
 						{/* Action buttons for saving and resetting form */}
 						<View className="flex-row gap-2 pb-5">
 							<TouchableOpacity

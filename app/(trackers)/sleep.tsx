@@ -1,7 +1,6 @@
 import {
 	Text,
 	View,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -15,8 +14,8 @@ import ManualEntry from "@/components/sleep-manual-entry";
 import { router } from "expo-router";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
-
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
@@ -170,26 +169,14 @@ export default function Sleep() {
 						/>
 
 						{/* Note input section */}
-						<View className='tracker-section'>
-							<View className='tracker-section-label'>
-								<Text className='tracker-section-label-text'>
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className='ml-4 mr-4 mb-6'>
-								<TextInput
-									className='text-input-note'
-									placeholder="i.e. baby was squirming often"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="sleep-note-entry"
-								/>
-							</View>
-						</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder="e.g. baby was squirming often"
+							testID="sleep-note-entry"
+						/>
+
 						{/* Action buttons */}
 						<View className="flex-row gap-2 pb-5">
 							<TouchableOpacity

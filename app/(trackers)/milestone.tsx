@@ -21,8 +21,8 @@ import CategoryModule from "@/components/category-module";
 import { useAuth } from "@/library/auth-provider";
 import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
-
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 type MilestoneCategoryList = 'Motor' | 'Language' | 'Social' | 'Cognitive' | 'Other';
 
@@ -303,26 +303,13 @@ export default function Milestone() {
 						</View>
 
 						{/* Note input section */}
-						<View className='tracker-section'>
-							<View className='tracker-section-label'>
-								<Text className='tracker-section-label-text'>
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className='ml-4 mr-4 mb-6'>
-								<TextInput
-									className='text-input-note'
-									placeholder="e.g., took first steps from the table"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="milestone-note-entry"
-								/>
-							</View>
-						</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder="e.g., took first steps from the table"
+							testID="milestone-note-entry"
+						/>
 
 						<View className="flex-row gap-2">
 							<TouchableOpacity
