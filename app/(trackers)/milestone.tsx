@@ -211,9 +211,8 @@ export default function Milestone() {
 						className={`gap-6 transition-all duration-300 ${
 							isTyping ? "-translate-y-[40%]" : "translate-y-0"
 						}`}
-					></View>
+					>
 
-					<View className='flex-col gap-6 mb-6'>
 						<CategoryModule
 							title="🌐 Choose Category"
 							selectedCategory={category}
@@ -227,124 +226,121 @@ export default function Milestone() {
 							onCategoryUpdate={setCategory}
 							testID="milestone-category-modal"
 						/>
-					</View>
 
-					{/* Name and Description inputs */}
-					<View className="stopwatch-primary">
-						<View className="items-start bottom-5 left-3">
-							<Text className="bg-gray-200 p-3 rounded-xl font">
-								⚖️ Add Details
-							</Text>
-						</View>
-
-						<View className="flex-col gap-4 mb-6">
-							<View className="ml-4 mr-4">
-								<Text className="feeding-module-label">Milestone Name</Text>
-								<TextInput
-									className="text-input-internal"
-									placeholder="e.g., First Steps"
-									autoCapitalize="none"
-									keyboardType="default"
-									value={name}
-									onChangeText={setName}
-									testID="milestone-item-name"
-								/>
+						{/* Name and Description inputs */}
+						<View className="tracker-section">
+							<View className="tracker-section-label">
+								<Text className="tracker-section-label-text">
+									⚖️ Add Details
+								</Text>
 							</View>
 
-							<View className="ml-4 mr-4 flex-row items-center justify-between">
-								<Text className="feeding-module-label">Date</Text>
-								<View className="flex-row items-center bg-red-100 rounded-full gap-2">
-									<TouchableOpacity
-										className="rounded-full bg-red-50 p-4"
-										onPress={showDatePickerModal}
-										testID="milestone-date-button"
-									>
-										<Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
-									</TouchableOpacity>
-									<Text className="mr-4">{formatDate(milestoneDate)}</Text>
-								</View>
-							</View>
-
-							{showDatePicker && Platform.OS === "ios" && (
-								<View className="items-center">
-									<DateTimePicker
-										testID="dateTimePicker"
-										value={milestoneDate}
-										mode="date"
-										onChange={onChangeDate}
-										display="spinner"
+							<View className="flex-col gap-4 mb-6">
+								<View className="ml-4 mr-4">
+									<Text className="tracker-input-label">Milestone Name</Text>
+									<TextInput
+										className="text-input-internal"
+										placeholder="e.g., First Steps"
+										autoCapitalize="none"
+										keyboardType="default"
+										value={name}
+										onChangeText={setName}
+										testID="milestone-item-name"
 									/>
 								</View>
-							)}
 
-							<View className="ml-4 mr-4 flex-row items-center justify-between">
-								<Text className="feeding-module-label">Milestone Photo</Text>
-								<TouchableOpacity
-									className="rounded-full p-4 bg-red-100 items-center"
-									onPress={pickPhoto}
-									disabled={uploadingPhoto}
-									testID='milestone-photo-button'
-								>
-									<Text>{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
-								</TouchableOpacity>
-							</View>
-							{(photoName || photoUri) && (
-								<View className="flex flex-col" accessible>
-									<Text className="text-sm text-gray-500 mt-2 text-center">
-										({photoName})
-									</Text>
+								<View className="ml-4 mr-4 flex-row items-center justify-between">
+									<Text className="tracker-input-label">Date</Text>
+									<View className="tracker-input-button">
+										<TouchableOpacity
+											className="tracker-input-subbutton"
+											onPress={showDatePickerModal}
+											testID="milestone-date-button"
+										>
+											<Text className="tracker-input-text">{showDatePicker ? "Close" : "Choose"} 📅</Text>
+										</TouchableOpacity>
+										<Text className="tracker-input-text mr-4">{formatDate(milestoneDate)}</Text>
+									</View>
+								</View>
+
+								{showDatePicker && Platform.OS === "ios" && (
+									<View className="items-center">
+										<DateTimePicker
+											testID="dateTimePicker"
+											value={milestoneDate}
+											mode="date"
+											onChange={onChangeDate}
+											display="spinner"
+										/>
+									</View>
+								)}
+
+								<View className="ml-4 mr-4 flex-row items-center justify-between">
+									<Text className="tracker-input-label">Milestone Photo</Text>
 									<TouchableOpacity
-										onPress={handleRemovePhoto}
-										testID="remove-milestone-photo-button"
+										className="tracker-input-button"
+										onPress={pickPhoto}
+										disabled={uploadingPhoto}
+										testID='milestone-photo-button'
 									>
-										<Text className="text-center text-gray-500 underline">Remove Photo</Text>
+										<Text className="tracker-input-text m-4">{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
 									</TouchableOpacity>
 								</View>
-							)}
+								{(photoName || photoUri) && (
+									<View className="flex flex-col" accessible>
+										<Text className="photo-indicator mt-2">
+											({photoName})
+										</Text>
+										<TouchableOpacity
+											onPress={handleRemovePhoto}
+											testID="remove-milestone-photo-button"
+										>
+											<Text className="photo-indicator underline">Remove Photo</Text>
+										</TouchableOpacity>
+									</View>
+								)}
+							</View>
 						</View>
-                    </View>
 
-					{/* Note input section */}
-					<View className="bottom-5 pt-4">
-						<View
-							className="items-start top-5 left-3 z-10"
-							testID="milestone-note"
-						>
-							<Text className="bg-gray-200 p-3 rounded-xl font">
-								{stringLib.uiLabels.noteLabel}
-							</Text>
+						{/* Note input section */}
+						<View className='tracker-section'>
+							<View className='tracker-section-label'>
+								<Text className='tracker-section-label-text'>
+									{stringLib.uiLabels.noteLabel}
+								</Text>
+							</View>
+							<View className='ml-4 mr-4 mb-6'>
+								<TextInput
+									className='text-input-note'
+									placeholder="e.g., took first steps from the table"
+									multiline={true}
+									maxLength={200}
+									onFocus={() => setIsTyping(true)}
+									onBlur={() => setIsTyping(false)}
+									value={note}
+									onChangeText={setNote}
+									testID="milestone-note-entry"
+								/>
+							</View>
 						</View>
-						<View className="p-4 pt-9 bg-white rounded-xl z-0">
-							<TextInput
-								placeholderTextColor={"#aaa"}
-								placeholder="e.g., took first steps from the table"
-								multiline={true}
-								maxLength={200}
-								onFocus={() => setIsTyping(true)}
-								onBlur={() => setIsTyping(false)}
-								value={note}
-								onChangeText={setNote}
-								testID="milestone-note-entry"
-							/>
-						</View>
-					</View>
 
-					<View className="flex-row gap-2">
-						<TouchableOpacity
-							className="rounded-full p-4 bg-red-100 grow"
-							onPress={handleSaveMilestoneLog}
-							disabled={isSaving}
-							testID="milestone-save-log-button"
-						>
-							<Text>➕ Add to log</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							className="rounded-full p-4 bg-red-100 items-center"
-							onPress={handleResetFields}
-							testID="milestone-reset-form-button"
-						>
-							<Text>🗑️ Reset fields</Text>
-						</TouchableOpacity>
+						<View className="flex-row gap-2">
+							<TouchableOpacity
+								className="tracker-button-save"
+								onPress={handleSaveMilestoneLog}
+								disabled={isSaving}
+								testID="milestone-save-log-button"
+							>
+								<Text className="tracker-form-button-text">➕ Add to log</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								className="tracker-button-reset"
+								onPress={handleResetFields}
+								testID="milestone-reset-form-button"
+							>
+								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
 				</ScrollView>
 			</View>

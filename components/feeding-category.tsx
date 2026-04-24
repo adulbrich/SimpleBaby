@@ -95,15 +95,15 @@ export default function FeedingCategory({
                 testID="feeding-category-module"
             />
 
-            <View className='stopwatch-primary'>
-                <View className='items-start bottom-5 left-3'>
-                    <Text className='bg-gray-200 p-3 rounded-xl font'>
+            <View className='tracker-section'>
+                <View className='tracker-section-label'>
+                    <Text className='tracker-section-label-text'>
                         ⚖️ Add Details
                     </Text>
                 </View>
                 <View className='flex-col gap-4 mb-6'>
                     <View className='ml-4 mr-4'>
-                        <Text className='feeding-module-label'>Item Name</Text>
+                        <Text className='tracker-input-label'>Item Name</Text>
                         <TextInput
                             className='text-input-internal'
                             placeholder='i.e. apple sauce'
@@ -116,7 +116,7 @@ export default function FeedingCategory({
                     </View>
 
                     <View className='ml-4 mr-4'>
-                        <Text className='feeding-module-label'>Amount</Text>
+                        <Text className='tracker-input-label'>Amount</Text>
                         <TextInput
                             className='text-input-internal'
                             placeholder='i.e. 12 oz'
@@ -129,18 +129,18 @@ export default function FeedingCategory({
                     </View>
 
                     <View className='ml-4 mr-4 flex-row items-center justify-between'>
-                        <Text className='feeding-module-label'>Meal Time</Text>
-                        <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
+                        <Text className='tracker-input-label'>Meal Time</Text>
+                        <View className='tracker-input-button'>
                             <TouchableOpacity
-                                className='rounded-full bg-red-50 p-4'
+                                className='tracker-input-subbutton'
                                 onPress={showTimePicker}
                                 testID='feeding-time-button'
                             >
-                                <Text>
+                                <Text className='tracker-input-text'>
                                     {showIOSPicker ? 'Close' : 'Choose'} ⏰
                                 </Text>
                             </TouchableOpacity>
-                            <Text className='mr-4'>
+                            <Text className='tracker-input-text mr-4'>
                                 {formatTime(feedingTime)}
                             </Text>
                         </View>

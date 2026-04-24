@@ -50,9 +50,9 @@ export default function Stopwatch({
     };
 
     return (
-        <View className='stopwatch-primary' testID={testID}>
-            <View className='items-start relative bottom-5 left-3'>
-                <Text className='bg-gray-200 p-3 rounded-xl font'>
+        <View className='tracker-section' testID={testID}>
+            <View className='tracker-section-label'>
+                <Text className='tracker-section-label-text'>
                     ⏱️ Stopwatch
                 </Text>
             </View>

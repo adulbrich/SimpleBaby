@@ -114,7 +114,7 @@ export default function EditLogPopup({
 
     // renderCategoryInput - dropdown of specific categories that the user can choose from
     const renderCategoryInput = (fieldKey: string, fieldInfo: editFieldCategory) => (
-        <View className="border border-gray-300 rounded-xl px-3 py-2 mb-3">
+        <View className="log-edit-box">
             <Dropdown
                 value={fieldInfo.value}
                 data={
@@ -136,7 +136,7 @@ export default function EditLogPopup({
     // renderTextInput - open text field for the user to type into
     const renderTextInput = (fieldKey: string, fieldInfo: editFieldText) => (
         <TextInput
-            className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
+            className="log-edit-box log-edit-text"
             value={fieldInfo.value ? fieldInfo.value : ""}
             onChangeText={(text) =>
                 setLog((prev) => 
@@ -152,7 +152,7 @@ export default function EditLogPopup({
     const renderDateInput = (fieldKey: string, fieldInfo: editFieldDateTime) => (
         <View className="mb-3">
             <TouchableOpacity
-                className="border border-gray-300 rounded-xl px-3 py-3"
+                className="log-edit-box"
                 onPress={() => {
                     setShowDatePicker(true);
                     setDatePickerField(fieldKey);
@@ -160,7 +160,7 @@ export default function EditLogPopup({
                 }}
                 testID={fieldInfo.buttonTestID}
             >
-                <Text>{format(fieldInfo.value, fieldInfo.type === "date" ? "MMM dd, yyyy" : "hh:mm a")}</Text>
+                <Text className="log-edit-text">{format(fieldInfo.value, fieldInfo.type === "date" ? "MMM dd, yyyy" : "hh:mm a")}</Text>
             </TouchableOpacity>
 
             {showDatePicker && datePickerData && (
@@ -197,7 +197,7 @@ export default function EditLogPopup({
     // renderTextInput - open text field for the user to type into
     const renderDurationInput = (fieldKey: string, fieldInfo: editFieldDuration) => (
         <TextInput
-            className="border border-gray-300 rounded-xl px-3 py-2 mb-3"
+            className="log-edit-box"
             value={fieldInfo.value ? fieldInfo.value : ""}
             inputMode="numeric"
             onChangeText={(text) =>
@@ -280,8 +280,8 @@ export default function EditLogPopup({
                         backgroundColor: "#00000099",
                     }}
                 >
-                    <View className="bg-white w-full rounded-2xl p-6">
-                        <Text className="text-xl font-bold mb-4">{title}</Text>
+                    <View className="popup">
+                        <Text className="log-edit-title">{title}</Text>
 
                         {/* User inputs */}
                         {
@@ -295,18 +295,18 @@ export default function EditLogPopup({
                         {/* Save and Cancel buttons */}
                         <View className="flex-row justify-end gap-3">
                             <TouchableOpacity
-                                className="bg-gray-200 rounded-full px-4 py-2"
+                                className="log-button-cancel"
                                 onPress={handleCancel}
                                 testID={testIDs.cancelButton}
                             >
-                                <Text>Cancel</Text>
+                                <Text className="log-button-cancel-text">Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                className="bg-green-500 rounded-full px-4 py-2"
+                                className="log-button-save"
                                 onPress={handleSubmit}
                                 testID={testIDs.saveButton}
                             >
-                                <Text className="text-white">Save</Text>
+                                <Text className="log-button-save-text">Save</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
