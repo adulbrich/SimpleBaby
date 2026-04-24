@@ -101,7 +101,7 @@ export const saveNewChild = async (childName: string) => {
     try {
         const children = await getChildrenByUserId(userId);
         // check if user already has a child with this name
-        if (children.find(({ name}) => name === formattedName)) {
+        if (children.find(({ name }) => name === formattedName)) {
             throw new Error("Child name already exists.");
         }
     } catch (error) {
