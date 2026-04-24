@@ -5,7 +5,8 @@ import { router } from "expo-router";
 import CategoryModule from "@/components/category-module";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { launchImageLibraryAsync, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 
 jest.mock("@react-native-community/datetimepicker", () => {
@@ -49,6 +50,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 
@@ -255,7 +259,7 @@ describe("Track milestone screen", () => {
 
         render(<Milestone/>);
 
-        // library/log-functions.ts -> formatStringList() should be mocked to return a test string
+        // library/utils.ts -> formatStringList() should be mocked to return a test string
         // This is to ensure its return value is displayed properly
         (formatStringList as jest.Mock).mockImplementationOnce(
             () => testFormattedList

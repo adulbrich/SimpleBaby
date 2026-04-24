@@ -15,7 +15,8 @@ import FeedingCategory, {
 	FeedingCategoryList,
 } from "@/components/feeding-category";
 import { useAuth } from "@/library/auth-provider";
-import { formatStringList, saveLog } from "@/library/log-functions";
+import { saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 import stringLib from "../../assets/stringLibrary.json";
 

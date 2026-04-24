@@ -1,5 +1,5 @@
-import { decryptData, encryptData } from "./crypto";
-import { getActiveChildData } from "@/library/utils";
+import { encryptData, safeDecrypt } from "./crypto";
+import { getActiveChildData } from "@/library/remote-store";
 import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
@@ -211,24 +211,6 @@ export async function saveLog(
         return await createRemoteLog(encryptedFields, logData.tableName, logType, imageFields, setUploadingPhotos);
     }
 };
-
-
-export function formatStringList(strings: string[]): string {
-    return strings.length > 1
-            ? `${strings.slice(0, -1).join(", ")} and ${strings.slice(-1)}`
-            : strings[0];
-}
-
-
-async function safeDecrypt(value: string | null): Promise<string> {
-    if (!value || !value.includes("U2FsdGVkX1")) return "";
-    try {
-        return await decryptData(value);
-    } catch (err) {
-        console.warn("⚠️ Decryption failed for:", value);
-        return `${stringLib.errors.decryption}: ${(err as Error).message}`;
-    }
-}
 
 
 async function fetchLocalLogs(

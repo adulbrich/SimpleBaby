@@ -1,11 +1,16 @@
 {
     "errors": {
         "trackerMissingInfo": "Missing Information",
+        "missingFields": "All fields are required.",
         "logUpdateFailure": "Failed to update log",
         "childData": "Could Not Retrieve Child Data",
         "childDataMessage": "The information for the active child could not be retrieved. Restarting the app may solve the issue.",
         "guestNoChild": "No active child selected (guest mode)",
-        "decryption": "[Decryption Failed]"
+        "decryption": "[Decryption Failed]",
+        "mismatchedPasswords": "Passwords do not match.",
+        "emailInUse": "That email is already in use. Please try again.",
+        "signUp": "Sign Up Error",
+        "signIn": "Sign In Error"
     },
 
     "warnings": {
@@ -18,10 +23,26 @@
         "noteLabel": "Add a note",
         "manualEntryLabel": "Manual Entry",
         "iosCloseDateTimePicker": "Done",
-        "editPhotoMessage": "Photos cannot be edited/updated yet in this menu. This feature will be added in a later release. For now, please create a new log."
+        "editPhotoMessage": "Photos cannot be edited/updated yet in this menu. This feature will be added in a later release. For now, please create a new log.",
+        "signUpButton": "Sign Up",
+        "signUpButtonLoading": "Signing up..."
     },
 
     "testIDs": {
+        "signUp": {
+            "firstName": "sign-up-first-name",
+            "lastName": "sign-up-last-name",
+            "email": "sign-up-email",
+            "passwordInitial": "sign-up-password-initial",
+            "passwordConfirm": "sign-up-password-confirm",
+            "passwordError": "sign-up-password-error",
+            "passwordVisibility": "sign-up-password-visibility",
+            "forgotPassword": "sign-up-forgot-password",
+            "signUpButton": "sign-up-sign-up-button",
+            "signInButton": "sign-up-sign-in-button",
+            "guestButton": "sign-up-guest-button"
+        },
+
         "activeChild": {
             "renameButton": "active-child-rename-button",
             "deleteButton": "active-child-delete-button"

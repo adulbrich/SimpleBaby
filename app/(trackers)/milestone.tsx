@@ -19,7 +19,8 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import CategoryModule from "@/components/category-module";
 import { useAuth } from "@/library/auth-provider";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
 
 import stringLib from "../../assets/stringLibrary.json";
 
