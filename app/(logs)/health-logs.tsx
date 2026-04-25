@@ -27,7 +27,7 @@ interface HealthLog {
 	activity_duration: string | null;
 	meds_name: string | null;
 	meds_amount: string | null;
-	meds_time_taken: string | null;
+	meds_time_taken: Date | null;
 	vaccine_name: string | null;
 	vaccine_location: string | null;
 	other_name: string | null;
@@ -63,6 +63,7 @@ const HealthLogsView: React.FC = () => {
 				{ dbFieldName: "activity_duration", type: "string" },
 				{ dbFieldName: "meds_name", type: "string" },
 				{ dbFieldName: "meds_amount", type: "string" },
+				{ dbFieldName: "meds_time_taken", type: "date" },
 				{ dbFieldName: "vaccine_name", type: "string" },
 				{ dbFieldName: "vaccine_location", type: "string" },
 				{ dbFieldName: "other_name", type: "string" },
@@ -102,7 +103,8 @@ const HealthLogsView: React.FC = () => {
 			)) ||
 			(editingLog.category === "Meds" && (
 				isBlank(editingLog.meds_name) ||
-				isBlank(editingLog.meds_amount)
+				isBlank(editingLog.meds_amount) ||
+				!editingLog.meds_time_taken
 			)) ||
 			(editingLog.category === "Vaccine" && isBlank(editingLog.vaccine_name)) ||
 			(editingLog.category === "Other" && isBlank(editingLog.other_name));
@@ -134,6 +136,9 @@ const HealthLogsView: React.FC = () => {
 					: null,
 				meds_amount: editingLog.meds_amount
 					? await encryptData(editingLog.meds_amount)
+					: null,
+				meds_time_taken: editingLog.meds_time_taken
+					? editingLog.meds_time_taken.toISOString()
 					: null,
 				vaccine_name: editingLog.vaccine_name
 					? await encryptData(editingLog.vaccine_name)
@@ -203,6 +208,7 @@ const HealthLogsView: React.FC = () => {
 				item.activity_duration && { type: "item", label: "Duration", value: item.activity_duration },
 				item.meds_name && { type: "item", label: "Med", value: item.meds_name },
 				item.meds_amount && { type: "item", label: "Amount", value: item.meds_amount },
+				item.meds_time_taken && { type: "item", label: "Time Taken", value: format(item.meds_time_taken, "h:mm a") },
 				item.vaccine_name && { type: "item", label: "Vaccine", value: item.vaccine_name },
 				item.vaccine_location && { type: "item", label: "Location", value: item.vaccine_location },
 				item.other_name && { type: "item", label: "Name", value: item.other_name },
@@ -282,6 +288,11 @@ const HealthLogsView: React.FC = () => {
 						title: "Amount",
 						type: "text",
 						value: editingLog?.meds_amount,
+					}},
+					...(editingLog?.category === "Meds") && {meds_time_taken: {
+						title: "Time Taken",
+						type: "time",
+						value: editingLog?.meds_time_taken as Date,
 					}},
 
 					// Vaccine category inputs
