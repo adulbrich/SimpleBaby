@@ -19,6 +19,7 @@ jest.mock("expo-router", () => ({
         replace: jest.fn(),
         push: jest.fn(),
     },
+    usePathname: () => "/profile",
 }));
 
 jest.mock("expo-audio", () => ({
