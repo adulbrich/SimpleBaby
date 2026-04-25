@@ -68,6 +68,7 @@ const BASE_LOG = {
     activity_duration: "",
     meds_name: "",
     meds_amount: "",
+    meds_time_taken: "",
     vaccine_name: "",
     vaccine_location: "",
     other_name: "",
@@ -98,6 +99,7 @@ const TEST_LOGS = [{
     category: "Meds",
     meds_name: "test meds name",
     meds_amount: "test meds amount",
+    meds_time_taken: new Date(),
     date: new Date(NOW - 3*24*60*60*1000),
     note: "",
     test_category: "meds",
@@ -218,6 +220,7 @@ describe("Health logs screen", () => {
             } else if (log.test_category === "meds") {
                 expect(displayValues.includes(log.meds_name as string)).toBeTruthy();
                 expect(displayValues.includes(log.meds_amount as string)).toBeTruthy();
+                expect(displayValues.includes(format(log.meds_time_taken as Date, "h:mm a"))).toBeTruthy();
             } else if (log.test_category === "vaccine") {
                 expect(displayValues.includes(log.vaccine_name as string)).toBeTruthy();
                 expect(displayValues.includes(log.vaccine_location as string)).toBeTruthy();
@@ -337,6 +340,8 @@ describe("Health logs screen", () => {
                     .toBe(log.meds_name as string);
                 expect(editingLog.meds_amount.value)
                     .toBe(log.meds_amount as string);
+                expect(editingLog.meds_time_taken.value)
+                    .toBe(log.meds_time_taken);
             } else if (log.test_category === "vaccine") {
                 expect(editingLog.vaccine_name.value)
                     .toBe(log.vaccine_name as string);
@@ -505,6 +510,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             // meds category values
             log.test_category === "meds" ? "meds_name" : null,
             log.test_category === "meds" ? "meds_amount" : null,
+            log.test_category === "meds" ? "meds_time_taken" : null,
             // vaccine category values
             log.test_category === "vaccine" ? "vaccine_name" : null,
             log.test_category === "vaccine" ? "vaccine_location" : null,
@@ -513,6 +519,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             log.test_category === "other" ? "other_description" : null,
         ].filter(value => value !== null);  // remove null values
         const editedDate = new Date((new Date(log.date)).getTime() + 5*24*60*60*1000);
+        const editedTime = new Date((new Date(log.meds_time_taken || 0)).getTime() + 43*60);  // only for meds
 
         // clear .mock.calls array each loop
         idMock.mockClear();
@@ -529,6 +536,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             editFields.map(field => (
                 field === "date" ?
                     [field, editedDate]
+                : field === "meds_time_taken" ?
+                    [field, editedTime]
                 :
                     [field, `edited ${field} ${log.id}`]
             ))
@@ -550,6 +559,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             if (editFields.includes(field)) {
                 if (field === "date") {
                     expect(submittedValue).toBe(editedDate.toISOString());
+                } else if (field === "meds_time_taken") {
+                    expect(submittedValue).toBe(editedTime.toISOString());
                 } else {
                     expect(submittedValue).toBe(await encryptData(`edited ${field} ${log.id}`));
                 }
