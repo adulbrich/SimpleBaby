@@ -48,8 +48,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         try {
             await enterGuestMode();
             setIsGuest(true);
-        } catch (err: any) {
-            return { error: err };
+        } catch {
+            throw new Error("Unable to access local storage.");
         }
     };
 
@@ -57,8 +57,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         try {
             await exitGuestMode();
             setIsGuest(false);
-        } catch (err: any) {
-            return { error: err };
+        } catch {
+            throw new Error("Unable to access local storage.");
         }
     };
 

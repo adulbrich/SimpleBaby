@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     Alert
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
@@ -88,9 +88,10 @@ export default function Profile() {
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
-            await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 data: { activeChildId: children[index].id, activeChild: "" },
             });
+            if (error) throw error;
         } catch (err) {
             Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
 
@@ -118,8 +119,14 @@ export default function Profile() {
         };
     };
 
+    const routerPath = usePathname();
+
     useEffect(() => {
         const loadChildName = async () => {
+            // If the current page is not the profile page, don't check the child name
+            // This prevents errors when the user's only child is deleted from the active-child page
+            if (routerPath !== "/profile") return;
+
             try {
                 if (isGuest) {
                     const activeId = await getLocalActiveChildId();
@@ -150,7 +157,7 @@ export default function Profile() {
         };
 
         loadChildName();
-    }, [isGuest, session]);
+    }, [isGuest, session, routerPath]);
 
     useEffect(() => {
         if (!session) {
