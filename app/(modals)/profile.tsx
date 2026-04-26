@@ -55,13 +55,13 @@ export default function Profile() {
                 await exitGuest();
 
                 // Send them back to auth entry
-                router.replace("/");
+                router.dismissTo("/");
             } else {
                 // Signed-in session sign-out: Supabase sign out
                 const { error } = await supabase.auth.signOut();
 
                 if (error) throw error;
-                router.replace("/");
+                router.dismissTo("/");
             }
         } catch (e: any) {
             Alert.alert("Sign out failed", e?.message ?? "Please try again.");

@@ -38,10 +38,10 @@ export default function RootIndex() {
 	// Navigation handlers for auth routes
 	const { width } = Dimensions.get("window");
 	const handleSignIn = () => {
-		return router.replace("/(auth)/signin");
+		return router.push("/(auth)/signin");
 	};
 	const handleSignUp = () => {
-		return router.replace("/(auth)/signup");
+		return router.push("/(auth)/signup");
 	};
 	const handleGuest = async () => {
 		return router.push("/(auth)/guest");
