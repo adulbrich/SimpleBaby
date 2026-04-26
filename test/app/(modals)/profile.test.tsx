@@ -735,26 +735,24 @@ describe("profile screen (guest mode)", () => {
         expect(screen.getByText("Guest Child", { exact: false })).toBeTruthy();
     });
 
-    // this test awaiting github issue # 169
-    // test("Catches sign out error", async () => {
-    //     const testErrorMessage = "test error";
+    test("Catches sign out error", async () => {
+        const testErrorMessage = "test error";
 
-    //     // library/auth-provider.tsx -> exitGuest should be mocked to return:
-    //     // { error: /* truthy value */ }
-    //     // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
-    //     updateUseAuth({ exitGuest: async () => ({ error: true })});
+        // library/auth-provider.tsx -> exitGuest should be mocked to throw an error
+        // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
+        updateUseAuth({ exitGuest: async () => { throw new Error(testErrorMessage); }});
 
-    //     render(<Profile/>);
-    //     await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        render(<Profile/>);
+        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
 
-    //     await userEvent.press(screen.getByTestId(testIDs.signOutButton));
+        await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-    //     expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-    //     expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
+        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
 
-    //     // revert library/auth-provider.tsx -> exitGuest to not cause any errors
-    //     updateUseAuth({ exitGuest: async () => undefined});
-    // });
+        // revert library/auth-provider.tsx -> exitGuest to not cause any errors
+        updateUseAuth({ exitGuest: async () => undefined});
+    });
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
