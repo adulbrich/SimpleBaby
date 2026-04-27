@@ -116,18 +116,21 @@ export default function SignInScreen() {
                         text={loading ? 'Signing in...' : 'Sign In'}
                         action={handleSignIn}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-button'
                     />
                     <Button
                         text='Sign Up Instead'
                         action={handleSignUp}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-sign-up-button'
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-guest-button'
                     />
                 </View>

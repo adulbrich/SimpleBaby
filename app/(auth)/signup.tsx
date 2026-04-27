@@ -211,18 +211,21 @@ const SignUpScreen: React.FC = () => {
                         text={loading ? stringLib.uiLabels.signUpButtonLoading : stringLib.uiLabels.signUpButton}
                         action={handleSignUp}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID={testIDs.signUpButton}
                     />
                     <Button
                         text='Sign In Instead'
                         action={handleSignIn}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID={testIDs.signInButton}
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID={testIDs.guestButton}
                     />
                 </View>
