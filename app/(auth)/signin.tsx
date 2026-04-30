@@ -51,8 +51,6 @@ export default function SignInScreen() {
         }
     };
 
-    const buttonTextClass = 'font-semibold';
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <SafeAreaView className='main-container flex-col justify-end'>
@@ -64,8 +62,8 @@ export default function SignInScreen() {
                     className='flex-col gap-4 transition-all'
                     behavior={'padding'}
                 >
-                    <View className=''>
-                        <Text className='text font-bold'>Email</Text>
+                    <View>
+                        <Text className='auth-label'>Email</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your email'
@@ -76,8 +74,8 @@ export default function SignInScreen() {
                             testID='sign-in-email'
                         />
                     </View>
-                    <View className=''>
-                        <Text className='text font-bold'>Password</Text>
+                    <View>
+                        <Text className='auth-label'>Password</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your password'
@@ -90,10 +88,9 @@ export default function SignInScreen() {
                     <View className='flex-row mt-2 justify-between mb-5'>
                         <TouchableOpacity
                             onPress={() => setPasswordHidden(!passwordHidden)}
-                            className=''
                             testID='sign-in-show-password'
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 {passwordHidden
                                     ? 'Show Password'
                                     : 'Hide Password'}
@@ -108,7 +105,7 @@ export default function SignInScreen() {
                             }
                             testID='sign-in-forgot-password'
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 Forgot your password?
                             </Text>
                         </TouchableOpacity>
@@ -118,22 +115,22 @@ export default function SignInScreen() {
                     <Button
                         text={loading ? 'Signing in...' : 'Sign In'}
                         action={handleSignIn}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-button'
                     />
                     <Button
                         text='Sign Up Instead'
                         action={handleSignUp}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-sign-up-button'
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
+                        disabled={loading}
                         testID='sign-in-guest-button'
                     />
                 </View>

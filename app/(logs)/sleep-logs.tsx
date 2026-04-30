@@ -145,14 +145,14 @@ const SleepLogsView: React.FC = () => {
 	);
 
 	return (
-		<View className="flex-1 bg-gray-50 p-4">
-			<Text className="text-2xl font-bold mb-4">🛏️ Sleep Logs</Text>
+		<View className="main-container">
+			<Text className="logs-heading">🛏️ Sleep Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center" testID="sleep-logs-loading-error">Error: {error}</Text>
+				<Text className="logs-error" testID="sleep-logs-loading-error">Error: {error}</Text>
 			) : sleepLogs.length === 0 ? (
-				<Text>
+				<Text className="aside-text">
 					You don&apos;t have any sleep logs
 					{activeChildName ? ` for ${activeChildName}` : ""} yet!
 				</Text>

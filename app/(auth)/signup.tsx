@@ -15,6 +15,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
 import { useAuth } from '@/library/auth-provider';
 import { formatStringList } from '@/library/utils';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.signUp;
+
 
 const SignUpScreen: React.FC = () => {
     const [email, setEmail] = React.useState('');
@@ -39,13 +44,13 @@ const SignUpScreen: React.FC = () => {
 
         if (missingFields.length > 0) {
             const formattedMissing = formatStringList(missingFields);
-            Alert.alert('All fields are required.', `Please provide the following fields: ${formattedMissing}.`);
+            Alert.alert(stringLib.errors.missingFields, `Please provide the following fields: ${formattedMissing}.`);
             return;
         }
 
         // Validate that passwords match
         if (password !== confirmPassword) {
-            Alert.alert('Passwords do not match.');
+            Alert.alert(stringLib.errors.mismatchedPasswords);
             return;
         }
 
@@ -57,12 +62,12 @@ const SignUpScreen: React.FC = () => {
                 const message = error.message ?? "";
                 if (message === "User already registered") {
                     Alert.alert(
-                       "Sign Up Error",
-                       "That email is already in use. Please try again." 
+                        stringLib.errors.signUp,
+                        stringLib.errors.emailInUse
                     );
                 } else {
                     Alert.alert(
-                        "Sign Up Error",
+                        stringLib.errors.signUp,
                         error.message || "An unknown error occurred during sign up.",
                     );
                 }
@@ -72,7 +77,7 @@ const SignUpScreen: React.FC = () => {
                 setLoading(false);
                 if (response.error) {
                     Alert.alert(
-                        'Sign In Error',
+                        stringLib.errors.signIn,
                         response.error.message ||
                             'An error occurred while signing in.',
                     );
@@ -100,8 +105,6 @@ const SignUpScreen: React.FC = () => {
         !passwordsMatch && confirmPassword ? styles.errorInput : {},
     ];
 
-    const buttonTextClass = 'font-semibold';
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <SafeAreaView className='main-container flex-col justify-end'>
@@ -115,7 +118,7 @@ const SignUpScreen: React.FC = () => {
                 >
                     <View className='flex-row gap-4'>
                         <View className='flex-1'>
-                            <Text className='text font-bold'>First Name</Text>
+                            <Text className='auth-label'>First Name</Text>
                             <TextInput
                                 className='text-input'
                                 placeholder='Enter your first name'
@@ -123,11 +126,11 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setFirstName}
                                 autoCapitalize='none'
                                 keyboardType='default'
-                                testID="sign-up-first-name"
+                                testID={testIDs.firstName}
                             />
                         </View>
                         <View className='flex-1'>
-                            <Text className='text font-bold'>Last Name</Text>
+                            <Text className='auth-label'>Last Name</Text>
                             <TextInput
                                 className='text-input'
                                 placeholder='Enter your last name'
@@ -135,12 +138,12 @@ const SignUpScreen: React.FC = () => {
                                 onChangeText={setLastName}
                                 autoCapitalize='none'
                                 keyboardType='default'
-                                testID="sign-up-last-name"
+                                testID={testIDs.lastName}
                             />
                         </View>
                     </View>
-                    <View className=''>
-                        <Text className='text font-bold'>Email</Text>
+                    <View>
+                        <Text className='auth-label'>Email</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your email'
@@ -148,22 +151,22 @@ const SignUpScreen: React.FC = () => {
                             onChangeText={setEmail}
                             autoCapitalize='none'
                             keyboardType='email-address'
-                            testID="sign-up-email"
+                            testID={testIDs.email}
                         />
                     </View>
-                    <View className=''>
-                        <Text className='text font-bold'>Password</Text>
+                    <View>
+                        <Text className='auth-label'>Password</Text>
                         <TextInput
                             className='text-input'
                             placeholder='Enter your password'
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={passwordHidden}
-                            testID="sign-up-password-initial"
+                            testID={testIDs.passwordInitial}
                         />
                     </View>
                     <View>
-                        <Text className='text font-bold'>Confirm Password</Text>
+                        <Text className='auth-label'>Confirm Password</Text>
                         <TextInput
                             style={getPasswordInputStyle()}
                             className='text-input'
@@ -171,12 +174,12 @@ const SignUpScreen: React.FC = () => {
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={passwordHidden}
-                            testID="sign-up-password-confirm"
+                            testID={testIDs.passwordConfirm}
                         />
                         {!passwordsMatch && confirmPassword ? (
                             <Text
                                 className='text-base text-red-600'
-                                testID="password-error"
+                                testID={testIDs.passwordError}
                             >
                                 Passwords do not match
                             </Text>
@@ -185,10 +188,9 @@ const SignUpScreen: React.FC = () => {
                     <View className='flex-row mt-2 justify-between mb-5'>
                         <TouchableOpacity
                             onPress={() => setPasswordHidden(!passwordHidden)}
-                            className=''
-                            testID="sign-up-password-visibility"
+                            testID={testIDs.passwordVisibility}
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 {passwordHidden
                                     ? 'Show Passwords'
                                     : 'Hide Passwords'}
@@ -196,9 +198,9 @@ const SignUpScreen: React.FC = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => Alert.alert('Not yet implemented.')}
-                            testID="sign-up-forgot-password"
+                            testID={testIDs.forgotPassword}
                         >
-                            <Text className='dark:text-white'>
+                            <Text className='auth-label'>
                                 Forgot your password?
                             </Text>
                         </TouchableOpacity>
@@ -206,25 +208,25 @@ const SignUpScreen: React.FC = () => {
                 </KeyboardAvoidingView>
                 <View className='flex-col gap-2'>
                     <Button
-                        text={loading ? 'Signing up...' : 'Sign Up'}
+                        text={loading ? stringLib.uiLabels.signUpButtonLoading : stringLib.uiLabels.signUpButton}
                         action={handleSignUp}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
-                        testID="sign-up"
+                        disabled={loading}
+                        testID={testIDs.signUpButton}
                     />
                     <Button
                         text='Sign In Instead'
                         action={handleSignIn}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
-                        testID="sign-in"
+                        disabled={loading}
+                        testID={testIDs.signInButton}
                     />
                     <Button
                         text='Try as Guest'
                         action={handleGuest}
-                        textClass={buttonTextClass}
                         buttonClass='button-normal'
-                        testID="guest-button"
+                        disabled={loading}
+                        testID={testIDs.guestButton}
                     />
                 </View>
             </SafeAreaView>

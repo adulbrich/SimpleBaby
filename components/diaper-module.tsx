@@ -116,28 +116,28 @@ export default function DiaperModule({
                 testID="diaper-category-amount-module"
             />
 
-            <View className='stopwatch-primary'>
-                <View className='items-start bottom-5 left-3'>
-                    <Text className='bg-gray-200 p-3 rounded-xl font'>
+            <View className='tracker-section'>
+                <View className='tracker-section-label'>
+                    <Text className='tracker-section-label-text'>
                         ⏰ Add Time
                     </Text>
                 </View>
                 <View className='flex-col gap-4 mb-6'>
                     <View className='ml-4 mr-4 flex-row items-center justify-between'>
-                        <Text className='feeding-module-label'>
+                        <Text className='tracker-input-label'>
                             Change Time
                         </Text>
-                        <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
+                        <View className='tracker-input-button'>
                             <TouchableOpacity
-                                className='rounded-full bg-red-50 p-4'
+                                className='tracker-input-subbutton'
                                 onPress={showTimePicker}
                                 testID='diaper-time-button'
                             >
-                                <Text>
+                                <Text className='tracker-input-text'>
                                     {showIOSPicker ? 'Close' : 'Choose'} ⏰
                                 </Text>
                             </TouchableOpacity>
-                            <Text className='mr-4'>
+                            <Text className='tracker-input-text mr-4'>
                                 {formatTime(changeTime)}
                             </Text>
                         </View>
