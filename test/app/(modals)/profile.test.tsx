@@ -16,7 +16,7 @@ const testIDs = stringLib.testIDs.profile;
 
 jest.mock("expo-router", () => ({
     router: {
-        replace: jest.fn(),
+        dismissTo: jest.fn(),
         push: jest.fn(),
     },
     usePathname: () => "/profile",
@@ -115,7 +115,7 @@ function manualPromise(): {
 describe("Profile screen", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -216,7 +216,7 @@ describe("Profile screen", () => {
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
         expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
     });
 
     test("Redirects on successful sign out", async () => {
@@ -225,8 +225,8 @@ describe("Profile screen", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 
     test("Displays loading message for child names/switching", async () => {
@@ -660,7 +660,7 @@ describe("profile screen (guest mode)", () => {
     
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -760,7 +760,7 @@ describe("profile screen (guest mode)", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 });
