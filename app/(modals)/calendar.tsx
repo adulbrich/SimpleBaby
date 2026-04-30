@@ -70,7 +70,7 @@ export default function CalendarModal() {
     useEffect(() => {
         if (isGuest) return;
         loadDay(selectedDate);
-    }, [loadDay, selectedDate]);
+    }, [loadDay, selectedDate, isGuest]);
 
     useEffect(() => {
         if (isGuest) return;
@@ -91,7 +91,7 @@ export default function CalendarModal() {
                 }
             }
         })();
-    }, [visibleMonth]);
+    }, [visibleMonth, isGuest]);
 
     if (isGuest) {
         return (
