@@ -14,8 +14,8 @@ import { router } from "expo-router";
 import NursingStopwatch from "@/components/nursing-stopwatch";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
-
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
@@ -174,26 +174,13 @@ export default function Nursing() {
 							</View>
 						</View>
 						{/* Note Input Section */}
-						<View className='tracker-section'>
-							<View className='tracker-section-label'>
-								<Text className='tracker-section-label-text'>
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className='ml-4 mr-4 mb-6'>
-								<TextInput
-									className='text-input-note'
-									placeholder="i.e. difficulties with latching or signs of poor latching"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="nursing-note-entry"
-								/>
-							</View>
-						</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder={stringLib.uiLabels.nursingNotePlaceholder}
+							testID="nursing-note-entry"
+						/>
 						{/* Bottom Buttons */}
 						<View className="flex-row gap-2 pb-5">
 							<TouchableOpacity

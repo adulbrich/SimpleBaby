@@ -13,7 +13,6 @@ import {
 	Keyboard,
 	ScrollView,
 	Text,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	View,
@@ -22,7 +21,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/library/auth-provider";
 import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // Define the shape of the health log data object with varying nested properties
 type HealthLog = {
@@ -288,37 +288,24 @@ export default function Health() {
 						testID="health-main-inputs"
 					/>
 					{/* Multiline input for additional notes */}
-					<View className='tracker-section'>
-						<View className='tracker-section-label'>
-							<Text className='tracker-section-label-text'>
-								{stringLib.uiLabels.noteLabel}
-							</Text>
-						</View>
-						<View className='ml-4 mr-4 mb-6'>
-							<TextInput
-								className='text-input-note'
-								placeholder={`i.e. ${
-									healthLog.category === "Growth"
-										? "growth is steady"
-										: healthLog.category === "Activity"
-											? "enjoyed tummy time"
-											: "took medicine without fuss"
-								}`}
-								multiline={true}
-								maxLength={200}
-								onFocus={() => setIsTyping(true)}
-								onBlur={() => setIsTyping(false)}
-								value={healthLog.note}
-								onChangeText={(note) =>
-									setHealthLog((prev) => ({
-										...prev,
-										note,
-									}))
-								}
-								testID="health-note-entry"
-							/>
-						</View>
-					</View>
+					<NoteEntry
+						note={healthLog.note}
+						setNote={(note) =>
+							setHealthLog((prev) => ({
+								...prev,
+								note,
+							}))
+						}
+						setIsTyping={setIsTyping}
+						placeholder={
+							healthLog.category === "Growth" ? stringLib.uiLabels.healthGrowthNotePlaceholder :
+							healthLog.category === "Activity" ? stringLib.uiLabels.healthActivityNotePlaceholder :
+							healthLog.category === "Meds" ? stringLib.uiLabels.healthMedsNotePlaceholder :
+							healthLog.category === "Vaccine" ? stringLib.uiLabels.healthVaccineNotePlaceholder :
+							stringLib.uiLabels.healthOtherNotePlaceholder
+						}
+						testID="health-note-entry"
+					/>
 
 					{/* Action buttons to save or reset form */}
 					<View className="flex-row gap-2 pb-5 pt-3">
