@@ -6,6 +6,11 @@ import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/libra
 import { getActiveChildData } from '@/library/remote-store';
 import { useAuth } from '@/library/auth-provider';
 import { toYMD } from '@/library/utils';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.calendar;
+
 
 export default function CalendarModal() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -63,10 +68,12 @@ export default function CalendarModal() {
     }, []);
 
     useEffect(() => {
+        if (isGuest) return;
         loadDay(selectedDate);
-    }, [loadDay, selectedDate]);
+    }, [loadDay, selectedDate, isGuest]);
 
     useEffect(() => {
+        if (isGuest) return;
         (async () => {
             const requestId = ++monthRequestIdRef.current;
             try {
@@ -84,17 +91,17 @@ export default function CalendarModal() {
                 }
             }
         })();
-    }, [visibleMonth]);
+    }, [visibleMonth, isGuest]);
 
     if (isGuest) {
         return (
-            <View className='flex-1 bg-gray-50 p-4'>
+            <View className='flex-1 bg-gray-50 p-4' testID={testIDs.guestMode}>
                 <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
                 <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
             </View>
         );
     }
-    
+
     return (
         <View className='flex-1 bg-gray-50 p-4'>
             <Calendar
@@ -106,16 +113,20 @@ export default function CalendarModal() {
                 onMonthChange={(m) => {
                     setVisibleMonth(new Date(m.dateString + "T00:00:00"));
                 }}
+                testID={testIDs.calendar}
             />
 
-            <Text className="text-xl font-bold mt-4 mb-2">
+            <Text className="text-xl font-bold mt-4 mb-2" testID={testIDs.dateLabel}>
                 {format(selectedDate, "MMMM d, yyyy")}
             </Text>
 
-            {loading ? (<ActivityIndicator size="large"/>)
-            : error ? (<Text className="text-red-600">{error}</Text>)
-            : logs.length === 0 ? (<Text className="text-gray-600 pb-5">No logs found for this day.</Text>)
-            : (
+            { loading ? (
+                <ActivityIndicator size="large" testID={testIDs.loading}/>
+            ) : error ? (
+                <Text className="text-red-600" testID={testIDs.logsError}>{error}</Text>
+            ) : logs.length === 0 ? (
+                <Text className="text-gray-600 pb-5" testID={testIDs.noLogs}>No logs found for this day.</Text>
+            ) : (
                 <FlatList
                     data={logs}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
@@ -132,6 +143,7 @@ export default function CalendarModal() {
                             )}
                         </View>
                     )}
+                    testID={testIDs.logList}
                 ></FlatList>
             )}
         </View>
