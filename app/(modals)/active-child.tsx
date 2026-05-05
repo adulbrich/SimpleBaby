@@ -4,7 +4,8 @@ import {
     ScrollView,
     View,
     TouchableOpacity,
-    Alert
+    Alert,
+    useColorScheme
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { formatName } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import stringLib from "@/assets/stringLibrary.json";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 const testIDs = stringLib.testIDs.activeChild;
@@ -35,6 +37,10 @@ export default function ActiveChild() {
     const [childName, setChildName] = useState<string>('Loading...');
     const [childId, setChildId] = useState<string>('');
     const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
+
+    const colorScheme = useColorScheme();
+    const childIconColor = colorScheme === 'dark' ? '#ffedd5' : '#f9a000';
+    const itemIconColor = colorScheme === 'dark' ? '#e5e7eb' : '#000000';
 
     // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
@@ -164,9 +170,10 @@ export default function ActiveChild() {
                         <Text className='profile-child-name-label'>
                             Name
                         </Text>
-                        <Text className='profile-child-name'>
-                            👶 {childName}
-                        </Text>
+                        <View className='profile-bubble-base flex-row items-center gap-2'>
+                            <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
+                            <Text className='text-2xl text-[#f9a000] dark:text-orange-100'>{childName}</Text>
+                        </View>
                     </View>
                     <TouchableOpacity
                         onPress={() => {
@@ -177,15 +184,17 @@ export default function ActiveChild() {
                         testID={testIDs.renameButton}
                     >
                         <View className='profile-item mb-8'>
-                            <Text className='profile-child-name-label'>
-                                ✏️ Rename
-                            </Text>
+                            <View className='flex-row items-center gap-2 p-4'>
+                                <Ionicons name='pencil' size={20} color={itemIconColor}/>
+                                <Text className='text-2xl dark:text-gray-100'>Rename</Text>
+                            </View>
                         </View>
                     </TouchableOpacity>
                     <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            📆 Created On
-                        </Text>
+                        <View className='profile-item-text flex-row items-center gap-1.5'>
+                            <Ionicons name='calendar-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Created On</Text>
+                        </View>
                         <Text className='profile-value-light'>
                             {createdDate}
                         </Text>
