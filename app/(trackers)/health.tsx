@@ -23,6 +23,7 @@ import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 // Define the shape of the health log data object with varying nested properties
 type HealthLog = {
@@ -315,14 +316,18 @@ export default function Health() {
 							disabled={isSaving}
 							testID="health-save-log-button"
 						>
-							<Text className="tracker-form-button-text">➕ Add to log</Text>
+							<Text className="tracker-form-button-text">
+								<AntDesign name="plus" size={14}/> Add to log
+							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							className="tracker-button-reset"
 							onPress={() => handleResetFields()}
 							testID="health-reset-form-button"
 						>
-							<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+							<Text className="tracker-form-button-text">
+								<Ionicons name="trash-outline" size={14}/> Reset fields
+							</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

@@ -23,6 +23,7 @@ import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, FontAwesome, FontAwesome5, FontAwesome6, Ionicons, MaterialCommunityIcons, SimpleLineIcons } from "@expo/vector-icons";
 
 type MilestoneCategoryList = 'Motor' | 'Language' | 'Social' | 'Cognitive' | 'Other';
 
@@ -214,14 +215,15 @@ export default function Milestone() {
 					>
 
 						<CategoryModule
-							title="🌐 Choose Category"
+							titleIcon={<Ionicons name="globe-outline" size={14}/>}
+							title=" Choose Category"
 							selectedCategory={category}
 							categoryList={[
-								{ label: "Motor", icon: "🏃" },
-								{ label: "Language", icon: "🗣️" },
-								{ label: "Social", icon: "🧍‍♂️" },
-								{ label: "Cognitive", icon: "🧠" },
-								{ label: "Other", icon: "❓" }
+								{ label: "Motor", icon: <FontAwesome5 name="running" size={24}/> },
+								{ label: "Language", icon: <SimpleLineIcons name="speech" size={24}/> },
+								{ label: "Social", icon: <FontAwesome6 name="people-group" size={24}/> },
+								{ label: "Cognitive", icon: <MaterialCommunityIcons name="brain" size={24}/> },
+								{ label: "Other", icon: <FontAwesome6 name="question" size={24}/> }
 							]}
 							onCategoryUpdate={setCategory}
 							testID="milestone-category-modal"
@@ -231,7 +233,7 @@ export default function Milestone() {
 						<View className="tracker-section">
 							<View className="tracker-section-label">
 								<Text className="tracker-section-label-text">
-									⚖️ Add Details
+									<FontAwesome name="balance-scale" size={14}/> Add Details
 								</Text>
 							</View>
 
@@ -257,7 +259,7 @@ export default function Milestone() {
 											onPress={showDatePickerModal}
 											testID="milestone-date-button"
 										>
-											<Text className="tracker-input-text">{showDatePicker ? "Close" : "Choose"} 📅</Text>
+											<Text className="tracker-input-text">{showDatePicker ? "Close " : "Choose "} <Ionicons name='calendar-outline' size={14}/></Text>
 										</TouchableOpacity>
 										<Text className="tracker-input-text mr-4">{formatDate(milestoneDate)}</Text>
 									</View>
@@ -283,7 +285,7 @@ export default function Milestone() {
 										disabled={uploadingPhoto}
 										testID='milestone-photo-button'
 									>
-										<Text className="tracker-input-text m-4">{photoUri ? "📷 Change Image" : "📷 Add Image"}</Text>
+										<Text className="tracker-input-text m-4"><AntDesign name='camera' size={14}/>{photoUri ? " Change Image" : " Add Image"}</Text>
 									</TouchableOpacity>
 								</View>
 								{(photoName || photoUri) && (
@@ -318,14 +320,18 @@ export default function Milestone() {
 								disabled={isSaving}
 								testID="milestone-save-log-button"
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								className="tracker-button-reset"
 								onPress={handleResetFields}
 								testID="milestone-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">
+									<Ionicons name="trash-outline" size={14}/> Reset fields
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

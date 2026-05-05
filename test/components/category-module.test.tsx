@@ -1,11 +1,13 @@
 import { render, screen, userEvent } from "@testing-library/react-native";
 import CategoryModule from "@/components/category-module";
+import { Text } from "react-native";
 
 
+const iconTexts = ["icon 1", "icon 2", "icon 3"];
 const testCategories = [
-    { label: "category 1", icon: "icon 1" },
-    { label: "category 2", icon: "icon 2" },
-    { label: "category 3", icon: "icon 3" },
+    { label: "category 1", icon: <Text>{iconTexts[0]}</Text> },
+    { label: "category 2", icon: <Text>{iconTexts[1]}</Text> },
+    { label: "category 3", icon: <Text>{iconTexts[2]}</Text> },
 ];
 
 
@@ -29,10 +31,11 @@ describe("Feeding component <FeedingCategory/>", () => {
             categoryList={testCategories}
         />);
 
-        for (const { label, icon } of testCategories) {
+        for (let i = 0; i < testCategories.length; i++) {
+            const { label } = testCategories[i];
             expect(screen.getByTestId(`category-${label.toLowerCase()}-button`)).toBeTruthy();
             expect(screen.getByText(label)).toBeTruthy();
-            expect(screen.getByText(icon)).toBeTruthy();
+            expect(screen.getByText(iconTexts[i])).toBeTruthy();
         }
     });
 
