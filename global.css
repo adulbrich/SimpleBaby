@@ -238,7 +238,7 @@
 }
 
 .about-title {
-    @apply text-4xl font-bold text-center mt-8 text-black dark:text-white;
+    @apply text-4xl font-bold text-center text-black dark:text-white;
 }
 
 .about-subtitle {
