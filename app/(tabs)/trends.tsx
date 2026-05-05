@@ -1,26 +1,23 @@
 import { Href, router } from 'expo-router';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-type Button = {
-    label: string
-    icon: string
-    link: Href
-    testID: string
-}
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Tab() {
 
     const insets = useSafeAreaInsets();
+    const colorScheme = useColorScheme();
+    const iconColor = colorScheme === 'dark' ? '#dbf9dd' : '#92400e';
+    const iconSize = 50;
 
-    const bars: Button[] = [
-        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-logs', testID: "trends-Sleep-button"},
-        { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs', testID: "trends-Feeding-button"},
-        { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs', testID: "trends-Nursing-button" },
-        { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs', testID: "trends-Diaper-button" },
-        { label: 'Milestone Logs', icon: '🌟', link: '/(logs)/milestone-logs', testID: "trends-Milestone-button" },
-        { label: 'Health Logs', icon: '💚', link: '/(logs)/health-logs', testID: "trends-Health-button" },
+    const bars = [
+        { label: 'Sleep Logs', icon: <Ionicons name="moon-outline" size={iconSize} color={iconColor} />, link: '/(logs)/sleep-logs' as Href, testID: "trends-Sleep-button"},
+        { label: 'Feeding Logs', icon: <Ionicons name="restaurant-outline" size={iconSize} color={iconColor} />, link: '/(logs)/feeding-logs' as Href, testID: "trends-Feeding-button"},
+        { label: 'Nursing Logs', icon: <MaterialCommunityIcons name="baby-bottle-outline" size={iconSize} color={iconColor} />, link: '/(logs)/nursing-logs' as Href, testID: "trends-Nursing-button" },
+        { label: 'Diaper Logs', icon: <MaterialCommunityIcons name="baby-face-outline" size={iconSize} color={iconColor} />, link: '/(logs)/diaper-logs' as Href, testID: "trends-Diaper-button" },
+        { label: 'Milestone Logs', icon: <Ionicons name="star-outline" size={iconSize} color={iconColor} />, link: '/(logs)/milestone-logs' as Href, testID: "trends-Milestone-button" },
+        { label: 'Health Logs', icon: <Ionicons name="heart-outline" size={iconSize} color={iconColor} />, link: '/(logs)/health-logs' as Href, testID: "trends-Health-button" },
     ];
 
     return (
@@ -38,9 +35,7 @@ export default function Tab() {
                         >
                             <View className='log-button'>
                                 <View className='flex-row justify-center items-center gap-4'>
-                                    <Text className='log-button-icon'>
-                                        {bars.icon}
-                                    </Text>
+                                    {bars.icon}
                                     <Text className='log-button-label'>
                                         {bars.label}
                                     </Text>

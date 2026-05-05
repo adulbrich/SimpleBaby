@@ -5,6 +5,7 @@ import {
 	View,
 } from "react-native";
 import stringLib from "@/assets/stringLibrary.json";
+import { Ionicons } from "@expo/vector-icons";
 
 
 const testIDs = stringLib.testIDs.logItem;
@@ -69,7 +70,7 @@ export default function LogItem({
         ) : item.type === "item" ? (
             <Text className="log-item-text" key={key}>{item.label}: {item.value}</Text>
         ) : item.type === "note" ? (
-            item.value && <Text className="log-note" key={key}>📝 {item.value}</Text>
+            item.value && <Text className="log-note" key={key}><Ionicons name='newspaper-outline'/> {item.value}</Text>
         ) : item.type === "image" ? (
             item.uri && <Image
                 source={{ uri: item.uri }}
@@ -100,7 +101,7 @@ export default function LogItem({
                     disabled={buttonsDisabled}
                     testID={testIDs.editButton}
                 >
-                    <Text className="log-button-edit-text">✏️ Edit</Text>
+                    <Text className="log-button-edit-text"><Ionicons name='pencil'/> Edit</Text>
                 </Pressable>
                 <Pressable
                     className="log-button-delete"
@@ -108,7 +109,7 @@ export default function LogItem({
                     disabled={buttonsDisabled}
                     testID={testIDs.deleteButton}
                 >
-                    <Text className="log-button-delete-text">🗑️ Delete</Text>
+                    <Text className="log-button-delete-text"><Ionicons name='trash'/> Delete</Text>
                 </Pressable>
             </View>
         </View>
