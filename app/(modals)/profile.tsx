@@ -259,6 +259,7 @@ export default function Profile() {
                                     player.play();
                                 }
                             }
+                            className='shrink'
                             testID={testIDs.emailButton}
                         >
                             <Text numberOfLines={1} ellipsizeMode="tail" className='profile-value-link'>

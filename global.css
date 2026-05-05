@@ -278,7 +278,7 @@
 }
 
 .profile-child-name {
-    @apply profile-bubble-base shrink text-2xl font-bold text-[#f9a000];
+    @apply profile-bubble-base shrink text-2xl text-[#f9a000] dark:text-orange-100;
 }
 
 .profile-item-text {
@@ -294,7 +294,7 @@
 }
 
 .profile-value-link {
-    @apply profile-value-base shrink text-blue-500;
+    @apply profile-value-base text-blue-500;
 }
 
 .profile-value-light {
