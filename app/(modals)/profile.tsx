@@ -176,12 +176,12 @@ export default function Profile() {
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text className='profile-child-name' testID={testIDs.childNameGuest}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameGuest}>
                                 👶 {childName}
                             </Text>
                         ) : (
-                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <Text className='profile-child-name' testID={testIDs.childNameButton}>
+                            <TouchableOpacity className='shrink' onPress={() => router.push("/(modals)/active-child")}>
+                                <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameButton}>
                                     👶 {childName}
                                 </Text>
                             </TouchableOpacity>
@@ -229,7 +229,7 @@ export default function Profile() {
                         <Text className='profile-item-text'>
                             👤 Name
                         </Text>
-                        <Text className='profile-value'>
+                        <Text numberOfLines={1} ellipsizeMode='tail' className='profile-value'>
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
@@ -266,9 +266,10 @@ export default function Profile() {
                                     player.play();
                                 }
                             }
+                            className='shrink'
                             testID={testIDs.emailButton}
                         >
-                            <Text className='profile-value-link'>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-value-link'>
                                 {displayEmail}
                             </Text>
                         </TouchableOpacity>

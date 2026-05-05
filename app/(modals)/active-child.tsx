@@ -164,7 +164,7 @@ export default function ActiveChild() {
                         <Text className='profile-child-name-label'>
                             Name
                         </Text>
-                        <Text className='profile-child-name'>
+                        <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name'>
                             👶 {childName}
                         </Text>
                     </View>

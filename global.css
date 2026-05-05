@@ -278,7 +278,7 @@
 }
 
 .profile-child-name {
-    @apply profile-bubble-base text-2xl text-[#f9a000] dark:text-orange-100;
+    @apply profile-bubble-base shrink text-2xl text-[#f9a000] dark:text-orange-100;
 }
 
 .profile-item-text {
@@ -290,11 +290,11 @@
 }
 
 .profile-value {
-    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace dark:text-gray-100;
+    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace dark:text-gray-100 shrink;
 }
 
 .profile-value-link {
-    @apply profile-value-base text-blue-500 dark:text-blue-300;
+    @apply profile-value-base text-blue-500;
 }
 
 .profile-value-light {
