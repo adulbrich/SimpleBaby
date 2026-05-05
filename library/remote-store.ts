@@ -121,9 +121,13 @@ export const saveNewChild = async (childName: string) => {
     }
 
     // Update user session metadata with the active child ID
-    await supabase.auth.updateUser({
+    const { error: updateError } = await supabase.auth.updateUser({
         data: { activeChildId: data.id },
     });
+
+    if (updateError) {
+        throw updateError;
+    }
 };
 
 

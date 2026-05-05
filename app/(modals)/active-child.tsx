@@ -63,20 +63,21 @@ export default function ActiveChild() {
             await deleteChild(childId);  // delete the current child
 
             const otherChildren = allChildren.filter(({ name }) => name !== childName);
-            if (otherChildren.length === 0) {
-                // the user has no other child accounts
-                router.dismissTo("/(tabs)");  // clear the routing stack back to the splash screen
+            if (otherChildren.length === 0) {  // the user has no other child accounts
                 // remove the active child from the user's supabase account. This will propagate to the user's session
-                await supabase.auth.updateUser({
+                const { error } = await supabase.auth.updateUser({
                     data: { activeChild: "", activeChildId: "" },
                 });
+                if (error) throw error;
+                router.dismissTo("/(tabs)");  // clear the routing stack back to the home screen
                 return;
             }
 
             // Update user session metadata with the active child as the user's first other child
-            await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 data: { activeChildId: otherChildren[0].id, activeChild: "" },
             });
+            if (error) throw error;
 
             if (otherChildren.length === 1) {
                 // send the user back to the profile page
@@ -98,9 +99,10 @@ export default function ActiveChild() {
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
-            await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 data: { activeChildId: children[index].id, activeChild: "" },
             });
+            if (error) throw error;
             // send the user back to the profile page
             router.dismissTo("/(modals)/profile");
         } catch (err) {
@@ -117,7 +119,8 @@ export default function ActiveChild() {
 
         try {
             await updateChildName(childId, newChildName);  // try to update child name
-            await supabase.auth.updateUser({});  // Update user session to trigger useEffects in profile page
+            const { error } = await supabase.auth.updateUser({});  // Update user session to trigger useEffects in profile page
+            if (error) throw error;
             setShowRenameChild(false);  // Close modal if successful
             setNewChildName("");  // reset child name
             setChildName("Loading...");

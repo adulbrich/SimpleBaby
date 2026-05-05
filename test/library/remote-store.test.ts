@@ -30,7 +30,7 @@ jest.mock("@/library/supabase-client", () => {
             getUser: jest.fn(() => ({
                 data: { user: { id: true, user_metadata: { activeChild: true } } },
             })),
-            updateUser: jest.fn(),
+            updateUser: jest.fn(async () => ({})),
         },
         from: jest.fn(() => ({
             select: () => ({

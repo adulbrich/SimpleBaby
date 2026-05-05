@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import DiaperModule from "@/components/diaper-module";
 import { field, saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("expo-router", () => ({
@@ -21,8 +22,14 @@ jest.mock("react-native", () => {
 
 jest.mock("@/components/diaper-module.tsx", () => {
     const View = jest.requireActual("react-native").View;
-    const DiaperModuleMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    const DiaperModuleMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
     return DiaperModuleMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("@/library/auth-provider", () => ({
@@ -46,26 +53,35 @@ async function setDiaperInputs({
     consistency,
     amount,
     time,
+    note,
 } : {
     consistency?: any;
     amount?: any;
     time?: Date;
+    note?: string;
 }) {
-    // read parameters to first call of DiaperModule
+    // read parameters to most recent call of <DiaperModule/>
     const {
         onConsistencyUpdate,
         onAmountUpdate,
         onTimeUpdate,
-    } = (DiaperModule as jest.Mock).mock.calls[0][0];
+    } = (DiaperModule as jest.Mock).mock.lastCall[0];
 
-    if (consistency != null) {
+    if (consistency !== undefined) {
         await act(() => onConsistencyUpdate?.(consistency));
     }
-    if (amount != null) {
+    if (amount !== undefined) {
         await act(() => onAmountUpdate?.(amount));
     }
-    if (time != null) {
+    if (time !== undefined) {
         await act(() => onTimeUpdate?.(time));
+    }
+
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -100,11 +116,8 @@ describe("Track diaper screen", () => {
         render(<Diaper/>);
 
         // write something in the note entry...
-        await userEvent.type(
-            screen.getByTestId("diaper-note-entry"),
-            testNote
-        );
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();  // ensure the typed note can be found
+        await setDiaperInputs({ note: testNote });
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
 
         const mainInputs = screen.getByTestId("diaper-main-inputs");  // get the displayed <DiaperModule/>
 
@@ -113,7 +126,7 @@ describe("Track diaper screen", () => {
         );
 
         // ensure note is no longer present
-        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
         // ensure new instance of <DiaperModule/> is being used
         expect(screen.getByTestId("diaper-main-inputs") === mainInputs).toBeFalsy();
     });
@@ -202,13 +215,12 @@ describe("Track diaper screen", () => {
         const testAmount = "test amount";
 
         render(<Diaper/>);
-        await setDiaperInputs({ consistency: testConsistency, amount: testAmount, time: testTime });
-
-        // write a note
-        await userEvent.type(
-            screen.getByTestId("diaper-note-entry"),
-            testNote
-        );
+        await setDiaperInputs({
+            consistency: testConsistency,
+            amount: testAmount,
+            time: testTime,
+            note: testNote,
+        });
 
         // submit log
         await userEvent.press(

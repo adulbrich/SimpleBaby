@@ -25,7 +25,17 @@
         "iosCloseDateTimePicker": "Done",
         "editPhotoMessage": "Photos cannot be edited/updated yet in this menu. This feature will be added in a later release. For now, please create a new log.",
         "signUpButton": "Sign Up",
-        "signUpButtonLoading": "Signing up..."
+        "signUpButtonLoading": "Signing up...",
+        "diaperNotePlaceholder": "e.g. really messy",
+        "feedingNotePlaceholder": "e.g. does not like pureed carrots",
+        "healthGrowthNotePlaceholder": "e.g. growth is steady",
+        "healthActivityNotePlaceholder": "e.g. enjoyed tummy time",
+        "healthMedsNotePlaceholder": "e.g. took medicine without fuss",
+        "healthVaccineNotePlaceholder": "e.g. was fussier for a day",
+        "healthOtherNotePlaceholder": "e.g. realignment surgery for fracture",
+        "milestoneNotePlaceholder": "e.g., took first steps from the table",
+        "nursingNotePlaceholder": "e.g. difficulties with latching or signs of poor latching",
+        "sleepNotePlaceholder": "e.g. baby was squirming often"
     },
 
     "testIDs": {

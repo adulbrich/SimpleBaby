@@ -4,6 +4,7 @@ import { Alert } from "react-native";
 import { router } from "expo-router";
 import NursingStopwatch from "@/components/nursing-stopwatch";
 import { field, saveLog } from "@/library/log-functions";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("expo-router", () => ({
@@ -20,8 +21,14 @@ jest.mock("react-native", () => {
 
 jest.mock("@/components/nursing-stopwatch.tsx", () => {
     const View = jest.requireActual("react-native").View;
-    const NursingStopwatchMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    const NursingStopwatchMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
     return NursingStopwatchMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("@/library/auth-provider", () => ({
@@ -79,11 +86,12 @@ async function setNursingInputs({
             rightAmount
         );
     }
-    if (note) {
-        await userEvent.type(
-            screen.getByTestId("nursing-note-entry"),
-            note
-        );
+
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -120,25 +128,14 @@ describe("Track nursing screen", () => {
         const testRightAmount = "test right";
         render(<Nursing/>);
 
-        // write something in the note entry...
-        await userEvent.type(
-            screen.getByTestId("nursing-note-entry"),
-            testNote
-        );
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();  // ensure the typed note can be found
-
-        // write left amount...
-        await userEvent.type(
-            screen.getByTestId("nursing-left-amount"),
-            testLeftAmount
-        );
+        // write something in the note entry and amount fields...
+        await setNursingInputs({
+            leftAmount: testLeftAmount,
+            rightAmount: testRightAmount,
+            note: testNote,
+        });
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
         expect(screen.getByDisplayValue(testLeftAmount)).toBeTruthy();  // ensure the typed amount can be found
-
-        // write right amount...
-        await userEvent.type(
-            screen.getByTestId("nursing-right-amount"),
-            testRightAmount
-        );
         expect(screen.getByDisplayValue(testRightAmount)).toBeTruthy();  // ensure the typed amount can be found
 
         const mainInputs = screen.getByTestId("nursing-stopwatch");  // get the displayed <NursingStopwatch/>
@@ -148,7 +145,7 @@ describe("Track nursing screen", () => {
         );
 
         // ensure note is no longer present
-        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
         // ensure left and right amounts are no longer present
         expect(() => screen.getByDisplayValue(testLeftAmount)).toThrow();
         expect(() => screen.getByDisplayValue(testRightAmount)).toThrow();
