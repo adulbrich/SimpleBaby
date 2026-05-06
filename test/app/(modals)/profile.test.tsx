@@ -748,7 +748,7 @@ describe("profile screen (guest mode)", () => {
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
         expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
 
         // revert library/auth-provider.tsx -> exitGuest to not cause any errors
         updateUseAuth({ exitGuest: async () => undefined});
