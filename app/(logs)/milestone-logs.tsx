@@ -213,15 +213,14 @@ const MilestoneLogsView: React.FC = () => {
 	};
 
 	return (
-		<View className="flex-1 bg-gray-50 p-4">
-			<Text className="text-2xl font-bold mb-4">✨ Milestone Logs</Text>
-
+		<View className="main-container">
+			<Text className="logs-heading">✨ Milestone Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center" testID="milestone-logs-loading-error">Error: {error}</Text>
+				<Text className="logs-error" testID="milestone-logs-loading-error">Error: {error}</Text>
 			) : milestoneLogs.length === 0 ? (
-				<Text>
+				<Text className="aside-text">
 					You don&apos;t have any milestone logs
 					{activeChildName ? ` for ${activeChildName}` : ""} yet!
 				</Text>

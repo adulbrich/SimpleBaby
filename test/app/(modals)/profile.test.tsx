@@ -16,9 +16,10 @@ const testIDs = stringLib.testIDs.profile;
 
 jest.mock("expo-router", () => ({
     router: {
-        replace: jest.fn(),
+        dismissTo: jest.fn(),
         push: jest.fn(),
     },
+    usePathname: () => "/profile",
 }));
 
 jest.mock("expo-audio", () => ({
@@ -114,7 +115,7 @@ function manualPromise(): {
 describe("Profile screen", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -215,7 +216,7 @@ describe("Profile screen", () => {
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
         expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
     });
 
     test("Redirects on successful sign out", async () => {
@@ -224,8 +225,8 @@ describe("Profile screen", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 
     test("Displays loading message for child names/switching", async () => {
@@ -659,7 +660,7 @@ describe("profile screen (guest mode)", () => {
     
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -734,26 +735,24 @@ describe("profile screen (guest mode)", () => {
         expect(screen.getByText("Guest Child", { exact: false })).toBeTruthy();
     });
 
-    // this test awaiting github issue # 169
-    // test("Catches sign out error", async () => {
-    //     const testErrorMessage = "test error";
+    test("Catches sign out error", async () => {
+        const testErrorMessage = "test error";
 
-    //     // library/auth-provider.tsx -> exitGuest should be mocked to return:
-    //     // { error: /* truthy value */ }
-    //     // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
-    //     updateUseAuth({ exitGuest: async () => ({ error: true })});
+        // library/auth-provider.tsx -> exitGuest should be mocked to throw an error
+        // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
+        updateUseAuth({ exitGuest: async () => { throw new Error(testErrorMessage); }});
 
-    //     render(<Profile/>);
-    //     await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        render(<Profile/>);
+        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
 
-    //     await userEvent.press(screen.getByTestId(testIDs.signOutButton));
+        await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-    //     expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-    //     expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
 
-    //     // revert library/auth-provider.tsx -> exitGuest to not cause any errors
-    //     updateUseAuth({ exitGuest: async () => undefined});
-    // });
+        // revert library/auth-provider.tsx -> exitGuest to not cause any errors
+        updateUseAuth({ exitGuest: async () => undefined});
+    });
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
@@ -761,7 +760,7 @@ describe("profile screen (guest mode)", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 });

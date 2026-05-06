@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import Stopwatch from "@/components/stopwatch";
 import ManualEntry from "@/components/sleep-manual-entry";
 import { field, saveLog } from "@/library/log-functions";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("expo-router", () => ({
@@ -21,8 +22,14 @@ jest.mock("react-native", () => {
 
 jest.mock("@/components/stopwatch.tsx", () => {
     const View = jest.requireActual("react-native").View;
-    const SleepStopwatchMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    const SleepStopwatchMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
     return SleepStopwatchMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("@/components/sleep-manual-entry.tsx", () => {
@@ -75,12 +82,11 @@ async function setSleepInputs({
         await act(() => onDatesUpdate?.(startDate, endDate));
     }
 
-    // type into <TextInput/> component for note
-    if (note) {
-        await userEvent.type(
-            screen.getByTestId("sleep-note-entry"),
-            note
-        );
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -146,7 +152,7 @@ describe("Track sleep screen", () => {
 
         // write something in the note entry...
         await setSleepInputs({ note: testNote });
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();  // ensure the typed note can be found
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
 
         const stopwatch = screen.getByTestId("sleep-stopwatch");  // get the displayed <Stopwatch/>
         const manualEntry = screen.getByTestId("sleep-manual-time-entry");  // get the displayed <ManualEntry/>
@@ -156,7 +162,7 @@ describe("Track sleep screen", () => {
         );
 
         // ensure note is no longer present
-        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
         // ensure new instance of <Stopwatch/> is being used
         expect(screen.getByTestId("sleep-stopwatch") === stopwatch).toBeFalsy();
         // ensure new instance of <ManualEntry/> is being used

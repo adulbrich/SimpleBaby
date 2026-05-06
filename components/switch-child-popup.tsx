@@ -51,7 +51,7 @@ export default function SwitchChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='popup'>
                         <View className='mb-5'>
                             <Text className='subheading font-bold mb-6'>
                                 Select Child
@@ -71,7 +71,6 @@ export default function SwitchChildPopup(
                             <Button
                                 text='Select'
                                 action={() => handleSwitch(selected)}
-                                textClass='font-bold'
                                 buttonClass='button-normal mb-3 mt-3'
                                 testID={testIDs.selectButton}
                             />
@@ -79,8 +78,7 @@ export default function SwitchChildPopup(
                                 <Button
                                     text='Cancel'
                                     action={handleCancel}
-                                    textClass='font-bold'
-                                    buttonClass='bg-red-600 border-gray-500'
+                                    buttonClass='button-red'
                                     testID={testIDs.cancelButton}
                                 />
                             }

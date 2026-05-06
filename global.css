@@ -9,18 +9,6 @@
     --color-accent: #f97316;
 } */
 
-.app-heading {
-    @apply text-xl scale-100;
-}
-
-.manual-primary {
-    @apply bg-white dark:bg-[#2c4a4d] rounded-xl mt-5 flex-col;
-}
-
-.manual-foregound-text {
-    @apply text-xl dark:text-white;
-}
-
 .stopwatch-clock {
     @apply text-[5rem] scale-100 dark:text-[#edf7c8] tabular-nums;
 }
@@ -101,10 +89,6 @@
     @apply bg-blue-100 rounded-3xl align-middle items-center p-3 pb-4 text-wrap max-h-[175px];
 }
 
-.button-2 {
-    @apply p-6 rounded-3xl;
-}
-
 .heading {
     @apply text-5xl mb-2 scale-100 font-bold dark:text-white;
 }
@@ -121,6 +105,14 @@
     @apply p-4 dark:bg-[#0b2218] bg-[#fff5e4] h-full w-full transition-colors;
 }
 
+.modal-container {
+    @apply p-4 dark:bg-[#0b2218] bg-gray-100;
+}
+
+.popup {
+    @apply p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600;
+}
+
 .button {
     @apply rounded-full p-5 border-[1px] shadow-sm;
 }
@@ -134,7 +126,7 @@
 }
 
 .button-text {
-    @apply text-base text-white text-center dark:text-gray-700;
+    @apply text-base text-white text-center dark:text-gray-700 font-semibold;
 }
 
 .text {
@@ -151,8 +143,49 @@
     placeholder:text-gray-300 dark:focus:border-orange-200;
 }
 
-.feeding-module-label {
+.text-input-note {
+    @apply dark:text-white border-gray-700 rounded-xl scale-100 focus:border-[#549461] dark:border-gray-300
+    placeholder:text-gray-300 dark:focus:border-orange-200;
+}
+
+.tracker-input-label {
     @apply font-bold dark:text-white scale-100 text-lg pb-1;
+}
+
+.tracker-section {
+    @apply bg-white dark:bg-[#3a645a] rounded-xl mt-5 flex-col;
+}
+
+.tracker-section-label {
+    @apply items-start relative bottom-5 left-3;
+}
+
+.tracker-section-label-text {
+    @apply bg-gray-200 p-3 rounded-xl dark:bg-gray-800 dark:text-gray-100;
+}
+
+.tracker-input-button {
+    @apply flex-row rounded-full bg-red-100 items-center gap-2 dark:bg-gray-900;
+}
+
+.tracker-input-subbutton {
+    @apply rounded-full bg-red-50 p-4 dark:bg-gray-800;
+}
+
+.tracker-input-text {
+    @apply text-black dark:text-gray-200;
+}
+
+.tracker-button-save {
+    @apply rounded-full p-4 bg-red-100 grow dark:bg-green-800;
+}
+
+.tracker-button-reset {
+    @apply rounded-full p-4 bg-red-100 items-center dark:bg-red-900;
+}
+
+.tracker-form-button-text {
+    @apply text-black dark:text-gray-100;
 }
 
 .transition-padding {
@@ -167,13 +200,17 @@
     dark:border-[#152619] ios:drop-shadow-sm android:shadow-md;
 }
 
-.tracker-bar-label {
+.log-button-label {
     @apply text-lg scale-100 font-bold text-yellow-800 dark:text-[#dbf9dd];
 }
 
-.tracker-bar {
+.log-button {
     @apply bg-[#fff6c9] dark:bg-[#466755] flex-row items-center justify-between p-4 gap-2 rounded-[2rem] border-2 border-[#c4b798]
     dark:border-[#152619] ios:drop-shadow-sm android:shadow-md;
+}
+
+.log-button-icon {
+    @apply text-[3rem] scale-100;
 }
 
 .tracker-label {
@@ -184,12 +221,174 @@
     @apply text-[4.5rem] scale-100;
 }
 
-.tos-text {
-    margin-top: 2;
-    margin-bottom: 2;
+.auth-label {
+    @apply text font-bold;
+}
+
+.settings-item {
+    @apply p-4 gap-4 mb-1 bg-white;
+}
+
+.settings-item-row {
+    @apply settings-item flex-row justify-between;
+}
+
+.settings-label {
+    @apply text-lg font-bold text-left;
+}
+
+.about-title {
+    @apply text-4xl font-bold text-center mt-8 text-black dark:text-white;
+}
+
+.about-subtitle {
+    @apply text-lg text-center text-gray-700 dark:text-gray-300;
+}
+
+.about-label {
+    @apply text-2xl font-bold mb-3 mt-8 text-black dark:text-white;
+}
+
+.about-text {
+    @apply text-lg text-gray-700 dark:text-gray-300;
+}
+
+.aside-text {
+    @apply text-base italic text-center text-gray-700 dark:text-gray-300;
 }
 
 .tos-heading {
-    font-size: 24;
-    color:rgb(48, 30, 99);
+    @apply text-3xl text-violet-950 dark:text-gray-200;
+}
+
+.tos-text {
+    @apply mt-1 mb-1 dark:text-gray-300;
+}
+
+.profile-item {
+    @apply bg-gray-200 dark:bg-gray-800 rounded-full flex-row justify-between gap-4;
+}
+
+.profile-bubble-base {
+    @apply p-4 scale-100 bg-white rounded-full border-[1px] border-gray-300 dark:bg-[#466755] dark:border-gray-700;
+}
+
+.profile-child-name-label {
+    @apply p-4 text-2xl scale-100 border-[1px] border-transparent dark:text-gray-100;
+}
+
+.profile-child-name {
+    @apply profile-bubble-base text-2xl text-[#f9a000] dark:text-orange-100;
+}
+
+.profile-item-text {
+    @apply profile-bubble-base text-lg text-black dark:text-gray-200;
+}
+
+.profile-value-base {
+    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace;
+}
+
+.profile-value {
+    @apply p-4 text-lg scale-100 border-[1px] border-transparent monospace dark:text-gray-100;
+}
+
+.profile-value-link {
+    @apply profile-value-base text-blue-500 dark:text-blue-300;
+}
+
+.profile-value-light {
+    @apply profile-value-base text-gray-500 dark:text-gray-400;
+}
+
+.list-select-base {
+    @apply rounded-lg p-2 border-[1px] shadow-sm m-2 border-black dark:border-gray-700;
+}
+
+.list-select-item {
+    @apply list-select-base bg-gray-200 dark:bg-gray-800;
+}
+
+.list-select-item-selected {
+    @apply list-select-base bg-[#fff6c9] dark:bg-[#466755];
+}
+
+.list-select-text {
+    @apply text-lg text-black dark:text-gray-100;
+}
+
+.logs-heading {
+    @apply text-2xl font-bold mb-4 dark:text-gray-200;
+}
+
+.logs-error {
+    @apply text-lg text-red-600 text-center;
+}
+
+.log-item {
+    @apply bg-white dark:bg-[#3a645a] rounded-xl p-4 mb-4 shadow;
+}
+
+.log-title {
+    @apply dark:text-white text-lg font-bold mb-2;
+}
+
+.log-item-text {
+    @apply dark:text-gray-100 text-base mb-1;
+}
+
+.log-note {
+    @apply dark:text-gray-200 text-sm italic text-gray-500 mt-1;
+}
+
+.log-button-edit {
+    @apply px-3 py-2 rounded-full bg-blue-100 dark:bg-blue-950;
+}
+
+.log-button-delete {
+    @apply px-3 py-2 rounded-full bg-red-100 dark:bg-red-950;
+}
+
+.log-button-edit-text {
+    @apply text-blue-700 dark:text-blue-100;
+}
+
+.log-button-delete-text {
+    @apply text-red-700 dark:text-red-200;
+}
+
+.log-button-save {
+    @apply bg-green-500 rounded-full px-4 py-2 dark:bg-green-900;
+}
+
+.log-button-cancel {
+    @apply bg-gray-200 rounded-full px-4 py-2 dark:bg-gray-900;
+}
+
+.log-button-save-text {
+    @apply text-white;
+}
+
+.log-button-cancel-text {
+    @apply text-black dark:text-white;
+}
+
+.log-edit-title {
+    @apply text-xl font-bold mb-4 dark:text-white;
+}
+
+.log-edit-label {
+    @apply text-sm text-gray-500 mb-1 dark:text-gray-300;
+}
+
+.log-edit-text {
+    @apply dark:text-white;
+}
+
+.log-edit-box {
+    @apply border border-gray-300 rounded-xl px-3 py-2 mb-3 dark:text-white;
+}
+
+.photo-indicator {
+    @apply text-center text-gray-500 dark:text-gray-300;
 }

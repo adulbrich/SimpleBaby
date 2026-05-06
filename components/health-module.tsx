@@ -225,9 +225,9 @@ export default function HealthModule({
                 testID="health-category-module"
             />
 
-            <View className="stopwatch-primary">
-                <View className="items-start bottom-5 left-3">
-                    <Text className="bg-gray-200 p-3 rounded-xl font">
+            <View className="tracker-section">
+                <View className="tracker-section-label">
+                    <Text className="tracker-section-label-text">
                         ✒️ Add Details
                     </Text>
                 </View>
@@ -235,7 +235,7 @@ export default function HealthModule({
                     {selectedCategory === "Growth" && (
                         <>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Length</Text>
+                                <Text className="tracker-input-label">Length</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., 20 in"
@@ -252,7 +252,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Weight</Text>
+                                <Text className="tracker-input-label">Weight</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., 8 lb"
@@ -269,7 +269,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Head</Text>
+                                <Text className="tracker-input-label">Head</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., 14 in"
@@ -290,7 +290,7 @@ export default function HealthModule({
                     {selectedCategory === "Activity" && (
                         <>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Type</Text>
+                                <Text className="tracker-input-label">Type</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., tummy time"
@@ -307,7 +307,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Duration</Text>
+                                <Text className="tracker-input-label">Duration</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., 30 min"
@@ -328,7 +328,7 @@ export default function HealthModule({
                     {selectedCategory === "Meds" && (
                         <>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Name</Text>
+                                <Text className="tracker-input-label">Name</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., ibuprofen"
@@ -345,7 +345,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Amount</Text>
+                                <Text className="tracker-input-label">Amount</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., 1 capsule"
@@ -362,7 +362,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4 flex-row items-center justify-between">
-                                <Text className="feeding-module-label">Time Taken</Text>
+                                <Text className="tracker-input-label">Time Taken</Text>
                                 <View className="flex-row items-center bg-red-100 rounded-full gap-2">
                                     <TouchableOpacity
                                         className="rounded-full bg-red-50 p-4"
@@ -391,7 +391,7 @@ export default function HealthModule({
                     {selectedCategory === "Vaccine" && (
                         <>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Name</Text>
+                                <Text className="tracker-input-label">Name</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., COVID-19 Vaccine"
@@ -408,7 +408,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Location</Text>
+                                <Text className="tracker-input-label">Location</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., Kaiser Permanente NW"
@@ -429,7 +429,7 @@ export default function HealthModule({
                     {selectedCategory === "Other" && (
                         <>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Name</Text>
+                                <Text className="tracker-input-label">Name</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., Elbow Surgery"
@@ -446,7 +446,7 @@ export default function HealthModule({
                                 />
                             </View>
                             <View className="ml-4 mr-4">
-                                <Text className="feeding-module-label">Description</Text>
+                                <Text className="tracker-input-label">Description</Text>
                                 <TextInput
                                     className="text-input-internal"
                                     placeholder="e.g., went to doctor's office for procedure"
@@ -465,16 +465,16 @@ export default function HealthModule({
                         </>
                     )}
                     <View className="ml-4 mr-4 flex-row items-center justify-between">
-                        <Text className="feeding-module-label">Date</Text>
-                        <View className="flex-row items-center bg-red-100 rounded-full gap-2">
+                        <Text className="tracker-input-label">Date</Text>
+                        <View className="tracker-input-button">
                             <TouchableOpacity
-                                className="rounded-full bg-red-50 p-4"
+                                className="tracker-input-subbutton"
                                 onPress={showDatePickerModal}
                                 testID="health-date-button"
                             >
-                                <Text>{showDatePicker ? "Close" : "Choose"} 📅</Text>
+                                <Text className="tracker-input-text">{showDatePicker ? "Close" : "Choose"} 📅</Text>
                             </TouchableOpacity>
-                            <Text className="mr-4">{formatDate(selectedDate)}</Text>
+                            <Text className="tracker-input-text mr-4">{formatDate(selectedDate)}</Text>
                         </View>
                     </View>
                     {showDatePicker && Platform.OS === "ios" && (

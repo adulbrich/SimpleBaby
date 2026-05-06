@@ -6,38 +6,38 @@ export default function SettingScreen() {
     <View className="main-container items-left justify-center">
         <ScrollView>
             <View className="bg-gray-100">
-                <TouchableOpacity className="p-4 gap-4 mb-1 bg-white" testID='settings-tos-button'
+                <TouchableOpacity className="settings-item" testID='settings-tos-button'
                     onPress={() => {
                     router.push('/(modals)/tos');}}>
-                    <Text className="text-lg font-bold text-left">
+                    <Text className="settings-label">
                         Terms of Service
                     </Text>
                 </TouchableOpacity>
-				<TouchableOpacity className="p-4 gap-4 mb-1 bg-white" testID='settings-privacy-button'
+				<TouchableOpacity className="settings-item" testID='settings-privacy-button'
                     onPress={() => {
                     router.push('/(modals)/privacypolicy');}}>
-                    <Text className="text-lg font-bold text-left">
+                    <Text className="settings-label">
                         Privacy Policy
                     </Text>
                 </TouchableOpacity>
-                <View className="p-4 gap-4 mb-1 bg-white">
-                    <Text className="text-lg font-bold text-left">
+                <View className="settings-item">
+                    <Text className="settings-label">
                         Settings Name 2
                     </Text>
                     <Text className="text-gray-600">
                         Settings subtext
                     </Text>
                 </View>
-                <View className="p-4 gap-4 mb-1 bg-white flex-row justify-between">
-                    <Text className="text-lg font-bold text-left">
+                <View className="settings-item-row">
+                    <Text className="settings-label">
                         Settings Name 3
                     </Text>
                     <Text className="text-gray-600">
                         Settings value
                     </Text>
                 </View>
-                <View className="p-4 gap-4 mb-1 bg-white flex-row justify-between">
-                	<Text className="text-lg font-bold text-left">
+                <View className="settings-item-row">
+                	<Text className="settings-label">
                         Settings Name 4
                 	</Text>
                     <TouchableOpacity className="rounded-lg">

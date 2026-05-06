@@ -1,7 +1,6 @@
 import {
 	Text,
 	View,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -15,8 +14,9 @@ import DiaperModule from "@/components/diaper-module";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
-import stringLib from "../../assets/stringLibrary.json";
 
 // Diaper.tsx
 // Screen for logging diaper changes — includes selecting consistency, amount, change time, notes, and save logic
@@ -130,45 +130,31 @@ export default function Diaper() {
 							testID={"diaper-main-inputs"}
 						/>
 						{/* Note input section */}
-						<View className="bottom-5">
-							<View className="items-start top-5 left-3 z-10">
-								<Text className="bg-gray-200 p-3 rounded-xl font">
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className="p-4 pt-9 bg-white rounded-xl z-0">
-								<TextInput
-									className=""
-									placeholderTextColor={"#aaa"}
-									placeholder="i.e. really messy"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="diaper-note-entry"
-								/>
-							</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder={stringLib.uiLabels.diaperNotePlaceholder}
+							testID="diaper-note-entry"
+						/>
+						{/* Action buttons row */}
+						<View className="flex-row gap-2 pb-5">
+							<TouchableOpacity
+								className="tracker-button-save"
+								onPress={handleSaveDiaperLog}
+								testID="diaper-save-log-button"
+								disabled={isSaving}
+							>
+								<Text className="tracker-form-button-text">➕ Add to log</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								className="tracker-button-reset"
+								onPress={() => handleResetFields()}
+								testID="diaper-reset-form-button"
+							>
+								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+							</TouchableOpacity>
 						</View>
-					</View>
-					{/* Action buttons row */}
-					<View className="flex-row gap-2 pb-5">
-						<TouchableOpacity
-							className="rounded-full p-4 bg-red-100 grow"
-							onPress={handleSaveDiaperLog}
-							testID="diaper-save-log-button"
-							disabled={isSaving}
-						>
-							<Text>➕ Add to log</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							className="rounded-full p-4 bg-red-100 items-center"
-							onPress={() => handleResetFields()}
-							testID="diaper-reset-form-button"
-						>
-							<Text>🗑️ Reset fields</Text>
-						</TouchableOpacity>
 					</View>
 				</ScrollView>
 			</View>

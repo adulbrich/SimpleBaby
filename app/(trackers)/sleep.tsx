@@ -1,7 +1,6 @@
 import {
 	Text,
 	View,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -15,8 +14,8 @@ import ManualEntry from "@/components/sleep-manual-entry";
 import { router } from "expo-router";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
-
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
@@ -170,43 +169,30 @@ export default function Sleep() {
 						/>
 
 						{/* Note input section */}
-						<View className="bottom-5">
-							<View className="items-start top-5 left-3 z-10">
-								<Text className="bg-gray-200 p-3 rounded-xl font">
-									{stringLib.uiLabels.noteLabel}
-								</Text>
-							</View>
-							<View className="p-4 pt-9 bg-white rounded-xl z-0">
-								<TextInput
-									className=""
-									placeholderTextColor={"#aaa"}
-									placeholder="i.e. baby was squirming often"
-									multiline={true}
-									maxLength={200}
-									onFocus={() => setIsTyping(true)}
-									onBlur={() => setIsTyping(false)}
-									value={note}
-									onChangeText={setNote}
-									testID="sleep-note-entry"
-								/>
-							</View>
-						</View>
+						<NoteEntry
+							note={note}
+							setNote={setNote}
+							setIsTyping={setIsTyping}
+							placeholder={stringLib.uiLabels.sleepNotePlaceholder}
+							testID="sleep-note-entry"
+						/>
+
 						{/* Action buttons */}
 						<View className="flex-row gap-2 pb-5">
 							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 grow"
+								className="tracker-button-save"
 								onPress={handleSaveSleepLog}
 								disabled={isSaving}
 								testID="sleep-save-log-button"
 							>
-								<Text>➕ Add to log</Text>
+								<Text className="tracker-form-button-text">➕ Add to log</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 items-center"
+								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="sleep-reset-form-button"
 							>
-								<Text>🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

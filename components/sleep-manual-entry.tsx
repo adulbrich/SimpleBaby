@@ -76,18 +76,18 @@ export default function ManualEntry({
     };
 
     return (
-        <View className='manual-primary' testID={testID}>
-            <View className='items-start relative bottom-5 left-3'>
-                <Text className='bg-gray-200 p-3 rounded-xl font'>
+        <View className='tracker-section' testID={testID}>
+            <View className='tracker-section-label'>
+                <Text className='tracker-section-label-text'>
                     {stringLib.uiLabels.manualEntryLabel}
                 </Text>
             </View>
-            <View className='manual-secondary p-4 pt-0 flex-col gap-4'>
+            <View className='p-4 pt-0 flex-col gap-4'>
                 <View className='flex-row gap-2 items-center w-full justify-between'>
-                    <Text className='manual-foregound-text'>Start Time</Text>
-                    <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
+                    <Text className='tracker-input-label'>Start Time</Text>
+                    <View className='tracker-input-button'>
                         <TouchableOpacity
-                            className='rounded-full bg-red-50 p-4'
+                            className='tracker-input-subbutton'
                             testID='sleep-manual-start-time'
                             onPress={() => {
                                 if (
@@ -104,21 +104,21 @@ export default function ManualEntry({
                                 }
                             }}
                         >
-                            <Text>
+                            <Text className='tracker-input-text'>
                                 {showIOSPicker && currentPickerMode === 'start'
                                     ? 'Close'
                                     : 'Choose'}{' '}
                                 ⏰
                             </Text>
                         </TouchableOpacity>
-                        <Text className='mr-4'>{formatTime(startDate)}</Text>
+                        <Text className='tracker-input-text mr-4'>{formatTime(startDate)}</Text>
                     </View>
                 </View>
                 <View className='flex-row gap-2 items-center w-full justify-between'>
-                    <Text className='manual-foregound-text'>End Time</Text>
-                    <View className='flex-row items-center bg-red-100 rounded-full gap-2'>
+                    <Text className='tracker-input-label'>End Time</Text>
+                    <View className='tracker-input-button'>
                         <TouchableOpacity
-                            className='rounded-full bg-red-50 p-4'
+                            className='tracker-input-subbutton'
                             testID='sleep-manual-end-time'
                             onPress={() => {
                                 if (
@@ -135,14 +135,14 @@ export default function ManualEntry({
                                 }
                             }}
                         >
-                            <Text>
+                            <Text className='tracker-input-text'>
                                 {showIOSPicker && currentPickerMode === 'end'
                                     ? 'Close'
                                     : 'Choose'}{' '}
                                 ⏰
                             </Text>
                         </TouchableOpacity>
-                        <Text className='mr-4'>{formatTime(endDate)}</Text>
+                        <Text className='tracker-input-text mr-4'>{formatTime(endDate)}</Text>
                     </View>
                 </View>
 

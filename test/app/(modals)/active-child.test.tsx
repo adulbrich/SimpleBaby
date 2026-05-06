@@ -44,7 +44,7 @@ jest.mock("@/library/utils", () => ({
 
 jest.mock("@/library/supabase-client", () => ({
     auth: {
-        updateUser: jest.fn(),
+        updateUser: jest.fn(async () => ({})),
     },
 }));
 
