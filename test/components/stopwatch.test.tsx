@@ -8,17 +8,36 @@ describe("Sleep component <Stopwatch/>", () => {
         // mock timers inside tests
         jest.useFakeTimers({advanceTimers: true});  // advanceTimers: to sync userEvents with jest fake timers
     });
-    
+
     afterEach(() => {
         // reset timers for test clean-up
         jest.useRealTimers();
     });
 
     test("Renders stopwatch buttons", () => {
-        render(<Stopwatch time={0} onTimeUpdate={undefined}/>);
+        render(<Stopwatch time={0}/>);
 
         expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
+    });
+
+    test("Renders provided time", () => {
+        const testTimeInitial = 45296;  // 12:34:56
+        const testTimeUpdated = 109210;  // 30:20:10
+        const { rerender } = render(<Stopwatch time={testTimeInitial}/>);
+
+        // ensure hours, minutes, and seconds are displayed on screen
+        expect(screen.getByText((testTimeInitial % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimeInitial / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimeInitial / 3600).toString())).toBeTruthy();  // hours
+
+        // rerender with new values
+        rerender(<Stopwatch time={testTimeUpdated}/>);
+
+        // ensure updated hours, minutes, and seconds are displayed on screen
+        expect(screen.getByText((testTimeUpdated % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimeUpdated / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimeUpdated / 3600).toString())).toBeTruthy();  // hours
     });
 
     test("Switches stopwatch buttons", async () => {

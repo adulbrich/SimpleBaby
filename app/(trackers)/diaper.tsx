@@ -31,7 +31,6 @@ export default function Diaper() {
 	const [amount, setAmount] = useState<DiaperAmount>("SM");
 	const [changeTime, setChangeTime] = useState(new Date());
 	const [note, setNote] = useState("");
-	const [reset, setReset] = useState<number>(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
@@ -106,7 +105,6 @@ export default function Diaper() {
 		setAmount("SM");
 		setChangeTime(new Date());
 		setNote("");
-		setReset((prev) => prev + 1);
 	};
 
 	return (
@@ -126,7 +124,6 @@ export default function Diaper() {
 						}`}
 					>
 						<DiaperModule
-							key={`diaper-module-${reset}`}
 							changeTime={changeTime}
 							consistency={consistency}
 							amount={amount}

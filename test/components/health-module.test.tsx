@@ -101,6 +101,70 @@ describe("Health component <HealthModule/>", () => {
         expect(screen.getByTestId("health-other-description")).toBeTruthy();
     });
 
+    test("Renders provided values", () => {
+        const testFieldSets = [
+            {
+                category: "Growth",
+                growth: { length: "test length", weight: "test weight", head: "test head" },
+                date: new Date()
+            },
+            {
+                category: "Activity",
+                activity: { type: "test type", duration: "test duration" },
+                date: new Date()
+            },
+            {
+                category: "Meds",
+                meds: { name: "test name", amount: "test amount", time_taken: new Date() },
+                date: new Date()
+            },
+            {
+                category: "Vaccine",
+                vaccine: { name: "test name", location: "test location" },
+                date: new Date()
+            },
+            {
+                category: "Other",
+                other: { name: "test name", description: "test description" },
+                date: new Date()
+            },
+        ];
+        const { rerender } = render(<HealthModule healthFields={testFieldSets[0] as HealthFields}/>);
+
+        for (const testFields of testFieldSets) {
+            // rerender with new values
+            rerender(<HealthModule healthFields={testFields as HealthFields}/>);
+
+            // ensure updated category is in <CategoryModule/> props
+            const categoryCalls = (CategoryModule as jest.Mock).mock.calls.filter(
+                call => call[0].testID === "health-category-module"  // filter calls by test id
+            );
+            // get props from most recent call
+            const category = categoryCalls.slice(-1)[0][0].selectedCategory;
+            expect(category).toBe(testFields.category);
+
+            // ensure date is displayed on screen
+            const formattedDate = testFields.date.toLocaleDateString();
+            expect(screen.getByText(formattedDate)).toBeTruthy();
+
+            // ensure category-specific fields are displayed
+            const categoryFields =  // get the one of the following that should be an object, the rest should be undefined
+                testFields.growth ||
+                testFields.activity ||
+                testFields.meds ||
+                testFields.vaccine ||
+                testFields.other;
+            for (const field of Object.values(categoryFields)) {
+                if (field instanceof Date) {  // this should only apply to meds time taken
+                    const formattedTime = field.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    expect(screen.getByText(formattedTime)).toBeTruthy();
+                } else {
+                    expect(screen.getByDisplayValue(field)).toBeTruthy();
+                }
+            }
+        }
+    });
+
     test("Shows/hides date picker (ios)", async () => {
         Platform.OS = "ios";
 

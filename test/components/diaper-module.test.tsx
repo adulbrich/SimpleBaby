@@ -1,4 +1,4 @@
-import DiaperModule from "@/components/diaper-module";
+import DiaperModule, { DiaperAmount, DiaperConsistency } from "@/components/diaper-module";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
@@ -25,6 +25,22 @@ jest.mock("@/components/category-module", () => {
 
 
 /*
+ *  getCategoryProps:
+ *      Reads props from CategoryModule mocks
+ *      filters calls by a provided testID
+ *      returns props from most recent matching call
+*/
+function getCategoryProps(testID: string) {
+    // get calls to <CategoryModule/> matching provided test ID
+    const calls = (CategoryModule as jest.Mock).mock.calls.filter(
+        call => call[0].testID === testID  // filter calls by test id
+    );
+    // get props from most recent call
+    return calls.slice(-1)[0][0];
+}
+
+
+/*
  *  setCategoryInput:
  *      Reads update handlers from CategoryModule mocks
  *      filters calls by a provided testID
@@ -33,7 +49,7 @@ jest.mock("@/components/category-module", () => {
 async function setCategoryInput(
     category: string,
     testID: string,
- ) {
+) {
     // get calls to <CategoryModule/> matching provided test ID
     const calls = (CategoryModule as jest.Mock).mock.calls.filter(
         call => call[0].testID === testID  // filter calls by test id
@@ -59,6 +75,41 @@ describe("Diaper component <DiaperModule/>", () => {
         expect(screen.getByTestId("diaper-category-consistency-module")).toBeTruthy();
         expect(screen.getByTestId("diaper-category-amount-module")).toBeTruthy();
         expect(screen.getByTestId("diaper-time-button")).toBeTruthy();
+    });
+
+    test("Renders provided values", () => {
+        const testValuesInitial = { amount: "SM", consistency: "Wet", time: new Date() };
+        const testValuesUpdated = { amount: "LG", consistency: "MD", time: new Date(new Date().getTime() - 73*60*1000) };
+        const { rerender } = render(<DiaperModule
+            amount={testValuesInitial.amount as DiaperAmount}
+            consistency={testValuesInitial.consistency as DiaperConsistency}
+            changeTime={testValuesInitial.time}
+        />);
+
+        // ensure initial values are present in <CategoryModule/> props
+        const amountInitial = getCategoryProps("diaper-category-amount-module");
+        expect(amountInitial.selectedCategory).toBe(testValuesInitial.amount);
+        const consistencyInitial = getCategoryProps("diaper-category-consistency-module");
+        expect(consistencyInitial.selectedCategory).toBe(testValuesInitial.consistency);
+        // ensure time is displayed on screen
+        const formattedTimeInitial = testValuesInitial.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedTimeInitial)).toBeTruthy();
+
+        // rerender with new values
+        rerender(<DiaperModule
+            amount={testValuesUpdated.amount as DiaperAmount}
+            consistency={testValuesUpdated.consistency as DiaperConsistency}
+            changeTime={testValuesUpdated.time}
+        />);
+
+        // ensure updated values are present in <CategoryModule/> props
+        const amountUpdated = getCategoryProps("diaper-category-amount-module");
+        expect(amountUpdated.selectedCategory).toBe(testValuesUpdated.amount);
+        const consistencyUpdated = getCategoryProps("diaper-category-consistency-module");
+        expect(consistencyUpdated.selectedCategory).toBe(testValuesUpdated.consistency);
+        // ensure updated time is displayed on screen
+        const formattedTimeUpdated = testValuesUpdated.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedTimeUpdated)).toBeTruthy();
     });
 
     test("Changes consistency", async () => {

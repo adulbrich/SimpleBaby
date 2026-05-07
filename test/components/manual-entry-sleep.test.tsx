@@ -29,6 +29,34 @@ describe("Sleep Component <ManualEntry/>", () => {
         expect(screen.getByTestId("sleep-manual-end-time")).toBeTruthy();
     });
 
+    test("Renders provided values", () => {
+        const nowMS = new Date().getTime();
+        const testValuesInitial = { start: new Date(nowMS), end: new Date(nowMS + 3*60*1000) };
+        const testValuesUpdated = { start: new Date(nowMS - 143*60*1000), end: new Date(nowMS - 10*60*1000) };
+        const { rerender } = render(<ManualEntry
+            startDate={testValuesInitial.start}
+            endDate={testValuesInitial.end}
+        />);
+
+        // ensure times are displayed on screen
+        const formattedStartInitial = testValuesInitial.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedStartInitial)).toBeTruthy();
+        const formattedEndInitial = testValuesInitial.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedEndInitial)).toBeTruthy();
+
+        // rerender with new values
+        rerender(<ManualEntry
+            startDate={testValuesUpdated.start}
+            endDate={testValuesUpdated.end}
+        />);
+
+        // ensure updated times are displayed on screen
+        const formattedStartUpdated = testValuesUpdated.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedStartUpdated)).toBeTruthy();
+        const formattedEndUpdated = testValuesUpdated.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedEndUpdated)).toBeTruthy();
+    });
+
     test("Displays time picker (ios)", async () => {
         Platform.OS = "ios";
 

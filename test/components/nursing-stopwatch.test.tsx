@@ -8,7 +8,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
         // mock timers inside tests
         jest.useFakeTimers({advanceTimers: true});  // advanceTimers: to sync userEvents with jest fake timers
     });
-    
+
     afterEach(() => {
         // reset timers for test clean-up
         jest.useRealTimers();
@@ -22,7 +22,46 @@ describe("Nursing component <NursingStopwatch/>", () => {
         expect(screen.getByTestId("nursing-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
     });
-    
+
+    test("Renders provided times", async () => {
+        const testTimesInitial = { left: 45296, right: 156741 };  // 12:34:56 and 43:32:21
+        const testTimesUpdated = { left: 109210, right: 37230 };  // 30:20:10 and 30:20:10
+        const { rerender } = render(<NursingStopwatch
+            leftTime={testTimesInitial.left}
+            rightTime={testTimesInitial.right}
+        />);
+
+        // ensure hours, minutes, and seconds are displayed on screen for left
+        expect(screen.getByText((testTimesInitial.left % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimesInitial.left / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimesInitial.left / 3600).toString())).toBeTruthy();  // hours
+        // and for the right side
+        await userEvent.press(
+            screen.getByTestId("nursing-stopwatch-right")
+        );
+        expect(screen.getByText((testTimesInitial.right % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimesInitial.right / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimesInitial.right / 3600).toString())).toBeTruthy();  // hours
+
+        // rerender with new values
+        rerender(<NursingStopwatch
+            leftTime={testTimesUpdated.left}
+            rightTime={testTimesUpdated.right}
+        />);
+
+        // ensure hours, minutes, and seconds are displayed on screen for right
+        expect(screen.getByText((testTimesUpdated.right % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimesUpdated.right / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimesUpdated.right / 3600).toString())).toBeTruthy();  // hours
+        // and for the left side
+        await userEvent.press(
+            screen.getByTestId("nursing-stopwatch-left")
+        );
+        expect(screen.getByText((testTimesUpdated.left % 60).toString())).toBeTruthy();  // seconds
+        expect(screen.getByText(Math.floor(testTimesUpdated.left / 60 % 60).toString())).toBeTruthy();  // minutes
+        expect(screen.getByText(Math.floor(testTimesUpdated.left / 3600).toString())).toBeTruthy();  // hours
+    });
+
     test("Switches stopwatch buttons", async () => {
         render(<NursingStopwatch leftTime={0} rightTime={0}/>);
 
