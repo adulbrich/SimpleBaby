@@ -279,9 +279,10 @@ export default function Profile() {
                                     player.play();
                                 }
                             }
+                            className='shrink'
                             testID={testIDs.emailButton}
                         >
-                            <Text className='profile-value-link'>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-value-link'>
                                 {displayEmail}
                             </Text>
                         </TouchableOpacity>
