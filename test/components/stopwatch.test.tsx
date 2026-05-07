@@ -15,14 +15,14 @@ describe("Sleep component <Stopwatch/>", () => {
     });
 
     test("Renders stopwatch buttons", () => {
-        render(<Stopwatch onTimeUpdate={undefined}/>);
+        render(<Stopwatch time={0} onTimeUpdate={undefined}/>);
 
         expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
     });
 
     test("Switches stopwatch buttons", async () => {
-        render(<Stopwatch onTimeUpdate={undefined}/>);
+        render(<Stopwatch time={0} onTimeUpdate={undefined}/>);
 
         expect(screen.getByTestId("sleep-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("sleep-stopwatch-reset")).toBeTruthy();
@@ -50,20 +50,19 @@ describe("Sleep component <Stopwatch/>", () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const setTimeCallback = jest.fn();
-        render(<Stopwatch onTimeUpdate={setTimeCallback}/>);
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:00");  // the callback should immediately be called with "00:00:00"
+        render(<Stopwatch time={0} onTimeUpdate={setTimeCallback}/>);
 
         // start timer
         await user.press(
             screen.getByTestId("sleep-stopwatch-start")
         );
 
-        // wait for two one-second loops, ensure time is updated after each
+        // wait for two one-second loops, ensure callback increments time
         await act(async () => jest.runOnlyPendingTimers());
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        expect(setTimeCallback.mock.calls[0][0](0)).toBe(1);
         await act(async () => jest.runOnlyPendingTimers());
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(setTimeCallback).toHaveBeenCalledTimes(3);
+        expect(setTimeCallback.mock.calls[0][0](1)).toBe(2);
+        expect(setTimeCallback).toHaveBeenCalledTimes(2);
 
         // stop timer
         await user.press(
@@ -72,29 +71,14 @@ describe("Sleep component <Stopwatch/>", () => {
 
         // ensure time has not been updated since
         await act(async () => jest.runOnlyPendingTimers());
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(setTimeCallback).toHaveBeenCalledTimes(3);
+        expect(setTimeCallback).toHaveBeenCalledTimes(2);
     });
 
     test("Resets timer", async () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const setTimeCallback = jest.fn();
-        render(<Stopwatch onTimeUpdate={setTimeCallback}/>);
-
-        // start timer, wait one second loop
-        await user.press(
-            screen.getByTestId("sleep-stopwatch-start")
-        );
-        await act(async () => jest.runOnlyPendingTimers());
-
-        // stop timer
-        await user.press(
-            screen.getByTestId("sleep-stopwatch-stop")
-        );
-
-        // ensure time was updated with a non-zero value
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        render(<Stopwatch time={1} onTimeUpdate={setTimeCallback}/>);
 
         // press the reset button
         await user.press(
@@ -102,6 +86,6 @@ describe("Sleep component <Stopwatch/>", () => {
         );
 
         // ensure time has been changed to zero
-        expect(setTimeCallback).toHaveBeenLastCalledWith("00:00:00");
+        expect(setTimeCallback).toHaveBeenLastCalledWith(0);
     });
 });

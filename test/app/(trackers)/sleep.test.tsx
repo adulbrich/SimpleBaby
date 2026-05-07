@@ -59,7 +59,7 @@ async function setSleepInputs({
     endDate,
     note,
 } : {
-    stopwatchTime?: string;
+    stopwatchTime?: number;
     startDate?: Date;
     endDate?: Date;
     note?: string;
@@ -71,15 +71,19 @@ async function setSleepInputs({
 
     // read parameters to first call of ManualEntry
     const {
-        onDatesUpdate,
+        onStartDateUpdate,
+        onEndDateUpdate,
     } = (ManualEntry as jest.Mock).mock.calls[0][0];
 
     // call update handlers for times
     if (stopwatchTime) {
         await act(() => onTimeUpdate?.(stopwatchTime));
     }
-    if (startDate && endDate) {
-        await act(() => onDatesUpdate?.(startDate, endDate));
+    if (startDate) {
+        await act(() => onStartDateUpdate?.(startDate));
+    }
+    if (endDate) {
+        await act(() => onEndDateUpdate?.(endDate));
     }
 
     // read parameters to most recent call of <NoteEntry/>
@@ -151,22 +155,25 @@ describe("Track sleep screen", () => {
         render(<Sleep/>);
 
         // write something in the note entry...
-        await setSleepInputs({ note: testNote });
+        const testTime = new Date(new Date().getTime() - 60*60*1000);
+        await setSleepInputs({ note: testNote, startDate: testTime, endDate: testTime });
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
 
         const stopwatch = screen.getByTestId("sleep-stopwatch");  // get the displayed <Stopwatch/>
-        const manualEntry = screen.getByTestId("sleep-manual-time-entry");  // get the displayed <ManualEntry/>
 
+        const resetTime = new Date();
         await userEvent.press(
             screen.getByTestId("sleep-reset-form-button")
         );
 
         // ensure note is no longer present
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
+        // ensure manual times have been updated
+        const manualProps = (ManualEntry as jest.Mock).mock.lastCall[0];
+        expect(manualProps.startDate.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
+        expect(manualProps.endDate.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
         // ensure new instance of <Stopwatch/> is being used
         expect(screen.getByTestId("sleep-stopwatch") === stopwatch).toBeFalsy();
-        // ensure new instance of <ManualEntry/> is being used
-        expect(screen.getByTestId("sleep-manual-time-entry") === manualEntry).toBeFalsy();
     });
     
     test("Catch saveLog() error", async () => {
@@ -180,7 +187,7 @@ describe("Track sleep screen", () => {
         );
 
         render(<Sleep/>);
-        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
+        await setSleepInputs({ stopwatchTime: 1 });  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -192,7 +199,7 @@ describe("Track sleep screen", () => {
 
     test("Successfully saved sleep log", async () => {
         render(<Sleep/>);
-        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
+        await setSleepInputs({ stopwatchTime: 1 });  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -213,7 +220,7 @@ describe("Track sleep screen", () => {
         render(<Sleep/>);
         // set both stopwatch time and manual start/end times. Stopwatch time should take priority for saving
         await setSleepInputs({
-            stopwatchTime: testDuration,
+            stopwatchTime: Math.floor(testDurationMS / 1000),
             startDate: new Date(),
             endDate: new Date(),
             note: testNote,

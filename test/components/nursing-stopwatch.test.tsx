@@ -15,7 +15,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
     });
 
     test("Renders stopwatch buttons", () => {
-        render(<NursingStopwatch onTimeUpdateLeft={undefined} onTimeUpdateRight={undefined}/>);
+        render(<NursingStopwatch leftTime={0} rightTime={0}/>);
 
         expect(screen.getByTestId("nursing-stopwatch-left")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-right")).toBeTruthy();
@@ -24,7 +24,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
     });
     
     test("Switches stopwatch buttons", async () => {
-        render(<NursingStopwatch onTimeUpdateLeft={undefined} onTimeUpdateRight={undefined}/>);
+        render(<NursingStopwatch leftTime={0} rightTime={0}/>);
 
         expect(screen.getByTestId("nursing-stopwatch-start")).toBeTruthy();
         expect(screen.getByTestId("nursing-stopwatch-reset")).toBeTruthy();
@@ -52,8 +52,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const leftTimeCallback = jest.fn();
-        render(<NursingStopwatch onTimeUpdateLeft={leftTimeCallback} onTimeUpdateRight={undefined}/>);
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:00");  // the callback should immediately be called with "00:00:00"
+        render(<NursingStopwatch leftTime={0} rightTime={0} onTimeUpdateLeft={leftTimeCallback}/>);
 
         // select left
         await user.press(
@@ -65,12 +64,12 @@ describe("Nursing component <NursingStopwatch/>", () => {
             screen.getByTestId("nursing-stopwatch-start")
         );
 
-        // wait for two one-second loops, ensure time is updated after each
+        // wait for two one-second loops, ensure callback increments time
         await act(async () => jest.runOnlyPendingTimers());
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        expect(leftTimeCallback.mock.calls[0][0](0)).toBe(1);
         await act(async () => jest.runOnlyPendingTimers());
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(leftTimeCallback).toHaveBeenCalledTimes(3);
+        expect(leftTimeCallback.mock.calls[0][0](1)).toBe(2);
+        expect(leftTimeCallback).toHaveBeenCalledTimes(2);
 
         // stop timer
         await user.press(
@@ -79,16 +78,14 @@ describe("Nursing component <NursingStopwatch/>", () => {
 
         // ensure time has not been updated since
         await act(async () => jest.runOnlyPendingTimers());
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(leftTimeCallback).toHaveBeenCalledTimes(3);
+        expect(leftTimeCallback).toHaveBeenCalledTimes(2);
     });
 
     test("Updates time while started (right)", async () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const rightTimeCallback = jest.fn();
-        render(<NursingStopwatch onTimeUpdateLeft={undefined} onTimeUpdateRight={rightTimeCallback}/>);
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:00");  // the callback should immediately be called with "00:00:00"
+        render(<NursingStopwatch leftTime={0} rightTime={0} onTimeUpdateRight={rightTimeCallback}/>);
 
         // select right
         await user.press(
@@ -100,12 +97,12 @@ describe("Nursing component <NursingStopwatch/>", () => {
             screen.getByTestId("nursing-stopwatch-start")
         );
 
-        // wait for two one-second loops, ensure time is updated after each
+        // wait for two one-second loops, ensure callback increments time
         await act(async () => jest.runOnlyPendingTimers());
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        expect(rightTimeCallback.mock.calls[0][0](0)).toBe(1);
         await act(async () => jest.runOnlyPendingTimers());
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(rightTimeCallback).toHaveBeenCalledTimes(3);
+        expect(rightTimeCallback.mock.calls[0][0](1)).toBe(2);
+        expect(rightTimeCallback).toHaveBeenCalledTimes(2);
 
         // stop timer
         await user.press(
@@ -114,15 +111,14 @@ describe("Nursing component <NursingStopwatch/>", () => {
 
         // ensure time has not been updated since
         await act(async () => jest.runOnlyPendingTimers());
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:02");
-        expect(rightTimeCallback).toHaveBeenCalledTimes(3);
+        expect(rightTimeCallback).toHaveBeenCalledTimes(2);
     });
 
     test("Resets timer (left)", async () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const leftTimeCallback = jest.fn();
-        render(<NursingStopwatch onTimeUpdateLeft={leftTimeCallback} onTimeUpdateRight={undefined}/>);
+        render(<NursingStopwatch leftTime={0} rightTime={0} onTimeUpdateLeft={leftTimeCallback}/>);
 
         // select left
         await user.press(
@@ -141,7 +137,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
         );
 
         // ensure time was updated with a non-zero value
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        expect(leftTimeCallback.mock.lastCall[0] === 0).toBeFalsy();
 
         // press the reset button
         await user.press(
@@ -149,14 +145,14 @@ describe("Nursing component <NursingStopwatch/>", () => {
         );
 
         // ensure time has been changed to zero
-        expect(leftTimeCallback).toHaveBeenLastCalledWith("00:00:00");
+        expect(leftTimeCallback).toHaveBeenLastCalledWith(0);
     });
 
     test("Resets timer (right)", async () => {
         const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});  // to sync userEvents with jest fake timers
 
         const rightTimeCallback = jest.fn();
-        render(<NursingStopwatch onTimeUpdateLeft={undefined} onTimeUpdateRight={rightTimeCallback}/>);
+        render(<NursingStopwatch leftTime={0} rightTime={0} onTimeUpdateRight={rightTimeCallback}/>);
 
         // select right
         await user.press(
@@ -175,7 +171,7 @@ describe("Nursing component <NursingStopwatch/>", () => {
         );
 
         // ensure time was updated with a non-zero value
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:01");
+        expect(rightTimeCallback.mock.lastCall[0] === 0).toBeFalsy();
 
         // press the reset button
         await user.press(
@@ -183,6 +179,6 @@ describe("Nursing component <NursingStopwatch/>", () => {
         );
 
         // ensure time has been changed to zero
-        expect(rightTimeCallback).toHaveBeenLastCalledWith("00:00:00");
+        expect(rightTimeCallback).toHaveBeenLastCalledWith(0);
     });
 });

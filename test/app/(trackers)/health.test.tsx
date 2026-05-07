@@ -142,19 +142,24 @@ describe("Track health screen", () => {
         render(<Health/>);
 
         // write something in the note entry...
-        await setHealthInputs({ note: testNote });
+        await setHealthInputs({
+            category: "Activity",
+            activity: { type: "test type", duration: "test duration" },
+            note: testNote,
+        });
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
-
-        const mainInputs = screen.getByTestId("health-main-inputs");  // get the displayed <HealthModule/>
 
         await userEvent.press(
             screen.getByTestId("health-reset-form-button")
         );
 
+        // ensure category and category fields are reset to default in <HealthModule/>
+        const healthFields = (HealthModule as jest.Mock).mock.lastCall[0].healthFields;
+        expect(healthFields.category).toBe("Growth");  // should revert to the default of growth
+        expect(healthFields.activity).toBe(undefined);
+        expect(healthFields.growth).toEqual({ length: "", weight: "", head: "" });
         // ensure note is no longer present
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
-        // ensure new instance of <HealthModule/> is being used
-        expect(screen.getByTestId("health-main-inputs") === mainInputs).toBeFalsy();
     });
         
     test("Catch unfilled growth inputs", async () => {

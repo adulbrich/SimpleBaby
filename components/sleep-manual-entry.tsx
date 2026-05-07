@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
-
-import stringLib from "../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 
 /**
  * ManualEntry component allows users to pick start and end times manually.
@@ -13,30 +12,30 @@ import stringLib from "../assets/stringLibrary.json";
  * Calls onDatesUpdate callback whenever start or end time changes.
  */
 export default function ManualEntry({
-    onDatesUpdate,
+    startDate,
+    endDate,
+    onStartDateUpdate,
+    onEndDateUpdate,
     testID
 }: {
-    onDatesUpdate?: (startDate: Date, endDate: Date) => void,
+    startDate: Date,
+    endDate: Date,
+    onStartDateUpdate?: (startDate: Date) => void,
+    onEndDateUpdate?: (endDate: Date) => void,
     testID?: string
 }) {
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
     const [currentPickerMode, setCurrentPickerMode] = useState<'start' | 'end'>(
         'start',
     );
 
-    useEffect(() => {
-        onDatesUpdate?.(startDate, endDate);
-    }, [startDate, endDate, onDatesUpdate]);
-
     // Handles date change from picker, updates corresponding time, hides iOS picker
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
             if (currentPickerMode === 'start') {
-                setStartDate(selectedDate);
+                onStartDateUpdate?.(selectedDate);
             } else {
-                setEndDate(selectedDate);
+                onEndDateUpdate?.(selectedDate);
             }
         }
         setShowIOSPicker(false);
@@ -52,9 +51,9 @@ export default function ManualEntry({
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
                         if (mode === 'start') {
-                            setStartDate(selectedDate);
+                            onStartDateUpdate?.(selectedDate);
                         } else {
-                            setEndDate(selectedDate);
+                            onEndDateUpdate?.(selectedDate);
                         }
                     }
                     setShowIOSPicker(false);
