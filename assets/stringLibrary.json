@@ -74,6 +74,16 @@
             "switchChildPopup": "profile-switch-child-popup"
         },
 
+        "calendar": {
+            "calendar": "calendar-component",
+            "guestMode": "calendar-guest-mode",
+            "dateLabel": "calendar-date-label",
+            "loading": "calendar-loading-indicator",
+            "logList": "calendar-log-list",
+            "noLogs": "calendar-no-logs-message",
+            "logsError": "calendar-logs-error"
+        },
+
         "addChild": {
             "popup": "add-child-popup",
             "nameEntry": "add-child-name",
