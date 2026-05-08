@@ -109,6 +109,10 @@
     @apply p-4 dark:bg-[#0b2218] bg-gray-100;
 }
 
+.modal-back-button {
+    @apply dark:bg-slate-700 p-2 bg-blue-200 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 mr-4;
+}
+
 .popup {
     @apply p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600;
 }

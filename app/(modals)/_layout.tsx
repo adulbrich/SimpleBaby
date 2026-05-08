@@ -3,6 +3,9 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform, TouchableOpacity, Text } from 'react-native';
 
 export default function ModalsLayout() {
+
+    const isAndroid = Platform.OS === 'android';
+
     return (
         <>
             <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
@@ -13,9 +16,9 @@ export default function ModalsLayout() {
                         onPress={() => {
                             router.back();
                         }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
+                        className={isAndroid ? 'modal-back-button' : 'p-2'}
                     >
-                        <Text className='dark:color-[#fff] font-bold'>
+                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
                             ⬅️ Back
                         </Text>
                     </TouchableOpacity>
