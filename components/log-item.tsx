@@ -63,13 +63,13 @@ export default function LogItem({
         !item ? (
             undefined
         ) : item.type === "title" ? (
-            <Text className="text-lg font-bold mb-2" key={key}>{item.value}</Text>
+            <Text className="log-title" key={key}>{item.value}</Text>
         ) : item.type === "text" ? (
-            <Text className="text-base mb-1" key={key}>{item.value}</Text>
+            <Text className="log-item-text" key={key}>{item.value}</Text>
         ) : item.type === "item" ? (
-            <Text className="text-base mb-1" key={key}>{item.label}: {item.value}</Text>
+            <Text className="log-item-text" key={key}>{item.label}: {item.value}</Text>
         ) : item.type === "note" ? (
-            item.value && <Text className="text-sm italic text-gray-500 mt-1" key={key}>📝 {item.value}</Text>
+            item.value && <Text className="log-note" key={key}>📝 {item.value}</Text>
         ) : item.type === "image" ? (
             item.uri && <Image
                 source={{ uri: item.uri }}
@@ -90,25 +90,25 @@ export default function LogItem({
     );
 
     return (
-        <View className="bg-white rounded-xl p-4 mb-4 shadow">
+        <View className="log-item">
             {logData.map((item, index) => renderItem(item, index))}
 
             <View className="flex-row justify-end gap-3 mt-4">
                 <Pressable
-                    className="px-3 py-2 rounded-full bg-blue-100"
+                    className="log-button-edit"
                     onPress={onEdit}
                     disabled={buttonsDisabled}
                     testID={testIDs.editButton}
                 >
-                    <Text className="text-blue-700">✏️ Edit</Text>
+                    <Text className="log-button-edit-text">✏️ Edit</Text>
                 </Pressable>
                 <Pressable
-                    className="px-3 py-2 rounded-full bg-red-100"
+                    className="log-button-delete"
                     onPress={onDelete}
                     disabled={buttonsDisabled}
                     testID={testIDs.deleteButton}
                 >
-                    <Text className="text-red-700">🗑️ Delete</Text>
+                    <Text className="log-button-delete-text">🗑️ Delete</Text>
                 </Pressable>
             </View>
         </View>

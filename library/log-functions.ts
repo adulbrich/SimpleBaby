@@ -1,13 +1,15 @@
-import { decryptData, encryptData } from "./crypto";
-import { getActiveChildData } from "@/library/utils";
+import { encryptData, safeDecrypt } from "./crypto";
+import { getActiveChildData } from "@/library/remote-store";
 import {
 	insertRow,
 	getActiveChildId as getLocalActiveChildId,
     TableName,
     listRows,
+    deleteRow,
 } from "@/library/local-store";
 import supabase from "./supabase-client";
 import stringLib from "../assets/stringLibrary.json";
+import { Alert } from "react-native";
 
 
 export type field = {
@@ -211,24 +213,6 @@ export async function saveLog(
 };
 
 
-export function formatStringList(strings: string[]): string {
-    return strings.length > 1
-            ? `${strings.slice(0, -1).join(", ")} and ${strings.slice(-1)}`
-            : strings[0];
-}
-
-
-async function safeDecrypt(value: string | null): Promise<string> {
-    if (!value || !value.includes("U2FsdGVkX1")) return "";
-    try {
-        return await decryptData(value);
-    } catch (err) {
-        console.warn("⚠️ Decryption failed for:", value);
-        return `${stringLib.errors.decryption}: ${(err as Error).message}`;
-    }
-}
-
-
 async function fetchLocalLogs(
     tableName: TableName,
     orderField: string,
@@ -317,3 +301,37 @@ export async function fetchLogs<LogType>(
         return { success: false, error: (err as Error).message };
     }
 }
+
+
+export function handleDeleteLog<LogType extends { id: string }>(
+    tableName: TableName,
+    logId: string,
+    isGuest: boolean,
+    setAlertVisible: React.Dispatch<React.SetStateAction<boolean>>,
+    updateLogs: React.Dispatch<React.SetStateAction<LogType[]>>,
+) {
+    const confirmDeleteLog = async () => {
+        const success = isGuest ? (
+            await deleteRow(tableName, logId)
+        ) : (
+            !(await supabase
+                .from(tableName)
+                .delete()
+                .eq("id", logId)).error
+        );
+
+        if (success) {
+            updateLogs((prev) => prev.filter((log) => log.id !== logId));
+        } else {
+            Alert.alert("Error deleting log");
+        }
+
+        setAlertVisible(false);  // record that the alert is being closed
+    };
+
+    setAlertVisible(true);  // record that the alert is being shown
+    Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
+        { text: "Cancel", style: "cancel", onPress: () => { setAlertVisible(false); } },
+        { text: "Delete", style: "destructive", onPress: confirmDeleteLog },
+    ]);
+};

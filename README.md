@@ -1,10 +1,10 @@
-# Baby Tracker
+# SimpleBaby
 
 ## Project Overview and Purpose
-The Baby Tracker project is a mobile application designed to help parents and caretakers log and monitor various aspects of a baby's daily activities and development. This includes tracking feeding times, sleep patterns, diaper changes, and developmental milestones. The purpose is to provide a convenient and centralized way to keep records, observe trends, and share information with other caregivers or healthcare providers.
+SimpleBaby is a mobile application designed to help parents and caretakers log and monitor various aspects of a baby's daily activities and development. This includes tracking feeding times, sleep patterns, diaper changes, nursing logs, and health and developmental milestones. The purpose of the project is to provide a convenient and centralized way to keep records, observe trends, and monitor all aspects of a newborn child's development, all within a private and securely encrypted environment.
 
 ## Complete Setup Instructions
-To get the Baby Tracker application running locally for development:
+To get the SimpleBaby running locally for development:
 
 **1. Install Dependencies:**
 After cloning this repository navigate to the project's root directory in your terminal and run the following command to install the necessary Node.js packages:
@@ -20,18 +20,18 @@ npx expo start
 This command will allow you to scan a QR code to test run the app on the Expo Go app, available on both Android and iOS.
 
 ## Deployment Procedures
-Currently, the application is configured for local development and testing via Expo. Deployment to app stores (Apple App Store, Google Play Store) would require additional steps including building standalone app binaries, setting up developer accounts, and following store submission guidelines. These procedures are not yet defined for this project, but you refer to [Expo EAS]([https://expo.dev/eas).
+Currently, the application is configured for local development and testing via Expo. Deployment to app stores (Apple App Store, Google Play Store) would require additional steps including building standalone app binaries, setting up developer accounts, and following store submission guidelines. These procedures are not yet defined for this project, but you should refer to [Expo EAS]([https://expo.dev/eas) for now.
 
 ## Maintenance Guidelines
 **Regular Updates:**
-*   Keep dependencies up-to-date by periodically running `npm update` and testing for compatibility, on a separate branch. You may have packages that lag behind in Expo SDK compatibility so it is best to not update things right away.
+*   Keep dependencies up-to-date by periodically running `npm update` and testing for compatibility issues. You may have packages that lag behind in Expo SDK compatibility, so it is best to not update things right away.
 *   Update the Expo SDK to the latest version when stable releases are available to leverage new features and bug fixes.
 
 **Codebase Health:**
-*   Follow consistent coding standards and comment complex logic.
-*   Regularly refactor code to improve readability, maintainability, and performance, using Prettier or similar to autoformat files in the entire codebase is recommended.
-*   Address items in the "Known Issues and Future Enhancements" list, marked as `todo.md` in the repo.
-*   Ensure that all future PRs pass the current test suite.
+*   Follow consistent coding standards and be sure to write comments for complex functions and types.
+*   We recommend that you egularly refactor code to improve readability, maintainability, and performance, using Prettier or similar to autoformat files in the entire codebase.
+*   Address items in the "Known Issues and Future Enhancements" list, at the bottom of this file.
+*   Ensure that all future PRs pass the current test suite and linter.
 
 **Backend (Supabase):**
 *   Monitor Supabase project usage and performance.
@@ -50,21 +50,18 @@ Currently, the application is configured for local development and testing via E
     *   Verify that the Supabase API URL is correct and accessible from your development machine and/or emulator/device. Ensure the port forwarding is active.
     *   Check the Supabase logs for any errors.
 
-**Specific Issues from "Known Issues" List:**
-*   Refer to the "Known Issues and Future Enhancements" section for specific bugs like the "back button fix on android" or "time picker label" issue. These may require targeted debugging.
-
 ## Unit Testing
 This project uses Jest as the backbone of its testing suite. Tests are created to ensure that all components and logic match the expected behavior, and that future changes to the code do not unknowingly alter the anticipated outputs. All test files and mocks are placed in the `/test` folder. To run the test suite, use the following command:
 ```
 npx jest
 ```
-This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in `jest.config.js` and `/test/setup.ts`. All pull requests to the repository must pass these tests before they can be merged into the `main` branch.
+This will run the regression test suite and inform you of how many tests are passing or failing. Updates to the test suite can be done in the `/test` folder. All pull requests to the repository must pass these tests before they can be merged into the `main` branch.
 
 ## Technical Documentation (Developer-Focused)
 This section focuses on the technical aspects relevant to developers working on the project.
 
 **Backend Service: Supabase**
-The project utilizes a local Supabase instance for its backend services, including database, authentication, and storage. The Supabase services are port forwarded to a public IP for accessibility. The CLI gives you the default ports and links, in which you can reforward to a public IP or use the official Supabase online (there is a free version).
+The project utilizes Supabase for its backend services, including database handling, user authentication, and data storage. If developing locally (i.e., without a deployed database), the Supabase services can be port forwarded to a public IP for accessibility. The CLI gives you the default ports and links, in which you can reforward to a public IP or use the official Supabase online (there is a free version).
 
 **Supabase Example Configuration We Used:**
 *   **API URL:** `http://76.138.134.66:44321`
@@ -88,20 +85,21 @@ For more details on local Supabase development, refer to the official Supabase d
 *   **Animation:** React Native Reanimated
 
 ## User Manual/Documentation
-The Baby Tracker app allows users to record and view various activities and milestones for their baby.
+SimpleBaby allows users to record and view various activities and milestones for their baby.
 
 **Key Functions:**
-*   **Logging Activities:** Users can log events such as feedings (type, amount, duration), sleep periods (start and end times), diaper changes (type), and other custom activities.
-*   **Viewing Logs:** A history of logged events can be viewed, typically in a chronological list or potentially summarized.
-*   **Tracking Milestones:** (Planned Feature) Users will be able to record developmental milestones, potentially with photos or videos.
-*   **Child Management:** (Planned Feature) Users will be able to add, remove, and switch between profiles for multiple children.
+*   **Logging Activities:** Users can log events such as feedings (type, amount, duration), sleep periods (start and end times), diaper changes (type), developmental milestones (including photo uploads), nursing activity, and health milestones.
+*   **Viewing Logs:** A history of logged events can be viewed in a chronological list.
+*   **Calendar:** Users can view a monthly calendar that details logs they have created for each day.
+*   **Child Management:** Users can add, remove, and switch between profiles to log info for multiple children.
+*   **Guest Mode:** Users can log into the app in Guest Mode, allowing them to log data in a secure local database without having to sign up for an account.
 
 **Basic Usage:**
 1.  Open the app.
 2.  Navigate to the desired tracking section (e.g., "Feedings", "Sleep", "Diapers").
 3.  Input the relevant details for the activity.
 4.  Save the entry.
-5.  View past entries in a "Logs" or "History" section.
+5.  View past entries in a "Logs" or "Calendar" section.
 
 ## API Documentation
 The application interacts with a Supabase backend. The primary API interaction points are:
@@ -139,88 +137,110 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 | Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
 | id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the child. |
-| name | text | Nullable | Name of the child. |
-| user_id | uuid | Nullable, Foreign Key to `auth.users.id` | The user associated with this child record. |
-| created_at | timestamp | Default: `now()` | Timestamp of when the child record was created. |
+| user_id | uuid | Not Null, Foreign Key to `auth.users.id` (CASCADE) | The user (parent/guardian) this child belongs to. |
+| name | text | Not Null | Name of the child. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
 
 **Table: `diaper_logs`**
 
 
 | Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
-| id | uuid | Primary Key, Default: `uuid_generate_v4()` | Unique identifier for the diaper log entry. |
-| child_id | uuid | Nullable, Foreign Key to `public.children.id` | The child associated with this diaper log. |
-| consistency | text | Nullable | Consistency of the diaper content. |
-| amount | text | Nullable | Amount observed in the diaper. |
-| change_time | timestamptz | Nullable | The actual time the diaper change occurred. Local timezone applied. |
-| logged_at | timestamptz | Default: `timezone('utc'::text, now())` | Timestamp of when the log was entered. Local timezone applied. |
-| note | text | Nullable | Additional notes about the diaper change. |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the diaper log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this diaper log belongs to. |
+| consistency | text | Not Null | The consistency of the diaper contents (e.g. wet, soft, solid). |
+| amount | text | Not Null | The amount observed in the diaper. |
+| note | text | Nullable | Optional free-text note about the diaper change. |
+| change_time | timestamptz | Not Null | The date/time the diaper change occurred. |
+| logged_at | timestamptz | Not Null, Default: `now()` | The date/time the entry was logged. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
 
 **Table: `feeding_logs`**
 
 
 | Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
-| id | uuid | Primary Key, Default: `uuid_generate_v4()` | Unique identifier for the feeding log entry. |
-| category | text | Nullable | Category of feeding (e.g., breast milk, formula, solids). |
-| item_name | text | Nullable | Specific name of the food/item. |
-| amount | text | Nullable | Amount consumed (e.g., "120ml", "30 minutes", "1 jar"). |
-| feeding_time | timestamptz | Nullable | The actual time the feeding occurred. Local timezone applied. |
-| child_id | uuid | Nullable, Foreign Key to `public.children.id` | The child associated with this feeding log. |
-| logged_at | timestamptz | Default: `timezone('utc'::text, now())` | Timestamp of when the log was entered. Local timezone applied. |
-| note | text | Nullable | Additional notes about the feeding. |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the feeding log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this feeding log belongs to. |
+| category | text | Not Null | The category of the feeding (e.g. breast milk, formula, solid food). |
+| item_name | text | Not Null | The name of the food or drink consumed. |
+| amount | text | Not Null | The amount consumed. |
+| feeding_time | timestamptz | Not Null | The date/time the feeding occurred. |
+| note | text | Nullable | Optional free-text note about the feeding session. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
+| updated_at | timestamptz | Not Null, Default: `now()`, Auto-updated by trigger | Timestamp of the last update; managed by the `feeding_logs_set_timestamp` trigger. |
 
 **Table: `sleep_logs`**
 
 
-| Column Name | Data Type | Constraints / Default (Assumed) | Description / Notes (Assumed) |
+| Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
-| id | uuid | Primary Key | Unique identifier for the sleep log entry. |
-| child_id | uuid | Foreign Key (children.id) | The child associated with this sleep log. |
-| start_time | timestamp | Not Null | Timestamp for when sleep started. |
-| end_time | timestamp | Nullable | Timestamp for when sleep ended. |
-| actual_sleep_time | text | Nullable | Calculated or recorded actual duration of sleep. |
-| predicted_sleep_time | text | Nullable | Predicted duration of sleep (if applicable). |
-| mood_type | text | Nullable | Mood of the child upon waking or before sleep. |
-| wake_type | text | Nullable | How the child woke up (e.g., naturally, disturbed). |
-| note_audio | text | Nullable | Link or reference to an audio note. |
-| note_text | text | Nullable | Textual notes about the sleep. |
-| note_file_links | jsonb | Nullable | JSON array of links to other relevant files. |
-| logged_at | timestamp | Default: `now()` | Timestamp of when the sleep log was entered or last updated. |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the sleep log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this sleep log belongs to. |
+| start_time | timestamptz | Not Null | The date/time the sleep session started. |
+| end_time | timestamptz | Not Null | The date/time the sleep session ended. Must be after `start_time`. |
+| duration | text | Not Null | The duration of the sleep session. |
+| note | text | Nullable | Optional free-text note about the sleep session. |
+| logged_at | timestamptz | Not Null, Default: `now()` | The date/time the sleep session was logged. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
+| updated_at | timestamptz | Not Null, Default: `now()`, Auto-updated by trigger | Timestamp of the last update; managed by the `sleep_logs_set_timestamp` trigger. |
 
 **Table: `nursing_logs`**
 
 
 | Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
-| id | uuid | Primary Key, Default: `uuid_generate_v4()` | Unique identifier for the nursing log entry. |
-| child_id | uuid | Nullable, Foreign Key to `public.children.id` | The child associated with this nursing log. |
-| left_duration | text | Nullable | Duration of nursing on the left side. |
-| right_duration | text | Nullable | Duration of nursing on the right side. |
-| logged_at | timestamptz | Default: `timezone('utc'::text, now())` | Timestamp of when the log was entered. Local timezone applied. |
-| note | text | Nullable (Optional Field) | Additional notes about the nursing session. |
-| left_amount | text | Nullable (Optional Field) | Amount consumed from the left side (if measured). |
-| right_amount | text | Nullable (Optional Field) | Amount consumed from the right side (if measured). |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the nursing log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this nursing log belongs to. |
+| left_duration | text | Nullable | Duration of feeding on the left side. |
+| right_duration | text | Nullable | Duration of feeding on the right side. |
+| left_amount | text | Nullable | Amount expressed/consumed on the left side. |
+| right_amount | text | Nullable | Amount expressed/consumed on the right side. |
+| note | text | Nullable | Optional free-text note about the nursing session. |
+| logged_at | timestamptz | Not Null, Default: `now()` | The date/time the nursing session occurred. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
+| updated_at | timestamptz | Not Null, Default: `now()`, Auto-updated by trigger | Timestamp of the last update; managed by the `nursing_logs_set_timestamp` trigger. |
 
 **Table: `health_logs`**
 
 
 | Column Name | Data Type | Constraints / Default | Description / Notes |
 | :-- | :-- | :-- | :-- |
-| id | uuid | Primary Key, Default: `uuid_generate_v4()` | Unique identifier for the health log entry. |
-| category | text | Nullable | Category of the health event (e.g., "Growth", "Activity", "Medication"). |
-| date | timestamptz | Nullable | Date and time of the health event. Local timezone applied. |
-| child_id | uuid | Nullable, Foreign Key to `public.children.id` (Optional Field) | The child associated with this health log. |
-| growth_length | text | Nullable (Optional Field) | Child's length measurement. |
-| growth_weight | text | Nullable (Optional Field) | Child's weight measurement. |
-| growth_head | text | Nullable (Optional Field) | Child's head circumference measurement. |
-| activity_type | text | Nullable (Optional Field) | Type of activity logged (e.g., "Tummy Time", "Walk"). |
-| activity_duration | text | Nullable (Optional Field) | Duration of the activity. |
-| meds_name | text | Nullable (Optional Field) | Name of the medication administered. |
-| meds_amount | text | Nullable (Optional Field) | Amount of medication administered. |
-| meds_time_taken | timestamptz | Nullable (Optional Field) | Actual time medication was taken. Local timezone applied. |
-| note | text | Nullable (Optional Field) | Additional notes about the health event. |
-| logged_at | timestamptz | Default: `timezone('utc'::text, now())` (Optional Field) | Timestamp of when the log was entered. Local timezone applied. |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the health log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this health log belongs to. |
+| category | health_category | Not Null | The category of the health log. Enum: `Growth`, `Activity`, `Meds`, `Vaccine`, `Other`. |
+| date | timestamptz | Not Null | The date/time the health event occurred. |
+| growth_length | text | Nullable | Recorded length/height. Required when `category = 'Growth'` (alongside at least one other growth field). |
+| growth_weight | text | Nullable | Recorded weight. Required when `category = 'Growth'` (alongside at least one other growth field). |
+| growth_head | text | Nullable | Recorded head circumference. Required when `category = 'Growth'` (alongside at least one other growth field). |
+| activity_type | text | Nullable | Type of activity. Required when `category = 'Activity'`. |
+| activity_duration | text | Nullable | Duration of activity. Required when `category = 'Activity'`. |
+| meds_name | text | Nullable | Name of the medication. Required when `category = 'Meds'`. |
+| meds_amount | text | Nullable | Dosage/amount of the medication. Required when `category = 'Meds'`. |
+| meds_time_taken | timestamptz | Nullable | Time the medication was taken. Required when `category = 'Meds'`. |
+| vaccine_name | text | Nullable | Name of the vaccine. Required when `category = 'Vaccine'`. |
+| vaccine_location | text | Nullable | Injection site or location of the vaccine. Optional even when `category = 'Vaccine'`. |
+| other_name | text | Nullable | Name/title of the other health event. Required when `category = 'Other'`. |
+| other_description | text | Nullable | Additional details for the other health event. Optional even when `category = 'Other'`. |
+| note | text | Nullable | Free-text note applicable to any category. |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
+| updated_at | timestamptz | Not Null, Default: `now()`, Auto-updated by trigger | Timestamp of the last update; managed by the `health_logs_set_timestamp` trigger. |
+
+**Table: `milestone_logs`**
+
+
+| Column Name | Data Type | Constraints / Default | Description / Notes |
+| :-- | :-- | :-- | :-- |
+| id | uuid | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the milestone log entry. |
+| child_id | uuid | Not Null, Foreign Key to `children.id` (CASCADE) | The child this milestone belongs to. |
+| title | text | Not Null | Title or name of the milestone. |
+| category | milestone_category | Nullable, Default: `'Other'` | The category of the milestone. Enum: `milestone_category`. |
+| note | text | Nullable | Optional free-text note about the milestone. |
+| achieved_at | timestamptz | Not Null | The date/time the milestone was achieved. |
+| photo_url | text | Nullable | URL to a photo associated with the milestone. |
+| source | text | Nullable | Source or reference for the milestone (e.g. doctor, book, app). |
+| created_at | timestamptz | Not Null, Default: `now()` | Timestamp of when the record was created. |
+| updated_at | timestamptz | Not Null, Default: `now()`, Auto-updated by trigger | Timestamp of the last update; managed by the `milestone_logs_set_timestamp` trigger. |
 
 ## Basic Architecture
 
@@ -239,29 +259,19 @@ Client-side interactions with these APIs are typically handled via the Supabase 
 ## Known Issues and Future Enhancements List
 The following are missing features or known issues, both big and small, that would improve the experience of using the app:
 
-*   [ ] Guest mode (local only)
-    *   Dependencies: [local db]
-*   [ ] Back button fix on android
 *   [ ] Add custom popup alerts framework
-*   [ ] Add child management screens (add, remove, switch)
 *   [ ] Add caretaker account option (and caretaker permission manager)
-*   [ ] Add change password, change email, forgot password
-*   [ ] Fix time picker label in sleep tracker displaying incorrect label in android
-*   [ ] Improve implementation of reset field in sleep tracker (requires modularization of all components)
-*   [ ] Log editing feature
-    *   Dependencies: [db syncing, local db]
-*   [ ] Add milestones (s3 buckets for video and photo storage)
-*   [ ] Make choose time drop down smoother
+*   [ ] Add account management features (i.e., change password, change email, forgot password)
 *   [ ] Add splash screen
-*   [ ] Add logo
-*   [ ] Add sound effects
-*   [ ] Add sound effect settings
-    *   Dependencies: [sound effects]
+*   [ ] Add logo(s)
 *   [ ] Make stopwatch remember time in local storage after app exit
-*   [ ] Fix first time animation jump glitch with nativewind/react native reanimated
-*   [ ] Autoscroll provider to make sure we don't have to reimplement scrolling if UI takes too much space on every screen
-*   [ ] Implement calendar feature
-*   [ ] Add number of logs and activity graph to logs tab screen
-*   [ ] Implement log screen more than the basic bare bones implementation
+*   [ ] Add number of logs and activity graph to logs tab screen / calendar screen
+*   [ ] Fix the iOS-exclusive child management bug (see open issue in the repo)
+*   [ ] Buttons push multiple requests to the database or navigation stack when loading (see open issues)
+*   [ ] Non-descriptive error messages
+*   [ ] Use of `isTyping` state and `translate-y` tailwind class causing scrolling issues when creating logs
+*   [ ] Add loading indicators for async button presses
 
-```
+-------
+#### © Alex Ulbrich - 2024-2026
+(Developed by Bryant Shitabata, Jacob Cocheu, James Grant, Michael Nunzio, Nathan Johnston, Sonny Box, Srija Palla, and Yahir Gonzalez)

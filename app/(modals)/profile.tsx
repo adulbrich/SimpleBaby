@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     Alert
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/components/button';
@@ -15,7 +15,7 @@ import AddChildPopup from '@/components/add-child-popup';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/library/local-store';
 import supabase from '@/library/supabase-client';
-import { getActiveChildData, getChildren, saveNewChild } from '@/library/utils';
+import { getActiveChildData, getChildren, saveNewChild } from '@/library/remote-store';
 import stringLib from "@/assets/stringLibrary.json";
 
 /**
@@ -55,13 +55,13 @@ export default function Profile() {
                 await exitGuest();
 
                 // Send them back to auth entry
-                router.replace("/");
+                router.dismissTo("/");
             } else {
                 // Signed-in session sign-out: Supabase sign out
                 const { error } = await supabase.auth.signOut();
 
                 if (error) throw error;
-                router.replace("/");
+                router.dismissTo("/");
             }
         } catch (e: any) {
             Alert.alert("Sign out failed", e?.message ?? "Please try again.");
@@ -88,9 +88,10 @@ export default function Profile() {
                 throw new Error("Unable to find selected child");
             }
             // Update user session metadata with the active child
-            await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 data: { activeChildId: children[index].id, activeChild: "" },
             });
+            if (error) throw error;
         } catch (err) {
             Alert.alert("Error switching:", err instanceof Error ? err.message : 'Failed to change active child.');
 
@@ -118,8 +119,14 @@ export default function Profile() {
         };
     };
 
+    const routerPath = usePathname();
+
     useEffect(() => {
         const loadChildName = async () => {
+            // If the current page is not the profile page, don't check the child name
+            // This prevents errors when the user's only child is deleted from the active-child page
+            if (routerPath !== "/profile") return;
+
             try {
                 if (isGuest) {
                     const activeId = await getLocalActiveChildId();
@@ -150,7 +157,7 @@ export default function Profile() {
         };
 
         loadChildName();
-    }, [isGuest, session]);
+    }, [isGuest, session, routerPath]);
 
     useEffect(() => {
         if (!session) {
@@ -161,20 +168,20 @@ export default function Profile() {
     }, [session]);
 
     return (
-        <SafeAreaView className='p-4 flex-col justify-between flex-grow'>
+        <SafeAreaView className='modal-container flex-col justify-between flex-grow'>
             <ScrollView>
                 <View className='flex-col gap-4'>
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                    <View className='profile-item'>
+                        <Text className='profile-child-name-label'>
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameGuest}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameGuest}>
                                 👶 {childName}
                             </Text>
                         ) : (
-                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <Text className='p-4 text-2xl scale-100 font-bold bg-white rounded-full border-[1px] border-gray-300 text-[#f9a000]' testID={testIDs.childNameButton}>
+                            <TouchableOpacity className='shrink' onPress={() => router.push("/(modals)/active-child")}>
+                                <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameButton}>
                                     👶 {childName}
                                 </Text>
                             </TouchableOpacity>
@@ -183,14 +190,14 @@ export default function Profile() {
                     { isGuest ? (
                         undefined
                     ) : loadingNames ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.loadingNames}>
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent'>
+                        <View className='profile-item' testID={testIDs.loadingNames}>
+                            <Text className='profile-value'>
                                 Loading Child Profiles...
                             </Text>
                         </View>
                     ) : namesError ? (
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4' testID={testIDs.namesError}>
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent text-red-600'>
+                        <View className='profile-item' testID={testIDs.namesError}>
+                            <Text className='profile-value text-red-600'>
                                 Error loading child names
                             </Text>
                         </View>
@@ -201,8 +208,8 @@ export default function Profile() {
                             onPress={() => setShowSwitchChild(true)}
                             testID={testIDs.switchChildButton}
                         >
-                            <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                                <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                            <View className='profile-item'>
+                                <Text className='profile-child-name-label'>
                                     🔃 Switch Child
                                 </Text>
                             </View>
@@ -212,22 +219,22 @@ export default function Profile() {
                         onPress={() => setShowAddChild(true)}
                         testID={testIDs.addChildButton}
                     >
-                        <View className='bg-gray-200 rounded-full flex-row justify-between gap-4 mb-8'>
-                            <Text className='p-4 text-2xl scale-100 border-[1px] border-transparent'>
+                        <View className='profile-item mb-8'>
+                            <Text className='profile-child-name-label'>
                                 ✚ Add Child
                             </Text>
                         </View>
                     </TouchableOpacity>}
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             👤 Name
                         </Text>
-                        <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace'>
+                        <Text numberOfLines={1} ellipsizeMode='tail' className='profile-value'>
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             👪 Caretakers
                         </Text>
                         <TouchableOpacity
@@ -239,13 +246,13 @@ export default function Profile() {
                             }
                             testID={testIDs.caretakersButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text className='profile-value-link'>
                                 Manage
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             📧 Email
                         </Text>
                         <TouchableOpacity
@@ -259,15 +266,16 @@ export default function Profile() {
                                     player.play();
                                 }
                             }
+                            className='shrink'
                             testID={testIDs.emailButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-value-link'>
                                 {displayEmail}
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    {!isGuest && <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    {!isGuest && <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             🔑 Password
                         </Text>
                         <TouchableOpacity
@@ -279,13 +287,13 @@ export default function Profile() {
                             }
                             testID={testIDs.passwordButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-blue-500'>
+                            <Text className='profile-value-link'>
                                 Change my password
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    <View className='bg-gray-200 rounded-full flex-row justify-between gap-4'>
-                        <Text className='p-4 text-lg scale-100 bg-white rounded-full border-[1px] border-gray-300'>
+                    <View className='profile-item'>
+                        <Text className='profile-item-text'>
                             🤖 App Version
                         </Text>
                         <TouchableOpacity
@@ -297,7 +305,7 @@ export default function Profile() {
                             }
                             testID={testIDs.appVersionButton}
                         >
-                            <Text className='p-4 text-lg scale-100 border-[1px] border-transparent monospace text-gray-500'>
+                            <Text className='profile-value-light'>
                                 v0.1a
                             </Text>
                         </TouchableOpacity>
@@ -309,8 +317,7 @@ export default function Profile() {
                     <Button
                         text={signOutLabel}
                         action={handleSignOut}
-                        buttonClass='bg-red-600 border-gray-500'
-                        textClass='font-bold dark:text-white'
+                        buttonClass='button-red'
                         testID={testIDs.signOutButton}
                     />
                 )}

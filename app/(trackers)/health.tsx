@@ -13,15 +13,16 @@ import {
 	Keyboard,
 	ScrollView,
 	Text,
-	TextInput,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/library/auth-provider";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
-import stringLib from "../../assets/stringLibrary.json";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
+import stringLib from "@/assets/stringLibrary.json";
+import NoteEntry from "@/components/note-entry";
 
 // Define the shape of the health log data object with varying nested properties
 type HealthLog = {
@@ -267,14 +268,13 @@ export default function Health() {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 			{/*ScrollView Prevents items from flowing off page on small devices*/}
-
-			<View
-				className={`main-container justify-between transition-all ${
-					isTyping ? "-translate-y-[40%]" : "translate-y-0"
-				}`}
-				style={{ paddingBottom: insets.bottom }}
-			>
-				<ScrollView>
+			<ScrollView>
+				<View
+					className={`main-container justify-between gap-6 transition-all duration-300 transition-all ${
+						isTyping ? "-translate-y-[40%]" : "translate-y-0"
+					}`}
+					style={{ paddingBottom: insets.bottom }}
+				>
 					{/* Render the health input form module with update handlers */}
 					<HealthModule
 						key={`health-module-${reset}`}
@@ -288,59 +288,45 @@ export default function Health() {
 						testID="health-main-inputs"
 					/>
 					{/* Multiline input for additional notes */}
-					<View className="bottom-5 pt-5">
-						<View className="items-start top-5 left-3 z-10">
-							<Text className="bg-gray-200 p-3 rounded-xl font">
-								{stringLib.uiLabels.noteLabel}
-							</Text>
-						</View>
-						<View className="p-4 pt-9 bg-white rounded-xl z-0">
-							<TextInput
-								className=""
-								placeholderTextColor={"#aaa"}
-								placeholder={`i.e. ${
-									healthLog.category === "Growth"
-										? "growth is steady"
-										: healthLog.category === "Activity"
-											? "enjoyed tummy time"
-											: "took medicine without fuss"
-								}`}
-								multiline={true}
-								maxLength={200}
-								onFocus={() => setIsTyping(true)}
-								onBlur={() => setIsTyping(false)}
-								value={healthLog.note}
-								onChangeText={(note) =>
-									setHealthLog((prev) => ({
-										...prev,
-										note,
-									}))
-								}
-								testID="health-note-entry"
-							/>
-						</View>
+					<NoteEntry
+						note={healthLog.note}
+						setNote={(note) =>
+							setHealthLog((prev) => ({
+								...prev,
+								note,
+							}))
+						}
+						setIsTyping={setIsTyping}
+						placeholder={
+							healthLog.category === "Growth" ? stringLib.uiLabels.healthGrowthNotePlaceholder :
+							healthLog.category === "Activity" ? stringLib.uiLabels.healthActivityNotePlaceholder :
+							healthLog.category === "Meds" ? stringLib.uiLabels.healthMedsNotePlaceholder :
+							healthLog.category === "Vaccine" ? stringLib.uiLabels.healthVaccineNotePlaceholder :
+							stringLib.uiLabels.healthOtherNotePlaceholder
+						}
+						testID="health-note-entry"
+					/>
 
-						{/* Action buttons to save or reset form */}
-						<View className="flex-row gap-2 pb-5 pt-5">
-							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 grow"
-								onPress={handleSaveHealthLog}
-								disabled={isSaving}
-								testID="health-save-log-button"
-							>
-								<Text>➕ Add to log</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								className="rounded-full p-4 bg-red-100 items-center"
-								onPress={() => handleResetFields()}
-								testID="health-reset-form-button"
-							>
-								<Text>🗑️ Reset fields</Text>
-							</TouchableOpacity>
-						</View>
+					{/* Action buttons to save or reset form */}
+					<View className="flex-row gap-2 pb-5 pt-3">
+						<TouchableOpacity
+							className="tracker-button-save"
+							onPress={handleSaveHealthLog}
+							disabled={isSaving}
+							testID="health-save-log-button"
+						>
+							<Text className="tracker-form-button-text">➕ Add to log</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							className="tracker-button-reset"
+							onPress={() => handleResetFields()}
+							testID="health-reset-form-button"
+						>
+							<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</View>
+				</View>
+			</ScrollView>
 		</TouchableWithoutFeedback>
 	);
 }

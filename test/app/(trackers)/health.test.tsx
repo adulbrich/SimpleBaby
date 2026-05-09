@@ -3,7 +3,9 @@ import Health from "@/app/(trackers)/health";
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import HealthModule, { HealthCategory } from "@/components/health-module";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("expo-router", () => ({
@@ -20,8 +22,14 @@ jest.mock("react-native", () => {
 
 jest.mock("@/components/health-module.tsx", () => {
     const View = jest.requireActual("react-native").View;
-    const HealthModuleMock = jest.fn(({testID}: {testID?: string}) => (<View testID={testID}></View>));
+    const HealthModuleMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
     return HealthModuleMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("@/library/auth-provider", () => ({
@@ -30,6 +38,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 
@@ -92,11 +103,12 @@ async function setHealthInputs({
     if (date) {
         await act(() => onDateUpdate?.(date));
     }
-    if (note) {
-        await userEvent.type(
-            screen.getByTestId("health-note-entry"),
-            note
-        );
+
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -130,11 +142,8 @@ describe("Track health screen", () => {
         render(<Health/>);
 
         // write something in the note entry...
-        await userEvent.type(
-            screen.getByTestId("health-note-entry"),
-            testNote
-        );
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();  // ensure the typed note can be found
+        await setHealthInputs({ note: testNote });
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
 
         const mainInputs = screen.getByTestId("health-main-inputs");  // get the displayed <HealthModule/>
 
@@ -143,7 +152,7 @@ describe("Track health screen", () => {
         );
 
         // ensure note is no longer present
-        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
         // ensure new instance of <HealthModule/> is being used
         expect(screen.getByTestId("health-main-inputs") === mainInputs).toBeFalsy();
     });
@@ -176,7 +185,7 @@ describe("Track health screen", () => {
         for (const testInput of testInputs) {
             (Alert.alert as jest.Mock).mockClear();  // clear calls between iterations
 
-            // library/log-functions.ts -> formatStringList() should be mocked to return a test string
+            // library/utils.ts -> formatStringList() should be mocked to return a test string
             // This is to ensure its return value is displayed properly
             (formatStringList as jest.Mock).mockImplementationOnce(
                 () => testFormattedList

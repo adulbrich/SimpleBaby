@@ -2,7 +2,7 @@ import { render, screen, userEvent, act, waitFor } from "@testing-library/react-
 import { router } from "expo-router";
 import Profile from "@/app/(modals)/profile";
 import { useAuth } from "@/library/auth-provider";
-import { getActiveChildData, getChildren, saveNewChild } from "@/library/utils";
+import { getActiveChildData, getChildren, saveNewChild } from "@/library/remote-store";
 import supabase from "@/library/supabase-client";
 import { Alert } from "react-native";
 import AddChildPopup from "@/components/add-child-popup";
@@ -16,9 +16,10 @@ const testIDs = stringLib.testIDs.profile;
 
 jest.mock("expo-router", () => ({
     router: {
-        replace: jest.fn(),
+        dismissTo: jest.fn(),
         push: jest.fn(),
     },
+    usePathname: () => "/profile",
 }));
 
 jest.mock("expo-audio", () => ({
@@ -48,7 +49,7 @@ jest.mock("@/library/auth-provider", () => {
     };
 });
 
-jest.mock("@/library/utils", () => ({
+jest.mock("@/library/remote-store", () => ({
     getActiveChildData: jest.fn(async () => ({ success: true })),
     getChildren: jest.fn(),
     saveNewChild: jest.fn(),
@@ -114,7 +115,7 @@ function manualPromise(): {
 describe("Profile screen", () => {
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -174,7 +175,7 @@ describe("Profile screen", () => {
         const { promise: waitForChildData, resolve: resolveChildData } = manualPromise();
         const { promise: waitForChildDataCalled, resolve: resolveChildDataCalled } = manualPromise();
 
-        // library/utils.ts -> getActiveChild() should be mocked to return:
+        // library/remote-store.ts -> getActiveChild() should be mocked to return:
         // a Promise that can be manually resolved to:
         // { success: /* truthy value */, childName: /* string */ }
         const originalMock = (getActiveChildData as jest.Mock).getMockImplementation();
@@ -215,7 +216,7 @@ describe("Profile screen", () => {
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
         expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
     });
 
     test("Redirects on successful sign out", async () => {
@@ -224,15 +225,15 @@ describe("Profile screen", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 
     test("Displays loading message for child names/switching", async () => {
         const { promise: waitForGetChildren, resolve: resolveGetChildren } = manualPromise();
         const { promise: waitForGetChildrenCalled, resolve: resolveGetChildrenCalled } = manualPromise();
 
-        // library/utils.ts -> getActiveChild() should be mocked to return:
+        // library/remote-store.ts -> getActiveChild() should be mocked to return:
         // a Promise that can be manually resolved to:
         // /* {}[] with length >= 2 */
         const originalMock = (getActiveChildData as jest.Mock).getMockImplementation();
@@ -262,7 +263,7 @@ describe("Profile screen", () => {
     test("Displays child names error", async () => {
         const testErrorMessage = "test error";
 
-        // library/utils.ts->getChildren() should be mocked to throw an error
+        // library/remote-store.ts->getChildren() should be mocked to throw an error
         // this should cause error handling in app/(modals)/profile.tsx -> fetchChildNames()
         (getChildren as jest.Mock).mockImplementation(
             async () => { throw new Error(testErrorMessage); }
@@ -282,7 +283,7 @@ describe("Profile screen", () => {
     });
 
     test("Hides switch child button when user has no children", async () => {
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // /* {}[] with length = 0 */
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => []
@@ -299,7 +300,7 @@ describe("Profile screen", () => {
     });
 
     test("Hides switch child button when user has 1 child", async () => {
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // /* {}[] with length = 1 */
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => [{}]
@@ -316,7 +317,7 @@ describe("Profile screen", () => {
     });
 
     test("Shows switch child button when user has 2 children", async () => {
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // /* {}[] with length = 2 */
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => [{}, {}]
@@ -378,7 +379,7 @@ describe("Profile screen", () => {
     test("Catch saveNewChild() error", async () => {
         const testErrorMessage = "test error";
 
-        // library/utils.ts->saveNewChild() should be mocked to throw an error
+        // library/remote-store.ts->saveNewChild() should be mocked to throw an error
         // this should cause error handling in app/(modals)/profile.tsx -> handleSaveChild()
         (saveNewChild as jest.Mock).mockImplementationOnce(
             async () => { throw new Error(testErrorMessage); }
@@ -398,7 +399,7 @@ describe("Profile screen", () => {
         // the add child popup should still be visible
         expect((AddChildPopup as jest.Mock).mock.lastCall[0].visible).toBe(true);
 
-        // error message generated by library/utils.ts -> saveNewChild()
+        // error message generated by library/remote-store.ts -> saveNewChild()
         // Alert.alert() called by app/(modals)/profile.tsx -> handleSaveChild()
         expect((Alert.alert as jest.Mock).mock.lastCall[0]).toBe(`Error`);
         expect((Alert.alert as jest.Mock).mock.lastCall[1]).toBe(testErrorMessage);
@@ -454,7 +455,7 @@ describe("Profile screen", () => {
     });
 
     test("Displays switch child popup", async () => {
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // /* {}[] with length >= 2 */
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => [{}, {}]
@@ -476,13 +477,13 @@ describe("Profile screen", () => {
         const testChildren = ["test name 1", "test name 2", "test name 3"];
         const testActiveChild = "test active child";
 
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // { name: /* test name */ }[]
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => testChildren.map(name => ({ name }))
         );
 
-        // library/utils.ts -> getActiveChild() should be mocked to return:
+        // library/remote-store.ts -> getActiveChild() should be mocked to return:
         // { success: /* truthy value */, childName: /* test name */ }
         (getActiveChildData as jest.Mock).mockImplementationOnce(
             async () => ({ success: true, childName: testActiveChild }));
@@ -500,7 +501,7 @@ describe("Profile screen", () => {
     });
 
     test("Hides switch child popup on close", async () => {
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // /* {}[] with length >= 2 */
         (getChildren as jest.Mock).mockImplementationOnce(
             async () => [{}, {}]
@@ -529,11 +530,11 @@ describe("Profile screen", () => {
         const testSwitch = -1;  // should not be < testChildren.length and >= 0
         const testActiveChild = "test active child";
 
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // {}[]
         (getChildren as jest.Mock).mockImplementationOnce(async () => testChildren);
 
-        // library/utils.ts -> getActiveChild() should be mocked to return:
+        // library/remote-store.ts -> getActiveChild() should be mocked to return:
         // { success: /* truthy value */, childName: /* test name */ }
         // this is so that loading the child name causes no errors/Alert.alert calls
         const originalMock = (getActiveChildData as jest.Mock).getMockImplementation();
@@ -573,7 +574,7 @@ describe("Profile screen", () => {
     //     const testChildren = [{}, {}, {}];
     //     const testSwitch = 1;  // must be < testChildren.length and >= 0
 
-    //     // library/utils.ts->getChildren() should be mocked to return:
+    //     // library/remote-store.ts->getChildren() should be mocked to return:
     //     // {}[]
     //     (getChildren as jest.Mock).mockImplementationOnce(async () => testChildren);
 
@@ -612,7 +613,7 @@ describe("Profile screen", () => {
         ];
         const testSwitch = 2;  // must be < testChildren.length and >= 0
 
-        // library/utils.ts->getChildren() should be mocked to return:
+        // library/remote-store.ts->getChildren() should be mocked to return:
         // { name: /* test name */, id: /* test value */ }[]
         (getChildren as jest.Mock).mockImplementationOnce(async () => testChildren);
 
@@ -659,7 +660,7 @@ describe("profile screen (guest mode)", () => {
     
     beforeEach(() => {
         // to clear the .mock.calls array
-        (router.replace as jest.Mock).mockClear();
+        (router.dismissTo as jest.Mock).mockClear();
         (Alert.alert as jest.Mock).mockClear();
         (AddChildPopup as jest.Mock).mockClear();
         (SwitchChildPopup as jest.Mock).mockClear();
@@ -734,26 +735,24 @@ describe("profile screen (guest mode)", () => {
         expect(screen.getByText("Guest Child", { exact: false })).toBeTruthy();
     });
 
-    // this test awaiting github issue # 169
-    // test("Catches sign out error", async () => {
-    //     const testErrorMessage = "test error";
+    test("Catches sign out error", async () => {
+        const testErrorMessage = "test error";
 
-    //     // library/auth-provider.tsx -> exitGuest should be mocked to return:
-    //     // { error: /* truthy value */ }
-    //     // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
-    //     updateUseAuth({ exitGuest: async () => ({ error: true })});
+        // library/auth-provider.tsx -> exitGuest should be mocked to throw an error
+        // this should cause error handling in app/(modals)/profile.tsx -> handleSignOut()
+        updateUseAuth({ exitGuest: async () => { throw new Error(testErrorMessage); }});
 
-    //     render(<Profile/>);
-    //     await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        render(<Profile/>);
+        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
 
-    //     await userEvent.press(screen.getByTestId(testIDs.signOutButton));
+        await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-    //     expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
-    //     expect(router.replace as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
+        expect(Alert.alert as jest.Mock).toHaveBeenLastCalledWith("Sign out failed", testErrorMessage);
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(0);  // user was not redirected
 
-    //     // revert library/auth-provider.tsx -> exitGuest to not cause any errors
-    //     updateUseAuth({ exitGuest: async () => undefined});
-    // });
+        // revert library/auth-provider.tsx -> exitGuest to not cause any errors
+        updateUseAuth({ exitGuest: async () => undefined});
+    });
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
@@ -761,7 +760,7 @@ describe("profile screen (guest mode)", () => {
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
-        expect(router.replace as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
-        expect(router.replace as jest.Mock).toHaveBeenLastCalledWith("/");
+        expect(router.dismissTo as jest.Mock).toHaveBeenCalledTimes(1);  // user was redirected
+        expect(router.dismissTo as jest.Mock).toHaveBeenLastCalledWith("/");
     });
 });

@@ -45,7 +45,7 @@ export default function AddChildPopup(
                     intensity={10}
                     className='grow items-center justify-center'
                 >
-                    <View className='p-8 w-[80%] bg-white dark:bg-black rounded-3xl border-[1px] border-gray-300 dark:border-gray-600'>
+                    <View className='popup'>
                         <Text className='subheading font-bold mb-6'>
                             {altTitle ?? "Add a Child"}
                         </Text>
@@ -64,15 +64,13 @@ export default function AddChildPopup(
                         <Button
                             text='Save New Child'
                             action={handleSave}
-                            textClass='font-bold'
                             buttonClass='button-normal mb-4'
                             testID={testIDs.saveButton}
                         />
                         {handleCancel && <Button
                             text='Cancel'
                             action={handleCancel}
-                            textClass='font-bold'
-                            buttonClass='bg-red-600 border-gray-500'
+                            buttonClass='button-red'
                             testID={testIDs.cancelButton}
                         />}
                     </View>

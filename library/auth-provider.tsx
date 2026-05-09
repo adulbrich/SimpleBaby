@@ -8,7 +8,7 @@ import {
     useState,
 } from 'react';
 import supabase from '@/library/supabase-client';
-import { formatName } from './utils';
+import { formatName } from '@/library/utils';
 import { enterGuestMode, exitGuestMode, isGuestMode } from '@/library/local-store';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,8 +48,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         try {
             await enterGuestMode();
             setIsGuest(true);
-        } catch (err: any) {
-            return { error: err };
+        } catch {
+            throw new Error("Unable to access local storage.");
         }
     };
 
@@ -57,8 +57,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         try {
             await exitGuestMode();
             setIsGuest(false);
-        } catch (err: any) {
-            return { error: err };
+        } catch {
+            throw new Error("Unable to access local storage.");
         }
     };
 

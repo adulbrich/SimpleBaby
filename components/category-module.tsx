@@ -20,9 +20,9 @@ export default function CategoryModule<Category extends string>({
     testID?: string
 }) {
     return (
-        <View className='stopwatch-primary' testID={testID}>
-            <View className='items-start bottom-5 left-3'>
-                <Text className='bg-gray-200 p-3 rounded-xl font'>{title}</Text>
+        <View className='tracker-section' testID={testID}>
+            <View className='tracker-section-label'>
+                <Text className='tracker-section-label-text'>{title}</Text>
             </View>
             <View className="flex-row flex-wrap gap-4 justify-center mb-6">
                 {categoryList.map(({ label, icon }) => (

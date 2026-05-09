@@ -10,15 +10,11 @@ import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
-import {
-	updateRow,
-	deleteRow,
-} from "@/library/local-store";
+import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-
 import stringLib from "../../assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
-import { fetchLogs } from "@/library/log-functions";
+import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 
 interface FeedingLog {
 	id: string;
@@ -71,41 +67,6 @@ const FeedingLogsView: React.FC = () => {
 	useEffect(() => {
 		fetchFeedingLogs();
 	}, [fetchFeedingLogs]);
-
-	const handleDelete = async (id: string) => {
-		setDeleteAlertVisible(true);
-		Alert.alert("Delete Entry", stringLib.warnings.logDeletionConfirmation, [
-			{ text: "Cancel", style: "cancel", onPress: () => { setDeleteAlertVisible(false); } },
-			{
-				text: "Delete",
-				style: "destructive",
-				onPress: async () => {
-					if (isGuest) {
-						const success = await deleteRow("feeding_logs", id);
-						if (!success) {
-							Alert.alert("Error deleting log");
-							return;
-						}
-						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
-						return;
-					} else {
-						const { error } = await supabase
-							.from("feeding_logs")
-							.delete()
-							.eq("id", id);
-
-						if (error) {
-							Alert.alert("Error deleting log");
-							return;
-						}
-
-						setFeedingLogs((prev) => prev.filter((log) => log.id !== id));
-					}
-					setDeleteAlertVisible(false);
-				},
-			},
-		]);
-	};
 
 	const handleSaveEdit = async () => {
 		if (!editingLog) return;
@@ -173,7 +134,13 @@ const FeedingLogsView: React.FC = () => {
 				setEditModalVisible(true);
 				setEditingLog(item);
 			}}
-			onDelete={() => handleDelete(item.id)}
+			onDelete={() => handleDeleteLog<FeedingLog>(
+				"feeding_logs",
+				item.id,
+				isGuest,
+				setDeleteAlertVisible,
+				setFeedingLogs,
+			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
 				{ type: "title", value: format(item.feeding_time, "MMM dd, yyyy") },
@@ -187,14 +154,14 @@ const FeedingLogsView: React.FC = () => {
 	);
 
 	return (
-		<View className="flex-1 bg-gray-50 p-4">
-			<Text className="text-2xl font-bold mb-4">🍽️ Feeding Logs</Text>
+		<View className="main-container">
+			<Text className="logs-heading">🍽️ Feeding Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
-				<Text className="text-red-600 text-center" testID="feeding-logs-loading-error">Error: {error}</Text>
+				<Text className="logs-error" testID="feeding-logs-loading-error">Error: {error}</Text>
 			) : feedingLogs.length === 0 ? (
-				<Text>
+				<Text className="aside-text">
 					You don&apos;t have any feeding logs
 					{activeChildName ? ` for ${activeChildName}` : ""} yet!
 				</Text>

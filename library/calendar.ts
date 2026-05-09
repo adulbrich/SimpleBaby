@@ -1,21 +1,9 @@
-import { startOfDay, startOfMonth, addDays, addMonths, format } from "date-fns";
+import { startOfDay, startOfMonth, addDays, addMonths } from "date-fns";
 import supabase from "@/library/supabase-client";
-import { decryptData } from "@/library/crypto";
+import { safeDecrypt } from "@/library/crypto";
+import { toYMD } from "@/library/utils";
 
 type CalendarLogType = "Sleep" | "Feeding" | "Diaper" | "Nursing" | "Health" | "Milestone";
-
-async function safeDecrypt(value: string | null): Promise<string> {
-    if (!value) {
-        return "";
-    } else if (!value.includes("U2FsdGVkX1")) {
-        return value;
-    }
-    try {
-        return await decryptData(value);
-    } catch {
-        return "";
-    }
-}
 
 export type CalendarLog = {
     type: CalendarLogType;
@@ -25,10 +13,6 @@ export type CalendarLog = {
     details?: string;
     raw: any;
 };
-
-function toYMD(d: Date) {
-    return format(d, "yyyy-MM-dd");
-}
 
 export async function fetchLogsForDay(childId: string, date: Date): Promise<CalendarLog[]> {
     const dayStart = startOfDay(date);

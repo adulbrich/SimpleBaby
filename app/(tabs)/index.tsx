@@ -10,7 +10,7 @@ import {
 	createChild,
 	getActiveChildId as getLocalActiveChildId,
 } from "@/library/local-store";
-import { saveNewChild } from "@/library/utils";
+import { saveNewChild } from "@/library/remote-store";
 import AddChildPopup from "@/components/add-child-popup";
 import stringLib from "@/assets/stringLibrary.json";
 

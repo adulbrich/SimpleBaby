@@ -5,13 +5,10 @@ import { encryptData } from "@/library/crypto";
 import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
-import {
-	updateRow,
-	deleteRow,
-} from "@/library/local-store";
+import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
-import { fetchLogs } from "@/library/log-functions";
+import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -43,7 +40,6 @@ jest.mock("@/library/auth-provider", () => ({
 }));
 
 jest.mock("@/library/local-store", () => ({
-    deleteRow: jest.fn(async () => true),
     updateRow: jest.fn(async () => true),
 }));
 
@@ -59,6 +55,7 @@ jest.mock("@/components/log-item.tsx", () => {
 
 jest.mock("@/library/log-functions", () => ({
     fetchLogs: jest.fn(),
+    handleDeleteLog: jest.fn(),
 }));
 
 
@@ -107,13 +104,14 @@ describe("Feeding logs screen", () => {
         (supabase.from("").update as unknown as jest.Mock).mockClear();
         (EditLogPopup as jest.Mock).mockClear();
         (LogItem as jest.Mock).mockClear();
+        (handleDeleteLog as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
 
     test("Catch fetchLogs() error", async () => {
         const testErrorMessage = "test error";
-    
+
         // library/log-functions.ts -> fetchLogs() should be mocked to return:
         // { success: /* falsy value */, error: /* string */ }
         // This should cause error handling in app/(logs)/feeding-logs.tsx -> fetchFeedingLogs()
@@ -160,7 +158,7 @@ describe("Feeding logs screen", () => {
             const logItems = (LogItem as jest.Mock).mock.calls;
             const logItemProps = logItems.find(call => call[0].id === log.id)[0];
             const displayValues = logItemProps.logData.map((item: any) => item.value);
-            
+
             expect(displayValues.includes(format(new Date(log.feeding_time), 'MMM dd, yyyy'))).toBeTruthy();
             expect(displayValues.includes(format(new Date(log.feeding_time), 'h:mm a'))).toBeTruthy();
             expect(displayValues.includes(log.category)).toBeTruthy();
@@ -170,31 +168,70 @@ describe("Feeding logs screen", () => {
         }
     });
 
-    test("Displays delete log confirmation", async () => {
+    test("Calls handleDeleteLog() with correct values", async () => callsHandleDeleteLog(false));
+
+    test("Blocks edit/delete when deleting", async () => {
         render(<FeedingLogsView/>);
         await screen.findByTestId("feeding-logs");  // wait for log list to render
 
         for (const log of TEST_LOGS) {
-            await pressButton(log.id, "delete");
+            // buttons should not be disabled
+            let logItems = (LogItem as jest.Mock).mock.calls.slice(-TEST_LOGS.length);
+            let logItemProps = logItems.find(call => call[0].id === log.id)[0];
+            expect(logItemProps.buttonsDisabled).toBe(false);
 
-            // Alert.alert called by feeding-logs.tsx -> handleDelete()
-            expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Delete Entry");
-            expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe("Are you sure you want to delete this log?");
-            expect((Alert.alert as jest.Mock).mock.calls[0][2][0].text).toBe("Cancel");  // cancel button
-            expect((Alert.alert as jest.Mock).mock.calls[0][2][1].text).toBe("Delete");  // delete button
+            await pressButton(log.id, "delete");
+            // record that the delete alert is visible
+            const setAlertVisible = (handleDeleteLog as jest.Mock).mock.calls[0][3];
+            await act(async () => setAlertVisible(true));
+
+            // buttons should be disabled now
+            logItems = (LogItem as jest.Mock).mock.calls.slice(-TEST_LOGS.length);
+            logItemProps = logItems.find(call => call[0].id === log.id)[0];
+            expect(logItemProps.buttonsDisabled).toBe(true);
+
+            // record delete alert as hidden before next iteration
+            await act(async () => setAlertVisible(false));
+
+            // buttons should be enabled again
+            logItems = (LogItem as jest.Mock).mock.calls.slice(-TEST_LOGS.length);
+            logItemProps = logItems.find(call => call[0].id === log.id)[0];
+            expect(logItemProps.buttonsDisabled).toBe(false);
         }
     });
 
-    test("Catches delete log error", async () => catchDeleteError(() =>
-        // supabase.from().delete().eq() should be mocked to return:
-        // { error: /* truthy value */ }
-        // This should cause error handling in callback defined in app/(logs)/feeding-logs.tsx -> handleDelete
-        (supabase.from("").delete().eq as unknown as jest.Mock).mockImplementationOnce(
-            async () => ({ error: true })
-        )
-    ));
+    test("Updates displayed logs on delete", async () => {
+        render(<FeedingLogsView/>);
+        await screen.findByTestId("feeding-logs");  // wait for log list to render
 
-    test("Deletes log", deletesLog);
+        const deletedLog = TEST_LOGS[0];  // choose any log
+        const updatedLogs = TEST_LOGS.filter(log => log.id !== log.id);
+
+        // ensure log was passed to <LogItem/>
+        const initialLogItems = (LogItem as jest.Mock).mock.calls;
+        expect(initialLogItems.find(call => call[0].id === deletedLog.id)).toBeTruthy();
+
+        // press delete
+        await pressButton(deletedLog.id, "delete");
+
+        (LogItem as jest.Mock).mockClear();  // clear the calls of <LogItem/>
+
+        // get updater from handleDeleteLog()
+        const updateLogs = (handleDeleteLog as jest.Mock).mock.calls[0][4];
+        await act(async () => updateLogs((value: typeof TEST_LOGS) => {
+            expect(value).toBe(TEST_LOGS);
+            return updatedLogs;
+        }));
+
+        // confirm deleted log was not rerendered
+        const updatedLogItems = (LogItem as jest.Mock).mock.calls;
+        expect(updatedLogItems.find(call => call[0].id === deletedLog.id)).toBeFalsy();
+
+        // confirm all logs in updated list are shown
+        for (const log of updatedLogs) {
+            expect(updatedLogItems.find(call => call[0].id === log.id)).toBeTruthy();
+        }
+    });
 
     test("Displays edit log", async () => {
         render(<FeedingLogsView/>);
@@ -202,11 +239,11 @@ describe("Feeding logs screen", () => {
 
         // open edit log pop-up
         await pressButton(TEST_LOGS[0].id, "edit");
-                
+
         // ensure popup is in DOM
         expect(screen.getByTestId("feeding-logs-edit-popup")).toBeTruthy();
         // Ensure popup has been shown
-        expect((EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].popupVisible).toBe(true);
+        expect((EditLogPopup as jest.Mock).mock.lastCall[0].popupVisible).toBe(true);
     });
 
     test("Passes current values to edit log pop-up", async () => {
@@ -216,10 +253,10 @@ describe("Feeding logs screen", () => {
         for (const log of TEST_LOGS) {
             // open edit log pop-up
             await pressButton(log.id, "edit");
-            
+
             // retrieve current editingLog from <EditingLogPopup/>
-            const editingLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].editingLog;
-            
+            const editingLog = (EditLogPopup as jest.Mock).mock.lastCall[0].editingLog;
+
             // check field values
             expect(editingLog.category.value).toBe(log.category);
             expect(editingLog.item_name.value).toBe(log.item_name);
@@ -243,9 +280,9 @@ describe("Feeding logs screen", () => {
 
             // open edit log pop-up
             await pressButton(log.id, "edit");
-            
+
             // submit edit
-            const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+            const submitCallback = (EditLogPopup as jest.Mock).mock.lastCall[0].handleSubmit;
             await act(async () => submitCallback());
 
             // Alert.alert called by feeding-logs.tsx -> handleSaveEdit()
@@ -286,22 +323,14 @@ describe("feeding logs screen (guest mode)", () => {
         (Alert.alert as jest.Mock).mockClear();
         (EditLogPopup as jest.Mock).mockClear();
         (LogItem as jest.Mock).mockClear();
+        (handleDeleteLog as jest.Mock).mockClear();
         // to revert to showing errors:
         jest.spyOn(console, "error").mockRestore();
     });
 
     test("Renders log buttons (guest)", rendersLogItems);
 
-    test("Catches delete log error (guest)", async () => catchDeleteError(() =>
-        // library/local-store.ts -> deleteRow() should be mocked to return:
-        // /* falsy value */
-        // This should cause error handling in callback defined in app/(logs)/feeding-logs.tsx -> handleDelete
-        (deleteRow as jest.Mock).mockImplementationOnce(
-            async () => false
-        )
-    ));
-
-    test("Deletes log (guest)", deletesLog);
+    test("Calls handleDeleteLog() with correct values (guest)", async () => callsHandleDeleteLog(true));
 
     test("Catch supabase error edit log", async () => catchUpdateError(() =>
         // library/local-store.ts -> updateRow should be mocked to return:
@@ -337,51 +366,18 @@ async function rendersLogItems() {
     }
 }
 
-async function catchDeleteError(mockFailingDelete: () => void) {
+async function callsHandleDeleteLog(isGuest: boolean) {
     render(<FeedingLogsView/>);
     await screen.findByTestId("feeding-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        mockFailingDelete();
-
-        // press delete
         await pressButton(log.id, "delete");
-
-        // Alert.alert called by feeding-logs.tsx -> handleDelete()
-        const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
-        await act(deleteHandler);  // call delete handler (user confirms delete)
-
-        // Alert.alert called by feeding-logs.tsx -> handleDelete() -> anonomous callback
-        expect((Alert.alert as jest.Mock).mock.calls[1][0]).toBe("Error deleting log");
-        
-        (Alert.alert as jest.Mock).mockClear();  // clear .mock.calls array for next loop
+        expect((handleDeleteLog as jest.Mock).mock.lastCall[0]).toBe("feeding_logs");
+        expect((handleDeleteLog as jest.Mock).mock.lastCall[1]).toBe(log.id);
+        expect(!!(handleDeleteLog as jest.Mock).mock.lastCall[2]).toBe(isGuest);
     }
-}
 
-async function deletesLog() {
-    render(<FeedingLogsView/>);
-    await screen.findByTestId("feeding-logs");  // wait for log list to render
-
-    for (const log of TEST_LOGS) {
-        // ensure log is still present
-        let logItems = (LogItem as jest.Mock).mock.calls;
-        expect(logItems.find(call => call[0].id === log.id)).toBeTruthy();
-
-        // press delete
-        await pressButton(log.id, "delete");
-
-        (LogItem as jest.Mock).mockClear();  // clear the calls of <LogItem/>
-        logItems = (LogItem as jest.Mock).mock.calls;  // track which items are re-rendered from this point onwards
-
-        // Alert.alert called by feeding-logs.tsx -> handleDelete()
-        const deleteHandler = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress as () => Promise<void>;
-        await act(deleteHandler);  // call delete handler (user confirms delete)
-
-        // confirm deleted log was not rerendered
-        expect(logItems.find(call => call[0].id === log.id)).toBeFalsy();
-        
-        (Alert.alert as jest.Mock).mockClear();  // clear .mock.calls array for next loop
-    }
+    expect(handleDeleteLog).toHaveBeenCalledTimes(TEST_LOGS.length);  // once for each log
 }
 
 async function catchUpdateError(mockFailingEdit: () => void) {
@@ -390,12 +386,12 @@ async function catchUpdateError(mockFailingEdit: () => void) {
 
     for (const log of TEST_LOGS) {
         mockFailingEdit();
-    
+
         // open edit log pop-up
         await pressButton(log.id, "edit");
 
         // submit edit
-        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        const submitCallback = (EditLogPopup as jest.Mock).mock.lastCall[0].handleSubmit;
         await act(async () => submitCallback());
 
         // Alert.alert called by feeding-logs.tsx -> handleSaveEdit()
@@ -421,10 +417,10 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
 
         // open edit log pop-up
         await pressButton(log.id, "edit");
-        
+
         // retrieve setLog callback from <EditingLogPopup/>
-        const setLog = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].setLog;
-        
+        const setLog = (EditLogPopup as jest.Mock).mock.lastCall[0].setLog;
+
         // clear set new field values from <EditLogPopup/>
         await act(async () =>
             setLog((prev: object) => ({
@@ -438,7 +434,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         );
 
         // submit edit
-        const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+        const submitCallback = (EditLogPopup as jest.Mock).mock.lastCall[0].handleSubmit;
         await act(async () => submitCallback());
 
         // Ensure mock was called with correct (updated) values
@@ -470,7 +466,7 @@ async function updateDisplayedLogs() {
     const updatedLogs = [editedLog].concat(  // join new edited log
         TEST_LOGS.filter((item) => item !== log)  // and remove previous log
     );
-    
+
     render(<FeedingLogsView/>);
     await screen.findByTestId("feeding-logs");  // wait for log list to render
 
@@ -488,7 +484,7 @@ async function updateDisplayedLogs() {
     (LogItem as jest.Mock).mockClear();
 
     // submit edit
-    const submitCallback = (EditLogPopup as jest.Mock).mock.calls.slice(-1)[0][0].handleSubmit;
+    const submitCallback = (EditLogPopup as jest.Mock).mock.lastCall[0].handleSubmit;
     await act(async () => submitCallback());
 
     await act(async () => {

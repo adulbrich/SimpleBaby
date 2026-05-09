@@ -5,7 +5,9 @@ import { router } from "expo-router";
 import CategoryModule from "@/components/category-module";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { launchImageLibraryAsync, requestMediaLibraryPermissionsAsync } from "expo-image-picker";
-import { field, formatStringList, saveLog } from "@/library/log-functions";
+import { field, saveLog } from "@/library/log-functions";
+import { formatStringList } from "@/library/utils";
+import NoteEntry from "@/components/note-entry";
 
 
 jest.mock("@react-native-community/datetimepicker", () => {
@@ -20,10 +22,16 @@ jest.mock("@react-native-community/datetimepicker", () => {
 jest.mock("@/components/category-module", () => {
     const Text = jest.requireActual("react-native").Text;
     const CategoryModuleMock = jest.fn(
-        ({testID, selectedCategory}: {testID?: string; selectedCategory: string}) =>
+        ({ testID, selectedCategory }: { testID?: string; selectedCategory: string }) =>
             (<Text testID={testID}>{selectedCategory}</Text>)
     );
     return CategoryModuleMock;
+});
+
+jest.mock("@/components/note-entry.tsx", () => {
+    const View = jest.requireActual("react-native").View;
+    const NoteEntryMock = jest.fn(({ testID }: { testID?: string }) => (<View testID={testID}></View>));
+    return NoteEntryMock;
 });
 
 jest.mock("expo-image-picker", () => ({
@@ -49,6 +57,9 @@ jest.mock("@/library/auth-provider", () => ({
 
 jest.mock("@/library/log-functions", () => ({
     saveLog: jest.fn(async () => ({ success: true })),
+}));
+
+jest.mock("@/library/utils", () => ({
     formatStringList: jest.fn(),
 }));
 
@@ -106,11 +117,12 @@ async function setMilestoneInputs({
         );
         await userEvent.press(screen.getByTestId("milestone-photo-button"));  // open photo picker
     }
-    if (note) {
-        await userEvent.type(
-            screen.getByTestId("milestone-note-entry"),
-            note
-        );
+
+    // read parameters to most recent call of <NoteEntry/>
+    const { setNote } = (NoteEntry as jest.Mock).mock.lastCall[0];
+
+    if (note !== undefined) {
+        await act(() => setNote?.(note));
     }
 }
 
@@ -196,7 +208,7 @@ describe("Track milestone screen", () => {
         expect(screen.getByDisplayValue(testName)).toBeTruthy();
         expect(screen.getByText(testTime.toLocaleDateString())).toBeTruthy();
         expect(screen.getByText(`(${testPhotoName})`)).toBeTruthy();
-        expect(screen.getByDisplayValue(testNote)).toBeTruthy();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);
 
         // submit log
         await userEvent.press(
@@ -208,7 +220,7 @@ describe("Track milestone screen", () => {
         expect(() => screen.getByDisplayValue(testName)).toThrow();
         expect(() => screen.getByText(testTime.toLocaleDateString())).toThrow();
         expect(() => screen.getByText(testPhotoName)).toThrow();
-        expect(() => screen.getByDisplayValue(testNote)).toThrow();
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
     });
             
     test("Catches denied photo permissions", async () => {
@@ -255,7 +267,7 @@ describe("Track milestone screen", () => {
 
         render(<Milestone/>);
 
-        // library/log-functions.ts -> formatStringList() should be mocked to return a test string
+        // library/utils.ts -> formatStringList() should be mocked to return a test string
         // This is to ensure its return value is displayed properly
         (formatStringList as jest.Mock).mockImplementationOnce(
             () => testFormattedList
