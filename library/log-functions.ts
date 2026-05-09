@@ -288,7 +288,7 @@ export async function fetchLogs<LogType>(
                     async ({ dbFieldName, type }) => [
                         dbFieldName,
                         type === "string" ? await safeDecrypt(entry[dbFieldName])
-                        : type === "date" ? new Date(entry[dbFieldName])
+                        : type === "date" ? (entry[dbFieldName] ? new Date(entry[dbFieldName]) : null) 
                         : entry[dbFieldName]  // don't decrypt "unencrypted" or "photo" fields
                     ]
                 ))
