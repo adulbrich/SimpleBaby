@@ -93,14 +93,6 @@ const SignUpScreen: React.FC = () => {
         }
     };
 
-    const handleSignIn = () => {
-        router.replace('/signin');
-    };
-
-    const handleGuest = () => {
-        router.push('/guest');
-    };
-
     const getPasswordInputStyle = () => [
         !passwordsMatch && confirmPassword ? styles.errorInput : {},
     ];
@@ -216,14 +208,14 @@ const SignUpScreen: React.FC = () => {
                     />
                     <Button
                         text='Sign In Instead'
-                        action={handleSignIn}
+                        action={() => router.replace('/signin')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID={testIDs.signInButton}
                     />
                     <Button
                         text='Try as Guest'
-                        action={handleGuest}
+                        action={() => router.push('/guest')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID={testIDs.guestButton}

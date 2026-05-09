@@ -104,6 +104,7 @@ export default function Profile() {
     };
 
     useEffect(() => {
+        if (isGuest) return;
         fetchChildNames();
     }, [session]);  // re-fetch child names if the user renames a child
 

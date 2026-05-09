@@ -109,7 +109,7 @@ function manualPromise(): {
         resolvePromise = (value: any = undefined) => resolve(value);
     });
     return { promise, resolve: resolvePromise };
-};
+}
 
 
 describe("Profile screen", () => {

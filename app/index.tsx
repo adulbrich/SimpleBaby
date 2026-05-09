@@ -37,16 +37,6 @@ export default function RootIndex() {
   
 	// Navigation handlers for auth routes
 	const { width } = Dimensions.get("window");
-	const handleSignIn = () => {
-		return router.push("/(auth)/signin");
-	};
-	const handleSignUp = () => {
-		return router.push("/(auth)/signup");
-	};
-	const handleGuest = async () => {
-		return router.push("/(auth)/guest");
-	};
-	const buttonTextClass = "";
 
 	return (
 		<SafeAreaProvider>
@@ -78,22 +68,19 @@ export default function RootIndex() {
 					<View className="flex-col gap-2 mt-10">
 					<Button
 						text="Sign In"
-						action={handleSignIn}
-						textClass={buttonTextClass}
+						action={() => router.push("/(auth)/signin")}
 						buttonClass="button-normal"
 						testID="sign-in-button"
 					/>
 					<Button
 						text="Sign Up"
-						action={handleSignUp}
-						textClass={buttonTextClass}
+						action={() => router.push("/(auth)/signup")}
 						buttonClass="button-normal"
 						testID="sign-up-button"
 					/>
 					<Button
 						text="Try as Guest"
-						action={handleGuest}
-						textClass={buttonTextClass}
+						action={() => router.push("/(auth)/guest")}
 						buttonClass="button-normal"
 						testID="guest-button"
 					/>

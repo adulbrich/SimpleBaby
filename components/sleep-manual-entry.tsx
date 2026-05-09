@@ -4,8 +4,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
-
-import stringLib from "../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 
 /**
  * ManualEntry component allows users to pick start and end times manually.

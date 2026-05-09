@@ -12,7 +12,7 @@ import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 
@@ -69,17 +69,15 @@ const DiaperLogsView: React.FC = () => {
 		if (!editingLog) return;
 
 		try {
-			const encryptedConsistency = await encryptData(editingLog.consistency);
-			const encryptedAmount = await encryptData(editingLog.amount);
-			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
+			const updated = {
+				consistency: await encryptData(editingLog.consistency),
+				amount: await encryptData(editingLog.amount),
+				change_time: editingLog.change_time.toISOString(),
+				note: editingLog.note ? await encryptData(editingLog.note) : null,
+			};
 
 			if (isGuest) {
-				const success = await updateRow("diaper_logs", editingLog.id, {
-					consistency: encryptedConsistency,
-					amount: encryptedAmount,
-					change_time: editingLog.change_time.toISOString(),
-					note: encryptedNote,
-				});
+				const success = await updateRow("diaper_logs", editingLog.id, updated);
 				if (!success) {
 					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
@@ -90,12 +88,7 @@ const DiaperLogsView: React.FC = () => {
 			} else {
                 const { error } = await supabase
                     .from("diaper_logs")
-                    .update({
-                        consistency: encryptedConsistency,
-                        amount: encryptedAmount,
-						change_time: editingLog.change_time.toISOString(),
-                        note: encryptedNote,
-                    })
+                    .update(updated)
                     .eq("id", editingLog.id);
 
                 if (error) {

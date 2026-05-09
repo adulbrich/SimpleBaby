@@ -63,7 +63,7 @@ function manualPromise(): {
         resolvePromise = (value: any = undefined) => resolve(value);
     });
     return { promise, resolve: resolvePromise };
-};
+}
 
 
 describe("Active Child screen", () => {

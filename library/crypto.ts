@@ -1,8 +1,8 @@
 import CryptoES from "crypto-es";
 import * as Crypto from "expo-crypto";
 import { Buffer } from "buffer";
-import { getEncryptionKey } from "./supabase-client";
-import stringLib from "../assets/stringLibrary.json";
+import { getEncryptionKey } from "@/library/supabase-client";
+import stringLib from "@/assets/stringLibrary.json";
 
 /**
  * Generates a 16-byte IV using Expo's Crypto API.
