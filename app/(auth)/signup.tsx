@@ -31,7 +31,7 @@ const SignUpScreen: React.FC = () => {
     const [loading, setLoading] = React.useState(false);
     const { signUp, signIn } = useAuth();
 
-    const passwordsMatch = password === confirmPassword;
+    const passwordsError = confirmPassword && password !== confirmPassword;
 
     const handleSignUp = async () => {
         // Validate that all fields are filled in
@@ -92,10 +92,6 @@ const SignUpScreen: React.FC = () => {
             setLoading(false);
         }
     };
-
-    const getPasswordInputStyle = () => [
-        !passwordsMatch && confirmPassword ? styles.errorInput : {},
-    ];
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -160,15 +156,14 @@ const SignUpScreen: React.FC = () => {
                     <View>
                         <Text className='auth-label'>Confirm Password</Text>
                         <TextInput
-                            style={getPasswordInputStyle()}
-                            className='text-input'
+                            className={passwordsError ? 'text-input-invalid' : 'text-input'}
                             placeholder='Confirm your password'
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={passwordHidden}
                             testID={testIDs.passwordConfirm}
                         />
-                        {!passwordsMatch && confirmPassword ? (
+                        {passwordsError ? (
                             <Text
                                 className='text-base text-red-600'
                                 testID={testIDs.passwordError}
