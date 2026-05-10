@@ -5,7 +5,6 @@ import {
     Text,
     TouchableOpacity,
     TextInput,
-    StyleSheet,
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     Keyboard,
@@ -220,11 +219,5 @@ const SignUpScreen: React.FC = () => {
         </TouchableWithoutFeedback>
     );
 };
-
-const styles = StyleSheet.create({
-    errorInput: {
-        borderColor: 'red',
-    },
-});
 
 export default SignUpScreen;
