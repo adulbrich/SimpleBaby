@@ -68,7 +68,6 @@
             "caretakersButton": "profile-caretakers-button",
             "emailButton": "profile-email-button",
             "passwordButton": "profile-password-button",
-            "appVersionButton": "profile-app-version-button",
             "signOutButton": "profile-sign-out-button",
             "addChildPopup": "profile-add-child-popup",
             "switchChildPopup": "profile-switch-child-popup"
