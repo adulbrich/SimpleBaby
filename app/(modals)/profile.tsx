@@ -292,24 +292,6 @@ export default function Profile() {
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            🤖 App Version
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() =>
-                                Alert.alert(
-                                    "Can't do this yet.",
-                                    'Please wait for an update.',
-                                )
-                            }
-                            testID={testIDs.appVersionButton}
-                        >
-                            <Text className='profile-value-light'>
-                                v0.1a
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
             </ScrollView>
             <View className='pt-4'>
