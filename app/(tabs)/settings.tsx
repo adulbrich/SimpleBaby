@@ -15,7 +15,7 @@ export default function SettingScreen() {
                 </TouchableOpacity>
 				<TouchableOpacity className="settings-item" testID='settings-privacy-button'
                     onPress={() => {
-                    router.push('/(modals)/privacypolicy');}}>
+                    router.push('/(modals)/privacy-policy');}}>
                     <Text className="settings-label">
                         Privacy Policy
                     </Text>
