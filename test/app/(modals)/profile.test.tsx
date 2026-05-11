@@ -668,7 +668,7 @@ describe("profile screen (guest mode)", () => {
 
     test("Displays buttons (guest)", async () => {
         render(<Profile/>);
-        await screen.findByText("Guest Child", { exact: false });  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         expect(screen.getByTestId(testIDs.childNameGuest)).toBeTruthy();
         expect(screen.getByTestId(testIDs.signOutButton)).toBeTruthy();
@@ -730,7 +730,7 @@ describe("profile screen (guest mode)", () => {
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
         await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
 
-        expect(screen.getByText("Guest Child", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Guest Child")).toBeTruthy();
     });
 
     test("Catches sign out error", async () => {
@@ -741,7 +741,7 @@ describe("profile screen (guest mode)", () => {
         updateUseAuth({ exitGuest: async () => { throw new Error(testErrorMessage); }});
 
         render(<Profile/>);
-        await screen.findByText("Guest Child", { exact: false });  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
@@ -754,7 +754,7 @@ describe("profile screen (guest mode)", () => {
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
-        await screen.findByText("Guest Child", { exact: false });  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
