@@ -3,7 +3,7 @@ import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
-import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, TextInput, useColorScheme } from 'react-native';
 import CategoryModule from "@/components/category-module";
 import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -81,6 +81,9 @@ export default function FeedingCategory({
         onCategoryUpdate?.(categoryValue);
     };
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className='flex-col gap-6' testID={testID}>
 
@@ -89,9 +92,9 @@ export default function FeedingCategory({
                 title=" Choose Category"
                 selectedCategory={category}
                 categoryList={[
-                    { label: "Liquid", icon: <MaterialCommunityIcons name="baby-bottle-outline" size={24}/> },
-                    { label: "Soft", icon: <MaterialCommunityIcons name="bowl-mix-outline" size={24}/> },
-                    { label: "Solid", icon: <MaterialCommunityIcons name="food-apple-outline" size={24}/> },
+                    { label: "Liquid", icon: <MaterialCommunityIcons name="baby-bottle-outline" size={24} color={iconStyle}/> },
+                    { label: "Soft", icon: <MaterialCommunityIcons name="bowl-mix-outline" size={24} color={iconStyle}/> },
+                    { label: "Solid", icon: <MaterialCommunityIcons name="food-apple-outline" size={24} color={iconStyle}/> },
                 ]}
                 onCategoryUpdate={handleCategoryPress}
                 testID="feeding-category-module"

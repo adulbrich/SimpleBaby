@@ -37,7 +37,7 @@ export default function CategoryModule<Category extends string>({
                         testID={`category-${label.toLowerCase()}-button`}
                     >
                         { icon ? (<>
-                            <Text>{icon}</Text>
+                            {icon}
                             <Text className="category-button-text-sm">{label}</Text>
                         </>) : (
                             <Text className="category-button-text-lg">{label}</Text>

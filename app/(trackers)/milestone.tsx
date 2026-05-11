@@ -8,6 +8,7 @@ import {
 	Alert,
 	ScrollView,
 	Platform,
+	useColorScheme,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -200,6 +201,9 @@ export default function Milestone() {
 		);
 	};
 
+	const theme = useColorScheme();
+	const iconStyle = theme === 'light' ? 'black' : 'white';
+
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 			{/*ScrollView Prevents items from flowing off page on small devices*/}
@@ -219,11 +223,11 @@ export default function Milestone() {
 							title=" Choose Category"
 							selectedCategory={category}
 							categoryList={[
-								{ label: "Motor", icon: <FontAwesome5 name="running" size={24}/> },
-								{ label: "Language", icon: <SimpleLineIcons name="speech" size={24}/> },
-								{ label: "Social", icon: <FontAwesome6 name="people-group" size={24}/> },
-								{ label: "Cognitive", icon: <MaterialCommunityIcons name="brain" size={24}/> },
-								{ label: "Other", icon: <FontAwesome6 name="question" size={24}/> }
+								{ label: "Motor", icon: <FontAwesome5 name="running" size={24} color={iconStyle}/> },
+								{ label: "Language", icon: <SimpleLineIcons name="speech" size={24} color={iconStyle}/> },
+								{ label: "Social", icon: <FontAwesome6 name="people-group" size={24} color={iconStyle}/> },
+								{ label: "Cognitive", icon: <MaterialCommunityIcons name="brain" size={24} color={iconStyle}/> },
+								{ label: "Other", icon: <FontAwesome6 name="question" size={24} color={iconStyle}/> }
 							]}
 							onCategoryUpdate={setCategory}
 							testID="milestone-category-modal"

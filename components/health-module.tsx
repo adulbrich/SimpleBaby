@@ -8,6 +8,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useColorScheme,
     View,
 } from "react-native";
 import CategoryModule from "@/components/category-module";
@@ -209,6 +210,9 @@ export default function HealthModule({
         }
     }, [other, selectedCategory, onOtherUpdate]);
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className="flex-col gap-6" testID={testID}>
 
@@ -217,11 +221,11 @@ export default function HealthModule({
                 title=" Choose Type"
                 selectedCategory={selectedCategory}
                 categoryList={[
-                    { label: "Growth", icon: <Entypo name="ruler" size={24}/> },
-                    { label: "Activity", icon: <FontAwesome5 name="running" size={24}/> },
-                    { label: "Meds", icon: <MaterialCommunityIcons name="pill" size={24}/> },
-                    { label: "Vaccine", icon: <MaterialIcons name="vaccines" size={24}/> },
-                    { label: "Other", icon: <FontAwesome6 name="question" size={24}/> }
+                    { label: "Growth", icon: <Entypo name="ruler" size={24} color={iconStyle}/> },
+                    { label: "Activity", icon: <FontAwesome5 name="running" size={24} color={iconStyle}/> },
+                    { label: "Meds", icon: <MaterialCommunityIcons name="pill" size={24} color={iconStyle}/> },
+                    { label: "Vaccine", icon: <MaterialIcons name="vaccines" size={24} color={iconStyle}/> },
+                    { label: "Other", icon: <FontAwesome6 name="question" size={24} color={iconStyle}/> }
                 ]}
                 onCategoryUpdate={handleCategoryPress}
                 testID="health-category-module"

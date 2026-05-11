@@ -3,7 +3,7 @@ import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, useColorScheme } from 'react-native';
 import CategoryModule from "@/components/category-module";
 import { AntDesign, Entypo, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -90,6 +90,9 @@ export default function DiaperModule({
         setSelectedAmount(amount);
     };
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className='flex-col gap-6' testID={testID}>
 
@@ -98,9 +101,9 @@ export default function DiaperModule({
                 title=" Choose Consistency"
                 selectedCategory={selectedConsistency}
                 categoryList={[
-                    { label: "Wet", icon: <Entypo name="water" size={24}/> },
-                    { label: "Dry", icon: <MaterialCommunityIcons name="cactus" size={24}/> },
-                    { label: "Mixed", icon: <MaterialCommunityIcons name="weather-partly-rainy" size={24}/> },
+                    { label: "Wet", icon: <Entypo name="water" size={24} color={iconStyle}/> },
+                    { label: "Dry", icon: <MaterialCommunityIcons name="cactus" size={24} color={iconStyle}/> },
+                    { label: "Mixed", icon: <MaterialCommunityIcons name="weather-partly-rainy" size={24} color={iconStyle}/> },
                 ]}
                 onCategoryUpdate={handleConsistencyPress}
                 testID="diaper-category-consistency-module"
