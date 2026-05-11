@@ -2,7 +2,7 @@ import supabase from '@/library/supabase-client';
 import { encryptData, decryptData } from '@/library/crypto';
 import { formatName } from '@/library/utils';
 
-export const getActiveChildData = async (): Promise<{
+export async function getActiveChildData(): Promise<{
     success: true;
     error?: undefined;
     childId: string;
@@ -14,7 +14,7 @@ export const getActiveChildData = async (): Promise<{
     childId?: undefined;
     childName?: undefined;
     createdAt?: undefined;
-}> => {
+}> {
     // Get the current user
     const {
         data: { user },
@@ -84,7 +84,7 @@ async function getChildrenByUserId(userId: string): Promise<{ name: string; id: 
 };
 
 
-export const saveNewChild = async (childName: string) => {
+export async function saveNewChild(childName: string) {
     const formattedName = formatName(childName);
 	if (!formattedName.trim()) {
 		throw new Error("Child name is required.");

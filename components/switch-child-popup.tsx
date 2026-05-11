@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Button from '@/components/button';
-import ListSelect from './list-select';
+import ListSelect from '@/components/list-select';
 import { useEffect, useState } from 'react';
 import stringLib from "@/assets/stringLibrary.json";
 

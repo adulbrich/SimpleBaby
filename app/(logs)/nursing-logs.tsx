@@ -12,7 +12,7 @@ import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 

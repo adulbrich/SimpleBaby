@@ -24,10 +24,10 @@ export default function Tab() {
     ];
 
     return (
-            <View
-                className='main-container justify-between'
-                style={{ paddingBottom: insets.bottom }}
-            >
+        <View
+            className='main-container justify-between'
+            style={{ paddingBottom: insets.bottom }}
+        >
             <ScrollView>
                 <View className='main-container flex-col justify-center gap-4'>
                     {bars.map((bars, key) => (
@@ -49,7 +49,7 @@ export default function Tab() {
                         </TouchableOpacity>
                     ))}
                 </View>
-                </ScrollView>
-            </View>
+            </ScrollView>
+        </View>
     );
 }

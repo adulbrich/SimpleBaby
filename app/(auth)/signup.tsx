@@ -5,7 +5,6 @@ import {
     Text,
     TouchableOpacity,
     TextInput,
-    StyleSheet,
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     Keyboard,
@@ -31,7 +30,7 @@ const SignUpScreen: React.FC = () => {
     const [loading, setLoading] = React.useState(false);
     const { signUp, signIn } = useAuth();
 
-    const passwordsMatch = password === confirmPassword;
+    const passwordsError = confirmPassword && password !== confirmPassword;
 
     const handleSignUp = async () => {
         // Validate that all fields are filled in
@@ -92,18 +91,6 @@ const SignUpScreen: React.FC = () => {
             setLoading(false);
         }
     };
-
-    const handleSignIn = () => {
-        router.replace('/signin');
-    };
-
-    const handleGuest = () => {
-        router.push('/guest');
-    };
-
-    const getPasswordInputStyle = () => [
-        !passwordsMatch && confirmPassword ? styles.errorInput : {},
-    ];
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -168,15 +155,14 @@ const SignUpScreen: React.FC = () => {
                     <View>
                         <Text className='auth-label'>Confirm Password</Text>
                         <TextInput
-                            style={getPasswordInputStyle()}
-                            className='text-input'
+                            className={passwordsError ? 'text-input-invalid' : 'text-input'}
                             placeholder='Confirm your password'
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={passwordHidden}
                             testID={testIDs.passwordConfirm}
                         />
-                        {!passwordsMatch && confirmPassword ? (
+                        {passwordsError ? (
                             <Text
                                 className='text-base text-red-600'
                                 testID={testIDs.passwordError}
@@ -216,14 +202,14 @@ const SignUpScreen: React.FC = () => {
                     />
                     <Button
                         text='Sign In Instead'
-                        action={handleSignIn}
+                        action={() => router.replace('/signin')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID={testIDs.signInButton}
                     />
                     <Button
                         text='Try as Guest'
-                        action={handleGuest}
+                        action={() => router.push('/guest')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID={testIDs.guestButton}
@@ -233,11 +219,5 @@ const SignUpScreen: React.FC = () => {
         </TouchableWithoutFeedback>
     );
 };
-
-const styles = StyleSheet.create({
-    errorInput: {
-        borderColor: 'red',
-    },
-});
 
 export default SignUpScreen;
