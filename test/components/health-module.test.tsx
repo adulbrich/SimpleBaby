@@ -1,4 +1,4 @@
-import HealthModule from "@/components/health-module";
+import HealthModule, { HealthFields } from "@/components/health-module";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
@@ -32,9 +32,8 @@ jest.mock("@/components/category-module", () => {
 async function setCategoryInput(
     category: string,
  ) {
-    // get calls to <CategoryModule/>
-    const onCategoryUpdate = (CategoryModule as jest.Mock).mock.calls
-        .slice(-1)[0][0].onCategoryUpdate;  // get update callback from most recent call
+    // get update callback from most recent call to <CategoryModule/>
+    const onCategoryUpdate = (CategoryModule as jest.Mock).mock.lastCall[0].onCategoryUpdate;
     await act(() => onCategoryUpdate?.(category));
 }
 
@@ -48,15 +47,18 @@ describe("Health component <HealthModule/>", () => {
     });
 
     test("Renders category and date inputs", () => {
-        render(<HealthModule/>);
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-category-module")).toBeTruthy();
         expect(screen.getByTestId("health-date-button")).toBeTruthy();
     });
 
     test("Renders growth inputs", () => {
-        render(<HealthModule/>);
-        // should default to showing growth
+        render(<HealthModule
+            healthFields={{ category: "Growth", growth: {}, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-growth-length")).toBeTruthy();
         expect(screen.getByTestId("health-growth-weight")).toBeTruthy();
@@ -64,45 +66,111 @@ describe("Health component <HealthModule/>", () => {
     });
 
     test("Renders activity inputs", async () => {
-        render(<HealthModule/>);
-        // switch to activity
-        await setCategoryInput("Activity");
+        render(<HealthModule
+            healthFields={{ category: "Activity", activity: {}, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-activity-type")).toBeTruthy();
         expect(screen.getByTestId("health-activity-duration")).toBeTruthy();
     });
 
     test("Renders meds inputs", async () => {
-        render(<HealthModule/>);
-        // switch to meds
-        await setCategoryInput("Meds");
+        render(<HealthModule
+            healthFields={{ category: "Meds", meds: { time_taken: new Date() }, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-meds-name")).toBeTruthy();
         expect(screen.getByTestId("health-meds-amount")).toBeTruthy();
     });
 
     test("Renders vaccine inputs", async () => {
-        render(<HealthModule/>);
-        // switch to vaccine
-        await setCategoryInput("Vaccine");
+        render(<HealthModule
+            healthFields={{ category: "Vaccine", vaccine: {}, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-vaccine-name")).toBeTruthy();
         expect(screen.getByTestId("health-vaccine-location")).toBeTruthy();
     });
 
     test("Renders 'other' inputs", async () => {
-        render(<HealthModule/>);
-        // switch to other
-        await setCategoryInput("Other");
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+        />);
 
         expect(screen.getByTestId("health-other-name")).toBeTruthy();
         expect(screen.getByTestId("health-other-description")).toBeTruthy();
     });
 
+    test("Renders provided values", () => {
+        const testFieldSets = [
+            {
+                category: "Growth",
+                growth: { length: "test length", weight: "test weight", head: "test head" },
+                date: new Date()
+            },
+            {
+                category: "Activity",
+                activity: { type: "test type", duration: "test duration" },
+                date: new Date()
+            },
+            {
+                category: "Meds",
+                meds: { name: "test name", amount: "test amount", time_taken: new Date() },
+                date: new Date()
+            },
+            {
+                category: "Vaccine",
+                vaccine: { name: "test name", location: "test location" },
+                date: new Date()
+            },
+            {
+                category: "Other",
+                other: { name: "test name", description: "test description" },
+                date: new Date()
+            },
+        ];
+        const { rerender } = render(<HealthModule healthFields={testFieldSets[0] as HealthFields}/>);
+
+        for (const testFields of testFieldSets) {
+            // rerender with new values
+            rerender(<HealthModule healthFields={testFields as HealthFields}/>);
+
+            // ensure updated category is in <CategoryModule/> props
+            const categoryCalls = (CategoryModule as jest.Mock).mock.calls.filter(
+                call => call[0].testID === "health-category-module"  // filter calls by test id
+            );
+            // get props from most recent call
+            const category = categoryCalls.slice(-1)[0][0].selectedCategory;
+            expect(category).toBe(testFields.category);
+
+            // ensure date is displayed on screen
+            const formattedDate = testFields.date.toLocaleDateString();
+            expect(screen.getByText(formattedDate)).toBeTruthy();
+
+            // ensure category-specific fields are displayed
+            const categoryFields =  // get the one of the following that should be an object, the rest should be undefined
+                testFields.growth ||
+                testFields.activity ||
+                testFields.meds ||
+                testFields.vaccine ||
+                testFields.other;
+            for (const field of Object.values(categoryFields)) {
+                if (field instanceof Date) {  // this should only apply to meds time taken
+                    const formattedTime = field.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    expect(screen.getByText(formattedTime)).toBeTruthy();
+                } else {
+                    expect(screen.getByDisplayValue(field)).toBeTruthy();
+                }
+            }
+        }
+    });
+
     test("Shows/hides date picker (ios)", async () => {
         Platform.OS = "ios";
-        
-        render(<HealthModule/>);
+
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+        />);
 
         // Press change date button
         await userEvent.press(screen.getByTestId("health-date-button"));
@@ -131,8 +199,11 @@ describe("Health component <HealthModule/>", () => {
         Platform.OS = "ios";
         const testDate = new Date();
         const onDateUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
-        
-        render(<HealthModule onDateUpdate={onDateUpdate}/>);
+
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+            onDateUpdate={onDateUpdate}
+        />);
 
         // Press change date button
         await userEvent.press(screen.getByTestId("health-date-button"));
@@ -142,16 +213,17 @@ describe("Health component <HealthModule/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange({type: 'set'}, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onDateUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onDateUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onDateUpdate).toHaveBeenCalledTimes(1);
+        expect(onDateUpdate.mock.calls[0][0]).toBe(testDate);
     });
-    
+
     test("Shows/hides date picker (android)", async () => {
         Platform.OS = "android";
 
-        render(<HealthModule/>);
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+        />);
 
         // ensure date picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -162,14 +234,16 @@ describe("Health component <HealthModule/>", () => {
         // ensure date picker has been shown
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(1);
     });
-    
+
     test("Updates date (android)", async () => {
         Platform.OS = "android";
         const testDate = new Date();
 
         const onDateUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onDateUpdate={onDateUpdate}/>);
-
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+            onDateUpdate={onDateUpdate}
+        />);
         await userEvent.press(screen.getByTestId("health-date-button"));
 
         // retrieve callback for when the date changes in the time picker
@@ -177,19 +251,17 @@ describe("Health component <HealthModule/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onDateUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onDateUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onDateUpdate).toHaveBeenCalledTimes(1);
+        expect(onDateUpdate.mock.calls[0][0]).toBe(testDate);
     });
-    
+
     test("Updates category", async () => {
         const onCategoryUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onCategoryUpdate={onCategoryUpdate}/>);
-
-        // category should default to growth
-        expect(onCategoryUpdate).toHaveBeenCalledTimes(1);
-        expect(onCategoryUpdate.mock.calls[0][0]).toBe("Growth");
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+            onCategoryUpdate={onCategoryUpdate}
+        />);
 
         const testConsistencyCategories = ["Activity", "Meds", "Vaccine", "Other", "Growth"];
 
@@ -198,17 +270,16 @@ describe("Health component <HealthModule/>", () => {
             expect(onCategoryUpdate.mock.lastCall[0]).toBe(category);
         }
     });
-    
+
     test("Updates growth", async () => {
         const testLength = "test length";
         const testWeight = "test weight";
         const testHead = "test head";
         const onGrowthUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onGrowthUpdate={onGrowthUpdate}/>);
-
-        // growth should start with empty/default values. Use loose equality to compare objects
-        expect(onGrowthUpdate).toHaveBeenCalledTimes(1);
-        expect(onGrowthUpdate.mock.calls[0][0]).toEqual({ length: "", weight: "", head: "" });
+        render(<HealthModule
+            healthFields={{ category: "Growth", growth: {}, date: new Date() } as HealthFields}
+            onGrowthUpdate={onGrowthUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -216,31 +287,27 @@ describe("Health component <HealthModule/>", () => {
             screen.getByTestId("health-growth-length"),
             testLength
         );
-        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ length: testLength, weight: "", head: "" });
+        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ length: testLength });
         await userEvent.type(
             screen.getByTestId("health-growth-weight"),
             testWeight
         );
-        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ length: testLength, weight: testWeight, head: "" });
+        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ weight: testWeight });
         await userEvent.type(
             screen.getByTestId("health-growth-head"),
             testHead
         );
-        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ length: testLength, weight: testWeight, head: testHead });
+        expect(onGrowthUpdate).toHaveBeenLastCalledWith({ head: testHead });
     });
-    
+
     test("Updates activity", async () => {
         const testType = "test type";
         const testDuration = "test duration";
         const onActivtityUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onActivityUpdate={onActivtityUpdate}/>);
-
-        // switch to activity
-        await setCategoryInput("Activity");
-
-        // growth should start with empty/default values. Use loose equality to compare objects
-        expect(onActivtityUpdate).toHaveBeenCalledTimes(1);
-        expect(onActivtityUpdate.mock.calls[0][0]).toEqual({ type: "", duration: "" });
+        render(<HealthModule
+            healthFields={{ category: "Activity", activity: {}, date: new Date() } as HealthFields}
+            onActivityUpdate={onActivtityUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -248,20 +315,20 @@ describe("Health component <HealthModule/>", () => {
             screen.getByTestId("health-activity-type"),
             testType
         );
-        expect(onActivtityUpdate).toHaveBeenLastCalledWith({ type: testType, duration: "" });
+        expect(onActivtityUpdate).toHaveBeenLastCalledWith({ type: testType });
         await userEvent.type(
             screen.getByTestId("health-activity-duration"),
             testDuration
         );
-        expect(onActivtityUpdate).toHaveBeenLastCalledWith({ type: testType, duration: testDuration });
+        expect(onActivtityUpdate).toHaveBeenLastCalledWith({ duration: testDuration });
     });
 
     test("Shows/hides meds time picker (ios)", async () => {
         Platform.OS = "ios";
-        
-        render(<HealthModule/>);
-        // switch to meds
-        await setCategoryInput("Meds");
+
+        render(<HealthModule
+            healthFields={{ category: "Meds", meds: { time_taken: new Date() }, date: new Date() } as HealthFields}
+        />);
 
         // Press change time button
         await userEvent.press(screen.getByTestId("health-meds-time"));
@@ -275,7 +342,7 @@ describe("Health component <HealthModule/>", () => {
         // ensure time picker has been closed
         expect(() => screen.getByTestId("timeTimePicker")).toThrow();
     });
-    
+
     test("Updates meds (ios)", async () => {
         Platform.OS = "ios";
 
@@ -283,20 +350,11 @@ describe("Health component <HealthModule/>", () => {
         const testAmount = "test amount";
         const testTimeTaken = new Date();
         const onMedsUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        const timeBeforeNow = new Date();
-        render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
-
-        // switch to meds
-        await setCategoryInput("Meds");
-        const timeAfterNow = new Date();
-
-        // growth should start with empty/default values, except the time, which will be initialized to the current time
-        expect(onMedsUpdate).toHaveBeenCalledTimes(1);
-        expect(onMedsUpdate.mock.calls[0][0].name).toBe("");
-        expect(onMedsUpdate.mock.calls[0][0].amount).toBe("");
-        // ensure time was initialized to approximately the current time
-        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        const initialMeds = { time_taken: new Date() };
+        render(<HealthModule
+            healthFields={{ category: "Meds", meds: initialMeds, date: new Date() } as HealthFields}
+            onMedsUpdate={onMedsUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -307,27 +365,27 @@ describe("Health component <HealthModule/>", () => {
         const onDateChange = (DateTimePicker as jest.Mock).mock.calls[0][0].onChange;
         // simulate date change with callback
         await act(async () => onDateChange({type: 'set'}, testTimeTaken));
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ time_taken: testTimeTaken });
 
         // fill in other inputs
         await userEvent.type(
             screen.getByTestId("health-meds-name"),
             testName
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ ...initialMeds, name: testName });
         await userEvent.type(
             screen.getByTestId("health-meds-amount"),
             testAmount
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ ...initialMeds, amount: testAmount });
     });
-    
+
     test("Shows/hides meds time picker (android)", async () => {
         Platform.OS = "android";
 
-        render(<HealthModule/>);
-        // switch to meds
-        await setCategoryInput("Meds");
+        render(<HealthModule
+            healthFields={{ category: "Meds", meds: { time_taken: new Date() }, date: new Date() } as HealthFields}
+        />);
 
         // ensure time picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -338,7 +396,7 @@ describe("Health component <HealthModule/>", () => {
         // ensure time picker has been shown
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(1);
     });
-    
+
     test("Updates meds (android)", async () => {
         Platform.OS = "android";
 
@@ -346,20 +404,11 @@ describe("Health component <HealthModule/>", () => {
         const testAmount = "test amount";
         const testTimeTaken = new Date();
         const onMedsUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        const timeBeforeNow = new Date();
-        render(<HealthModule onMedsUpdate={onMedsUpdate}/>);
-
-        // switch to meds
-        await setCategoryInput("Meds");
-        const timeAfterNow = new Date();
-
-        // growth should start with empty/default values, except the time, which will be initialized to the current time
-        expect(onMedsUpdate).toHaveBeenCalledTimes(1);
-        expect(onMedsUpdate.mock.calls[0][0].name).toBe("");
-        expect(onMedsUpdate.mock.calls[0][0].amount).toBe("");
-        // ensure time was initialized to approximately the current time
-        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onMedsUpdate.mock.calls[0][0].time_taken.getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        const initialMeds = { time_taken: new Date() };
+        render(<HealthModule
+            healthFields={{ category: "Meds", meds: initialMeds, date: new Date() } as HealthFields}
+            onMedsUpdate={onMedsUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -370,33 +419,29 @@ describe("Health component <HealthModule/>", () => {
         const onDateChange = (DateTimePickerAndroid.open as jest.Mock).mock.calls[0][0].onChange;
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testTimeTaken));
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: "", amount: "", time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ time_taken: testTimeTaken });
 
         // fill in other inputs
         await userEvent.type(
             screen.getByTestId("health-meds-name"),
             testName
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: "", time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ ...initialMeds, name: testName });
         await userEvent.type(
             screen.getByTestId("health-meds-amount"),
             testAmount
         );
-        expect(onMedsUpdate).toHaveBeenLastCalledWith({ name: testName, amount: testAmount, time_taken: testTimeTaken });
+        expect(onMedsUpdate).toHaveBeenLastCalledWith({ ...initialMeds, amount: testAmount });
     });
-    
+
     test("Updates vaccine", async () => {
         const testName = "test name";
         const testLocation = "test location";
         const onVaccineUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onVaccineUpdate={onVaccineUpdate}/>);
-
-        // switch to vaccine
-        await setCategoryInput("Vaccine");
-
-        // growth should start with empty/default values. Use loose equality to compare objects
-        expect(onVaccineUpdate).toHaveBeenCalledTimes(1);
-        expect(onVaccineUpdate.mock.calls[0][0]).toEqual({ name: "", location: "" });
+        render(<HealthModule
+            healthFields={{ category: "Vaccine", vaccine: {}, date: new Date() } as HealthFields}
+            onVaccineUpdate={onVaccineUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -404,26 +449,22 @@ describe("Health component <HealthModule/>", () => {
             screen.getByTestId("health-vaccine-name"),
             testName
         );
-        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ name: testName, location: "" });
+        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ name: testName });
         await userEvent.type(
             screen.getByTestId("health-vaccine-location"),
             testLocation
         );
-        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ name: testName, location: testLocation });
+        expect(onVaccineUpdate).toHaveBeenLastCalledWith({ location: testLocation });
     });
-    
+
     test("Updates 'other'", async () => {
         const testName = "test name";
         const testDescription = "test description";
         const onOtherUpdate = jest.fn();  // to capture callbacks by <HealthModule/>
-        render(<HealthModule onOtherUpdate={onOtherUpdate}/>);
-
-        // switch to other
-        await setCategoryInput("Other");
-
-        // growth should start with empty/default values. Use loose equality to compare objects
-        expect(onOtherUpdate).toHaveBeenCalledTimes(1);
-        expect(onOtherUpdate.mock.calls[0][0]).toEqual({ name: "", description: "" });
+        render(<HealthModule
+            healthFields={{ category: "Other", other: {}, date: new Date() } as HealthFields}
+            onOtherUpdate={onOtherUpdate}
+        />);
 
         // Fill in inputs
         // Callback should be called to update after each value is changed
@@ -431,11 +472,11 @@ describe("Health component <HealthModule/>", () => {
             screen.getByTestId("health-other-name"),
             testName
         );
-        expect(onOtherUpdate).toHaveBeenLastCalledWith({ name: testName, description: "" });
+        expect(onOtherUpdate).toHaveBeenLastCalledWith({ name: testName });
         await userEvent.type(
             screen.getByTestId("health-other-description"),
             testDescription
         );
-        expect(onOtherUpdate).toHaveBeenLastCalledWith({ name: testName, description: testDescription });
+        expect(onOtherUpdate).toHaveBeenLastCalledWith({ description: testDescription });
     });
 });

@@ -59,7 +59,7 @@ async function setSleepInputs({
     endDate,
     note,
 } : {
-    stopwatchTime?: string;
+    stopwatchTime?: number;
     startDate?: Date;
     endDate?: Date;
     note?: string;
@@ -71,15 +71,19 @@ async function setSleepInputs({
 
     // read parameters to first call of ManualEntry
     const {
-        onDatesUpdate,
+        onStartDateUpdate,
+        onEndDateUpdate,
     } = (ManualEntry as jest.Mock).mock.calls[0][0];
 
     // call update handlers for times
     if (stopwatchTime) {
         await act(() => onTimeUpdate?.(stopwatchTime));
     }
-    if (startDate && endDate) {
-        await act(() => onDatesUpdate?.(startDate, endDate));
+    if (startDate) {
+        await act(() => onStartDateUpdate?.(startDate));
+    }
+    if (endDate) {
+        await act(() => onEndDateUpdate?.(endDate));
     }
 
     // read parameters to most recent call of <NoteEntry/>
@@ -117,6 +121,24 @@ describe("Track sleep screen", () => {
         expect(screen.getByTestId("sleep-reset-form-button")).toBeTruthy();
     });
 
+    test("Passes current stopwatch time", async () => {
+        const testDuration = 123;
+        render(<Sleep/>);
+
+        // ensure time defaults to 0
+        const stopwatchPropsInitial = (Stopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsInitial.time).toBe(0);
+
+        // set stopwatch duration
+        await setSleepInputs({
+            stopwatchTime: testDuration,
+        });
+
+        // ensure time has been updated
+        const stopwatchPropsUpdated = (Stopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsUpdated.time).toBe(testDuration);
+    });
+
     test("Catch unfilled inputs", async () => {
         render(<Sleep/>);
         await userEvent.press(
@@ -133,7 +155,7 @@ describe("Track sleep screen", () => {
     test("Catch invalid time inputs", async () => {
         const testStart = new(Date);
         render(<Sleep/>);
-        
+
         await setSleepInputs({ startDate: testStart, endDate: testStart });
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
@@ -145,30 +167,49 @@ describe("Track sleep screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][1])
             .toBe("Failed to save the Sleep log. Please provide either a stopwatch time or valid manual start and end times.");
     });
-            
+
     test("Refreshes on reset", async () => {
         const testNote = "test note";
+        const testDuration = 123;
+        const testTime = new Date(new Date().getTime() - 60*60*1000);
         render(<Sleep/>);
 
         // write something in the note entry...
-        await setSleepInputs({ note: testNote });
+        await setSleepInputs({
+            note: testNote,
+            startDate: testTime,
+            endDate: testTime,
+            stopwatchTime: testDuration,
+        });
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
+        // ensure manual times have the test values
+        const manualPropsInitial = (ManualEntry as jest.Mock).mock.lastCall[0];
+        expect(manualPropsInitial.startDate).toBe(testTime);
+        expect(manualPropsInitial.endDate).toBe(testTime);
+        // ensure time is test value
+        const stopwatchPropsInitial = (Stopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsInitial.time).toBe(testDuration);
 
         const stopwatch = screen.getByTestId("sleep-stopwatch");  // get the displayed <Stopwatch/>
-        const manualEntry = screen.getByTestId("sleep-manual-time-entry");  // get the displayed <ManualEntry/>
 
+        const resetTime = new Date();
         await userEvent.press(
             screen.getByTestId("sleep-reset-form-button")
         );
 
         // ensure note is no longer present
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
+        // ensure manual times have been updated
+        const manualPropsUpdated = (ManualEntry as jest.Mock).mock.lastCall[0];
+        expect(manualPropsUpdated.startDate.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
+        expect(manualPropsUpdated.endDate.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
+        // ensure time has been reset
+        const stopwatchPropsUpdated = (Stopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsUpdated.time).toBe(0);
         // ensure new instance of <Stopwatch/> is being used
         expect(screen.getByTestId("sleep-stopwatch") === stopwatch).toBeFalsy();
-        // ensure new instance of <ManualEntry/> is being used
-        expect(screen.getByTestId("sleep-manual-time-entry") === manualEntry).toBeFalsy();
     });
-    
+
     test("Catch saveLog() error", async () => {
         const testErrorMessage = "test error";
 
@@ -180,7 +221,7 @@ describe("Track sleep screen", () => {
         );
 
         render(<Sleep/>);
-        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
+        await setSleepInputs({ stopwatchTime: 1 });  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -192,7 +233,7 @@ describe("Track sleep screen", () => {
 
     test("Successfully saved sleep log", async () => {
         render(<Sleep/>);
-        await setSleepInputs({stopwatchTime: "1:00:00"});  // set minimum required inputs
+        await setSleepInputs({ stopwatchTime: 1 });  // set minimum required inputs
         await userEvent.press(
             screen.getByTestId("sleep-save-log-button")
         );
@@ -213,7 +254,7 @@ describe("Track sleep screen", () => {
         render(<Sleep/>);
         // set both stopwatch time and manual start/end times. Stopwatch time should take priority for saving
         await setSleepInputs({
-            stopwatchTime: testDuration,
+            stopwatchTime: Math.floor(testDurationMS / 1000),
             startDate: new Date(),
             endDate: new Date(),
             note: testNote,
@@ -232,7 +273,7 @@ describe("Track sleep screen", () => {
             (field: field) => field.dbFieldName === name && (!value || field.value === value);
         const savedEndMS = savedValues.find(findfield("end_time")).value.getTime();  // should be the time at which the log was saved
         const savedStartMS = savedValues.find(findfield("start_time")).value.getTime();  // should be the log save time minus the duration
-        
+
         expect(savedStartMS).toBeCloseTo(executionTime.getTime() - testDurationMS, -3.3);  // times are within ~1000 ms of each other
         expect(savedEndMS).toBeCloseTo(executionTime.getTime(), -3.3);  // times are within ~1000 ms of each other
         expect(savedValues.find(findfield("duration", testDuration))).toBeTruthy();

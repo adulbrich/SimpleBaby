@@ -1,4 +1,5 @@
 import HealthModule, {
+	HealthFields,
 	HealthCategory,
 	GrowthData,
 	ActivityData,
@@ -30,22 +31,7 @@ type HealthLog = {
 	category: HealthCategory;
 	date: Date;
 	note: string;
-} & ({
-	category: "Growth";
-	growth: GrowthData;
-} | {
-	category: "Activity";
-	activity: ActivityData;
-} | {
-	category: "Meds";
-	meds: MedsData;
-} | {
-	category: "Vaccine";
-	vaccine: VaccineData;
-} | {
-	category: "Other";
-	other: OtherData;
-});
+} & HealthFields;
 
 export default function Health() {
 	const insets = useSafeAreaInsets();
@@ -57,7 +43,6 @@ export default function Health() {
 		date: new Date(),
 		note: "",
 	});
-	const [reset, setReset] = useState(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
@@ -202,7 +187,7 @@ export default function Health() {
 
 	// Update growth-related fields in state with partial updates
 	const handleGrowthUpdate = useCallback(
-		(growth: { length: string; weight: string; head: string }) => {
+		(growth: GrowthData) => {
 			setHealthLog((prev) => ({
 				...prev,
 				growth,
@@ -262,7 +247,6 @@ export default function Health() {
 			growth: { length: "", weight: "", head: "" },
 			note: "",
 		});
-		setReset((prev) => prev + 1);
 	};
 
 	return (
@@ -277,7 +261,7 @@ export default function Health() {
 				>
 					{/* Render the health input form module with update handlers */}
 					<HealthModule
-						key={`health-module-${reset}`}
+						healthFields={healthLog}
 						onDateUpdate={handleDateUpdate}
 						onCategoryUpdate={handleCategoryUpdate}
 						onGrowthUpdate={handleGrowthUpdate}

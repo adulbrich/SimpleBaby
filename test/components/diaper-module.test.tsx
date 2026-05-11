@@ -1,4 +1,4 @@
-import DiaperModule from "@/components/diaper-module";
+import DiaperModule, { DiaperAmount, DiaperConsistency } from "@/components/diaper-module";
 import { render, screen, userEvent, act } from "@testing-library/react-native";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Platform } from "react-native";
@@ -25,6 +25,22 @@ jest.mock("@/components/category-module", () => {
 
 
 /*
+ *  getCategoryProps:
+ *      Reads props from CategoryModule mocks
+ *      filters calls by a provided testID
+ *      returns props from most recent matching call
+*/
+function getCategoryProps(testID: string) {
+    // get calls to <CategoryModule/> matching provided test ID
+    const calls = (CategoryModule as jest.Mock).mock.calls.filter(
+        call => call[0].testID === testID  // filter calls by test id
+    );
+    // get props from most recent call
+    return calls.slice(-1)[0][0];
+}
+
+
+/*
  *  setCategoryInput:
  *      Reads update handlers from CategoryModule mocks
  *      filters calls by a provided testID
@@ -33,7 +49,7 @@ jest.mock("@/components/category-module", () => {
 async function setCategoryInput(
     category: string,
     testID: string,
- ) {
+) {
     // get calls to <CategoryModule/> matching provided test ID
     const calls = (CategoryModule as jest.Mock).mock.calls.filter(
         call => call[0].testID === testID  // filter calls by test id
@@ -54,20 +70,56 @@ describe("Diaper component <DiaperModule/>", () => {
     });
 
     test("Renders inputs", () => {
-        render(<DiaperModule/>);
+        render(<DiaperModule amount={"SM"} consistency={"Wet"} changeTime={new Date()}/>);
 
         expect(screen.getByTestId("diaper-category-consistency-module")).toBeTruthy();
         expect(screen.getByTestId("diaper-category-amount-module")).toBeTruthy();
         expect(screen.getByTestId("diaper-time-button")).toBeTruthy();
     });
 
+    test("Renders provided values", () => {
+        const testValuesInitial = { amount: "SM", consistency: "Wet", time: new Date() };
+        const testValuesUpdated = { amount: "LG", consistency: "MD", time: new Date(new Date().getTime() - 73*60*1000) };
+        const { rerender } = render(<DiaperModule
+            amount={testValuesInitial.amount as DiaperAmount}
+            consistency={testValuesInitial.consistency as DiaperConsistency}
+            changeTime={testValuesInitial.time}
+        />);
+
+        // ensure initial values are present in <CategoryModule/> props
+        const amountInitial = getCategoryProps("diaper-category-amount-module");
+        expect(amountInitial.selectedCategory).toBe(testValuesInitial.amount);
+        const consistencyInitial = getCategoryProps("diaper-category-consistency-module");
+        expect(consistencyInitial.selectedCategory).toBe(testValuesInitial.consistency);
+        // ensure time is displayed on screen
+        const formattedTimeInitial = testValuesInitial.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedTimeInitial)).toBeTruthy();
+
+        // rerender with new values
+        rerender(<DiaperModule
+            amount={testValuesUpdated.amount as DiaperAmount}
+            consistency={testValuesUpdated.consistency as DiaperConsistency}
+            changeTime={testValuesUpdated.time}
+        />);
+
+        // ensure updated values are present in <CategoryModule/> props
+        const amountUpdated = getCategoryProps("diaper-category-amount-module");
+        expect(amountUpdated.selectedCategory).toBe(testValuesUpdated.amount);
+        const consistencyUpdated = getCategoryProps("diaper-category-consistency-module");
+        expect(consistencyUpdated.selectedCategory).toBe(testValuesUpdated.consistency);
+        // ensure updated time is displayed on screen
+        const formattedTimeUpdated = testValuesUpdated.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedTimeUpdated)).toBeTruthy();
+    });
+
     test("Changes consistency", async () => {
         const onConsistencyUpdate = jest.fn();
-        render(<DiaperModule onConsistencyUpdate={onConsistencyUpdate}/>);
-
-        // consistency should default to wet
-        expect(onConsistencyUpdate).toHaveBeenCalledTimes(1);
-        expect(onConsistencyUpdate.mock.calls[0][0]).toBe("Wet");
+        render(<DiaperModule
+            amount={"SM"}
+            consistency={"Wet"}
+            changeTime={new Date()}
+            onConsistencyUpdate={onConsistencyUpdate}
+        />);
 
         const testConsistencyCategories = ["Dry", "Mixed", "Wet"];
 
@@ -79,11 +131,12 @@ describe("Diaper component <DiaperModule/>", () => {
 
     test("Changes amount", async () => {
         const onAmountUpdate = jest.fn();
-        render(<DiaperModule onAmountUpdate={onAmountUpdate}/>);
-
-        // amount should default to small
-        expect(onAmountUpdate).toHaveBeenCalledTimes(1);
-        expect(onAmountUpdate.mock.calls[0][0]).toBe("SM");
+        render(<DiaperModule
+            amount={"SM"}
+            consistency={"Wet"}
+            changeTime={new Date()}
+            onAmountUpdate={onAmountUpdate}
+        />);
 
         const testAmountCategories = ["MD", "LG", "SM"];
 
@@ -96,7 +149,7 @@ describe("Diaper component <DiaperModule/>", () => {
     test("Shows/hides date picker (ios)", async () => {
         Platform.OS = "ios";
 
-        render(<DiaperModule/>);
+        render(<DiaperModule amount={"SM"} consistency={"Wet"} changeTime={new Date()}/>);
 
         // Press change date button
         await userEvent.press(screen.getByTestId("diaper-time-button"));
@@ -115,14 +168,12 @@ describe("Diaper component <DiaperModule/>", () => {
         const onTimeUpdate = jest.fn();  // to capture callbacks by <DiaperModule/>
 
         // record pre and post render times
-        const timeBeforeNow = new Date();
-        render(<DiaperModule onTimeUpdate={onTimeUpdate}/>);
-        const timeAfterNow = new Date();
-
-        // ensure time was initialized to approximately the current time
-        expect(onTimeUpdate).toHaveBeenCalledTimes(1);
-        expect(onTimeUpdate.mock.calls[0][0].getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onTimeUpdate.mock.calls[0][0].getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        render(<DiaperModule
+            amount={"SM"}
+            consistency={"Wet"}
+            changeTime={new Date()}
+            onTimeUpdate={onTimeUpdate}
+        />);
 
         // Press change date button
         await userEvent.press(screen.getByTestId("diaper-time-button"));
@@ -132,16 +183,15 @@ describe("Diaper component <DiaperModule/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange({type: 'set'}, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onTimeUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onTimeUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onTimeUpdate).toHaveBeenCalledTimes(1);
+        expect(onTimeUpdate.mock.calls[0][0]).toBe(testDate);
     });
-    
+
     test("Shows/hides date picker (android)", async () => {
         Platform.OS = "android";
 
-        render(<DiaperModule/>);
+        render(<DiaperModule amount={"SM"} consistency={"Wet"} changeTime={new Date()}/>);
 
         // ensure date picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -152,21 +202,19 @@ describe("Diaper component <DiaperModule/>", () => {
         // ensure date picker has been shown
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(1);
     });
-    
+
     test("Updates date (android)", async () => {
         Platform.OS = "android";
         const testDate = new Date();
         const onTimeUpdate = jest.fn();  // to capture callbacks by <DiaperModule/>
 
         // record pre and post render times
-        const timeBeforeNow = new Date();
-        render(<DiaperModule onTimeUpdate={onTimeUpdate}/>);
-        const timeAfterNow = new Date();
-
-        // ensure time was initialized to approximately the current time
-        expect(onTimeUpdate).toHaveBeenCalledTimes(1);
-        expect(onTimeUpdate.mock.calls[0][0].getTime()).toBeGreaterThanOrEqual(timeBeforeNow.getTime());
-        expect(onTimeUpdate.mock.calls[0][0].getTime()).toBeLessThanOrEqual(timeAfterNow.getTime());
+        render(<DiaperModule
+            amount={"SM"}
+            consistency={"Wet"}
+            changeTime={new Date()}
+            onTimeUpdate={onTimeUpdate}
+        />);
 
         await userEvent.press(screen.getByTestId("diaper-time-button"));
 
@@ -175,9 +223,8 @@ describe("Diaper component <DiaperModule/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onTimeUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onTimeUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onTimeUpdate).toHaveBeenCalledTimes(1);
+        expect(onTimeUpdate.mock.calls[0][0]).toBe(testDate);
     });
 });

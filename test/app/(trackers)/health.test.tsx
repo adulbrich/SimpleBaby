@@ -137,31 +137,73 @@ describe("Track health screen", () => {
         expect(screen.getByTestId("health-reset-form-button")).toBeTruthy();
     });
 
-    test("Refreshes on reset", async () => {
-        const testNote = "test note";
+    test("Passes current health fields", async () => {
+        const testHealthLog = {
+            category: "Activity" as HealthCategory,
+            activity: { type: "test type", duration: "test duration" },
+            note: "test note",
+            date: new Date(),
+        };
+        const renderTime = new Date();
         render(<Health/>);
 
-        // write something in the note entry...
-        await setHealthInputs({ note: testNote });
-        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
+        // ensure category and category fields have default values in <HealthModule/>
+        const healthFieldsInitial = (HealthModule as jest.Mock).mock.lastCall[0].healthFields;
+        expect(healthFieldsInitial.category).toBe("Growth");
+        expect(healthFieldsInitial.growth).toEqual({ length: "", weight: "", head: "" });
+        expect(healthFieldsInitial.date.getTime()).toBeCloseTo(renderTime.getTime(), -3.3);
 
-        const mainInputs = screen.getByTestId("health-main-inputs");  // get the displayed <HealthModule/>
+        // fill in test values...
+        await setHealthInputs(testHealthLog);
 
+        // ensure change time, consistency, and amount have been updated
+        const healthFieldsUpdated = (HealthModule as jest.Mock).mock.lastCall[0].healthFields;
+        expect(healthFieldsUpdated.category).toBe(testHealthLog.category);
+        expect(healthFieldsUpdated.activity).toBe(testHealthLog.activity);
+        expect(healthFieldsUpdated.growth).toBe(undefined);
+        expect(healthFieldsUpdated.date).toBe(testHealthLog.date);
+    });
+
+    test("Refreshes on reset", async () => {
+        const testHealthLog = {
+            category: "Activity" as HealthCategory,
+            activity: { type: "test type", duration: "test duration" },
+            note: "test note",
+            date: new Date(),
+        };
+        render(<Health/>);
+
+        // fill in inputs...
+        await setHealthInputs(testHealthLog);
+
+        expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testHealthLog.note);  // ensure the typed note can be found
+        // ensure category and category fields have test values in <HealthModule/>
+        const healthFieldsInitial = (HealthModule as jest.Mock).mock.lastCall[0].healthFields;
+        expect(healthFieldsInitial.category).toBe(testHealthLog.category);
+        expect(healthFieldsInitial.growth).toBe(undefined);
+        expect(healthFieldsInitial.activity).toBe(testHealthLog.activity);
+        expect(healthFieldsInitial.date).toBe(testHealthLog.date);
+
+        const resetTime = new Date();
         await userEvent.press(
             screen.getByTestId("health-reset-form-button")
         );
 
+        // ensure category and category fields are reset to default in <HealthModule/>
+        const healthFieldsUpdated = (HealthModule as jest.Mock).mock.lastCall[0].healthFields;
+        expect(healthFieldsUpdated.category).toBe("Growth");  // should revert to the default of growth
+        expect(healthFieldsUpdated.activity).toBe(undefined);
+        expect(healthFieldsUpdated.growth).toEqual({ length: "", weight: "", head: "" });
+        expect(healthFieldsUpdated.date.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
         // ensure note is no longer present
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
-        // ensure new instance of <HealthModule/> is being used
-        expect(screen.getByTestId("health-main-inputs") === mainInputs).toBeFalsy();
     });
-        
+
     test("Catch unfilled growth inputs", async () => {
         const testFormattedList = "test list";
 
         render(<Health/>);  // will default to growth category
-        
+
         const testInputs = [
             { category: "Growth" as HealthCategory, growth: { length: "", weight: "", head: "" } },
             { category: "Growth" as HealthCategory, growth: { length: " ", weight: " ", head: " " } },
@@ -240,7 +282,7 @@ describe("Track health screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe("Error");
         expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Failed to save health log: ${testErrorMessage}`);
     });
-        
+
     test("Redirects user on successful submit", async () => {
         render(<Health/>);
 
@@ -257,7 +299,7 @@ describe("Track health screen", () => {
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Success`);
         expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(`Health log saved successfully!`);
     });
-        
+
     test("Saves correct values (growth)", async () =>
         await savesCorrectValues({
             category: "Growth",
@@ -270,7 +312,7 @@ describe("Track health screen", () => {
             },
         })
     );
-        
+
     test("Saves correct values (activity)", async () =>
         await savesCorrectValues({
             category: "Activity",
@@ -282,7 +324,7 @@ describe("Track health screen", () => {
             },
         })
     );
-        
+
     test("Saves correct values (meds)", async () =>
         await savesCorrectValues({
             category: "Meds",
@@ -295,7 +337,7 @@ describe("Track health screen", () => {
             },
         })
     );
-        
+
     test("Saves correct values (vaccine)", async () =>
         await savesCorrectValues({
             category: "Vaccine",
@@ -307,7 +349,7 @@ describe("Track health screen", () => {
             },
         })
     );
-        
+
     test("Saves correct values (other)", async () =>
         await savesCorrectValues({
             category: "Other",
