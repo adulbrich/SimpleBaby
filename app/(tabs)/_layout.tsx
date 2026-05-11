@@ -55,7 +55,7 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
-                name="trends"
+                name="logs"
                 options={{
                     title: 'Logs',
                     tabBarIcon: ({ color }) => Icon(color, '📈'),

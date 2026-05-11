@@ -53,6 +53,15 @@
             "guestButton": "sign-up-guest-button"
         },
 
+        "logs": {
+            "sleepButton": "logs-sleep-button",
+            "nursingButton": "logs-nursing-button",
+            "diaperButton": "logs-diaper-button",
+            "feedingButton": "logs-feeding-button",
+            "milestoneButton": "logs-milestone-button",
+            "healthButton": "logs-health-button"
+        },
+
         "activeChild": {
             "renameButton": "active-child-rename-button",
             "deleteButton": "active-child-delete-button"

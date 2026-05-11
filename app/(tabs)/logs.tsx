@@ -2,6 +2,8 @@ import { Href, router } from 'expo-router';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import stringLib from "@/assets/stringLibrary.json";
+
 
 type Button = {
     label: string
@@ -10,17 +12,19 @@ type Button = {
     testID: string
 }
 
+const testIDs = stringLib.testIDs.logs;
+
 export default function Tab() {
 
     const insets = useSafeAreaInsets();
 
     const bars: Button[] = [
-        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-logs', testID: "trends-Sleep-button"},
-        { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs', testID: "trends-Feeding-button"},
-        { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs', testID: "trends-Nursing-button" },
-        { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs', testID: "trends-Diaper-button" },
-        { label: 'Milestone Logs', icon: '🌟', link: '/(logs)/milestone-logs', testID: "trends-Milestone-button" },
-        { label: 'Health Logs', icon: '💚', link: '/(logs)/health-logs', testID: "trends-Health-button" },
+        { label: 'Sleep Logs', icon: '🌙', link: '/(logs)/sleep-logs', testID: testIDs.sleepButton },
+        { label: 'Feeding Logs', icon: '🍽️', link: '/(logs)/feeding-logs', testID: testIDs.feedingButton },
+        { label: 'Nursing Logs', icon: '🍼', link: '/(logs)/nursing-logs', testID: testIDs.nursingButton },
+        { label: 'Diaper Logs', icon: '🧷', link: '/(logs)/diaper-logs', testID: testIDs.diaperButton },
+        { label: 'Milestone Logs', icon: '🌟', link: '/(logs)/milestone-logs', testID: testIDs.milestoneButton },
+        { label: 'Health Logs', icon: '💚', link: '/(logs)/health-logs', testID: testIDs.healthButton },
     ];
 
     return (
