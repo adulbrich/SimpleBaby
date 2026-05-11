@@ -3,11 +3,10 @@ import CategoryModule from "@/components/category-module";
 import { Text } from "react-native";
 
 
-const iconTexts = ["icon 1", "icon 2", "icon 3"];
 const testCategories = [
-    { label: "category 1", icon: <Text>{iconTexts[0]}</Text> },
-    { label: "category 2", icon: <Text>{iconTexts[1]}</Text> },
-    { label: "category 3", icon: <Text>{iconTexts[2]}</Text> },
+    { label: "category 1", icon: <Text>icon 1</Text> },
+    { label: "category 2", icon: <Text>icon 2</Text> },
+    { label: "category 3", icon: <Text>icon 3</Text> },
 ];
 
 
@@ -31,11 +30,10 @@ describe("Feeding component <FeedingCategory/>", () => {
             categoryList={testCategories}
         />);
 
-        for (let i = 0; i < testCategories.length; i++) {
-            const { label } = testCategories[i];
+        for (const { label, icon } of testCategories) {
             expect(screen.getByTestId(`category-${label.toLowerCase()}-button`)).toBeTruthy();
             expect(screen.getByText(label)).toBeTruthy();
-            expect(screen.getByText(iconTexts[i])).toBeTruthy();
+            expect(screen.getByText(icon.props.children)).toBeTruthy();
         }
     });
 
