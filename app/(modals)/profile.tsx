@@ -306,25 +306,6 @@ export default function Profile() {
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    <View className='profile-item'>
-                        <View className='profile-bubble-base flex-row items-center gap-1.5'>
-                            <Ionicons name='alert-circle-outline' size={22} color={itemIconColor}/>
-                            <Text className='text-lg text-black dark:text-gray-200'>App Version</Text>
-                        </View>
-                        <TouchableOpacity
-                            onPress={() =>
-                                Alert.alert(
-                                    "Can't do this yet.",
-                                    'Please wait for an update.',
-                                )
-                            }
-                            testID={testIDs.appVersionButton}
-                        >
-                            <Text className='profile-value-light'>
-                                v0.1a
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
             </ScrollView>
             <View className='pt-4'>
