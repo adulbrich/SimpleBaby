@@ -12,12 +12,40 @@ export default function Tab() {
     const iconSize = 50;
 
     const bars = [
-        { label: 'Sleep Logs', icon: <Ionicons name="moon-outline" size={iconSize} color={iconColor} />, link: '/(logs)/sleep-logs' as Href, testID: "trends-Sleep-button"},
-        { label: 'Feeding Logs', icon: <Ionicons name="restaurant-outline" size={iconSize} color={iconColor} />, link: '/(logs)/feeding-logs' as Href, testID: "trends-Feeding-button"},
-        { label: 'Nursing Logs', icon: <MaterialCommunityIcons name="baby-bottle-outline" size={iconSize} color={iconColor} />, link: '/(logs)/nursing-logs' as Href, testID: "trends-Nursing-button" },
-        { label: 'Diaper Logs', icon: <MaterialCommunityIcons name="baby-face-outline" size={iconSize} color={iconColor} />, link: '/(logs)/diaper-logs' as Href, testID: "trends-Diaper-button" },
-        { label: 'Milestone Logs', icon: <Ionicons name="star-outline" size={iconSize} color={iconColor} />, link: '/(logs)/milestone-logs' as Href, testID: "trends-Milestone-button" },
-        { label: 'Health Logs', icon: <Ionicons name="heart-outline" size={iconSize} color={iconColor} />, link: '/(logs)/health-logs' as Href, testID: "trends-Health-button" },
+        { 
+            label: 'Sleep Logs', 
+            icon: <Ionicons name="moon-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/sleep-logs' as Href, testID: "trends-Sleep-button"
+        },
+        { 
+            label: 'Feeding Logs', 
+            icon: <Ionicons name="restaurant-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/feeding-logs' as Href, 
+            testID: "trends-Feeding-button"
+        },
+        { 
+            label: 'Nursing Logs', 
+            icon: <MaterialCommunityIcons name="baby-bottle-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/nursing-logs' as Href, 
+            testID: "trends-Nursing-button" 
+        },
+        { 
+            label: 'Diaper Logs', 
+            icon: <MaterialCommunityIcons name="baby-face-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/diaper-logs' as Href, 
+            testID: "trends-Diaper-button" 
+        },
+        { 
+            label: 'Milestone Logs', 
+            icon: <Ionicons name="star-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/milestone-logs' as Href, 
+            testID: "trends-Milestone-button" },
+        { 
+            label: 'Health Logs', 
+            icon: <Ionicons name="heart-outline" size={iconSize} color={iconColor} />, 
+            link: '/(logs)/health-logs' as Href, 
+            testID: "trends-Health-button" 
+        },
     ];
 
     return (
