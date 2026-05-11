@@ -98,7 +98,7 @@ export default function DiaperModule({
 
             <CategoryModule
                 titleIcon={<FontAwesome name="certificate" size={14}/>}
-                title=" Choose Consistency"
+                title="Choose Consistency"
                 selectedCategory={selectedConsistency}
                 categoryList={[
                     { label: "Wet", icon: <Entypo name="water" size={24} color={iconStyle}/> },
@@ -111,7 +111,7 @@ export default function DiaperModule({
 
             <CategoryModule
                 titleIcon={<FontAwesome name="balance-scale" size={14}/>}
-                title=" Choose Amount"
+                title="Choose Amount"
                 selectedCategory={selectedAmount}
                 categoryList={[
                     { label: "SM" },

@@ -89,7 +89,7 @@ export default function FeedingCategory({
 
             <CategoryModule
                 titleIcon={<MaterialCommunityIcons name="food-apple" size={14}/>}
-                title=" Choose Category"
+                title="Choose Category"
                 selectedCategory={category}
                 categoryList={[
                     { label: "Liquid", icon: <MaterialCommunityIcons name="baby-bottle-outline" size={24} color={iconStyle}/> },

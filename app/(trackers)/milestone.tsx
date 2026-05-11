@@ -220,7 +220,7 @@ export default function Milestone() {
 
 						<CategoryModule
 							titleIcon={<Ionicons name="globe-outline" size={14}/>}
-							title=" Choose Category"
+							title="Choose Category"
 							selectedCategory={category}
 							categoryList={[
 								{ label: "Motor", icon: <FontAwesome5 name="running" size={24} color={iconStyle}/> },

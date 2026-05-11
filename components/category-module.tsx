@@ -24,7 +24,7 @@ export default function CategoryModule<Category extends string>({
     return (
         <View className='tracker-section' testID={testID}>
             <View className='tracker-section-label'>
-                <Text className='tracker-section-label-text'>{titleIcon}{title}</Text>
+                <Text className='tracker-section-label-text'>{titleIcon} {title}</Text>
             </View>
             <View className="flex-row flex-wrap gap-4 justify-center mb-6">
                 {categoryList.map(({ label, icon }) => (

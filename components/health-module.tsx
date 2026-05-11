@@ -218,7 +218,7 @@ export default function HealthModule({
 
             <CategoryModule
                 titleIcon={<FontAwesome name="stethoscope" size={14}/>}
-                title=" Choose Type"
+                title="Choose Type"
                 selectedCategory={selectedCategory}
                 categoryList={[
                     { label: "Growth", icon: <Entypo name="ruler" size={24} color={iconStyle}/> },
