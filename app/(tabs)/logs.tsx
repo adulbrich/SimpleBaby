@@ -3,6 +3,10 @@ import { View, Text, TouchableOpacity, ScrollView, useColorScheme } from 'react-
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import stringLib from "@/assets/stringLibrary.json";
+
+
+const testIDs = stringLib.testIDs.logs;
 
 export default function Tab() {
 
@@ -15,36 +19,37 @@ export default function Tab() {
         { 
             label: 'Sleep Logs', 
             icon: <Ionicons name="moon-outline" size={iconSize} color={iconColor} />, 
-            link: '/(logs)/sleep-logs' as Href, testID: "trends-Sleep-button"
+            link: '/(logs)/sleep-logs' as Href, 
+            testID: testIDs.sleepButton
         },
         { 
             label: 'Feeding Logs', 
             icon: <Ionicons name="restaurant-outline" size={iconSize} color={iconColor} />, 
             link: '/(logs)/feeding-logs' as Href, 
-            testID: "trends-Feeding-button"
+            testID: testIDs.feedingButton
         },
         { 
             label: 'Nursing Logs', 
             icon: <MaterialCommunityIcons name="baby-bottle-outline" size={iconSize} color={iconColor} />, 
             link: '/(logs)/nursing-logs' as Href, 
-            testID: "trends-Nursing-button" 
+            testID: testIDs.nursingButton
         },
         { 
             label: 'Diaper Logs', 
             icon: <MaterialCommunityIcons name="baby-face-outline" size={iconSize} color={iconColor} />, 
             link: '/(logs)/diaper-logs' as Href, 
-            testID: "trends-Diaper-button" 
+            testID: testIDs.diaperButton
         },
         { 
             label: 'Milestone Logs', 
             icon: <Ionicons name="star-outline" size={iconSize} color={iconColor} />, 
             link: '/(logs)/milestone-logs' as Href, 
-            testID: "trends-Milestone-button" },
+            testID: testIDs.milestoneButton },
         { 
             label: 'Health Logs', 
             icon: <Ionicons name="heart-outline" size={iconSize} color={iconColor} />, 
             link: '/(logs)/health-logs' as Href, 
-            testID: "trends-Health-button" 
+            testID: testIDs.healthButton
         },
     ];
 
