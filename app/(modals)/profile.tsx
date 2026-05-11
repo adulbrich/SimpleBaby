@@ -182,13 +182,13 @@ export default function Profile() {
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <View className='profile-bubble-base flex-row items-center gap-2' testID={testIDs.childNameGuest}>
+                            <View className='profile-bubble-base' testID={testIDs.childNameGuest}>
                                 <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
                                 <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
                             </View>
                         ) : (
                             <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
-                                <View className='profile-bubble-base flex-row items-center gap-2' testID={testIDs.childNameButton}>
+                                <View className='profile-bubble-base' testID={testIDs.childNameButton}>
                                     <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
                                     <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
                                 </View>
@@ -236,7 +236,7 @@ export default function Profile() {
                         </View>
                     </TouchableOpacity>}
                     <View className='profile-item'>
-                        <View className='profile-bubble-base flex-row items-center gap-1.5'>
+                        <View className='profile-bubble-base'>
                             <Ionicons name='person-outline' size={22} color={itemIconColor}/>
                             <Text className='text-lg text-black dark:text-gray-200'>Name</Text>
                         </View>
@@ -245,7 +245,7 @@ export default function Profile() {
                         </Text>
                     </View>
                     {!isGuest && <View className='profile-item'>
-                        <View className='profile-bubble-base flex-row items-center gap-1.5'>
+                        <View className='profile-bubble-base'>
                             <Ionicons name='people-outline' size={22} color={itemIconColor}/>
                             <Text className='text-lg text-black dark:text-gray-200'>Caretakers</Text>
                         </View>
@@ -264,7 +264,7 @@ export default function Profile() {
                         </TouchableOpacity>
                     </View>}
                     {!isGuest && <View className='profile-item'>
-                        <View className='profile-bubble-base flex-row items-center gap-1.5'>
+                        <View className='profile-bubble-base'>
                             <Ionicons name='mail-outline' size={22} color={itemIconColor}/>
                             <Text className='text-lg text-black dark:text-gray-200'>Email</Text>
                         </View>
@@ -288,7 +288,7 @@ export default function Profile() {
                         </TouchableOpacity>
                     </View>}
                     {!isGuest && <View className='profile-item'>
-                        <View className='profile-bubble-base flex-row items-center gap-1.5'>
+                        <View className='profile-bubble-base'>
                             <Ionicons name='key-outline' size={22} color={itemIconColor}/>
                             <Text className='text-lg text-black dark:text-gray-200'>Password</Text>
                         </View>

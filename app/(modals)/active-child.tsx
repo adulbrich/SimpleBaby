@@ -170,7 +170,7 @@ export default function ActiveChild() {
                         <Text className='profile-child-name-label'>
                             Name
                         </Text>
-                        <View className='profile-bubble-base flex-row items-center gap-2'>
+                        <View className='profile-bubble-base'>
                             <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
                             <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
                         </View>
