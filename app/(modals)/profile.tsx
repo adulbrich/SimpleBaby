@@ -184,13 +184,13 @@ export default function Profile() {
                         { isGuest ? (
                             <View className='profile-bubble-base flex-row items-center gap-2' testID={testIDs.childNameGuest}>
                                 <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
-                                <Text className='text-2xl text-[#f9a000] dark:text-orange-100'>{childName}</Text>
+                                <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
                             </View>
                         ) : (
                             <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
                                 <View className='profile-bubble-base flex-row items-center gap-2' testID={testIDs.childNameButton}>
                                     <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
-                                    <Text className='text-2xl text-[#f9a000] dark:text-orange-100'>{childName}</Text>
+                                    <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
                                 </View>
                             </TouchableOpacity>
                         )}
@@ -240,7 +240,7 @@ export default function Profile() {
                             <Ionicons name='person-outline' size={22} color={itemIconColor}/>
                             <Text className='text-lg text-black dark:text-gray-200'>Name</Text>
                         </View>
-                        <Text className='profile-value'>
+                        <Text className='profile-value' numberOfLines={1} ellipsizeMode="tail">
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
