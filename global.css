@@ -209,10 +209,6 @@
     dark:border-[#152619] ios:drop-shadow-sm android:shadow-md;
 }
 
-.log-button-icon {
-    @apply text-[3rem] scale-100;
-}
-
 .tracker-label {
     @apply text-lg scale-100 font-bold text-yellow-800 dark:text-[#dbf9dd];
 }
