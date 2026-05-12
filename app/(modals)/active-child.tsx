@@ -177,7 +177,7 @@ export default function ActiveChild() {
                                 color={childIconColor}
                             />
                             <Text 
-                                className='text-2xl text-[#f9a000] dark:text-orange-100' 
+                                className='child-name-text' 
                                 numberOfLines={1} 
                                 ellipsizeMode="tail"
                             >
