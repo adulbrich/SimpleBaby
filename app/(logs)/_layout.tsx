@@ -2,12 +2,26 @@ import { router, Stack } from 'expo-router';
 import {
     Text,
     TouchableOpacity,
+    useColorScheme,
 } from 'react-native';
 
 export default function LogsLayout() {
+    
+    const theme = useColorScheme();
+    const headerStyle = {
+        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
+    };
+    const headerTitleStyle = {
+        color: theme === 'light' ? '#000' : '#fff',
+    };
+    
     return (
         <Stack
             screenOptions={{
+                headerShown: true,
+                headerStyle: { ...headerStyle },
+                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
+                headerShadowVisible: false,
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
