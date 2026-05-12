@@ -1,16 +1,26 @@
 import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, TouchableOpacity, Text } from 'react-native';
+import { Platform, TouchableOpacity, Text, useColorScheme } from 'react-native';
 
 export default function ModalsLayout() {
 
     const isAndroid = Platform.OS === 'android';
+    const theme = useColorScheme();
+    const headerStyle = {
+        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
+    };
+    const headerTitleStyle = {
+        color: theme === 'light' ? '#000' : '#fff',
+    };
 
     return (
         <>
             <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
             <Stack screenOptions={{
                 presentation: 'modal',
+                headerShown: true,
+                headerStyle: { ...headerStyle },
+                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
@@ -50,7 +60,7 @@ export default function ModalsLayout() {
                     }}
                 />
                 <Stack.Screen
-                    name='privacypolicy'
+                    name='privacy-policy'
                     options={{
                         headerTitle: 'Privacy Policy',
                     }}

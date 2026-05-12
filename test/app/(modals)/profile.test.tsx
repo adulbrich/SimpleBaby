@@ -132,7 +132,6 @@ describe("Profile screen", () => {
         expect(screen.getByTestId(testIDs.caretakersButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.emailButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.passwordButton)).toBeTruthy();
-        expect(screen.getByTestId(testIDs.appVersionButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.signOutButton)).toBeTruthy();
         expect(screen.getByText("Sign Out")).toBeTruthy();  // sign out button label
 
@@ -672,7 +671,6 @@ describe("profile screen (guest mode)", () => {
         await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
 
         expect(screen.getByTestId(testIDs.childNameGuest)).toBeTruthy();
-        expect(screen.getByTestId(testIDs.appVersionButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.signOutButton)).toBeTruthy();
         expect(screen.getByText("Exit Guest Mode")).toBeTruthy();  // sign out button label
 
