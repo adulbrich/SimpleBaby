@@ -189,11 +189,11 @@ describe("Profile screen", () => {
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
         await waitForChildDataCalled;  // ...then ensure that getActiveChildData() has been called
 
-        expect(screen.getByText("Loading...", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Loading...")).toBeTruthy();
 
         await act(async () => resolveChildData({ success: true, childName: testChildName }));
-        expect(() => screen.getByText("Loading...", { exact: false })).toThrow();
-        expect(screen.getByText(testChildName, { exact: false })).toBeTruthy();
+        expect(() => screen.getByText("Loading...")).toThrow();
+        expect(screen.getByText(testChildName)).toBeTruthy();
 
         // revert mock implementation
         (getActiveChildData as jest.Mock).mockImplementation(originalMock);
@@ -490,7 +490,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText(testActiveChild, { exact: false });
+        await screen.findByText(testActiveChild);
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -544,7 +544,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText(testActiveChild, { exact: false });
+        await screen.findByText(testActiveChild);
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -709,11 +709,11 @@ describe("profile screen (guest mode)", () => {
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
         await waitForListChildrenCalled;  // ensure getActiveChildData() has been called
 
-        expect(screen.getByText("Loading...", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Loading...")).toBeTruthy();
 
         await act(async () => resolveListChildren([{ id: testChildId, name: testChildName }]));
-        expect(() => screen.getByText("Loading...", { exact: false })).toThrow();
-        expect(screen.getByText(testChildName, { exact: false })).toBeTruthy();
+        expect(() => screen.getByText("Loading...")).toThrow();
+        expect(screen.getByText(testChildName)).toBeTruthy();
     });
 
     test("Catches missing child ID", async () => {
@@ -728,7 +728,7 @@ describe("profile screen (guest mode)", () => {
 
         // wait for child names to finish loading...
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
-        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...")).toThrow());
 
         expect(screen.getByText("Guest Child")).toBeTruthy();
     });
