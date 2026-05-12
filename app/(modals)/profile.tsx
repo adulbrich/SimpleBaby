@@ -183,14 +183,34 @@ export default function Profile() {
                         </Text>
                         { isGuest ? (
                             <View className='profile-bubble-base' testID={testIDs.childNameGuest}>
-                                <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
-                                <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
+                                <MaterialCommunityIcons 
+                                    name='baby-face-outline' 
+                                    size={24} 
+                                    color={childIconColor}
+                                />
+                                <Text 
+                                    className='text-2xl text-[#f9a000] dark:text-orange-100' 
+                                    numberOfLines={1} 
+                                    ellipsizeMode="tail"
+                                >
+                                    {childName}
+                                </Text>
                             </View>
                         ) : (
                             <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
                                 <View className='profile-bubble-base' testID={testIDs.childNameButton}>
-                                    <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
-                                    <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
+                                    <MaterialCommunityIcons 
+                                        name='baby-face-outline' 
+                                        size={24} 
+                                        color={childIconColor}
+                                    />
+                                    <Text 
+                                        className='text-2xl text-[#f9a000] dark:text-orange-100' 
+                                        numberOfLines={1} 
+                                        ellipsizeMode="tail"
+                                    >
+                                        {childName}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                         )}

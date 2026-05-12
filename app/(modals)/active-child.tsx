@@ -171,8 +171,18 @@ export default function ActiveChild() {
                             Name
                         </Text>
                         <View className='profile-bubble-base'>
-                            <MaterialCommunityIcons name='baby-face-outline' size={24} color={childIconColor}/>
-                            <Text className='text-2xl text-[#f9a000] dark:text-orange-100' numberOfLines={1} ellipsizeMode="tail">{childName}</Text>
+                            <MaterialCommunityIcons 
+                                name='baby-face-outline' 
+                                size={24} 
+                                color={childIconColor}
+                            />
+                            <Text 
+                                className='text-2xl text-[#f9a000] dark:text-orange-100' 
+                                numberOfLines={1} 
+                                ellipsizeMode="tail"
+                            >
+                                {childName}
+                            </Text>
                         </View>
                     </View>
                     <TouchableOpacity
