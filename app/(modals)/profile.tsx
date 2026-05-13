@@ -239,7 +239,7 @@ export default function Profile() {
                             <View className='profile-item'>
                                 <View className='child-action-label'>
                                     <AntDesign name='user-switch' size={24} color={itemIconColor}/>
-                                    <Text className='text-2xl dark:text-gray-100'>Switch Child</Text>
+                                    <Text className='child-action-button'>Switch Child</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -251,7 +251,7 @@ export default function Profile() {
                         <View className='profile-item mb-8'>
                             <View className='child-action-label'>
                                 <AntDesign name='plus' size={24} color={itemIconColor}/>
-                                <Text className='text-2xl dark:text-gray-100'>Add Child</Text>
+                                <Text className='child-action-button'>Add Child</Text>
                             </View>
                         </View>
                     </TouchableOpacity>}
