@@ -237,7 +237,7 @@ export default function Profile() {
                             testID={testIDs.switchChildButton}
                         >
                             <View className='profile-item'>
-                                <View className='flex-row items-center gap-3 p-4'>
+                                <View className='child-action-label'>
                                     <AntDesign name='user-switch' size={24} color={itemIconColor}/>
                                     <Text className='text-2xl dark:text-gray-100'>Switch Child</Text>
                                 </View>
@@ -249,7 +249,7 @@ export default function Profile() {
                         testID={testIDs.addChildButton}
                     >
                         <View className='profile-item mb-8'>
-                            <View className='flex-row items-center gap-3 p-4'>
+                            <View className='child-action-label'>
                                 <AntDesign name='plus' size={24} color={itemIconColor}/>
                                 <Text className='text-2xl dark:text-gray-100'>Add Child</Text>
                             </View>

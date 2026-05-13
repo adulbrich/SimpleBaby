@@ -194,7 +194,7 @@ export default function ActiveChild() {
                         testID={testIDs.renameButton}
                     >
                         <View className='profile-item mb-8'>
-                            <View className='flex-row items-center gap-2 p-4'>
+                            <View className='child-action-label'>
                                 <Ionicons name='pencil' size={20} color={itemIconColor}/>
                                 <Text className='text-2xl dark:text-gray-100'>Rename</Text>
                             </View>

@@ -79,7 +79,7 @@ describe("Log item", () => {
 
         for (const logField of testLog) {
             if (logField && logField.type === "note" && logField.value) {
-                expect(screen.getByText(logField.value, { exact: false })).toBeTruthy();
+                expect(screen.getByText(logField.value)).toBeTruthy();
             }
         }
     });

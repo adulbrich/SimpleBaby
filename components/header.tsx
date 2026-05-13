@@ -42,8 +42,8 @@ export default function Header({ title, headerLink, topInset }: HeaderProps) {
                     }}
                     testID='header-link'
                 >
-                    <View className='flex-row gap-2 p-2 border-2 rounded-full border-[#000] dark:border-[#293c25] bg-[#fff2af] dark:bg-[#6fac7d]'>
-                        <View className='pl-2'>{headerLink.icon}</View>
+                    <View className='flex-row gap-2 p-2 pl-4 border-2 rounded-full border-[#000] dark:border-[#293c25] bg-[#fff2af] dark:bg-[#6fac7d]'>
+                        {headerLink.icon}
                         <Text className='pr-2 dark:text-[#ffefa9] font-bold'>
                             {headerLink.title}
                         </Text>
