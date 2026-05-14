@@ -1,20 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, Text, useColorScheme } from 'react-native';
+import { TouchableOpacity, Text, useColorScheme, Platform } from 'react-native';
 
 // TrackersLayout.tsx
 // Layout screen for baby trackers stack — handles common header styling and back button
 export default function TrackersLayout() {
     const theme = useColorScheme();
-
     const headerStyle = {
         backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
     };
-
     const headerTitleStyle = {
         color: theme === 'light' ? '#000' : '#fff',
     };
+    const isAndroid = Platform.OS === 'android';
 
     return (
         // Stack navigator with common header options and screens
@@ -29,9 +28,9 @@ export default function TrackersLayout() {
                         onPress={() => {
                             router.dismissTo('/(tabs)');
                         }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
+                        className={isAndroid ? 'modal-back-button' : 'p-2'}
                     >
-                        <Text className='dark:color-[#fff] font-bold'>
+                        <Text className='dark:color-[#fff] color-[#000] font-bold'>
                             <Ionicons name='arrow-back' size={14}/> Back
                         </Text>
                     </TouchableOpacity>
