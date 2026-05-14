@@ -4,7 +4,8 @@ import {
     ScrollView,
     View,
     TouchableOpacity,
-    Alert
+    Alert,
+    useColorScheme
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { formatName } from '@/library/utils';
 import supabase from '@/library/supabase-client';
 import SwitchChildPopup from '@/components/switch-child-popup';
 import stringLib from "@/assets/stringLibrary.json";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 const testIDs = stringLib.testIDs.activeChild;
@@ -35,6 +37,10 @@ export default function ActiveChild() {
     const [childName, setChildName] = useState<string>('Loading...');
     const [childId, setChildId] = useState<string>('');
     const [children, setChildren] = useState<{ name: string; id: string }[]>([]);
+
+    const colorScheme = useColorScheme();
+    const childIconColor = colorScheme === 'dark' ? '#ffedd5' : '#f9a000';
+    const itemIconColor = colorScheme === 'dark' ? '#e5e7eb' : '#000000';
 
     // Handles intial user request to delete a child
     const handleDeleteChild = async () => {
@@ -164,9 +170,20 @@ export default function ActiveChild() {
                         <Text className='profile-child-name-label'>
                             Name
                         </Text>
-                        <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name'>
-                            👶 {childName}
-                        </Text>
+                        <View className='profile-bubble-base'>
+                            <MaterialCommunityIcons 
+                                name='baby-face-outline' 
+                                size={24} 
+                                color={childIconColor}
+                            />
+                            <Text 
+                                className='child-name-text' 
+                                numberOfLines={1} 
+                                ellipsizeMode="tail"
+                            >
+                                {childName}
+                            </Text>
+                        </View>
                     </View>
                     <TouchableOpacity
                         onPress={() => {
@@ -177,15 +194,17 @@ export default function ActiveChild() {
                         testID={testIDs.renameButton}
                     >
                         <View className='profile-item mb-8'>
-                            <Text className='profile-child-name-label'>
-                                ✏️ Rename
-                            </Text>
+                            <View className='child-action-button'>
+                                <Ionicons name='pencil' size={20} color={itemIconColor}/>
+                                <Text className='child-action-label'>Rename</Text>
+                            </View>
                         </View>
                     </TouchableOpacity>
                     <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            📆 Created On
-                        </Text>
+                        <View className='profile-item-text flex-row items-center gap-1.5'>
+                            <Ionicons name='calendar-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Created On</Text>
+                        </View>
                         <Text className='profile-value-light'>
                             {createdDate}
                         </Text>

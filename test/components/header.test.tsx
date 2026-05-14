@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import { render, screen, userEvent } from "@testing-library/react-native";
 import { router } from "expo-router";
+import { Text } from "react-native";
 
 
 jest.mock("expo-router", () => ({
@@ -21,7 +22,7 @@ describe("header component", () => {
         const testTitle = "test title";
         const testLabel = "test label";
         const testIcon = "test icon";
-        render(<Header title={testTitle} headerLink={{icon: testIcon, title: testLabel, link: ":"}}></Header>);
+        render(<Header title={testTitle} headerLink={{icon: <Text>{testIcon}</Text>, title: testLabel, link: ":"}}></Header>);
 
         expect(screen.getByText(testTitle)).toBeTruthy();
         expect(screen.getByText(testLabel)).toBeTruthy();

@@ -6,6 +6,7 @@ import DateTimePicker, {
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 
 import stringLib from "../assets/stringLibrary.json";
+import { AntDesign } from '@expo/vector-icons';
 
 /**
  * ManualEntry component allows users to pick start and end times manually.
@@ -106,9 +107,9 @@ export default function ManualEntry({
                         >
                             <Text className='tracker-input-text'>
                                 {showIOSPicker && currentPickerMode === 'start'
-                                    ? 'Close'
-                                    : 'Choose'}{' '}
-                                ⏰
+                                    ? 'Close  '
+                                    : 'Choose  '}
+                                <AntDesign name="clock-circle" size={14}/>
                             </Text>
                         </TouchableOpacity>
                         <Text className='tracker-input-text mr-4'>{formatTime(startDate)}</Text>
@@ -137,9 +138,9 @@ export default function ManualEntry({
                         >
                             <Text className='tracker-input-text'>
                                 {showIOSPicker && currentPickerMode === 'end'
-                                    ? 'Close'
-                                    : 'Choose'}{' '}
-                                ⏰
+                                    ? 'Close  '
+                                    : 'Choose  '}
+                                <AntDesign name="clock-circle" size={14}/>
                             </Text>
                         </TouchableOpacity>
                         <Text className='tracker-input-text mr-4'>{formatTime(endDate)}</Text>

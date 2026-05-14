@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import React from 'react';
 import { TouchableOpacity, Text, useColorScheme, Platform } from 'react-native';
@@ -30,7 +31,7 @@ export default function TrackersLayout() {
                         className={isAndroid ? 'modal-back-button' : 'p-2'}
                     >
                         <Text className='dark:color-[#fff] color-[#000] font-bold'>
-                            ⬅️ Back
+                            <Ionicons name='arrow-back' size={14}/> Back
                         </Text>
                     </TouchableOpacity>
                 ),

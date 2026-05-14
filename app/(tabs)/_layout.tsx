@@ -1,23 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Text, useColorScheme } from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Header, { HeaderLink } from '@/components/header';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const Icon = (color: string, text: string) => {
-    return <Text style={{ color }}>{text}</Text>;
-};
-
-const Profile: HeaderLink = {
-    link: '/(modals)/profile',
-    title: 'Profile',
-    icon: '👩',
-};
-
-const Calendar: HeaderLink = {
-    link: '/(modals)/calendar',
-    title: 'Calendar',
-    icon: '📅',
-};
 
 export default function TabLayout() {
     const scheme = useColorScheme();
@@ -31,6 +16,20 @@ export default function TabLayout() {
     const tabBarActiveTintColor =
         scheme === 'light' ? '#bc8877' : '#118866';
 
+    const headerIconColor = scheme === 'dark' ? '#ffefa9' : '#000000';
+
+    const Profile: HeaderLink = {
+        link: '/(modals)/profile',
+        title: 'Profile',
+        icon: <Ionicons name="person-outline" size={18} color={headerIconColor} />,
+    };
+
+    const Calendar: HeaderLink = {
+        link: '/(modals)/calendar',
+        title: 'Calendar',
+        icon: <Ionicons name="calendar-outline" size={18} color={headerIconColor} />,
+    };
+
     return (
         <Tabs
             screenOptions={{
@@ -43,10 +42,12 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     tabBarLabel: 'Trackers',
-                    tabBarIcon: ({ color }) => Icon(color, '👶'),
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="home-outline" size={size} color={color} />
+                    ),
                     header: () => (
                         <Header
-                            title="👶 SimpleBaby"
+                            title="SimpleBaby"
                             headerLink={Profile}
                             topInset={insets.top}
                         />
@@ -58,10 +59,12 @@ export default function TabLayout() {
                 name="logs"
                 options={{
                     title: 'Logs',
-                    tabBarIcon: ({ color }) => Icon(color, '📈'),
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="bar-chart-outline" size={size} color={color} />
+                    ),
                     header: () => (
                         <Header
-                            title="📈 Logs"
+                            title="Logs"
                             headerLink={Calendar}
                             topInset={insets.top}
                         />
@@ -73,18 +76,21 @@ export default function TabLayout() {
                 name="about"
                 options={{
                     title: 'About',
-                    tabBarIcon: ({ color }) => Icon(color, '❓'),
-                    header: () => <Header title="❓ About" topInset={insets.top}/>,
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="information-circle-outline" size={size} color={color} />
+                    ),
+                    header: () => <Header title="About" topInset={insets.top} />,
                 }}
             />
 
-          
             <Tabs.Screen
                 name="settings"
                 options={{
                     title: 'Settings',
-                    tabBarIcon: ({ color }) => Icon(color, '⚙️'),
-                    header: () => <Header title="⚙️ Settings" topInset={insets.top}/>,
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="settings-outline" size={size} color={color} />
+                    ),
+                    header: () => <Header title="Settings" topInset={insets.top} />,
                 }}
             />
 

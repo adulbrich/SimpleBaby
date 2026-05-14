@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { View, Text, ScrollView } from 'react-native';
 
 export default function AboutScreen() {
@@ -38,8 +39,8 @@ export default function AboutScreen() {
                 </Text>
 
                 {/* Mission Statement */}
-                <Text className='aside-text mt-16'>
-                    Designed to make baby tracking simple and stress-free. 💛
+                <Text className='aside-text mt-10'>
+                    Designed to make baby tracking simple and stress-free. <Ionicons name="heart"/>
                 </Text>
             </View>
         </ScrollView>
