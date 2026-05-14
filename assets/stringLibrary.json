@@ -143,5 +143,26 @@
             "healthButton": "health-button",
             "addChildPopup": "add-child-popup"
         }
+    },
+
+    "privacyPolicy": {
+        "setionHeader": {
+            "about" : "About SimpleBaby",
+            "dataUse" : "Data Use",
+            "permissions": "Permissions",
+            "subaBase" : "SupaBase",
+            "changes" : "Changes to Privacy Policy",
+            "contact" : "Contact Us"
+        },
+
+        "content" : {
+            "about" : "The following privacy policy explains how Simplebaby uses personal data, how it's stored, how it's processed, and what data processors we work with.",
+            "dataUse1" : "SimpleBaby is a privacy first app, built around the belief that parents and caregivers should have childcare tools which respect their privacy and security. Hence, SimpleBaby encrypts all information regarding childcare activities such feeding amounts/times, foods eaten, diaper changes, and milestones. Currently not included in this encryption is:",
+            "dataUse2" : "Your encrypted data cannot be viewed by any members of the SimpleBaby team, even if we wanted to. This data is used for creating the tracking logs which you can view from the logs page to the calendar page.",
+            "permissions" : "In order to maintain account functionality, SimpleBaby does store the provided email given to the app upon signing up for an account. Currently we don't do anything with your email besides storing it, but eventually it will be used for account management, such as resetting your password.",
+            "subaBase" : "Simplebaby makes use of a third party provider, Supabase, for external data storage. Prior to storing any information on the server, data is encrypted locally on your device and then sent for Supabase for storage and retrieval. Users who do not sign up but instead use guest mode have all their data encrypted and instead stored locally on their device.", 
+            "changes" : "We may update this privacy policy from time to time and will notify you of any changes by posting new versions of this policy to this section.",
+            "contant" : "If you have any questions about this Privacy Policy, you can contact us at: <insert email here>"
+        }
     }
 }
