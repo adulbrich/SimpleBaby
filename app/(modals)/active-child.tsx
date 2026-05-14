@@ -194,9 +194,9 @@ export default function ActiveChild() {
                         testID={testIDs.renameButton}
                     >
                         <View className='profile-item mb-8'>
-                            <View className='child-action-label'>
+                            <View className='child-action-button'>
                                 <Ionicons name='pencil' size={20} color={itemIconColor}/>
-                                <Text className='text-2xl dark:text-gray-100'>Rename</Text>
+                                <Text className='child-action-label'>Rename</Text>
                             </View>
                         </View>
                     </TouchableOpacity>

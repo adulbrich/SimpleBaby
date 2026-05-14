@@ -237,9 +237,9 @@ export default function Profile() {
                             testID={testIDs.switchChildButton}
                         >
                             <View className='profile-item'>
-                                <View className='child-action-label'>
+                                <View className='child-action-button'>
                                     <AntDesign name='user-switch' size={24} color={itemIconColor}/>
-                                    <Text className='child-action-button'>Switch Child</Text>
+                                    <Text className='child-action-label'>Switch Child</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -249,9 +249,9 @@ export default function Profile() {
                         testID={testIDs.addChildButton}
                     >
                         <View className='profile-item mb-8'>
-                            <View className='child-action-label'>
+                            <View className='child-action-button'>
                                 <AntDesign name='plus' size={24} color={itemIconColor}/>
-                                <Text className='child-action-button'>Add Child</Text>
+                                <Text className='child-action-label'>Add Child</Text>
                             </View>
                         </View>
                     </TouchableOpacity>}
