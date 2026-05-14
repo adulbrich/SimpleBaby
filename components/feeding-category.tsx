@@ -3,8 +3,9 @@ import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
-import { View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, TextInput, useColorScheme } from 'react-native';
 import CategoryModule from "@/components/category-module";
+import { AntDesign, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
  * FeedingCategory component allows users to select a feeding category,
@@ -80,16 +81,20 @@ export default function FeedingCategory({
         onCategoryUpdate?.(categoryValue);
     };
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className='flex-col gap-6' testID={testID}>
 
             <CategoryModule
-                title="🍽️ Choose Category"
+                titleIcon={<MaterialCommunityIcons name="food-apple" size={14}/>}
+                title="Choose Category"
                 selectedCategory={category}
                 categoryList={[
-                    { label: "Liquid", icon: "🍼" },
-                    { label: "Soft", icon: "🥣" },
-                    { label: "Solid", icon: "🥕" },
+                    { label: "Liquid", icon: <MaterialCommunityIcons name="baby-bottle-outline" size={24} color={iconStyle}/> },
+                    { label: "Soft", icon: <MaterialCommunityIcons name="bowl-mix-outline" size={24} color={iconStyle}/> },
+                    { label: "Solid", icon: <MaterialCommunityIcons name="food-apple-outline" size={24} color={iconStyle}/> },
                 ]}
                 onCategoryUpdate={handleCategoryPress}
                 testID="feeding-category-module"
@@ -98,7 +103,7 @@ export default function FeedingCategory({
             <View className='tracker-section'>
                 <View className='tracker-section-label'>
                     <Text className='tracker-section-label-text'>
-                        ⚖️ Add Details
+                        <FontAwesome name="balance-scale" size={14}/> Add Details
                     </Text>
                 </View>
                 <View className='flex-col gap-4 mb-6'>
@@ -137,7 +142,7 @@ export default function FeedingCategory({
                                 testID='feeding-time-button'
                             >
                                 <Text className='tracker-input-text'>
-                                    {showIOSPicker ? 'Close' : 'Choose'} ⏰
+                                    {showIOSPicker ? 'Close ' : 'Choose '} <AntDesign name="clock-circle" size={14}/>
                                 </Text>
                             </TouchableOpacity>
                             <Text className='tracker-input-text mr-4'>

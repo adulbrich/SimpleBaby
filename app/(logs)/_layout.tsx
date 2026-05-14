@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import {
     Text,
@@ -30,7 +31,7 @@ export default function LogsLayout() {
                         className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
                     >
                         <Text className='dark:color-[#fff] font-bold'>
-                            ⬅️ Back
+                            <Ionicons name='arrow-back' size={14}/> Back
                         </Text>
                     </TouchableOpacity>
                 ),

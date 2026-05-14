@@ -8,9 +8,11 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useColorScheme,
     View,
 } from "react-native";
 import CategoryModule from "@/components/category-module";
+import { AntDesign, Entypo, FontAwesome, FontAwesome5, FontAwesome6, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 
 /**
  * HealthModule component lets users select a health category (Growth, Activity, Meds, Vaccine, or Other),
@@ -208,18 +210,22 @@ export default function HealthModule({
         }
     }, [other, selectedCategory, onOtherUpdate]);
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className="flex-col gap-6" testID={testID}>
 
             <CategoryModule
-                title="🩺 Choose Type"
+                titleIcon={<FontAwesome name="stethoscope" size={14}/>}
+                title="Choose Type"
                 selectedCategory={selectedCategory}
                 categoryList={[
-                    { label: "Growth", icon: "📏" },
-                    { label: "Activity", icon: "🏃‍♂️" },
-                    { label: "Meds", icon: "💊" },
-                    { label: "Vaccine", icon: "💉" },
-                    { label: "Other", icon: "❓" }
+                    { label: "Growth", icon: <Entypo name="ruler" size={24} color={iconStyle}/> },
+                    { label: "Activity", icon: <FontAwesome5 name="running" size={24} color={iconStyle}/> },
+                    { label: "Meds", icon: <MaterialCommunityIcons name="pill" size={24} color={iconStyle}/> },
+                    { label: "Vaccine", icon: <MaterialIcons name="vaccines" size={24} color={iconStyle}/> },
+                    { label: "Other", icon: <FontAwesome6 name="question" size={24} color={iconStyle}/> }
                 ]}
                 onCategoryUpdate={handleCategoryPress}
                 testID="health-category-module"
@@ -228,7 +234,7 @@ export default function HealthModule({
             <View className="tracker-section">
                 <View className="tracker-section-label">
                     <Text className="tracker-section-label-text">
-                        ✒️ Add Details
+                        <FontAwesome5 name="pen-fancy" size={14}/> Add Details
                     </Text>
                 </View>
                 <View className="flex-col gap-4 mb-6">
@@ -369,7 +375,7 @@ export default function HealthModule({
                                         onPress={showTimePickerModal}
                                         testID="health-meds-time"
                                     >
-                                        <Text>Choose ⏰</Text>
+                                        <Text>Choose <AntDesign name="clock-circle" size={14}/></Text>
                                     </TouchableOpacity>
                                     <Text className="mr-4">{formatTime(meds.time_taken)}</Text>
                                 </View>
@@ -472,7 +478,7 @@ export default function HealthModule({
                                 onPress={showDatePickerModal}
                                 testID="health-date-button"
                             >
-                                <Text className="tracker-input-text">{showDatePicker ? "Close" : "Choose"} 📅</Text>
+                                <Text className="tracker-input-text">{showDatePicker ? "Close " : "Choose "} <AntDesign name='camera' size={14}/></Text>
                             </TouchableOpacity>
                             <Text className="tracker-input-text mr-4">{formatDate(selectedDate)}</Text>
                         </View>

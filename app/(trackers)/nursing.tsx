@@ -16,6 +16,7 @@ import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
@@ -137,7 +138,7 @@ export default function Nursing() {
 						<View className="tracker-section">
 							<View className="tracker-section-label">
 								<Text className="tracker-section-label-text">
-									⚖️ Add Volume
+									<FontAwesome name="balance-scale" size={14}/> Add Volume
 								</Text>
 							</View>
 							<View className="flex-row mb-6">
@@ -189,14 +190,18 @@ export default function Nursing() {
 								disabled={isSaving}
 								testID="nursing-save-log-button"
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="nursing-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">
+									<Ionicons name="trash-outline" size={14}/> Reset fields
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
