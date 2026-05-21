@@ -69,7 +69,7 @@ First, go to the left sidebar menu and click on Authentication. Under Configurat
 
 Next, you will want to add a bucket to your database in order to store files in the app (e.g., for milestone logs). In the Supabase dashboard, go to the left sidebar menu and click on Storage. From there, press Files and select the Buckets tab. Press the "New bucket" button, and create a bucket titled `milestone-logs`. Leave the three options (public bucket, restrict file size, and restrict MIME) all unchecked. Then, create the bucket.
 
-Now, you are officially all set to run the application, work with your database, and develop changes for the project! If you run into any trouble with setting up your database, refer to to the official Supabase documentation for assistance:
+Now, you are officially all set to run the application, work with your database, and develop changes for the project! If you run into any trouble with setting up your database, refer to the official Supabase documentation for assistance:
 - [Supabase Docs](https://supabase.com/docs)
 
 ## Linting and Testing
