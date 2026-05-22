@@ -55,8 +55,8 @@ async function setNursingInputs({
 } : {
     leftAmount?: string;
     rightAmount?: string;
-    leftDuration?: string;
-    rightDuration?: string;
+    leftDuration?: number;
+    rightDuration?: number;
     note?: string;
 }) {
     // read parameters to first call of NursingStopwatch
@@ -114,29 +114,59 @@ describe("Track nursing screen", () => {
         expect(screen.getByTestId("nursing-right-amount")).toBeTruthy();
         expect(screen.getByTestId("nursing-note-entry")).toBeTruthy();
     });
-        
+
     test("Renders nursing form control buttons", () => {
         render(<Nursing/>);
 
         expect(screen.getByTestId("nursing-save-log-button")).toBeTruthy();
         expect(screen.getByTestId("nursing-reset-form-button")).toBeTruthy();
     });
-        
+
+    test("Passes current stopwatch times", async () => {
+        const testLeftDuration = 123;
+        const testRightDuration = 456;
+        render(<Nursing/>);
+
+        // ensure times default to 0
+        const stopwatchPropsInitial = (NursingStopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsInitial.leftTime).toBe(0);
+        expect(stopwatchPropsInitial.rightTime).toBe(0);
+
+        // set stopwatch durations
+        await setNursingInputs({
+            leftDuration: testLeftDuration,
+            rightDuration: testRightDuration,
+        });
+
+        // ensure times have been updated
+        const stopwatchPropsUpdated = (NursingStopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsUpdated.leftTime).toBe(testLeftDuration);
+        expect(stopwatchPropsUpdated.rightTime).toBe(testRightDuration);
+    });
+
     test("Refreshes on reset", async () => {
         const testNote = "test note";
         const testLeftAmount = "test left";
         const testRightAmount = "test right";
+        const testLeftDuration = 123;
+        const testRightDuration = 456;
         render(<Nursing/>);
 
         // write something in the note entry and amount fields...
         await setNursingInputs({
             leftAmount: testLeftAmount,
             rightAmount: testRightAmount,
+            leftDuration: testLeftDuration,
+            rightDuration: testRightDuration,
             note: testNote,
         });
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
         expect(screen.getByDisplayValue(testLeftAmount)).toBeTruthy();  // ensure the typed amount can be found
         expect(screen.getByDisplayValue(testRightAmount)).toBeTruthy();  // ensure the typed amount can be found
+        // ensure times are test values
+        const stopwatchPropsInitial = (NursingStopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsInitial.leftTime).toBe(testLeftDuration);
+        expect(stopwatchPropsInitial.rightTime).toBe(testRightDuration);
 
         const mainInputs = screen.getByTestId("nursing-stopwatch");  // get the displayed <NursingStopwatch/>
 
@@ -151,6 +181,10 @@ describe("Track nursing screen", () => {
         expect(() => screen.getByDisplayValue(testRightAmount)).toThrow();
         // ensure new instance of <NursingStopwatch/> is being used
         expect(screen.getByTestId("nursing-stopwatch") === mainInputs).toBeFalsy();
+        // ensure times passed to <NursingStopwatch/> have been reset
+        const stopwatchPropsUpdated = (NursingStopwatch as jest.Mock).mock.lastCall[0];
+        expect(stopwatchPropsUpdated.leftTime).toBe(0);
+        expect(stopwatchPropsUpdated.rightTime).toBe(0);
     });
 
     test("Catch unfilled inputs", async () => {
@@ -203,13 +237,13 @@ describe("Track nursing screen", () => {
         // Alert.alert() called by app/(trackers)/nursing.tsx -> handleSaveNursingLog()
         expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe(`Nursing log saved successfully!`);
     });
-        
+
     test("Saves correct values", async () => {
         const testNote = "test note";
         const testLeftAmount = "test left amount";
         const testRightAmount = "test right amount";
-        const testLeftDuration = "test left duration";
-        const testRightDuration = "test right duration";
+        const testLeftDuration = 123;
+        const testRightDuration = 456;
 
         render(<Nursing/>);
 
@@ -233,8 +267,8 @@ describe("Track nursing screen", () => {
             (field: field) => field.dbFieldName === name && field.value === value;
         expect(savedValues.find(findfield("left_amount", testLeftAmount))).toBeTruthy();
         expect(savedValues.find(findfield("right_amount", testRightAmount))).toBeTruthy();
-        expect(savedValues.find(findfield("left_duration", testLeftDuration))).toBeTruthy();
-        expect(savedValues.find(findfield("right_duration", testRightDuration))).toBeTruthy();
+        expect(savedValues.find(findfield("left_duration", testLeftDuration.toString()))).toBeTruthy();
+        expect(savedValues.find(findfield("right_duration", testRightDuration.toString()))).toBeTruthy();
         expect(savedValues.find(findfield("note", testNote))).toBeTruthy();
 
         // Ensure that log was saved successfully

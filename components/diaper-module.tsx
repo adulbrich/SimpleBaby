@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
@@ -15,41 +15,31 @@ import { AntDesign, Entypo, FontAwesome, MaterialCommunityIcons } from '@expo/ve
  * or amount updates.
  */
 
-type DiaperConsistency = 'Wet' | 'Dry' | 'Mixed';
-type DiaperAmount = 'SM' | 'MD' | 'LG';
+export type DiaperConsistency = 'Wet' | 'Dry' | 'Mixed';
+export type DiaperAmount = 'SM' | 'MD' | 'LG';
 
 export default function DiaperModule({
+    changeTime,
+    consistency,
+    amount,
     onTimeUpdate,
     onConsistencyUpdate,
     onAmountUpdate,
     testID,
 }: {
+    changeTime: Date;
+    consistency: DiaperConsistency;
+    amount: DiaperAmount;
     onTimeUpdate?: (time: Date) => void;
     onConsistencyUpdate?: (consistency: DiaperConsistency) => void;
     onAmountUpdate?: (amount: DiaperAmount) => void;
     testID?: string;
 }) {
-    const [changeTime, setChangeTime] = useState(new Date());
     const [showIOSPicker, setShowIOSPicker] = useState(false);
-    const [selectedConsistency, setSelectedConsistency] =
-        useState<DiaperConsistency>('Wet');
-    const [selectedAmount, setSelectedAmount] = useState<DiaperAmount>('SM');
-
-    useEffect(() => {
-        onTimeUpdate?.(changeTime);
-    }, [changeTime, onTimeUpdate]);
-
-    useEffect(() => {
-        onConsistencyUpdate?.(selectedConsistency);
-    }, [selectedConsistency, onConsistencyUpdate]);
-
-    useEffect(() => {
-        onAmountUpdate?.(selectedAmount);
-    }, [selectedAmount, onAmountUpdate]);
 
     const onChangeTime = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
-            setChangeTime(selectedDate);
+            onTimeUpdate?.(selectedDate);
         }
     };
 
@@ -64,7 +54,7 @@ export default function DiaperModule({
                 value: changeTime,
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
-                        setChangeTime(selectedDate);
+                        onTimeUpdate?.(selectedDate);
                     }
                 },
                 mode: 'time',
@@ -83,11 +73,11 @@ export default function DiaperModule({
     };
 
     const handleConsistencyPress = (consistency: DiaperConsistency) => {
-        setSelectedConsistency(consistency);
+        onConsistencyUpdate?.(consistency);
     };
 
     const handleAmountPress = (amount: DiaperAmount) => {
-        setSelectedAmount(amount);
+        onAmountUpdate?.(amount);
     };
 
     const theme = useColorScheme();
@@ -99,7 +89,7 @@ export default function DiaperModule({
             <CategoryModule
                 titleIcon={<FontAwesome name="certificate" size={14}/>}
                 title="Choose Consistency"
-                selectedCategory={selectedConsistency}
+                selectedCategory={consistency}
                 categoryList={[
                     { label: "Wet", icon: <Entypo name="water" size={24} color={iconStyle}/> },
                     { label: "Dry", icon: <MaterialCommunityIcons name="cactus" size={24} color={iconStyle}/> },
@@ -112,7 +102,7 @@ export default function DiaperModule({
             <CategoryModule
                 titleIcon={<FontAwesome name="balance-scale" size={14}/>}
                 title="Choose Amount"
-                selectedCategory={selectedAmount}
+                selectedCategory={amount}
                 categoryList={[
                     { label: "SM" },
                     { label: "MD" },

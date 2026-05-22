@@ -24,8 +24,8 @@ import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 export default function Nursing() {
 	const insets = useSafeAreaInsets();
 	const [isTyping, setIsTyping] = useState(false);
-	const [leftDuration, setLeftDuration] = useState("00:00:00");
-	const [rightDuration, setRightDuration] = useState("00:00:00");
+	const [leftDuration, setLeftDuration] = useState(0);
+	const [rightDuration, setRightDuration] = useState(0);
 	const [leftAmount, setLeftAmount] = useState("");
 	const [rightAmount, setRightAmount] = useState("");
 	const [note, setNote] = useState("");
@@ -43,8 +43,8 @@ export default function Nursing() {
 		error: string
 	} => {
 		if (
-			leftDuration === "00:00:00" &&
-			rightDuration === "00:00:00" &&
+			leftDuration === 0 &&
+			rightDuration === 0 &&
 			leftAmount.trim() === "" &&
 			rightAmount.trim() === ""
 		) {
@@ -71,11 +71,11 @@ export default function Nursing() {
 			tableName: "nursing_logs",
 			fields: [{
 				dbFieldName: "left_duration",
-				value: leftDuration === "00:00:00" ? "" : leftDuration,
+				value: leftDuration === 0 ? "" : leftDuration.toString(),
 				type: "string",
 			}, {
 				dbFieldName: "right_duration",
-				value: rightDuration === "00:00:00" ? "" : rightDuration,
+				value: rightDuration === 0 ? "" : rightDuration.toString(),
 				type: "string",
 			}, {
 				dbFieldName: "left_amount",
@@ -107,8 +107,8 @@ export default function Nursing() {
 
 	// Handle the UI logic when resetting fields
 	const handleResetFields = () => {
-		setLeftDuration("00:00:00");
-		setRightDuration("00:00:00");
+		setLeftDuration(0);
+		setRightDuration(0);
 		setLeftAmount("");
 		setRightAmount("");
 		setNote("");
@@ -130,6 +130,8 @@ export default function Nursing() {
 						{/* Stopwatch component controls left/right timer states */}
 						<NursingStopwatch
 							key={`nursing-stopwatch-${reset}`}
+							leftTime={leftDuration}
+							rightTime={rightDuration}
 							onTimeUpdateLeft={setLeftDuration}
 							onTimeUpdateRight={setRightDuration}
 							testID={"nursing-stopwatch"}
