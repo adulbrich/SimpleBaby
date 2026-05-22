@@ -25,17 +25,11 @@ export default function Sleep() {
 	const [isTyping, setIsTyping] = useState(false);
 	const [startTime, setStartTime] = useState<Date>(new Date());
 	const [endTime, setEndTime] = useState<Date>(new Date());
-	const [stopwatchTime, setStopwatchTime] = useState("00:00:00");
+	const [stopwatchTime, setStopwatchTime] = useState(0);
 	const [note, setNote] = useState("");
 	const [reset, setReset] = useState<number>(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
-
-	// Update manual entry times
-	const handleDatesUpdate = (start: Date, end: Date) => {
-		setStartTime(start);
-		setEndTime(end);
-	};
 
 	/**
 	 * Gets start/stop times and duration to submit. Assumes that stopwatch or manual times are valid
@@ -43,9 +37,8 @@ export default function Sleep() {
 	const getFinalTimes = () => {
 		let finalStartTime: Date, finalEndTime: Date;
 
-		if (stopwatchTime && stopwatchTime !== "00:00:00") {
-			const [hours, minutes, seconds] = stopwatchTime.split(":").map(Number);
-			const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
+		if (stopwatchTime) {
+			const durationMs = stopwatchTime * 1000;
 
 			finalEndTime = new Date();
 			finalStartTime = new Date(finalEndTime.getTime() - durationMs);
@@ -78,7 +71,7 @@ export default function Sleep() {
 		error: string
 	} => {
 		if (
-			(!stopwatchTime || stopwatchTime === "00:00:00") &&
+			(!stopwatchTime) &&
 			(!startTime || !endTime || startTime.getTime() >= endTime.getTime())
 		) {
 			const error = `Failed to save the Sleep log. Please provide either a stopwatch time or valid manual start and end times.`;
@@ -135,7 +128,7 @@ export default function Sleep() {
 	const handleResetFields = () => {
 		setStartTime(new Date());
 		setEndTime(new Date());
-		setStopwatchTime("00:00:00");
+		setStopwatchTime(0);
 		setNote("");
 		setReset((prev) => prev + 1);
 	};
@@ -158,14 +151,17 @@ export default function Sleep() {
 						{/* Stopwatch component for tracking session duration */}
 						<Stopwatch
 							key={`stopwatch-${reset}`}
+							time={stopwatchTime}
 							onTimeUpdate={setStopwatchTime}
 							testID="sleep-stopwatch"
 						/>
 
 						{/* Manual start/end time picker */}
 						<ManualEntry
-							key={`manual-entry-${reset}`}
-							onDatesUpdate={handleDatesUpdate}
+							startDate={startTime}
+							endDate={endTime}
+							onStartDateUpdate={setStartTime}
+							onEndDateUpdate={setEndTime}
 							testID="sleep-manual-time-entry"
 						/>
 

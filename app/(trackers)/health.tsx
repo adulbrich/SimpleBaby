@@ -1,4 +1,5 @@
 import HealthModule, {
+	HealthFields,
 	HealthCategory,
 	GrowthData,
 	ActivityData,
@@ -31,22 +32,7 @@ type HealthLog = {
 	category: HealthCategory;
 	date: Date;
 	note: string;
-} & ({
-	category: "Growth";
-	growth: GrowthData;
-} | {
-	category: "Activity";
-	activity: ActivityData;
-} | {
-	category: "Meds";
-	meds: MedsData;
-} | {
-	category: "Vaccine";
-	vaccine: VaccineData;
-} | {
-	category: "Other";
-	other: OtherData;
-});
+} & HealthFields;
 
 export default function Health() {
 	const insets = useSafeAreaInsets();
@@ -58,7 +44,6 @@ export default function Health() {
 		date: new Date(),
 		note: "",
 	});
-	const [reset, setReset] = useState(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
@@ -203,7 +188,7 @@ export default function Health() {
 
 	// Update growth-related fields in state with partial updates
 	const handleGrowthUpdate = useCallback(
-		(growth: { length: string; weight: string; head: string }) => {
+		(growth: GrowthData) => {
 			setHealthLog((prev) => ({
 				...prev,
 				growth,
@@ -263,55 +248,55 @@ export default function Health() {
 			growth: { length: "", weight: "", head: "" },
 			note: "",
 		});
-		setReset((prev) => prev + 1);
 	};
 
 	return (
-		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><<<<<<< misc/consistency-fixes
 			<View
 				className="main-container justify-between"
 				style={{
 					paddingBottom: insets.bottom,
 				}}
 			>
-				{/*ScrollView Prevents items from flowing off page on small devices*/}
-				<ScrollView>
-					<View
-						className={`gap-6 transition-all duration-300 ${
-							isTyping ? "-translate-y-[40%]" : "translate-y-0"
-						}`}
-					>
-						{/* Render the health input form module with update handlers */}
-						<HealthModule
-							key={`health-module-${reset}`}
-							onDateUpdate={handleDateUpdate}
-							onCategoryUpdate={handleCategoryUpdate}
-							onGrowthUpdate={handleGrowthUpdate}
-							onActivityUpdate={handleActivityUpdate}
-							onMedsUpdate={handleMedsUpdate}
-							onVaccineUpdate={handleVaccineUpdate}
-							onOtherUpdate={handleOtherUpdate}
-							testID="health-main-inputs"
-						/>
-						{/* Multiline input for additional notes */}
-						<NoteEntry
-							note={healthLog.note}
-							setNote={(note) =>
-								setHealthLog((prev) => ({
-									...prev,
-									note,
-								}))
-							}
-							setIsTyping={setIsTyping}
-							placeholder={
-								healthLog.category === "Growth" ? stringLib.uiLabels.healthGrowthNotePlaceholder :
-								healthLog.category === "Activity" ? stringLib.uiLabels.healthActivityNotePlaceholder :
-								healthLog.category === "Meds" ? stringLib.uiLabels.healthMedsNotePlaceholder :
-								healthLog.category === "Vaccine" ? stringLib.uiLabels.healthVaccineNotePlaceholder :
-								stringLib.uiLabels.healthOtherNotePlaceholder
-							}
-							testID="health-note-entry"
-						/>
+        {/*ScrollView Prevents items from flowing off page on small devices*/}
+        <ScrollView>
+          <View
+            className={`main-container justify-between gap-6 transition-all duration-300 transition-all ${
+              isTyping ? "-translate-y-[40%]" : "translate-y-0"
+            }`}
+            style={{ paddingBottom: insets.bottom }}
+          >
+            {/* Render the health input form module with update handlers */}
+            <HealthModule
+              healthFields={healthLog}
+              onDateUpdate={handleDateUpdate}
+              onCategoryUpdate={handleCategoryUpdate}
+              onGrowthUpdate={handleGrowthUpdate}
+              onActivityUpdate={handleActivityUpdate}
+              onMedsUpdate={handleMedsUpdate}
+              onVaccineUpdate={handleVaccineUpdate}
+              onOtherUpdate={handleOtherUpdate}
+              testID="health-main-inputs"
+            />
+            {/* Multiline input for additional notes */}
+            <NoteEntry
+              note={healthLog.note}
+              setNote={(note) =>
+                setHealthLog((prev) => ({
+                  ...prev,
+                  note,
+                }))
+              }
+              setIsTyping={setIsTyping}
+              placeholder={
+                healthLog.category === "Growth" ? stringLib.uiLabels.healthGrowthNotePlaceholder :
+                healthLog.category === "Activity" ? stringLib.uiLabels.healthActivityNotePlaceholder :
+                healthLog.category === "Meds" ? stringLib.uiLabels.healthMedsNotePlaceholder :
+                healthLog.category === "Vaccine" ? stringLib.uiLabels.healthVaccineNotePlaceholder :
+                stringLib.uiLabels.healthOtherNotePlaceholder
+              }
+              testID="health-note-entry"
+            />
 
 						{/* Action buttons to save or reset form */}
 						<View className="flex-row gap-2 pb-5 pt-3">

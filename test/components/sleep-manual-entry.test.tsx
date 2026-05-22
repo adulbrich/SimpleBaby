@@ -23,16 +23,44 @@ describe("Sleep Component <ManualEntry/>", () => {
 
     test("Renders inputs", () => {
         Platform.OS = "ios";
-        render(<ManualEntry/>);
+        render(<ManualEntry startDate={new Date()} endDate={new Date()}/>);
 
         expect(screen.getByTestId("sleep-manual-start-time")).toBeTruthy();
         expect(screen.getByTestId("sleep-manual-end-time")).toBeTruthy();
     });
 
+    test("Renders provided values", () => {
+        const nowMS = new Date().getTime();
+        const testValuesInitial = { start: new Date(nowMS), end: new Date(nowMS + 3*60*1000) };
+        const testValuesUpdated = { start: new Date(nowMS - 143*60*1000), end: new Date(nowMS - 10*60*1000) };
+        const { rerender } = render(<ManualEntry
+            startDate={testValuesInitial.start}
+            endDate={testValuesInitial.end}
+        />);
+
+        // ensure times are displayed on screen
+        const formattedStartInitial = testValuesInitial.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedStartInitial)).toBeTruthy();
+        const formattedEndInitial = testValuesInitial.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedEndInitial)).toBeTruthy();
+
+        // rerender with new values
+        rerender(<ManualEntry
+            startDate={testValuesUpdated.start}
+            endDate={testValuesUpdated.end}
+        />);
+
+        // ensure updated times are displayed on screen
+        const formattedStartUpdated = testValuesUpdated.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedStartUpdated)).toBeTruthy();
+        const formattedEndUpdated = testValuesUpdated.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        expect(screen.getByText(formattedEndUpdated)).toBeTruthy();
+    });
+
     test("Displays time picker (ios)", async () => {
         Platform.OS = "ios";
 
-        render(<ManualEntry/>);
+        render(<ManualEntry startDate={new Date()} endDate={new Date()}/>);
 
         // ensure time picker isn't visible yet
         expect(() => screen.getByTestId("dateTimePicker")).toThrow();
@@ -65,7 +93,12 @@ describe("Sleep Component <ManualEntry/>", () => {
 
         const onDatesUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
 
-        render(<ManualEntry onDatesUpdate={onDatesUpdate}/>);
+        render(<ManualEntry
+            onStartDateUpdate={onDatesUpdate}
+            onEndDateUpdate={onDatesUpdate}
+            startDate={new Date()}
+            endDate={new Date()}
+        />);
 
         await userEvent.press(screen.getByTestId("sleep-manual-start-time"));
 
@@ -78,7 +111,7 @@ describe("Sleep Component <ManualEntry/>", () => {
         // ensure time picker has been closed
         expect(() => screen.getByTestId("dateTimePicker")).toThrow();
         // ensure date has not been updated since first useEffect() call
-        expect(onDatesUpdate).toHaveBeenCalledTimes(1);
+        expect(onDatesUpdate).toHaveBeenCalledTimes(0);
     });
 
     test("Updates start date (ios)", async () => {
@@ -86,7 +119,11 @@ describe("Sleep Component <ManualEntry/>", () => {
         const testDate = new Date();
 
         const onDatesUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
-        render(<ManualEntry onDatesUpdate={onDatesUpdate}/>);
+        render(<ManualEntry
+            onStartDateUpdate={onDatesUpdate}
+            startDate={new Date()}
+            endDate={new Date()}
+        />);
 
         await userEvent.press(screen.getByTestId("sleep-manual-start-time"));
 
@@ -97,10 +134,9 @@ describe("Sleep Component <ManualEntry/>", () => {
 
         // ensure time picker has been closed
         expect(() => screen.getByTestId("dateTimePicker")).toThrow();
-        // ensure date has been updated once since first useEffect() call
-        expect(onDatesUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onDatesUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onDatesUpdate).toHaveBeenCalledTimes(1);
+        expect(onDatesUpdate.mock.calls[0][0]).toBe(testDate);
     });
 
     test("Updates end date (ios)", async () => {
@@ -108,7 +144,11 @@ describe("Sleep Component <ManualEntry/>", () => {
         const testDate = new Date();
 
         const onDatesUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
-        render(<ManualEntry onDatesUpdate={onDatesUpdate}/>);
+        render(<ManualEntry
+            onEndDateUpdate={onDatesUpdate}
+            startDate={new Date()}
+            endDate={new Date()}
+        />);
 
         await userEvent.press(screen.getByTestId("sleep-manual-end-time"));
 
@@ -119,16 +159,15 @@ describe("Sleep Component <ManualEntry/>", () => {
 
         // ensure time picker has been closed
         expect(() => screen.getByTestId("dateTimePicker")).toThrow();
-        // ensure date has been updated once since first useEffect() call
-        expect(onDatesUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the end time
-        expect(onDatesUpdate.mock.calls[1][1]).toBe(testDate);
+        // ensure date has been updated once with the test date as the end time
+        expect(onDatesUpdate).toHaveBeenCalledTimes(1);
+        expect(onDatesUpdate.mock.calls[0][0]).toBe(testDate);
     });
 
     test("Displays time picker (android)", async () => {
         Platform.OS = "android";
 
-        render(<ManualEntry/>);
+        render(<ManualEntry startDate={new Date()} endDate={new Date()}/>);
 
         // ensure time picker isn't visible yet
         expect(DateTimePickerAndroid.open).toHaveBeenCalledTimes(0);
@@ -151,7 +190,11 @@ describe("Sleep Component <ManualEntry/>", () => {
         const testDate = new Date();
 
         const onDatesUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
-        render(<ManualEntry onDatesUpdate={onDatesUpdate}/>);
+        render(<ManualEntry
+            onStartDateUpdate={onDatesUpdate}
+            startDate={new Date()}
+            endDate={new Date()}
+        />);
 
         await userEvent.press(screen.getByTestId("sleep-manual-start-time"));
 
@@ -160,10 +203,9 @@ describe("Sleep Component <ManualEntry/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onDatesUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the start date
-        expect(onDatesUpdate.mock.calls[1][0]).toBe(testDate);
+        // ensure date has been updated once with the test date as the start date
+        expect(onDatesUpdate).toHaveBeenCalledTimes(1);
+        expect(onDatesUpdate.mock.calls[0][0]).toBe(testDate);
     });
 
     test("Updates end date (android)", async () => {
@@ -171,7 +213,11 @@ describe("Sleep Component <ManualEntry/>", () => {
         const testDate = new Date();
 
         const onDatesUpdate = jest.fn();  // to capture callbacks by <ManualEntry/>
-        render(<ManualEntry onDatesUpdate={onDatesUpdate}/>);
+        render(<ManualEntry
+            onEndDateUpdate={onDatesUpdate}
+            startDate={new Date()}
+            endDate={new Date()}
+        />);
 
         await userEvent.press(screen.getByTestId("sleep-manual-end-time"));
 
@@ -180,9 +226,8 @@ describe("Sleep Component <ManualEntry/>", () => {
         // simulate date change with callback
         await act(async () => onDateChange(undefined, testDate));
 
-        // ensure date has been updated once since first useEffect() call
-        expect(onDatesUpdate).toHaveBeenCalledTimes(2);
-        // ensure second call to onDatesUpdate was with the test date as the end date
-        expect(onDatesUpdate.mock.calls[1][1]).toBe(testDate);
+        // ensure date has been updated once with the test date as the end date
+        expect(onDatesUpdate).toHaveBeenCalledTimes(1);
+        expect(onDatesUpdate.mock.calls[0][0]).toBe(testDate);
     });
 });
