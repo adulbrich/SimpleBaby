@@ -2,6 +2,7 @@ import TrackerButton from "@/components/tracker-button";
 import { render, screen, userEvent } from "@testing-library/react-native";
 import { useAudioPlayer } from 'expo-audio';
 import { router } from "expo-router";
+import { Text } from "react-native";
 
 
 jest.mock("expo-router", () => ({
@@ -34,7 +35,7 @@ describe("Tracker button component", () => {
     test("Renders button text", () => {
         const testLabel = "test label";
         const testIcon = "test icon";
-        render(<TrackerButton button={{label: testLabel, icon: testIcon, link: ":"}}/>);
+        render(<TrackerButton button={{label: testLabel, icon: <Text>{testIcon}</Text>, link: ":"}}/>);
 
         expect(screen.getByText(testLabel)).toBeTruthy();
         expect(screen.getByText(testIcon)).toBeTruthy();

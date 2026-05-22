@@ -15,6 +15,7 @@ import EditLogPopup from "@/components/edit-log-popup";
 import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface DiaperLog {
 	id: string;
@@ -132,7 +133,7 @@ const DiaperLogsView: React.FC = () => {
 
 	return (
 		<View className="main-container">
-			<Text className="logs-heading">🧷 Diaper Logs</Text>
+			<Text className="logs-heading"><MaterialCommunityIcons name='baby' size={18}/> Diaper Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (

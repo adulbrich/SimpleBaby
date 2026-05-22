@@ -1,22 +1,39 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import {
+    Platform,
     Text,
     TouchableOpacity,
+    useColorScheme,
 } from 'react-native';
 
 export default function LogsLayout() {
+    
+    const isAndroid = Platform.OS === 'android';
+    const theme = useColorScheme();
+    const headerStyle = {
+        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
+    };
+    const headerTitleStyle = {
+        color: theme === 'light' ? '#000' : '#fff',
+    };
+    
     return (
         <Stack
             screenOptions={{
+                headerShown: true,
+                headerStyle: { ...headerStyle },
+                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
+                headerShadowVisible: false,
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
-                            router.dismissTo('/(tabs)/trends');
+                            router.dismissTo('/(tabs)/logs');
                         }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
+                        className={isAndroid ? 'modal-back-button' : 'p-2'}
                     >
-                        <Text className='dark:color-[#fff] font-bold'>
-                            ⬅️ Back
+                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
+                            <Ionicons name='arrow-back' size={14}/> Back
                         </Text>
                     </TouchableOpacity>
                 ),

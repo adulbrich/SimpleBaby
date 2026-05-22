@@ -3,7 +3,9 @@ import { ExternalPathString } from "expo-router";
 import {
 	View,
 	Alert,
+	useColorScheme,
 } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import TrackerButton from "@/components/tracker-button";
 import { useAuth } from "@/library/auth-provider";
 import {
@@ -19,35 +21,41 @@ const testIDs = stringLib.testIDs.tabsIndex;
 
 
 export default function MainTab() {
-	type Button = {
-		label: string;
-		icon: string;
-		link: ExternalPathString;
-	};
+	const colorScheme = useColorScheme();
+	const iconColor = colorScheme === "dark" ? "#dbf9dd" : "#92400e";
+	const iconSize = 74;
 
-	const buttons: Button[] = [
+	const buttons = [
 		{
 			label: "Sleep",
-			icon: "🌙",
+			icon: <Ionicons name="moon-outline" size={iconSize} color={iconColor} />,
 			link: "/sleep" as ExternalPathString,
 		},
 		{
 			label: "Nursing",
-			icon: "🍼",
+			icon: <MaterialCommunityIcons name="baby-bottle-outline" size={iconSize} color={iconColor} />,
 			link: "/nursing" as ExternalPathString,
 		},
 		{
 			label: "Milestone",
-			icon: "🌟",
+			icon: <Ionicons name="star-outline" size={iconSize} color={iconColor} />,
 			link: "/milestone" as ExternalPathString,
 		},
 		{
 			label: "Feeding",
-			icon: "🍽️",
+			icon: <Ionicons name="restaurant-outline" size={iconSize} color={iconColor} />,
 			link: "/feeding" as ExternalPathString,
 		},
-		{ label: "Diaper", icon: "🧷", link: "/diaper" as ExternalPathString },
-		{ label: "Health", icon: "💚", link: "/health" as ExternalPathString },
+		{
+			label: "Diaper",
+			icon: <MaterialCommunityIcons name="baby-face-outline" size={iconSize} color={iconColor} />,
+			link: "/diaper" as ExternalPathString,
+		},
+		{
+			label: "Health",
+			icon: <Ionicons name="heart-outline" size={iconSize} color={iconColor} />,
+			link: "/health" as ExternalPathString,
+		},
 	];
 
 	const { isGuest, session, loading } = useAuth();

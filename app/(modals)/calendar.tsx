@@ -6,6 +6,7 @@ import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/libra
 import { getActiveChildData } from '@/library/remote-store';
 import { useAuth } from '@/library/auth-provider';
 import { toYMD } from '@/library/utils';
+import { Entypo } from '@expo/vector-icons';
 import stringLib from "@/assets/stringLibrary.json";
 
 
@@ -96,8 +97,12 @@ export default function CalendarModal() {
     if (isGuest) {
         return (
             <View className='flex-1 bg-gray-50 p-4' testID={testIDs.guestMode}>
-                <Text className="text-base font-bold mt-1">⚠️ This feature is not supported in Guest Mode.</Text>
-                <Text className="text-base mt-1">Please create an account or sign in to access this feature.</Text>
+                <Text className="text-base font-bold mt-1">
+                    <Entypo name="warning" size={14}/> This feature is not supported in Guest Mode.
+                </Text>
+                <Text className="text-base mt-1">
+                    Please create an account or sign in to access this feature.
+                </Text>
             </View>
         );
     }

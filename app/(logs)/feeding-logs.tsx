@@ -15,6 +15,7 @@ import EditLogPopup from "@/components/edit-log-popup";
 import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { Ionicons } from "@expo/vector-icons";
 
 interface FeedingLog {
 	id: string;
@@ -146,7 +147,7 @@ const FeedingLogsView: React.FC = () => {
 
 	return (
 		<View className="main-container">
-			<Text className="logs-heading">🍽️ Feeding Logs</Text>
+			<Text className="logs-heading"><Ionicons name='restaurant' size={18}/> Feeding Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (

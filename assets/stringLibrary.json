@@ -53,6 +53,15 @@
             "guestButton": "sign-up-guest-button"
         },
 
+        "logs": {
+            "sleepButton": "logs-sleep-button",
+            "nursingButton": "logs-nursing-button",
+            "diaperButton": "logs-diaper-button",
+            "feedingButton": "logs-feeding-button",
+            "milestoneButton": "logs-milestone-button",
+            "healthButton": "logs-health-button"
+        },
+
         "activeChild": {
             "renameButton": "active-child-rename-button",
             "deleteButton": "active-child-delete-button"
@@ -68,7 +77,6 @@
             "caretakersButton": "profile-caretakers-button",
             "emailButton": "profile-email-button",
             "passwordButton": "profile-password-button",
-            "appVersionButton": "profile-app-version-button",
             "signOutButton": "profile-sign-out-button",
             "addChildPopup": "profile-add-child-popup",
             "switchChildPopup": "profile-switch-child-popup"

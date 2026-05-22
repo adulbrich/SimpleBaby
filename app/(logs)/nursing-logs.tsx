@@ -15,6 +15,7 @@ import EditLogPopup from "@/components/edit-log-popup";
 import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface NursingLog {
 	id: string;
@@ -168,7 +169,7 @@ const NursingLogsView: React.FC = () => {
 
 	return (
 		<View className="main-container">
-			<Text className="logs-heading">🍼 Nursing Logs</Text>
+			<Text className="logs-heading"><MaterialCommunityIcons name='baby-bottle' size={18}/> Nursing Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
