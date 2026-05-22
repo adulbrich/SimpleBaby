@@ -125,14 +125,13 @@ describe("Profile screen", () => {
 
     test("Displays buttons and labels", async () => {
         render(<Profile/>);
-        await screen.findByText("👶 ERROR");  // wait for child name to finish loading...
+        await screen.findByText("ERROR");  // wait for child name to finish loading...
 
         expect(screen.getByTestId(testIDs.childNameButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.addChildButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.caretakersButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.emailButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.passwordButton)).toBeTruthy();
-        expect(screen.getByTestId(testIDs.appVersionButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.signOutButton)).toBeTruthy();
         expect(screen.getByText("Sign Out")).toBeTruthy();  // sign out button label
 
@@ -142,7 +141,7 @@ describe("Profile screen", () => {
 
     test("Hides popups by default", async () => {
         render(<Profile/>);
-        await screen.findByText("👶 ERROR");  // wait for child name to finish loading...
+        await screen.findByText("ERROR");  // wait for child name to finish loading...
 
         // <AddChildPopup/> and <SwitchChildPopup/> have not yet been called with visible=true
         expect((AddChildPopup as jest.Mock).mock.calls.find(call =>
@@ -164,7 +163,7 @@ describe("Profile screen", () => {
         }});
 
         render(<Profile/>);
-        await screen.findByText("👶 ERROR");  // wait for child name to finish loading...
+        await screen.findByText("ERROR");  // wait for child name to finish loading...
 
         expect(screen.getByText(`${testFirstName} ${testLastName}`)).toBeTruthy();
         expect(screen.getByText(testEmail)).toBeTruthy();
@@ -190,11 +189,11 @@ describe("Profile screen", () => {
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
         await waitForChildDataCalled;  // ...then ensure that getActiveChildData() has been called
 
-        expect(screen.getByText("Loading...", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Loading...")).toBeTruthy();
 
         await act(async () => resolveChildData({ success: true, childName: testChildName }));
-        expect(() => screen.getByText("Loading...", { exact: false })).toThrow();
-        expect(screen.getByText(testChildName, { exact: false })).toBeTruthy();
+        expect(() => screen.getByText("Loading...")).toThrow();
+        expect(screen.getByText(testChildName)).toBeTruthy();
 
         // revert mock implementation
         (getActiveChildData as jest.Mock).mockImplementation(originalMock);
@@ -211,7 +210,7 @@ describe("Profile screen", () => {
         );
 
         render(<Profile/>);
-        await screen.findByText("👶 ERROR");  // wait for child name to finish loading...
+        await screen.findByText("ERROR");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
@@ -221,7 +220,7 @@ describe("Profile screen", () => {
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
-        await screen.findByText("👶 ERROR");  // wait for child name to finish loading...
+        await screen.findByText("ERROR");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
@@ -245,7 +244,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for page to load...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitForGetChildrenCalled;  // ...then ensure that getChildren() has been called
 
         expect(screen.getByTestId(testIDs.loadingNames)).toBeTruthy();
@@ -272,7 +271,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         expect(screen.getByTestId(testIDs.namesError)).toBeTruthy();
@@ -292,7 +291,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");  //
+        await screen.findByText("ERROR");  //
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         expect(() => screen.getByTestId(testIDs.namesError)).toThrow();
@@ -309,7 +308,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         expect(() => screen.getByTestId(testIDs.namesError)).toThrow();
@@ -326,7 +325,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         // now the switch child button should be shown
@@ -338,7 +337,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.addChildButton));
@@ -353,7 +352,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.addChildButton));
@@ -388,7 +387,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.addChildButton));
@@ -411,7 +410,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.addChildButton));
@@ -431,7 +430,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.addChildButton));
@@ -464,7 +463,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -491,7 +490,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText(testActiveChild, { exact: false });
+        await screen.findByText(testActiveChild);
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -510,7 +509,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -545,7 +544,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText(testActiveChild, { exact: false });
+        await screen.findByText(testActiveChild);
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -620,7 +619,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.switchChildButton));
@@ -642,7 +641,7 @@ describe("Profile screen", () => {
         render(<Profile/>);
 
         // wait for child names to finish loading...
-        await screen.findByText("👶 ERROR");
+        await screen.findByText("ERROR");
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
 
         await userEvent.press(screen.getByTestId(testIDs.childNameButton));
@@ -669,10 +668,9 @@ describe("profile screen (guest mode)", () => {
 
     test("Displays buttons (guest)", async () => {
         render(<Profile/>);
-        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         expect(screen.getByTestId(testIDs.childNameGuest)).toBeTruthy();
-        expect(screen.getByTestId(testIDs.appVersionButton)).toBeTruthy();
         expect(screen.getByTestId(testIDs.signOutButton)).toBeTruthy();
         expect(screen.getByText("Exit Guest Mode")).toBeTruthy();  // sign out button label
 
@@ -711,11 +709,11 @@ describe("profile screen (guest mode)", () => {
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
         await waitForListChildrenCalled;  // ensure getActiveChildData() has been called
 
-        expect(screen.getByText("Loading...", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Loading...")).toBeTruthy();
 
         await act(async () => resolveListChildren([{ id: testChildId, name: testChildName }]));
-        expect(() => screen.getByText("Loading...", { exact: false })).toThrow();
-        expect(screen.getByText(testChildName, { exact: false })).toBeTruthy();
+        expect(() => screen.getByText("Loading...")).toThrow();
+        expect(screen.getByText(testChildName)).toBeTruthy();
     });
 
     test("Catches missing child ID", async () => {
@@ -730,9 +728,9 @@ describe("profile screen (guest mode)", () => {
 
         // wait for child names to finish loading...
         await waitFor(() => expect(() => screen.getByTestId(testIDs.loadingNames)).toThrow());
-        await waitFor(() => expect(() => screen.getByText("Loading...", { exact: false })).toThrow());
+        await waitFor(() => expect(() => screen.getByText("Loading...")).toThrow());
 
-        expect(screen.getByText("Guest Child", { exact: false })).toBeTruthy();
+        expect(screen.getByText("Guest Child")).toBeTruthy();
     });
 
     test("Catches sign out error", async () => {
@@ -743,7 +741,7 @@ describe("profile screen (guest mode)", () => {
         updateUseAuth({ exitGuest: async () => { throw new Error(testErrorMessage); }});
 
         render(<Profile/>);
-        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 
@@ -756,7 +754,7 @@ describe("profile screen (guest mode)", () => {
 
     test("Redirects on successful sign out", async () => {
         render(<Profile/>);
-        await screen.findByText("👶 Guest Child");  // wait for child name to finish loading...
+        await screen.findByText("Guest Child");  // wait for child name to finish loading...
 
         await userEvent.press(screen.getByTestId(testIDs.signOutButton));
 

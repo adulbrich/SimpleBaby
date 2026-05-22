@@ -3,8 +3,9 @@ import DateTimePicker, {
     DateTimePickerEvent,
     DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, useColorScheme } from 'react-native';
 import CategoryModule from "@/components/category-module";
+import { AntDesign, Entypo, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
  * DiaperModule component allows users to select diaper consistency and amount,
@@ -79,23 +80,28 @@ export default function DiaperModule({
         onAmountUpdate?.(amount);
     };
 
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
+
     return (
         <View className='flex-col gap-6' testID={testID}>
 
             <CategoryModule
-                title="🌀 Choose Consistency"
+                titleIcon={<FontAwesome name="certificate" size={14}/>}
+                title="Choose Consistency"
                 selectedCategory={consistency}
                 categoryList={[
-                    { label: "Wet", icon: "💧" },
-                    { label: "Dry", icon: "🌵" },
-                    { label: "Mixed", icon: "🌦️" },
+                    { label: "Wet", icon: <Entypo name="water" size={24} color={iconStyle}/> },
+                    { label: "Dry", icon: <MaterialCommunityIcons name="cactus" size={24} color={iconStyle}/> },
+                    { label: "Mixed", icon: <MaterialCommunityIcons name="weather-partly-rainy" size={24} color={iconStyle}/> },
                 ]}
                 onCategoryUpdate={handleConsistencyPress}
                 testID="diaper-category-consistency-module"
             />
 
             <CategoryModule
-                title="⚖️ Choose Amount"
+                titleIcon={<FontAwesome name="balance-scale" size={14}/>}
+                title="Choose Amount"
                 selectedCategory={amount}
                 categoryList={[
                     { label: "SM" },
@@ -109,7 +115,7 @@ export default function DiaperModule({
             <View className='tracker-section'>
                 <View className='tracker-section-label'>
                     <Text className='tracker-section-label-text'>
-                        ⏰ Add Time
+                        <AntDesign name="clock-circle" size={14}/> Add Time
                     </Text>
                 </View>
                 <View className='flex-col gap-4 mb-6'>
@@ -124,7 +130,7 @@ export default function DiaperModule({
                                 testID='diaper-time-button'
                             >
                                 <Text className='tracker-input-text'>
-                                    {showIOSPicker ? 'Close' : 'Choose'} ⏰
+                                    {showIOSPicker ? 'Close ' : 'Choose '} <AntDesign name="clock-circle" size={14}/>
                                 </Text>
                             </TouchableOpacity>
                             <Text className='tracker-input-text mr-4'>

@@ -1,3 +1,4 @@
+import { Entypo } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
@@ -78,7 +79,7 @@ export default function NursingStopwatch({
         <View className='tracker-section' testID={testID} >
             <View className='tracker-section-label'>
                 <Text className='tracker-section-label-text'>
-                    ⏱️ Nursing Stopwatch
+                    <Entypo name="stopwatch" size={14}/> Nursing Stopwatch
                 </Text>
             </View>
             <View className='flex-row justify-center mb-6'>

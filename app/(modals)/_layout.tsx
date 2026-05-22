@@ -1,22 +1,36 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, TouchableOpacity, Text } from 'react-native';
+import { Platform, TouchableOpacity, Text, useColorScheme } from 'react-native';
 
 export default function ModalsLayout() {
+
+    const isAndroid = Platform.OS === 'android';
+    const theme = useColorScheme();
+    const headerStyle = {
+        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
+    };
+    const headerTitleStyle = {
+        color: theme === 'light' ? '#000' : '#fff',
+    };
+
     return (
         <>
             <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
             <Stack screenOptions={{
                 presentation: 'modal',
+                headerShown: true,
+                headerStyle: { ...headerStyle },
+                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
                 headerLeft: () => (
                     <TouchableOpacity
                         onPress={() => {
                             router.back();
                         }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
+                        className={isAndroid ? 'modal-back-button' : 'p-2'}
                     >
-                        <Text className='dark:color-[#fff] font-bold'>
-                            ⬅️ Back
+                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
+                            <Ionicons name='arrow-back' size={14}/> Back
                         </Text>
                     </TouchableOpacity>
                 ),
@@ -47,7 +61,7 @@ export default function ModalsLayout() {
                     }}
                 />
                 <Stack.Screen
-                    name='privacypolicy'
+                    name='privacy-policy'
                     options={{
                         headerTitle: 'Privacy Policy',
                     }}
