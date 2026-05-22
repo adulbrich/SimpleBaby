@@ -251,7 +251,7 @@ export default function Health() {
 	};
 
 	return (
-		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><<<<<<< misc/consistency-fixes
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 			<View
 				className="main-container justify-between"
 				style={{
