@@ -93,7 +93,7 @@ function manualPromise(): {
         resolvePromise = (value: any = undefined) => resolve(value);
     });
     return { promise, resolve: resolvePromise };
-};
+}
 
 
 describe("Create Account screen", () => {

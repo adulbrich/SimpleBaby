@@ -12,7 +12,7 @@ import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
@@ -144,18 +144,15 @@ const MilestoneLogsView: React.FC = () => {
         }
 
 		try {
-			const encryptedTitle = await encryptData(titlePlain);
-			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
-
-			const patch = {
-				title: encryptedTitle,
+			const updated = {
+				title: await encryptData(titlePlain),
 				category: editingLog.category ?? "Other",
-				note: encryptedNote,
+				note: editingLog.note ? await encryptData(editingLog.note) : null,
 				achieved_at: editingLog.achieved_at.toISOString(),
 			};
 
 			if (isGuest) {
-				const success = await updateRow("milestone_logs", editingLog.id, patch);
+				const success = await updateRow("milestone_logs", editingLog.id, updated);
 				if (!success) {
 					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
@@ -165,7 +162,7 @@ const MilestoneLogsView: React.FC = () => {
 			} else {
                 const { error } = await supabase
                     .from("milestone_logs")
-                    .update(patch)
+                    .update(updated)
                     .eq("id", editingLog.id);
 
                 if (error) {

@@ -110,13 +110,13 @@ export default function Diaper() {
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-			{/*ScrollView Prevents items from flowing off page on small devices*/}
 			<View
 				className="main-container justify-between"
 				style={{
 					paddingBottom: insets.bottom,
 				}}
 			>
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					{/* Main form stack with diaper inputs and note */}
 					<View

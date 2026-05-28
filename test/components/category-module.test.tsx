@@ -10,7 +10,7 @@ const testCategories = [
 ];
 
 
-describe("Feeding component <FeedingCategory/>", () => {
+describe("Category select component <CategoryModule/>", () => {
 
     test("Renders title", () => {
         const testTitle = "test title";

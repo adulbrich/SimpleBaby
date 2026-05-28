@@ -74,17 +74,15 @@ const SleepLogsView: React.FC = () => {
 		}
 
 		try {
-			const encryptedNote = editingLog.note
-				? await encryptData(editingLog.note)
-				: null;
+			const updated = {
+				start_time: editingLog.start_time.toISOString(),
+				end_time: editingLog.end_time.toISOString(),
+				duration: editingLog.duration,
+				note: editingLog.note ? await encryptData(editingLog.note) : null,
+			};
 
 			if (isGuest) {
-				const success = await updateRow("sleep_logs", editingLog.id, {
-					start_time: editingLog.start_time.toISOString(),
-					end_time: editingLog.end_time.toISOString(),
-					duration: editingLog.duration,
-					note: encryptedNote,
-				});
+				const success = await updateRow("sleep_logs", editingLog.id, updated);
 
 				if (!success) {
 					Alert.alert("Failed to update log",
@@ -97,12 +95,7 @@ const SleepLogsView: React.FC = () => {
 			} else {
 				const { error } = await supabase
 					.from("sleep_logs")
-					.update({
-						start_time: editingLog.start_time.toISOString(),
-						end_time: editingLog.end_time.toISOString(),
-						duration: editingLog.duration,
-						note: encryptedNote,
-					})
+					.update(updated)
 					.eq("id", editingLog.id);
 
 				if (error) {

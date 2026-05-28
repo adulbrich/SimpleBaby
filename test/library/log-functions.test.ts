@@ -14,7 +14,7 @@ import {
     insertRow,
     listRows,
 } from '@/library/local-store';
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import { Alert } from 'react-native';
 
 

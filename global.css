@@ -137,9 +137,16 @@
     @apply text-base text-gray-700 dark:text-gray-300;
 }
 
+.text-input-base {
+    @apply border-2 text-black dark:text-white rounded-xl p-4 scale-100 placeholder:text-gray-600;
+}
+
 .text-input {
-    @apply border-2 dark:text-white border-gray-700 rounded-xl p-4 scale-100 focus:border-[#549461] dark:border-gray-300
-    placeholder:text-gray-600 dark:focus:border-blue-300;
+    @apply text-input-base border-gray-700 focus:border-[#549461] dark:border-gray-300 dark:focus:border-blue-300;
+}
+
+.text-input-invalid {
+    @apply text-input-base border-red-400 dark:border-red-600;
 }
 
 .text-input-internal {

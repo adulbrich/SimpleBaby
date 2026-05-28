@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
-import { encryptData, decryptData } from "./crypto";
+import { encryptData, decryptData } from "@/library/crypto";
 import { formatName } from "@/library/utils";
 
 export type TableName =

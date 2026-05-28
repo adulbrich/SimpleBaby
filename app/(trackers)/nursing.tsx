@@ -121,6 +121,7 @@ export default function Nursing() {
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					<View
 						className={`gap-6 transition-all duration-300 ${

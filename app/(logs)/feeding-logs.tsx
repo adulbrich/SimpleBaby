@@ -12,7 +12,7 @@ import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
@@ -78,19 +78,16 @@ const FeedingLogsView: React.FC = () => {
 				return;
 			}
 
-			const encryptedCategory = await encryptData(editingLog.category);
-			const encryptedItemName = await encryptData(editingLog.item_name);
-			const encryptedAmount = await encryptData(editingLog.amount);
-			const encryptedNote = editingLog.note ? await encryptData(editingLog.note) : null;
+			const updated = {
+				category: await encryptData(editingLog.category),
+				item_name: await encryptData(editingLog.item_name),
+				amount: await encryptData(editingLog.amount),
+				feeding_time: editingLog.feeding_time.toISOString(),
+				note: editingLog.note ? await encryptData(editingLog.note) : null,
+			};
 
 			if (isGuest) {
-				const success = await updateRow("feeding_logs", editingLog.id, {
-					category: encryptedCategory,
-					item_name: encryptedItemName,
-					amount: encryptedAmount,
-					feeding_time: editingLog.feeding_time.toISOString(),
-					note: encryptedNote,
-				});
+				const success = await updateRow("feeding_logs", editingLog.id, updated);
 				if (!success) {
 					Alert.alert(stringLib.errors.logUpdateFailure);
 					return;
@@ -101,13 +98,7 @@ const FeedingLogsView: React.FC = () => {
 			} else {
 				const { error } = await supabase
 					.from("feeding_logs")
-					.update({
-						category: encryptedCategory,
-						item_name: encryptedItemName,
-						amount: encryptedAmount,
-						feeding_time: editingLog.feeding_time.toISOString(),
-						note: encryptedNote,
-					})
+					.update(updated)
 					.eq("id", editingLog.id);
 
 				if (error) {
