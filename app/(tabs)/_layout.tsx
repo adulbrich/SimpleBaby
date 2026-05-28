@@ -2,11 +2,9 @@ import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Header, { HeaderLink } from '@/components/header';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
     const scheme = useColorScheme();
-    const insets = useSafeAreaInsets();
 
     const tabBarStyle =
         scheme === 'light'
@@ -49,7 +47,6 @@ export default function TabLayout() {
                         <Header
                             title="SimpleBaby"
                             headerLink={Profile}
-                            topInset={insets.top}
                         />
                     ),
                 }}
@@ -66,7 +63,6 @@ export default function TabLayout() {
                         <Header
                             title="Logs"
                             headerLink={Calendar}
-                            topInset={insets.top}
                         />
                     ),
                 }}
@@ -79,7 +75,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="information-circle-outline" size={size} color={color} />
                     ),
-                    header: () => <Header title="About" topInset={insets.top} />,
+                    header: () => <Header title="About" />,
                 }}
             />
 
@@ -90,7 +86,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="settings-outline" size={size} color={color} />
                     ),
-                    header: () => <Header title="Settings" topInset={insets.top} />,
+                    header: () => <Header title="Settings" />,
                 }}
             />
 

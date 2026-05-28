@@ -1,79 +1,32 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
-import {
-    Platform,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-} from 'react-native';
+import Header from '@/components/header';
+import { Stack } from 'expo-router';
 
 export default function LogsLayout() {
-    
-    const isAndroid = Platform.OS === 'android';
-    const theme = useColorScheme();
-    const headerStyle = {
-        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
-    };
-    const headerTitleStyle = {
-        color: theme === 'light' ? '#000' : '#fff',
-    };
-    
     return (
-        <Stack
-            screenOptions={{
-                headerShown: true,
-                headerStyle: { ...headerStyle },
-                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
-                headerShadowVisible: false,
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.dismissTo('/(tabs)/logs');
-                        }}
-                        className={isAndroid ? 'modal-back-button' : 'p-2'}
-                    >
-                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
-                            <Ionicons name='arrow-back' size={14}/> Back
-                        </Text>
-                    </TouchableOpacity>
-                ),
-            }}
-        >
+        <Stack>
             <Stack.Screen
                 name='sleep-logs'
-                options={{
-                    headerTitle: 'Sleep',
-                }}
+                options={{ header: () => <Header title='Sleep' backButton={true} /> }}
             />
             <Stack.Screen
                 name='feeding-logs'
-                options={{
-                    headerTitle: 'Feeding',
-                }}
+                options={{ header: () => <Header title='Feeding' backButton={true} /> }}
             />
             <Stack.Screen
                 name='nursing-logs'
-                options={{
-                    headerTitle: 'Nursing',
-                }}
+                options={{ header: () => <Header title='Nursing' backButton={true} /> }}
             />
             <Stack.Screen
                 name='diaper-logs'
-                options={{
-                    headerTitle: 'Diapers',
-                }}
+                options={{ header: () => <Header title='Diapers' backButton={true} /> }}
             />
             <Stack.Screen
                 name='milestone-logs'
-                options={{
-                    headerTitle: 'Milestones',
-                }}
+                options={{ header: () => <Header title='Milestones' backButton={true} /> }}
             />
             <Stack.Screen
                 name='health-logs'
-                options={{
-                    headerTitle: 'Health',
-                }}
+                options={{ header: () => <Header title='Health' backButton={true} /> }}
             />
         </Stack>
     );

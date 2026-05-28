@@ -1,6 +1,8 @@
-import { View, Text, TouchableOpacity, DimensionValue } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import React from 'react';
 import { Href, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * Header component displays a title and an optional navigation link with an icon.
@@ -10,28 +12,46 @@ import { Href, router } from 'expo-router';
  */
 
 export interface HeaderLink {
-    icon: React.ReactNode
-    title: string
-    link?: Href
+    icon: React.ReactNode;
+    title: string;
+    link?: Href;
 }
 
 interface HeaderProps {
-    title: string
-    headerLink?: HeaderLink
-    topInset?: DimensionValue
+    title: string;
+    headerLink?: HeaderLink;
+    backButton?: boolean;
 }
 
-export default function Header({ title, headerLink, topInset }: HeaderProps) {
+export default function Header({ title, headerLink, backButton }: HeaderProps) {
+
+    const isAndroid = Platform.OS === 'android';
+    const insets = useSafeAreaInsets();
+
     return (
         <View
-            className='flex-row bg-[#fff5e4] dark:bg-[#0b2218] justify-between p-0 m-0'
+            className={'flex-row bg-[#fff5e4] dark:bg-[#0b2218] justify-between p-0 m-0 pb-2'}
             style={{
-                paddingTop: topInset,
+                paddingTop: insets.top,
             }}
         >
-            <Text className='pl-4 font-bold dark:text-white text-black text-2xl scale-100'>
-                {title}
-            </Text>
+            <View className='flex-row pl-4'>
+                { backButton &&
+                    <TouchableOpacity
+                        onPress={router.back}
+                        className={isAndroid ? 'modal-back-button' : 'p-2'}
+                    >
+                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
+                            <Ionicons name='arrow-back' size={14}/> Back
+                        </Text>
+                    </TouchableOpacity>
+                }
+
+                <Text className='font-bold dark:text-white text-black text-2xl scale-100 align-middle'>
+                    {title}
+                </Text>
+            </View>
+
             {headerLink ? (
                 <TouchableOpacity
                     className='pr-4'
