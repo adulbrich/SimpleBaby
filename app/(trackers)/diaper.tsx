@@ -116,7 +116,7 @@ export default function Diaper() {
 					paddingBottom: insets.bottom,
 				}}
 			>
-				{/*ScrollView Prevents items from flowing off page on small devices*/}
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					{/* Main form stack with diaper inputs and note */}
 					<View

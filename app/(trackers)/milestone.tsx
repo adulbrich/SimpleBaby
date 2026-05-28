@@ -210,7 +210,7 @@ export default function Milestone() {
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
-				{/*ScrollView Prevents items from flowing off page on small devices*/}
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					<View
 						className={`gap-6 transition-all duration-300 ${

@@ -140,7 +140,7 @@ export default function Sleep() {
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
-				{/*ScrollView Prevents items from flowing off page on small devices*/}
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					{/* Main form stack with stopwatch and manual entry */}
 					<View
