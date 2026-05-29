@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -16,6 +15,7 @@ import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
+import { toMDY } from "@/library/utils";
 
 type MilestoneCategory =
 	| "Motor"
@@ -201,7 +201,7 @@ const MilestoneLogsView: React.FC = () => {
 					{ type: "title", value: item.title },
 					{ type: "text", value: item.category ?? "Other" },
 					{ type: "item", label: "Date", value:
-						hasValidDate ? format(item.achieved_at, "MMM dd, yyyy") : "[unable to retrieve date]"
+						hasValidDate ? toMDY(item.achieved_at) : "[unable to retrieve date]"
 					},
 					{ type: "note", value: item.note},
 					{ type: "image", uri: photoSignedUrls[item.id] },

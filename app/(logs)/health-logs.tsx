@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
-import { format } from "date-fns";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
@@ -16,6 +15,7 @@ import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface HealthLog {
 	id: string;
@@ -201,7 +201,7 @@ const HealthLogsView: React.FC = () => {
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
 				{ type: "title", value: item.category },
-				{ type: "text", value: format(item.date, "MMM dd, yyyy") },
+				{ type: "text", value: toMDY(item.date) },
 				item.growth_length && { type: "item", label: "Length", value: item.growth_length },
 				item.growth_weight && { type: "item", label: "Weight", value: item.growth_weight },
 				item.growth_head && { type: "item", label: "Head", value: item.growth_head },
@@ -209,7 +209,7 @@ const HealthLogsView: React.FC = () => {
 				item.activity_duration && { type: "item", label: "Duration", value: item.activity_duration },
 				item.meds_name && { type: "item", label: "Med", value: item.meds_name },
 				item.meds_amount && { type: "item", label: "Amount", value: item.meds_amount },
-				item.meds_time_taken && { type: "item", label: "Time Taken", value: format(item.meds_time_taken, "h:mm a") },
+				item.meds_time_taken && { type: "item", label: "Time Taken", value: toTime(item.meds_time_taken) },
 				item.vaccine_name && { type: "item", label: "Vaccine", value: item.vaccine_name },
 				item.vaccine_location && { type: "item", label: "Location", value: item.vaccine_location },
 				item.other_name && { type: "item", label: "Name", value: item.other_name },
