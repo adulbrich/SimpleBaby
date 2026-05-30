@@ -1,72 +1,33 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
+import Header from '@/components/header';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, TouchableOpacity, Text, useColorScheme } from 'react-native';
+import { Platform } from 'react-native';
 
 export default function ModalsLayout() {
-
-    const isAndroid = Platform.OS === 'android';
-    const theme = useColorScheme();
-    const headerStyle = {
-        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
-    };
-    const headerTitleStyle = {
-        color: theme === 'light' ? '#000' : '#fff',
-    };
-
     return (
         <>
             <StatusBar style={Platform.OS === 'android' ? 'dark' : 'auto'} />
-            <Stack screenOptions={{
-                presentation: 'modal',
-                headerShown: true,
-                headerStyle: { ...headerStyle },
-                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.back();
-                        }}
-                        className={isAndroid ? 'modal-back-button' : 'p-2'}
-                    >
-                        <Text className='dark:color-[#fff] color:-[#000] font-bold'>
-                            <Ionicons name='arrow-back' size={14}/> Back
-                        </Text>
-                    </TouchableOpacity>
-                ),
-             }}>
+            <Stack>
                 <Stack.Screen
                     name='calendar'
-                    options={{
-                        presentation: 'modal',
-                        headerTitle: "Calendar"
-                    }}
+                    options={{ header: () => <Header title='Calendar' backButton={true} /> }}
                 />
                 <Stack.Screen
                     name='profile'
-                    options={{
-                        headerTitle: 'Profile',
-                    }}
+                    options={{ header: () => <Header title='Profile' backButton={true} /> }}
                 />
                 <Stack.Screen
                     name='active-child'
-                    options={{
-                        headerTitle: 'Active Child',
-                    }}
+                    options={{ header: () => <Header title='Active Child' backButton={true} /> }}
                 />
                 <Stack.Screen
                     name='tos'
-                    options={{
-                        headerTitle: 'Terms of Service',
-                    }}
+                    options={{ header: () => <Header title='Terms of Service' backButton={true} /> }}
                 />
                 <Stack.Screen
                     name='privacy-policy'
-                    options={{
-                        headerTitle: 'Privacy Policy',
-                    }}
+                    options={{ header: () => <Header title='Privacy Policy' backButton={true} /> }}
                 />
-
             </Stack>
         </>
     );
