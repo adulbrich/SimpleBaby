@@ -2,13 +2,13 @@ import HealthLogsView from "@/app/(logs)/health-logs";
 import { render, screen, act } from "@testing-library/react-native";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
-import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { toMDY, toTime } from "@/library/utils";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -56,6 +56,11 @@ jest.mock("@/components/log-item.tsx", () => {
 jest.mock("@/library/log-functions", () => ({
     fetchLogs: jest.fn(),
     handleDeleteLog: jest.fn(),
+}));
+
+jest.mock("@/library/utils", () => ({
+    toMDY: (d: Date) => "Date: " + d.toISOString(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
 }));
 
 
@@ -207,7 +212,7 @@ describe("Health logs screen", () => {
             const logItemProps = logItems.find(call => call[0].id === log.id)[0];
             const displayValues = logItemProps.logData.map((item: any) => item.value);
 
-            expect(displayValues.includes(format(new Date(log.date), 'MMM dd, yyyy'))).toBeTruthy();
+            expect(displayValues.includes(toMDY(log.date))).toBeTruthy();
             if (log.note) expect(displayValues.includes(log.note)).toBeTruthy();
             // the remaining displayed data depends on what category the log is
             if (log.test_category === "growth") {
@@ -220,7 +225,7 @@ describe("Health logs screen", () => {
             } else if (log.test_category === "meds") {
                 expect(displayValues.includes(log.meds_name as string)).toBeTruthy();
                 expect(displayValues.includes(log.meds_amount as string)).toBeTruthy();
-                expect(displayValues.includes(format(log.meds_time_taken as Date, "h:mm a"))).toBeTruthy();
+                expect(displayValues.includes(toTime(log.meds_time_taken as Date))).toBeTruthy();
             } else if (log.test_category === "vaccine") {
                 expect(displayValues.includes(log.vaccine_name as string)).toBeTruthy();
                 expect(displayValues.includes(log.vaccine_location as string)).toBeTruthy();
@@ -518,8 +523,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
             log.test_category === "other" ? "other_name" : null,
             log.test_category === "other" ? "other_description" : null,
         ].filter(value => value !== null);  // remove null values
-        const editedDate = new Date((new Date(log.date)).getTime() + 5*24*60*60*1000);
-        const editedTime = new Date((new Date(log.meds_time_taken || 0)).getTime() + 43*60);  // only for meds
+        const editedDate = new Date(log.date.getTime() + 5*24*60*60*1000);
+        const editedTime = new Date(log.test_category === "meds" ? (log.meds_time_taken as Date).getTime() + 43*60 : 0);  // only for meds
 
         // clear .mock.calls array each loop
         idMock.mockClear();

@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -15,6 +14,7 @@ import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface SleepLog {
 	id: string;
@@ -129,9 +129,9 @@ const SleepLogsView: React.FC = () => {
 			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(item.start_time, "MMM dd, yyyy") },
-				{ type: "item", label: "Start", value: format(item.start_time, "h:mm a") },
-				{ type: "item", label: "End", value: format(item.end_time, "h:mm a") },
+				{ type: "title", value: toMDY(item.start_time) },
+				{ type: "item", label: "Start", value: toTime(item.start_time) },
+				{ type: "item", label: "End", value: toTime(item.end_time) },
 				{ type: "item", label: "Duration", value: item.duration || "N/A" },
 				{ type: "note", value: item.note},
 			]}

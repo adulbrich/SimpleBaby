@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -16,6 +15,7 @@ import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface DiaperLog {
 	id: string;
@@ -122,8 +122,8 @@ const DiaperLogsView: React.FC = () => {
 			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(item.change_time, "MMM dd, yyyy") },
-				{ type: "text", value: format(item.change_time, "h:mm a") },
+				{ type: "title", value: toMDY(item.change_time) },
+				{ type: "text", value: toTime(item.change_time) },
 				{ type: "item", label: "Consistency", value: item.consistency },
 				{ type: "item", label: "Amount", value: item.amount },
 				{ type: "note", value: item.note},

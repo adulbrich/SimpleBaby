@@ -2,13 +2,13 @@ import NursingLogsView from "@/app/(logs)/nursing-logs";
 import { render, screen, act } from "@testing-library/react-native";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
-import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { toMDY, toTime } from "@/library/utils";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -56,6 +56,11 @@ jest.mock("@/components/log-item.tsx", () => {
 jest.mock("@/library/log-functions", () => ({
     fetchLogs: jest.fn(),
     handleDeleteLog: jest.fn(),
+}));
+
+jest.mock("@/library/utils", () => ({
+    toMDY: (d: Date) => "Date: " + d.toISOString(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
 }));
 
 
@@ -162,8 +167,8 @@ describe("Nursing logs screen", () => {
             const logItemProps = logItems.find(call => call[0].id === log.id)[0];
             const displayValues = logItemProps.logData.map((item: any) => item.value);
 
-            expect(displayValues.includes(format(new Date(log.logged_at), 'MMM dd, yyyy'))).toBeTruthy();
-            expect(displayValues.includes(format(new Date(log.logged_at), 'h:mm a'))).toBeTruthy();
+            expect(displayValues.includes(toMDY(log.logged_at))).toBeTruthy();
+            expect(displayValues.includes(toTime(log.logged_at))).toBeTruthy();
             expect(displayValues.includes(log.left_amount)).toBeTruthy();
             expect(displayValues.includes(log.right_amount)).toBeTruthy();
             expect(displayValues.includes(log.left_duration)).toBeTruthy();

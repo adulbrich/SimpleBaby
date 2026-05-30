@@ -7,11 +7,11 @@ import EditLogPopup, {
     editFieldText,
     insert,
 } from "@/components/edit-log-popup";
-import { format } from "date-fns";
 import stringLib from "@/assets/stringLibrary.json";
 import { Dropdown } from "react-native-element-dropdown";
 import { View, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { toTime } from "@/library/utils";
 
 
 const testIDs = stringLib.testIDs.editLog;
@@ -28,6 +28,11 @@ jest.mock("@react-native-community/datetimepicker", () => {
     const View = jest.requireActual("react-native").View;
     return jest.fn(({ testID }: { testID: string }) => <View testID={testID}></View>);
 });
+
+jest.mock("@/library/utils", () => ({
+    toMDY: (d: Date) => "Date: " + d.toISOString(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
+}));
 
 
 const testLog = {
@@ -286,7 +291,7 @@ describe("Edit Log Popup", () => {
             handleSubmit={() => undefined}
         />);
 
-        expect(screen.getByText(format(testLog.time_input.value, "hh:mm a"))).toBeTruthy();
+        expect(screen.getByText(toTime(testLog.time_input.value))).toBeTruthy();
     });
 
     test("Renders time picker", async () => {
@@ -299,7 +304,7 @@ describe("Edit Log Popup", () => {
             handleSubmit={() => undefined}
         />);
 
-        expect(screen.getByText(format(testLog.time_input.value, "hh:mm a"))).toBeTruthy();
+        expect(screen.getByText(toTime(testLog.time_input.value))).toBeTruthy();
         expect(() => screen.getByTestId(testIDs.timePickerTestID)).toThrow();
 
         await userEvent.press(screen.getByTestId(testIDs.timeInputButton));
@@ -332,7 +337,7 @@ describe("Edit Log Popup", () => {
             handleSubmit={() => undefined}
         />);
 
-        expect(screen.getByText(format(testLog.date_input.value, "hh:mm a"))).toBeTruthy();
+        expect(screen.getByText(toTime(testLog.date_input.value))).toBeTruthy();
         expect(() => screen.getByTestId(testIDs.datePickerTestID)).toThrow();
 
         await userEvent.press(screen.getByTestId(testIDs.dateInputButton));

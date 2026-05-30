@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { fetchLogsForDay, fetchDaysWithLogsForMonth, CalendarLog } from "@/library/calendar";
 import { getActiveChildData } from '@/library/remote-store';
 import { useAuth } from '@/library/auth-provider';
-import { toYMD } from '@/library/utils';
+import { toTime, toYMD } from '@/library/utils';
 import { Entypo } from '@expo/vector-icons';
 import stringLib from "@/assets/stringLibrary.json";
 
@@ -138,7 +138,7 @@ export default function CalendarModal() {
                     renderItem={({ item }) => (
                         <View className="bg-white rounded-xl p-4 mb-3 shadow">
                             <Text className="text-xs text-gray-500">
-                                {format(new Date(item.at), "h:mm a")}
+                                {toTime(new Date(item.at))}
                             </Text>
 
                             <Text className="text-base font-bold mt-1">{item.title}</Text>

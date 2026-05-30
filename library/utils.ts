@@ -21,3 +21,15 @@ export function formatStringList(strings: string[]): string {
 export function toYMD(d: Date) {
     return format(d, "yyyy-MM-dd");
 }
+
+
+// A function to convert a date to "h:mm a" format
+export function toTime(d: Date) {
+    return format(d, "h:mm a");
+}
+
+
+// A function to convert a date to "h:mm a" format
+export function toMDY(d: Date) {
+    return format(d, "MMM dd, yyyy");
+}

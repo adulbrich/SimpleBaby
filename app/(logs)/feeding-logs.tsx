@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -16,6 +15,7 @@ import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
 import { Ionicons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface FeedingLog {
 	id: string;
@@ -135,8 +135,8 @@ const FeedingLogsView: React.FC = () => {
 			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(item.feeding_time, "MMM dd, yyyy") },
-				{ type: "text", value: format(item.feeding_time, "h:mm a") },
+				{ type: "title", value: toMDY(item.feeding_time) },
+				{ type: "text", value: toTime(item.feeding_time) },
 				{ type: "item", label: "Category", value: item.category },
 				{ type: "item", label: "Item", value: item.item_name },
 				{ type: "item", label: "Amount", value: item.amount },
