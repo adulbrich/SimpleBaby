@@ -269,7 +269,7 @@
 }
 
 .tos-text {
-    @apply mt-1 mb-1 dark:text-gray-300;
+    @apply text-xl mt-1 mb-1 dark:text-gray-300;
 }
 
 .profile-item {
