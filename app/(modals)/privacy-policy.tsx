@@ -16,10 +16,10 @@ export default function PrivacyPolicy() {
                 <Text className="tos-text">{stringLib.privacyPolicy.content.about}</Text>
                 <Text className="tos-heading">{stringLib.privacyPolicy.setionHeader.dataUse}</Text>
                 <Text className="tos-text">{stringLib.privacyPolicy.content.dataUse1}</Text>
-                    <Text>  - Timestamps for events</Text>
-                    <Text>  - Sleep Duration</Text>
-                    <Text>  - The categories for health</Text>
-                    <Text>  - The categories for milestones</Text>
+                    <Text className="tos-text">  - Timestamps for events</Text>
+                    <Text className="tos-text">  - Sleep Duration</Text>
+                    <Text className="tos-text">  - The categories for health</Text>
+                    <Text className="tos-text">  - The categories for milestones</Text>
                 <Text className="tos-text">{stringLib.privacyPolicy.content.dataUse2}</Text>
                 <Text className="tos-heading">{stringLib.privacyPolicy.setionHeader.permissions}</Text>
                 <Text className="tos-text">{stringLib.privacyPolicy.content.permissions}</Text>
