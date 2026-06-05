@@ -2,13 +2,13 @@ import SleepLogsView from "@/app/(logs)/sleep-logs";
 import { render, screen, act } from "@testing-library/react-native";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
-import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { toMDY, toTime } from "@/library/utils";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -56,6 +56,11 @@ jest.mock("@/components/log-item.tsx", () => {
 jest.mock("@/library/log-functions", () => ({
     fetchLogs: jest.fn(),
     handleDeleteLog: jest.fn(),
+}));
+
+jest.mock("@/library/utils", () => ({
+    toMDY: (d: Date) => "Date: " + d.toISOString(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
 }));
 
 
@@ -158,9 +163,9 @@ describe("Sleep logs screen", () => {
             const logItemProps = logItems.find(call => call[0].id === log.id)[0];
             const displayValues = logItemProps.logData.map((item: any) => item.value);
 
-            expect(displayValues.includes(format(new Date(log.start_time), 'MMM dd, yyyy'))).toBeTruthy();
-            expect(displayValues.includes(format(new Date(log.start_time), 'h:mm a'))).toBeTruthy();
-            expect(displayValues.includes(format(new Date(log.end_time), 'h:mm a'))).toBeTruthy();
+            expect(displayValues.includes(toMDY(log.start_time))).toBeTruthy();
+            expect(displayValues.includes(toTime(log.start_time))).toBeTruthy();
+            expect(displayValues.includes(toTime(log.end_time))).toBeTruthy();
             expect(displayValues.includes(log.duration)).toBeTruthy();
             if (log.note) expect(displayValues.includes(log.note)).toBeTruthy();
         }
@@ -407,8 +412,8 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
     await screen.findByTestId("sleep-logs");  // wait for log list to render
 
     for (const log of TEST_LOGS) {
-        const editedStartTime = new Date((new Date(log.start_time)).getTime() - 61*1000);
-        const editedEndTime = new Date((new Date(log.end_time)).getTime() - 61*1000);
+        const editedStartTime = new Date(log.start_time.getTime() - 61*1000);
+        const editedEndTime = new Date(log.end_time.getTime() - 61*1000);
         const editedDuration = `edited duration ${log.id}`;
         const editedNote = `edited note ${log.id}`;
 
@@ -489,15 +494,15 @@ async function updateDisplayedLogs() {
         const logItemProps = logItems.find(call => call[0].id === log.id)[0];
         const displayValues = logItemProps.logData.map((item: any) => item.value);
         // ensure new values were passed...
-        expect(displayValues.includes(format(editedLog.start_time, "MMM dd, yyyy"))).toBeTruthy();
-        expect(displayValues.includes(format(editedLog.start_time, "h:mm a"))).toBeTruthy();
-        expect(displayValues.includes(format(editedLog.end_time, "h:mm a"))).toBeTruthy();
+        expect(displayValues.includes(toMDY(editedLog.start_time))).toBeTruthy();
+        expect(displayValues.includes(toTime(editedLog.start_time))).toBeTruthy();
+        expect(displayValues.includes(toTime(editedLog.end_time))).toBeTruthy();
         expect(displayValues.includes(editedLog.duration)).toBeTruthy();
         expect(displayValues.includes(editedLog.note)).toBeTruthy();
         // ...and that the previous values are not
-        expect(displayValues.includes(format(log.start_time, "MMM dd, yyyy"))).toBeFalsy();
-        expect(displayValues.includes(format(log.start_time, "h:mm a"))).toBeFalsy();
-        expect(displayValues.includes(format(log.end_time, "h:mm a"))).toBeFalsy();
+        expect(displayValues.includes(toMDY(log.start_time))).toBeFalsy();
+        expect(displayValues.includes(toTime(log.start_time))).toBeFalsy();
+        expect(displayValues.includes(toTime(log.end_time))).toBeFalsy();
         expect(displayValues.includes(log.duration)).toBeFalsy();
         expect(displayValues.includes(log.note)).toBeFalsy();
     });

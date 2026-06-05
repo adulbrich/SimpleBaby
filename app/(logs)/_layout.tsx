@@ -1,62 +1,32 @@
-import { router, Stack } from 'expo-router';
-import {
-    Text,
-    TouchableOpacity,
-} from 'react-native';
+import Header from '@/components/header';
+import { Stack } from 'expo-router';
 
 export default function LogsLayout() {
     return (
-        <Stack
-            screenOptions={{
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.dismissTo('/(tabs)/trends');
-                        }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
-                    >
-                        <Text className='dark:color-[#fff] font-bold'>
-                            ⬅️ Back
-                        </Text>
-                    </TouchableOpacity>
-                ),
-            }}
-        >
+        <Stack>
             <Stack.Screen
                 name='sleep-logs'
-                options={{
-                    headerTitle: 'Sleep',
-                }}
+                options={{ header: () => <Header title='Sleep' backButton={true} /> }}
             />
             <Stack.Screen
                 name='feeding-logs'
-                options={{
-                    headerTitle: 'Feeding',
-                }}
+                options={{ header: () => <Header title='Feeding' backButton={true} /> }}
             />
             <Stack.Screen
                 name='nursing-logs'
-                options={{
-                    headerTitle: 'Nursing',
-                }}
+                options={{ header: () => <Header title='Nursing' backButton={true} /> }}
             />
             <Stack.Screen
                 name='diaper-logs'
-                options={{
-                    headerTitle: 'Diapers',
-                }}
+                options={{ header: () => <Header title='Diapers' backButton={true} /> }}
             />
             <Stack.Screen
                 name='milestone-logs'
-                options={{
-                    headerTitle: 'Milestones',
-                }}
+                options={{ header: () => <Header title='Milestones' backButton={true} /> }}
             />
             <Stack.Screen
                 name='health-logs'
-                options={{
-                    headerTitle: 'Health',
-                }}
+                options={{ header: () => <Header title='Health' backButton={true} /> }}
             />
         </Stack>
     );

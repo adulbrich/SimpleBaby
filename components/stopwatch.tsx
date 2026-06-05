@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { Entypo } from '@expo/vector-icons';
+import { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
 /**
@@ -7,53 +8,42 @@ import { View, Text, TouchableOpacity } from 'react-native';
  * Elapsed time is formatted as hh:mm:ss and reported to parent via callback.
  */
 export default function Stopwatch({
+    time,
     onTimeUpdate,
     testID,
 }: {
-    onTimeUpdate: any;
+    time: number;
+    onTimeUpdate?: (updater: number | ((time: number) => number)) => void;
     testID?: string;
 }) {
-    const [time, setTime] = useState(0);
     const [running, setRunning] = useState(false);
     const intervalRef = useRef<any>(null);
 
-    // Convert elapsed seconds to hh:mm:ss format
     const formatTime = (t: number) => t.toString().padStart(2, '0');
-    const formatElapsedTime = useCallback((t: number) => {
-        const h = Math.floor(t / 3600);
-        const m = Math.floor((t % 3600) / 60);
-        const s = t % 60;
-        return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
-    }, []);
 
     // Start or stop the timer based on `running` state
     useEffect(() => {
         if (running) {
             intervalRef.current = setInterval(() => {
-                setTime((prevTime) => prevTime + 1);
+                onTimeUpdate?.(prevTime => prevTime + 1);
             }, 1000);
         } else {
             clearInterval(intervalRef.current);
         }
         return () => clearInterval(intervalRef.current);
-    }, [running]);
-
-    useEffect(() => {
-        onTimeUpdate?.(formatElapsedTime(time));
-    }, [time, onTimeUpdate, formatElapsedTime]);
+    }, [running, onTimeUpdate]);
 
      // Reset timer and stop running
     const reset = () => {
-        setTime(0);
         setRunning(false);
-        onTimeUpdate?.('00:00:00');
+        onTimeUpdate?.(0);
     };
 
     return (
         <View className='tracker-section' testID={testID}>
             <View className='tracker-section-label'>
                 <Text className='tracker-section-label-text'>
-                    ⏱️ Stopwatch
+                    <Entypo name="stopwatch" size={14}/> Stopwatch
                 </Text>
             </View>
             <View className='items-center mb-10'>

@@ -111,24 +111,66 @@ describe("Track diaper screen", () => {
         expect(screen.getByTestId("diaper-reset-form-button")).toBeTruthy();
     });
 
-    test("Refreshes on reset", async () => {
-        const testNote = "test note";
+    test("Passes current diaper fields", async () => {
+        const testAmount = "test amount";
+        const testConsistency = "test consistency";
+        const testTime = new Date(new Date().getTime() - 60*60*1000);
+        const renderTime = new Date();
         render(<Diaper/>);
 
-        // write something in the note entry...
-        await setDiaperInputs({ note: testNote });
+        // ensure fields default to "SM", "Wet", and current time
+        const diaperFieldsInitial = (DiaperModule as jest.Mock).mock.lastCall[0];
+        expect(diaperFieldsInitial.amount).toBe("SM");
+        expect(diaperFieldsInitial.consistency).toBe("Wet");
+        expect(diaperFieldsInitial.changeTime.getTime()).toBeCloseTo(renderTime.getTime(), -3.3);
+
+        // fill in test values...
+        await setDiaperInputs({
+            amount: testAmount,
+            consistency: testConsistency,
+            time: testTime,
+        });
+
+        // ensure change time, consistency, and amount have been updated
+        const diaperFieldsUpdated = (DiaperModule as jest.Mock).mock.lastCall[0];
+        expect(diaperFieldsUpdated.amount).toBe(testAmount);
+        expect(diaperFieldsUpdated.consistency).toBe(testConsistency);
+        expect(diaperFieldsUpdated.changeTime).toBe(testTime);
+    });
+
+    test("Refreshes on reset", async () => {
+        const testNote = "test note";
+        const testAmount = "test amount";
+        const testConsistency = "test consistency";
+        const testTime = new Date(new Date().getTime() - 60*60*1000);
+        render(<Diaper/>);
+
+        // fill in test values...
+        await setDiaperInputs({
+            note: testNote,
+            amount: testAmount,
+            consistency: testConsistency,
+            time: testTime,
+        });
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe(testNote);  // ensure the typed note can be found
+        // ensure change time, consistency, and amount have test values in <DiaperModule/>
+        const diaperFieldsInitial = (DiaperModule as jest.Mock).mock.lastCall[0];
+        expect(diaperFieldsInitial.amount).toBe(testAmount);
+        expect(diaperFieldsInitial.consistency).toBe(testConsistency);
+        expect(diaperFieldsInitial.changeTime).toBe(testTime);
 
-        const mainInputs = screen.getByTestId("diaper-main-inputs");  // get the displayed <DiaperModule/>
-
+        const resetTime = new Date();
         await userEvent.press(
             screen.getByTestId("diaper-reset-form-button")
         );
 
         // ensure note is no longer present
         expect((NoteEntry as jest.Mock).mock.lastCall[0].note).toBe("");
-        // ensure new instance of <DiaperModule/> is being used
-        expect(screen.getByTestId("diaper-main-inputs") === mainInputs).toBeFalsy();
+        // ensure change time, consistency, and amount are reset to default in <DiaperModule/>
+        const diaperFieldsUpdated = (DiaperModule as jest.Mock).mock.lastCall[0];
+        expect(diaperFieldsUpdated.amount).toBe("SM");
+        expect(diaperFieldsUpdated.consistency).toBe("Wet");
+        expect(diaperFieldsUpdated.changeTime.getTime()).toBeCloseTo(resetTime.getTime(), -3.3);
     });
 
     test("Catch unfilled inputs", async () => {

@@ -18,6 +18,7 @@ import { saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 // Feeding.tsx
 // Screen for logging baby feeding sessions — includes category, item name, amount, feeding time, optional notes, and save logic
@@ -114,11 +115,11 @@ export default function Feeding() {
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-			{/*ScrollView Prevents items from flowing off page on small devices*/}
 			<View
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					<View
 						className={`gap-6 transition-all duration-300 ${
@@ -153,14 +154,18 @@ export default function Feeding() {
 								testID="feeding-save-log-button"
 								disabled={isSaving}
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="feeding-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">
+									<Ionicons name="trash-outline" size={14}/> Reset fields
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

@@ -1,4 +1,4 @@
-import { encryptData, safeDecrypt } from "./crypto";
+import { encryptData, safeDecrypt } from "@/library/crypto";
 import { getActiveChildData } from "@/library/remote-store";
 import {
 	insertRow,
@@ -7,8 +7,8 @@ import {
     listRows,
     deleteRow,
 } from "@/library/local-store";
-import supabase from "./supabase-client";
-import stringLib from "../assets/stringLibrary.json";
+import supabase from "@/library/supabase-client";
+import stringLib from "@/assets/stringLibrary.json";
 import { Alert } from "react-native";
 
 
@@ -288,7 +288,7 @@ export async function fetchLogs<LogType>(
                     async ({ dbFieldName, type }) => [
                         dbFieldName,
                         type === "string" ? await safeDecrypt(entry[dbFieldName])
-                        : type === "date" ? new Date(entry[dbFieldName])
+                        : type === "date" ? (entry[dbFieldName] ? new Date(entry[dbFieldName]) : null) 
                         : entry[dbFieldName]  // don't decrypt "unencrypted" or "photo" fields
                     ]
                 ))

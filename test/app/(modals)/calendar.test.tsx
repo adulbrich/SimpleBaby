@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import { fetchDaysWithLogsForMonth, fetchLogsForDay } from "@/library/calendar";
 import { getActiveChildData } from "@/library/remote-store";
+import { toTime } from "@/library/utils";
 
 
 const testIDs = stringLib.testIDs.calendar;
@@ -29,6 +30,7 @@ jest.mock("@/library/remote-store", () => ({
 
 jest.mock("@/library/utils", () => ({
     toYMD: jest.fn(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
 }));
 
 jest.mock("@/library/calendar", () => ({
@@ -134,7 +136,7 @@ describe("Calendar screen", () => {
         await screen.findByTestId(testIDs.logList);
 
         for (const log of testLogs) {
-            expect(screen.getByText(format(new Date(log.at), "h:mm a"))).toBeTruthy();
+            expect(screen.getByText(toTime(new Date(log.at)))).toBeTruthy();
             expect(screen.getByText(log.title)).toBeTruthy();
             if (log.details) expect(screen.getByText(log.details)).toBeTruthy();
         }

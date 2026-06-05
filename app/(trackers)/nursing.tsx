@@ -16,6 +16,7 @@ import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 // nursing.tsx
 // Screen for logging breastfeeding sessions — includes stopwatch, volume input, and notes
@@ -23,8 +24,8 @@ import NoteEntry from "@/components/note-entry";
 export default function Nursing() {
 	const insets = useSafeAreaInsets();
 	const [isTyping, setIsTyping] = useState(false);
-	const [leftDuration, setLeftDuration] = useState("00:00:00");
-	const [rightDuration, setRightDuration] = useState("00:00:00");
+	const [leftDuration, setLeftDuration] = useState(0);
+	const [rightDuration, setRightDuration] = useState(0);
 	const [leftAmount, setLeftAmount] = useState("");
 	const [rightAmount, setRightAmount] = useState("");
 	const [note, setNote] = useState("");
@@ -42,8 +43,8 @@ export default function Nursing() {
 		error: string
 	} => {
 		if (
-			leftDuration === "00:00:00" &&
-			rightDuration === "00:00:00" &&
+			leftDuration === 0 &&
+			rightDuration === 0 &&
 			leftAmount.trim() === "" &&
 			rightAmount.trim() === ""
 		) {
@@ -70,11 +71,11 @@ export default function Nursing() {
 			tableName: "nursing_logs",
 			fields: [{
 				dbFieldName: "left_duration",
-				value: leftDuration === "00:00:00" ? "" : leftDuration,
+				value: leftDuration === 0 ? "" : leftDuration.toString(),
 				type: "string",
 			}, {
 				dbFieldName: "right_duration",
-				value: rightDuration === "00:00:00" ? "" : rightDuration,
+				value: rightDuration === 0 ? "" : rightDuration.toString(),
 				type: "string",
 			}, {
 				dbFieldName: "left_amount",
@@ -106,8 +107,8 @@ export default function Nursing() {
 
 	// Handle the UI logic when resetting fields
 	const handleResetFields = () => {
-		setLeftDuration("00:00:00");
-		setRightDuration("00:00:00");
+		setLeftDuration(0);
+		setRightDuration(0);
 		setLeftAmount("");
 		setRightAmount("");
 		setNote("");
@@ -120,6 +121,7 @@ export default function Nursing() {
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					<View
 						className={`gap-6 transition-all duration-300 ${
@@ -129,6 +131,8 @@ export default function Nursing() {
 						{/* Stopwatch component controls left/right timer states */}
 						<NursingStopwatch
 							key={`nursing-stopwatch-${reset}`}
+							leftTime={leftDuration}
+							rightTime={rightDuration}
 							onTimeUpdateLeft={setLeftDuration}
 							onTimeUpdateRight={setRightDuration}
 							testID={"nursing-stopwatch"}
@@ -137,7 +141,7 @@ export default function Nursing() {
 						<View className="tracker-section">
 							<View className="tracker-section-label">
 								<Text className="tracker-section-label-text">
-									⚖️ Add Volume
+									<FontAwesome name="balance-scale" size={14}/> Add Volume
 								</Text>
 							</View>
 							<View className="flex-row mb-6">
@@ -189,14 +193,18 @@ export default function Nursing() {
 								disabled={isSaving}
 								testID="nursing-save-log-button"
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="nursing-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">
+									<Ionicons name="trash-outline" size={14}/> Reset fields
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

@@ -10,11 +10,11 @@ import {
     View,
 } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
-import { format } from "date-fns";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import stringLib from "@/assets/stringLibrary.json";
+import { toMDY, toTime } from "@/library/utils";
 
 
 const testIDs = stringLib.testIDs.editLog;
@@ -160,7 +160,9 @@ export default function EditLogPopup({
                 }}
                 testID={fieldInfo.buttonTestID}
             >
-                <Text className="log-edit-text">{format(fieldInfo.value, fieldInfo.type === "date" ? "MMM dd, yyyy" : "hh:mm a")}</Text>
+                <Text className="log-edit-text">
+                    {fieldInfo.type === "date" ? toMDY(fieldInfo.value) : toTime(fieldInfo.value)}
+                </Text>
             </TouchableOpacity>
 
             {showDatePicker && datePickerData && (

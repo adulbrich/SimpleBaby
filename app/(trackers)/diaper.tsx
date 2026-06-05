@@ -10,12 +10,16 @@ import {
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import DiaperModule from "@/components/diaper-module";
+import DiaperModule, {
+	DiaperConsistency,
+	DiaperAmount,
+} from "@/components/diaper-module";
 import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import { formatStringList } from "@/library/utils";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 
 // Diaper.tsx
@@ -24,11 +28,10 @@ import NoteEntry from "@/components/note-entry";
 export default function Diaper() {
 	const insets = useSafeAreaInsets();
 	const [isTyping, setIsTyping] = useState(false);
-	const [consistency, setConsistency] = useState("");
-	const [amount, setAmount] = useState("");
+	const [consistency, setConsistency] = useState<DiaperConsistency>("Wet");
+	const [amount, setAmount] = useState<DiaperAmount>("SM");
 	const [changeTime, setChangeTime] = useState(new Date());
 	const [note, setNote] = useState("");
-	const [reset, setReset] = useState<number>(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
 
@@ -99,22 +102,21 @@ export default function Diaper() {
 
 	// Handle the UI logic when resetting fields
 	const handleResetFields = () => {
-		setConsistency("");
-		setAmount("");
+		setConsistency("Wet");
+		setAmount("SM");
 		setChangeTime(new Date());
 		setNote("");
-		setReset((prev) => prev + 1);
 	};
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-			{/*ScrollView Prevents items from flowing off page on small devices*/}
 			<View
 				className="main-container justify-between"
 				style={{
 					paddingBottom: insets.bottom,
 				}}
 			>
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
 					{/* Main form stack with diaper inputs and note */}
 					<View
@@ -123,7 +125,9 @@ export default function Diaper() {
 						}`}
 					>
 						<DiaperModule
-							key={`diaper-module-${reset}`}
+							changeTime={changeTime}
+							consistency={consistency}
+							amount={amount}
 							onConsistencyUpdate={setConsistency}
 							onAmountUpdate={setAmount}
 							onTimeUpdate={setChangeTime}
@@ -145,14 +149,18 @@ export default function Diaper() {
 								testID="diaper-save-log-button"
 								disabled={isSaving}
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								className="tracker-button-reset"
 								onPress={() => handleResetFields()}
 								testID="diaper-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+								<Text className="tracker-form-button-text">
+									<Ionicons name="trash-outline" size={14}/> Reset fields
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

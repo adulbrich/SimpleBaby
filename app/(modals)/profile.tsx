@@ -4,7 +4,8 @@ import {
     ScrollView,
     View,
     TouchableOpacity,
-    Alert
+    Alert,
+    useColorScheme,
 } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { useAuth } from '@/library/auth-provider';
@@ -17,6 +18,7 @@ import { getActiveChildId as getLocalActiveChildId, listChildren } from '@/libra
 import supabase from '@/library/supabase-client';
 import { getActiveChildData, getChildren, saveNewChild } from '@/library/remote-store';
 import stringLib from "@/assets/stringLibrary.json";
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
  * Profile Screen
@@ -44,6 +46,10 @@ export default function Profile() {
     const [childName, setChildName] = useState<string>('Loading...');
     const [displayName, setDisplayName] = useState<string>('');
     const [displayEmail, setDisplayEmail] = useState<string>('');
+
+    const colorScheme = useColorScheme();
+    const childIconColor = colorScheme === 'dark' ? '#ffedd5' : '#f9a000';
+    const itemIconColor = colorScheme === 'dark' ? '#e5e7eb' : '#000000';
 
     const signOutLabel = isGuest ? "Exit Guest Mode" : "Sign Out";
 
@@ -104,8 +110,9 @@ export default function Profile() {
     };
 
     useEffect(() => {
+        if (isGuest) return;
         fetchChildNames();
-    }, [session]);  // re-fetch child names if the user renames a child
+    }, [session, isGuest]);  // re-fetch child names if the user renames a child
 
     const fetchChildNames = async () => {
         try {
@@ -176,14 +183,36 @@ export default function Profile() {
                             Active Child
                         </Text>
                         { isGuest ? (
-                            <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameGuest}>
-                                👶 {childName}
-                            </Text>
-                        ) : (
-                            <TouchableOpacity className='shrink' onPress={() => router.push("/(modals)/active-child")}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" className='profile-child-name' testID={testIDs.childNameButton}>
-                                    👶 {childName}
+                            <View className='profile-bubble-base' testID={testIDs.childNameGuest}>
+                                <MaterialCommunityIcons 
+                                    name='baby-face-outline' 
+                                    size={24} 
+                                    color={childIconColor}
+                                />
+                                <Text 
+                                    className='text-2xl text-[#f9a000] dark:text-orange-100' 
+                                    numberOfLines={1} 
+                                    ellipsizeMode="tail"
+                                >
+                                    {childName}
                                 </Text>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={() => router.push("/(modals)/active-child")}>
+                                <View className='profile-bubble-base' testID={testIDs.childNameButton}>
+                                    <MaterialCommunityIcons 
+                                        name='baby-face-outline' 
+                                        size={24} 
+                                        color={childIconColor}
+                                    />
+                                    <Text 
+                                        className='child-name-text' 
+                                        numberOfLines={1} 
+                                        ellipsizeMode="tail"
+                                    >
+                                        {childName}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -209,9 +238,10 @@ export default function Profile() {
                             testID={testIDs.switchChildButton}
                         >
                             <View className='profile-item'>
-                                <Text className='profile-child-name-label'>
-                                    🔃 Switch Child
-                                </Text>
+                                <View className='child-action-button'>
+                                    <AntDesign name='user-switch' size={24} color={itemIconColor}/>
+                                    <Text className='child-action-label'>Switch Child</Text>
+                                </View>
                             </View>
                         </TouchableOpacity>
                     )}
@@ -220,23 +250,26 @@ export default function Profile() {
                         testID={testIDs.addChildButton}
                     >
                         <View className='profile-item mb-8'>
-                            <Text className='profile-child-name-label'>
-                                ✚ Add Child
-                            </Text>
+                            <View className='child-action-button'>
+                                <AntDesign name='plus' size={24} color={itemIconColor}/>
+                                <Text className='child-action-label'>Add Child</Text>
+                            </View>
                         </View>
                     </TouchableOpacity>}
                     <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            👤 Name
-                        </Text>
-                        <Text numberOfLines={1} ellipsizeMode='tail' className='profile-value'>
+                        <View className='profile-bubble-base'>
+                            <Ionicons name='person-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Name</Text>
+                        </View>
+                        <Text className='profile-value' numberOfLines={1} ellipsizeMode="tail">
                             {isGuest ? "Guest" : displayName}
                         </Text>
                     </View>
                     {!isGuest && <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            👪 Caretakers
-                        </Text>
+                        <View className='profile-bubble-base'>
+                            <Ionicons name='people-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Caretakers</Text>
+                        </View>
                         <TouchableOpacity
                             onPress={() =>
                                 Alert.alert(
@@ -252,9 +285,10 @@ export default function Profile() {
                         </TouchableOpacity>
                     </View>}
                     {!isGuest && <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            📧 Email
-                        </Text>
+                        <View className='profile-bubble-base'>
+                            <Ionicons name='mail-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Email</Text>
+                        </View>
                         <TouchableOpacity
                             onPress={() =>
                                 {
@@ -275,9 +309,10 @@ export default function Profile() {
                         </TouchableOpacity>
                     </View>}
                     {!isGuest && <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            🔑 Password
-                        </Text>
+                        <View className='profile-bubble-base'>
+                            <Ionicons name='key-outline' size={22} color={itemIconColor}/>
+                            <Text className='text-lg text-black dark:text-gray-200'>Password</Text>
+                        </View>
                         <TouchableOpacity
                             onPress={() =>
                                 Alert.alert(
@@ -292,24 +327,6 @@ export default function Profile() {
                             </Text>
                         </TouchableOpacity>
                     </View>}
-                    <View className='profile-item'>
-                        <Text className='profile-item-text'>
-                            🤖 App Version
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() =>
-                                Alert.alert(
-                                    "Can't do this yet.",
-                                    'Please wait for an update.',
-                                )
-                            }
-                            testID={testIDs.appVersionButton}
-                        >
-                            <Text className='profile-value-light'>
-                                v0.1a
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
             </ScrollView>
             <View className='pt-4'>

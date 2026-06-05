@@ -8,13 +8,15 @@ import { View, Text, TouchableOpacity } from 'react-native';
 
 export default function CategoryModule<Category extends string>({
     title,
+    titleIcon,
     categoryList,
     selectedCategory,
     onCategoryUpdate,
     testID,
 }: {
     title: string
-    categoryList: { label: Category; icon?: string }[];
+    titleIcon?: React.ReactNode,
+    categoryList: { label: Category; icon?: React.ReactNode }[];
     selectedCategory: Category;
     onCategoryUpdate?: (category: Category) => void
     testID?: string
@@ -22,7 +24,7 @@ export default function CategoryModule<Category extends string>({
     return (
         <View className='tracker-section' testID={testID}>
             <View className='tracker-section-label'>
-                <Text className='tracker-section-label-text'>{title}</Text>
+                <Text className='tracker-section-label-text'>{titleIcon} {title}</Text>
             </View>
             <View className="flex-row flex-wrap gap-4 justify-center mb-6">
                 {categoryList.map(({ label, icon }) => (
@@ -35,7 +37,7 @@ export default function CategoryModule<Category extends string>({
                         testID={`category-${label.toLowerCase()}-button`}
                     >
                         { icon ? (<>
-                            <Text className="scale-100 text-xl">{icon}</Text>
+                            {icon}
                             <Text className="category-button-text-sm">{label}</Text>
                         </>) : (
                             <Text className="category-button-text-lg">{label}</Text>

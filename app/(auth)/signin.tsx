@@ -28,15 +28,7 @@ export default function SignInScreen() {
     const [loading, setLoading] = React.useState(false);
     const { signIn } = useAuth();
 
-    const handleSignUp = () => {
-        router.replace('/(auth)/signup');
-    };
-
-    const handleGuest = () => {
-        router.push('/(auth)/guest');
-    };
-
-      // Attempt to sign in the user using provided credentials
+    // Attempt to sign in the user using provided credentials
     const handleSignIn = async () => {
         setLoading(true);
         const response = await signIn(email, password);
@@ -121,14 +113,14 @@ export default function SignInScreen() {
                     />
                     <Button
                         text='Sign Up Instead'
-                        action={handleSignUp}
+                        action={() => router.replace('/(auth)/signup')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID='sign-in-sign-up-button'
                     />
                     <Button
                         text='Try as Guest'
-                        action={handleGuest}
+                        action={() => router.push('/(auth)/guest')}
                         buttonClass='button-normal'
                         disabled={loading}
                         testID='sign-in-guest-button'

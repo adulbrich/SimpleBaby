@@ -6,22 +6,23 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
-import stringLib from "../../assets/stringLibrary.json";
+import stringLib from "@/assets/stringLibrary.json";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface NursingLog {
 	id: string;
 	child_id: string;
 	left_duration: string | null;
 	right_duration: string | null;
-	logged_at: string;
+	logged_at: Date;
 	note: string | null;
 	left_amount: string | null;
 	right_amount: string | null;
@@ -151,8 +152,8 @@ const NursingLogsView: React.FC = () => {
 			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(new Date(item.logged_at), "MMM dd, yyyy") },
-				{ type: "item", label: "Time Logged", value: format(new Date(item.logged_at), "h:mm a") },
+				{ type: "title", value: toMDY(item.logged_at) },
+				{ type: "item", label: "Time Logged", value: toTime(item.logged_at) },
 				(item.left_duration !== "00:00:00") && item.left_duration &&
 					{ type: "item", label: "Left Duration", value: item.left_duration },
 				(item.right_duration !== "00:00:00") && item.right_duration &&
@@ -168,7 +169,7 @@ const NursingLogsView: React.FC = () => {
 
 	return (
 		<View className="main-container">
-			<Text className="logs-heading">🍼 Nursing Logs</Text>
+			<Text className="logs-heading"><MaterialCommunityIcons name='baby-bottle' size={18}/> Nursing Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (

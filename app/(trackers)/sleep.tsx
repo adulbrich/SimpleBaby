@@ -16,6 +16,7 @@ import { useAuth } from "@/library/auth-provider";
 import { saveLog } from "@/library/log-functions";
 import stringLib from "@/assets/stringLibrary.json";
 import NoteEntry from "@/components/note-entry";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 // Sleep.tsx
 // Screen for logging baby sleep sessions — includes stopwatch, manual entry, notes, and save logic
@@ -24,17 +25,11 @@ export default function Sleep() {
 	const [isTyping, setIsTyping] = useState(false);
 	const [startTime, setStartTime] = useState<Date>(new Date());
 	const [endTime, setEndTime] = useState<Date>(new Date());
-	const [stopwatchTime, setStopwatchTime] = useState("00:00:00");
+	const [stopwatchTime, setStopwatchTime] = useState(0);
 	const [note, setNote] = useState("");
 	const [reset, setReset] = useState<number>(0);
 	const [isSaving, setIsSaving] = useState(false);
 	const { isGuest } = useAuth();
-
-	// Update manual entry times
-	const handleDatesUpdate = (start: Date, end: Date) => {
-		setStartTime(start);
-		setEndTime(end);
-	};
 
 	/**
 	 * Gets start/stop times and duration to submit. Assumes that stopwatch or manual times are valid
@@ -42,9 +37,8 @@ export default function Sleep() {
 	const getFinalTimes = () => {
 		let finalStartTime: Date, finalEndTime: Date;
 
-		if (stopwatchTime && stopwatchTime !== "00:00:00") {
-			const [hours, minutes, seconds] = stopwatchTime.split(":").map(Number);
-			const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
+		if (stopwatchTime) {
+			const durationMs = stopwatchTime * 1000;
 
 			finalEndTime = new Date();
 			finalStartTime = new Date(finalEndTime.getTime() - durationMs);
@@ -77,7 +71,7 @@ export default function Sleep() {
 		error: string
 	} => {
 		if (
-			(!stopwatchTime || stopwatchTime === "00:00:00") &&
+			(!stopwatchTime) &&
 			(!startTime || !endTime || startTime.getTime() >= endTime.getTime())
 		) {
 			const error = `Failed to save the Sleep log. Please provide either a stopwatch time or valid manual start and end times.`;
@@ -134,7 +128,7 @@ export default function Sleep() {
 	const handleResetFields = () => {
 		setStartTime(new Date());
 		setEndTime(new Date());
-		setStopwatchTime("00:00:00");
+		setStopwatchTime(0);
 		setNote("");
 		setReset((prev) => prev + 1);
 	};
@@ -142,13 +136,13 @@ export default function Sleep() {
 	return (
 		// Dismiss keyboard when touching outside inputs
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-			{/*ScrollView Prevents items from flowing off page on small devices*/}
 			<View
 				className="main-container justify-between"
 				style={{ paddingBottom: insets.bottom }}
 			>
-				{/* Main form stack with stopwatch and manual entry */}
+				{/* ScrollView prevents items from flowing off page on small devices */}
 				<ScrollView>
+					{/* Main form stack with stopwatch and manual entry */}
 					<View
 						className={`gap-6 transition-all duration-300 ${
 							isTyping ? "-translate-y-[40%]" : "translate-y-0"
@@ -157,14 +151,17 @@ export default function Sleep() {
 						{/* Stopwatch component for tracking session duration */}
 						<Stopwatch
 							key={`stopwatch-${reset}`}
+							time={stopwatchTime}
 							onTimeUpdate={setStopwatchTime}
 							testID="sleep-stopwatch"
 						/>
 
 						{/* Manual start/end time picker */}
 						<ManualEntry
-							key={`manual-entry-${reset}`}
-							onDatesUpdate={handleDatesUpdate}
+							startDate={startTime}
+							endDate={endTime}
+							onStartDateUpdate={setStartTime}
+							onEndDateUpdate={setEndTime}
 							testID="sleep-manual-time-entry"
 						/>
 
@@ -185,14 +182,18 @@ export default function Sleep() {
 								disabled={isSaving}
 								testID="sleep-save-log-button"
 							>
-								<Text className="tracker-form-button-text">➕ Add to log</Text>
+								<Text className="tracker-form-button-text">
+									<AntDesign name="plus" size={14}/> Add to log
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
-								className="tracker-button-reset"
+								className="tracker-button-reset flex-row items-center gap-2"
 								onPress={() => handleResetFields()}
 								testID="sleep-reset-form-button"
 							>
-								<Text className="tracker-form-button-text">🗑️ Reset fields</Text>
+							<Text className="tracker-form-button-text">
+								<Ionicons name="trash-outline" size={14}/> Reset fields
+							</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

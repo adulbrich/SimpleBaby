@@ -2,13 +2,13 @@ import FeedingLogsView from "@/app/(logs)/feeding-logs";
 import { render, screen, act } from "@testing-library/react-native";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
-import { format } from 'date-fns';
 import { Alert } from "react-native";
 import { useAuth } from "@/library/auth-provider";
 import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { toMDY, toTime } from "@/library/utils";
 
 
 jest.mock("@/library/supabase-client", () => {
@@ -56,6 +56,11 @@ jest.mock("@/components/log-item.tsx", () => {
 jest.mock("@/library/log-functions", () => ({
     fetchLogs: jest.fn(),
     handleDeleteLog: jest.fn(),
+}));
+
+jest.mock("@/library/utils", () => ({
+    toMDY: (d: Date) => "Date: " + d.toISOString(),
+    toTime: (d: Date) => "Time: " + d.toISOString(),
 }));
 
 
@@ -159,8 +164,8 @@ describe("Feeding logs screen", () => {
             const logItemProps = logItems.find(call => call[0].id === log.id)[0];
             const displayValues = logItemProps.logData.map((item: any) => item.value);
 
-            expect(displayValues.includes(format(new Date(log.feeding_time), 'MMM dd, yyyy'))).toBeTruthy();
-            expect(displayValues.includes(format(new Date(log.feeding_time), 'h:mm a'))).toBeTruthy();
+            expect(displayValues.includes(toMDY(log.feeding_time))).toBeTruthy();
+            expect(displayValues.includes(toTime(log.feeding_time))).toBeTruthy();
             expect(displayValues.includes(log.category)).toBeTruthy();
             expect(displayValues.includes(log.item_name)).toBeTruthy();
             expect(displayValues.includes(log.amount)).toBeTruthy();
@@ -409,7 +414,7 @@ async function updateRemoteLogs(dataMock: jest.Mock, dataArgI: number, idMock: j
         const editedItem = `edited item ${log.id}`;
         const editedAmount = `edited amount ${log.id}`;
         const editedNote = `edited note ${log.id}`;
-        const editedTime = new Date((new Date(log.feeding_time)).getTime() - 74*60*1000);
+        const editedTime = new Date(log.feeding_time.getTime() - 74*60*1000);
 
         // clear .mock.calls array each loop
         idMock.mockClear();

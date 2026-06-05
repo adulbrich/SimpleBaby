@@ -1,49 +1,38 @@
-import { router, Stack } from 'expo-router';
+import Header from '@/components/header';
+import { Stack } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, Text, useColorScheme } from 'react-native';
 
 // TrackersLayout.tsx
 // Layout screen for baby trackers stack — handles common header styling and back button
 export default function TrackersLayout() {
-    const theme = useColorScheme();
-
-    const headerStyle = {
-        backgroundColor: theme === 'light' ? '#fff5e4' : '#0b2218',
-    };
-
-    const headerTitleStyle = {
-        color: theme === 'light' ? '#000' : '#fff',
-    };
-
     return (
-        // Stack navigator with common header options and screens
-        <Stack
-            screenOptions={{
-                headerShown: true,
-                headerStyle: { ...headerStyle },
-                headerTitleStyle: { ...headerTitleStyle, fontWeight: 'bold' },
-                headerShadowVisible: false,
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            router.dismissTo('/(tabs)');
-                        }}
-                        className='dark:bg-slate-700 bg-blue-200 p-2 rounded-xl border-[1px] border-blue-300 dark:border-slate-600 android:mr-4'
-                    >
-                        <Text className='dark:color-[#fff] font-bold'>
-                            ⬅️ Back
-                        </Text>
-                    </TouchableOpacity>
-                ),
-            }}
-        >
+        // Stack navigator with headers and screens
+        <Stack>
             {/* Screens in the trackers stack */}
-            <Stack.Screen name='sleep' options={{ title: 'Sleep Tracker' }} />
-            <Stack.Screen name='diaper' options={{ title: 'Diaper Tracker' }} />
-            <Stack.Screen name='health' options={{ title: 'Health Tracker' }} />
-            <Stack.Screen name='feeding' options={{ title: 'Feeding Tracker' }} />
-            <Stack.Screen name='nursing' options={{ title: 'Nursing Tracker' }} />
-            <Stack.Screen name='milestone' options={{ title: 'Milestone Tracker' }} />
+            <Stack.Screen
+                name='sleep'
+                options={{ header: () => <Header title='Sleep Tracker' backButton={true} /> }}
+            />
+            <Stack.Screen
+                name='diaper'
+                options={{ header: () => <Header title='Diaper Tracker' backButton={true} /> }}
+            />
+            <Stack.Screen
+                name='health'
+                options={{ header: () => <Header title='Health Tracker' backButton={true} /> }}
+            />
+            <Stack.Screen
+                name='feeding'
+                options={{ header: () => <Header title='Feeding Tracker' backButton={true} /> }}
+            />
+            <Stack.Screen
+                name='nursing'
+                options={{ header: () => <Header title='Nursing Tracker' backButton={true} /> }}
+            />
+            <Stack.Screen
+                name='milestone'
+                options={{ header: () => <Header title='Milestone Tracker' backButton={true} /> }}
+            />
         </Stack>
     );
 }

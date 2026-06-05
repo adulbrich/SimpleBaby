@@ -2,15 +2,17 @@ import DateTimePicker, {
     DateTimePickerAndroid,
     DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Platform,
     Text,
     TextInput,
     TouchableOpacity,
+    useColorScheme,
     View,
 } from "react-native";
 import CategoryModule from "@/components/category-module";
+import { AntDesign, Entypo, FontAwesome, FontAwesome5, FontAwesome6, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 
 /**
  * HealthModule component lets users select a health category (Growth, Activity, Meds, Vaccine, or Other),
@@ -22,6 +24,7 @@ import CategoryModule from "@/components/category-module";
 export type HealthCategory = "Growth" | "Activity" | "Meds" | "Vaccine" | "Other";
 
 export interface HealthModuleProps {
+    healthFields: HealthFields;
     onDateUpdate?: (date: Date) => void;
     onCategoryUpdate?: (category: HealthCategory) => void;
     onGrowthUpdate?: (growth: GrowthData) => void;
@@ -31,6 +34,27 @@ export interface HealthModuleProps {
     onOtherUpdate?: (other: OtherData) => void;
     testID?: string;
 }
+
+// Define the shape of the health log data object with varying nested properties
+export type HealthFields = {
+	category: HealthCategory;
+	date: Date;
+} & ({
+	category: "Growth";
+	growth: GrowthData;
+} | {
+	category: "Activity";
+	activity: ActivityData;
+} | {
+	category: "Meds";
+	meds: MedsData;
+} | {
+	category: "Vaccine";
+	vaccine: VaccineData;
+} | {
+	category: "Other";
+	other: OtherData;
+});
 
 export interface GrowthData {
     length: string;
@@ -60,6 +84,7 @@ export interface OtherData {
 }
 
 export default function HealthModule({
+    healthFields,
     onDateUpdate,
     onCategoryUpdate,
     onGrowthUpdate,
@@ -69,44 +94,19 @@ export default function HealthModule({
     onOtherUpdate,
     testID,
 }: HealthModuleProps) {
-    const [selectedDate, setSelectedDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [selectedCategory, setSelectedCategory] =
-        useState<HealthCategory>("Growth");
-    const [growth, setGrowth] = useState<GrowthData>({
-        length: "",
-        weight: "",
-        head: "",
-    });
-    const [activity, setActivity] = useState<ActivityData>({
-        type: "",
-        duration: "",
-    });
-    const [meds, setMeds] = useState<MedsData>({
-        name: "",
-        amount: "",
-        time_taken: new Date(),
-    });
-    const [vaccine, setVaccine] = useState<VaccineData>({
-        name: "",
-        location: "",
-    });
-    const [other, setOther] = useState<OtherData>({
-        name: "",
-        description: "",
-    });
 
     const onChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === "set" && selectedDate) {
-            setSelectedDate(selectedDate);
+            onDateUpdate?.(selectedDate);
         }
         setShowDatePicker(false);
     };
 
-    const onChangeTime = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    const onChangeMedsTime = (event: DateTimePickerEvent, selectedTime?: Date) => {
         if (event.type === "set" && selectedTime) {
-            setMeds((prevMeds) => ({ ...prevMeds, time_taken: selectedTime }));
+            onMedsUpdate?.({ ...(healthFields as { meds: MedsData }).meds, time_taken: selectedTime });
         }
         setShowTimePicker(false);
     };
@@ -119,10 +119,10 @@ export default function HealthModule({
 
         if (Platform.OS === "android") {
             DateTimePickerAndroid.open({
-                value: selectedDate,
+                value: healthFields.date,
                 onChange: (event, selectedDate) => {
                     if (selectedDate) {
-                        setSelectedDate(selectedDate);
+                        onDateUpdate?.(selectedDate);
                     }
                 },
                 mode: "date",
@@ -135,13 +135,13 @@ export default function HealthModule({
     const showTimePickerModal = () => {
         if (Platform.OS === "android") {
             DateTimePickerAndroid.open({
-                value: meds.time_taken,
+                value: (healthFields as { meds: MedsData }).meds.time_taken,
                 onChange: (event, selectedTime) => {
                     if (selectedTime) {
-                        setMeds((prevMeds) => ({
-                            ...prevMeds,
+                        onMedsUpdate?.({
+                            ...(healthFields as { meds: MedsData }).meds,
                             time_taken: selectedTime,
-                        }));
+                        });
                     }
                 },
                 mode: "time",
@@ -162,77 +162,35 @@ export default function HealthModule({
         });
     };
 
-    const handleCategoryPress = (category: HealthCategory) => {
-        setSelectedCategory(category);
-    };
-
-    useEffect(() => {
-        if (onDateUpdate) {
-            onDateUpdate(selectedDate);
-        }
-    }, [selectedDate, onDateUpdate]);
-
-    useEffect(() => {
-        if (onCategoryUpdate) {
-            onCategoryUpdate(selectedCategory);
-        }
-    }, [selectedCategory, onCategoryUpdate]);
-
-    useEffect(() => {
-        if (onGrowthUpdate && selectedCategory === "Growth") {
-            onGrowthUpdate(growth);
-        }
-    }, [growth, selectedCategory, onGrowthUpdate]);
-
-    useEffect(() => {
-        if (onActivityUpdate && selectedCategory === "Activity") {
-            onActivityUpdate(activity);
-        }
-    }, [activity, selectedCategory, onActivityUpdate]);
-
-    useEffect(() => {
-        if (onMedsUpdate && selectedCategory === "Meds") {
-            onMedsUpdate(meds);
-        }
-    }, [meds, selectedCategory, onMedsUpdate]);
-
-    useEffect(() => {
-        if (onVaccineUpdate && selectedCategory === "Vaccine") {
-            onVaccineUpdate(vaccine);
-        }
-    }, [vaccine, selectedCategory, onVaccineUpdate]);
-
-        useEffect(() => {
-        if (onOtherUpdate && selectedCategory === "Other") {
-            onOtherUpdate(other);
-        }
-    }, [other, selectedCategory, onOtherUpdate]);
+    const theme = useColorScheme();
+    const iconStyle = theme === 'light' ? 'black' : 'white';
 
     return (
         <View className="flex-col gap-6" testID={testID}>
 
             <CategoryModule
-                title="🩺 Choose Type"
-                selectedCategory={selectedCategory}
+                titleIcon={<FontAwesome name="stethoscope" size={14}/>}
+                title="Choose Type"
+                selectedCategory={healthFields.category}
                 categoryList={[
-                    { label: "Growth", icon: "📏" },
-                    { label: "Activity", icon: "🏃‍♂️" },
-                    { label: "Meds", icon: "💊" },
-                    { label: "Vaccine", icon: "💉" },
-                    { label: "Other", icon: "❓" }
+                    { label: "Growth", icon: <Entypo name="ruler" size={24} color={iconStyle}/> },
+                    { label: "Activity", icon: <FontAwesome5 name="running" size={24} color={iconStyle}/> },
+                    { label: "Meds", icon: <MaterialCommunityIcons name="pill" size={24} color={iconStyle}/> },
+                    { label: "Vaccine", icon: <MaterialIcons name="vaccines" size={24} color={iconStyle}/> },
+                    { label: "Other", icon: <FontAwesome6 name="question" size={24} color={iconStyle}/> }
                 ]}
-                onCategoryUpdate={handleCategoryPress}
+                onCategoryUpdate={onCategoryUpdate}
                 testID="health-category-module"
             />
 
             <View className="tracker-section">
                 <View className="tracker-section-label">
                     <Text className="tracker-section-label-text">
-                        ✒️ Add Details
+                        <FontAwesome5 name="pen-fancy" size={14}/> Add Details
                     </Text>
                 </View>
                 <View className="flex-col gap-4 mb-6">
-                    {selectedCategory === "Growth" && (
+                    {healthFields.category === "Growth" && (
                         <>
                             <View className="ml-4 mr-4">
                                 <Text className="tracker-input-label">Length</Text>
@@ -241,12 +199,12 @@ export default function HealthModule({
                                     placeholder="e.g., 20 in"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={growth.length}
+                                    value={healthFields.growth.length}
                                     onChangeText={(text: string) =>
-                                        setGrowth((prevGrowth) => ({
-                                            ...prevGrowth,
+                                        onGrowthUpdate?.({
+                                            ...healthFields.growth,
                                             length: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-growth-length"
                                 />
@@ -258,12 +216,12 @@ export default function HealthModule({
                                     placeholder="e.g., 8 lb"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={growth.weight}
+                                    value={healthFields.growth.weight}
                                     onChangeText={(text: string) =>
-                                        setGrowth((prevGrowth) => ({
-                                            ...prevGrowth,
+                                        onGrowthUpdate?.({
+                                            ...healthFields.growth,
                                             weight: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-growth-weight"
                                 />
@@ -275,19 +233,19 @@ export default function HealthModule({
                                     placeholder="e.g., 14 in"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={growth.head}
+                                    value={healthFields.growth.head}
                                     onChangeText={(text: string) =>
-                                        setGrowth((prevGrowth) => ({
-                                            ...prevGrowth,
+                                        onGrowthUpdate?.({
+                                            ...healthFields.growth,
                                             head: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-growth-head"
                                 />
                             </View>
                         </>
                     )}
-                    {selectedCategory === "Activity" && (
+                    {healthFields.category === "Activity" && (
                         <>
                             <View className="ml-4 mr-4">
                                 <Text className="tracker-input-label">Type</Text>
@@ -296,12 +254,12 @@ export default function HealthModule({
                                     placeholder="e.g., tummy time"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={activity.type}
+                                    value={healthFields.activity.type}
                                     onChangeText={(text: string) =>
-                                        setActivity((prevActivity) => ({
-                                            ...prevActivity,
+                                        onActivityUpdate?.({
+                                            ...healthFields.activity,
                                             type: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-activity-type"
                                 />
@@ -313,19 +271,19 @@ export default function HealthModule({
                                     placeholder="e.g., 30 min"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={activity.duration}
+                                    value={healthFields.activity.duration}
                                     onChangeText={(text: string) =>
-                                        setActivity((prevActivity) => ({
-                                            ...prevActivity,
+                                        onActivityUpdate?.({
+                                            ...healthFields.activity,
                                             duration: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-activity-duration"
                                 />
                             </View>
                         </>
                     )}
-                    {selectedCategory === "Meds" && (
+                    {healthFields.category === "Meds" && (
                         <>
                             <View className="ml-4 mr-4">
                                 <Text className="tracker-input-label">Name</Text>
@@ -334,12 +292,12 @@ export default function HealthModule({
                                     placeholder="e.g., ibuprofen"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={meds.name}
+                                    value={healthFields.meds.name}
                                     onChangeText={(text: string) =>
-                                        setMeds((prevMeds) => ({
-                                            ...prevMeds,
+                                        onMedsUpdate?.({
+                                            ...healthFields.meds,
                                             name: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-meds-name"
                                 />
@@ -351,12 +309,12 @@ export default function HealthModule({
                                     placeholder="e.g., 1 capsule"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={meds.amount}
+                                    value={healthFields.meds.amount}
                                     onChangeText={(text: string) =>
-                                        setMeds((prevMeds) => ({
-                                            ...prevMeds,
+                                        onMedsUpdate?.({
+                                            ...healthFields.meds,
                                             amount: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-meds-amount"
                                 />
@@ -369,26 +327,26 @@ export default function HealthModule({
                                         onPress={showTimePickerModal}
                                         testID="health-meds-time"
                                     >
-                                        <Text>Choose ⏰</Text>
+                                        <Text>Choose <AntDesign name="clock-circle" size={14}/></Text>
                                     </TouchableOpacity>
-                                    <Text className="mr-4">{formatTime(meds.time_taken)}</Text>
+                                    <Text className="mr-4">{formatTime(healthFields.meds.time_taken)}</Text>
                                 </View>
                             </View>
                             {showTimePicker && Platform.OS === "ios" && (
                                 <View className="items-center">
                                     <DateTimePicker
                                         testID="timeTimePicker"
-                                        value={meds.time_taken}
+                                        value={healthFields.meds.time_taken}
                                         mode="time"
                                         is24Hour={false}
-                                        onChange={onChangeTime}
+                                        onChange={onChangeMedsTime}
                                         display="spinner"
                                     />
                                 </View>
                             )}
                         </>
                     )}
-                    {selectedCategory === "Vaccine" && (
+                    {healthFields.category === "Vaccine" && (
                         <>
                             <View className="ml-4 mr-4">
                                 <Text className="tracker-input-label">Name</Text>
@@ -397,12 +355,12 @@ export default function HealthModule({
                                     placeholder="e.g., COVID-19 Vaccine"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={vaccine.name}
+                                    value={healthFields.vaccine.name}
                                     onChangeText={(text: string) =>
-                                        setVaccine((prevName) => ({
-                                            ...prevName,
+                                        onVaccineUpdate?.({
+                                            ...healthFields.vaccine,
                                             name: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-vaccine-name"
                                 />
@@ -414,19 +372,19 @@ export default function HealthModule({
                                     placeholder="e.g., Kaiser Permanente NW"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={vaccine.location}
+                                    value={healthFields.vaccine.location}
                                     onChangeText={(text: string) =>
-                                        setVaccine((prevLocation) => ({
-                                            ...prevLocation,
+                                        onVaccineUpdate?.({
+                                            ...healthFields.vaccine,
                                             location: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-vaccine-location"
                                 />
                             </View>
                         </>
                     )}
-                    {selectedCategory === "Other" && (
+                    {healthFields.category === "Other" && (
                         <>
                             <View className="ml-4 mr-4">
                                 <Text className="tracker-input-label">Name</Text>
@@ -435,12 +393,12 @@ export default function HealthModule({
                                     placeholder="e.g., Elbow Surgery"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={other.name}
+                                    value={healthFields.other.name}
                                     onChangeText={(text: string) =>
-                                        setOther((prevName) => ({
-                                            ...prevName,
+                                        onOtherUpdate?.({
+                                            ...healthFields.other,
                                             name: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-other-name"
                                 />
@@ -452,12 +410,12 @@ export default function HealthModule({
                                     placeholder="e.g., went to doctor's office for procedure"
                                     autoCapitalize="none"
                                     keyboardType="default"
-                                    value={other.description}
+                                    value={healthFields.other.description}
                                     onChangeText={(text: string) =>
-                                        setOther((prevDescription) => ({
-                                            ...prevDescription,
+                                        onOtherUpdate?.({
+                                            ...healthFields.other,
                                             description: text,
-                                        }))
+                                        })
                                     }
                                     testID="health-other-description"
                                 />
@@ -472,16 +430,16 @@ export default function HealthModule({
                                 onPress={showDatePickerModal}
                                 testID="health-date-button"
                             >
-                                <Text className="tracker-input-text">{showDatePicker ? "Close" : "Choose"} 📅</Text>
+                                <Text className="tracker-input-text">{showDatePicker ? "Close " : "Choose "} <AntDesign name='camera' size={14}/></Text>
                             </TouchableOpacity>
-                            <Text className="tracker-input-text mr-4">{formatDate(selectedDate)}</Text>
+                            <Text className="tracker-input-text mr-4">{formatDate(healthFields.date)}</Text>
                         </View>
                     </View>
                     {showDatePicker && Platform.OS === "ios" && (
                         <View className="items-center">
                             <DateTimePicker
                                 testID="dateTimePicker"
-                                value={selectedDate}
+                                value={healthFields.date}
                                 mode="date"
                                 onChange={onChangeDate}
                                 display="spinner"

@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
-import { format } from "date-fns";
 import supabase from "@/library/supabase-client";
 import { encryptData } from "@/library/crypto";
 import { useAuth } from "@/library/auth-provider";
@@ -14,6 +13,8 @@ import { updateRow } from "@/library/local-store";
 import EditLogPopup from "@/components/edit-log-popup";
 import LogItem from "@/components/log-item";
 import { fetchLogs, handleDeleteLog } from "@/library/log-functions";
+import { Ionicons } from "@expo/vector-icons";
+import { toMDY, toTime } from "@/library/utils";
 
 interface SleepLog {
 	id: string;
@@ -73,17 +74,15 @@ const SleepLogsView: React.FC = () => {
 		}
 
 		try {
-			const encryptedNote = editingLog.note
-				? await encryptData(editingLog.note)
-				: null;
+			const updated = {
+				start_time: editingLog.start_time.toISOString(),
+				end_time: editingLog.end_time.toISOString(),
+				duration: editingLog.duration,
+				note: editingLog.note ? await encryptData(editingLog.note) : null,
+			};
 
 			if (isGuest) {
-				const success = await updateRow("sleep_logs", editingLog.id, {
-					start_time: editingLog.start_time.toISOString(),
-					end_time: editingLog.end_time.toISOString(),
-					duration: editingLog.duration,
-					note: encryptedNote,
-				});
+				const success = await updateRow("sleep_logs", editingLog.id, updated);
 
 				if (!success) {
 					Alert.alert("Failed to update log",
@@ -96,12 +95,7 @@ const SleepLogsView: React.FC = () => {
 			} else {
 				const { error } = await supabase
 					.from("sleep_logs")
-					.update({
-						start_time: editingLog.start_time.toISOString(),
-						end_time: editingLog.end_time.toISOString(),
-						duration: editingLog.duration,
-						note: encryptedNote,
-					})
+					.update(updated)
 					.eq("id", editingLog.id);
 
 				if (error) {
@@ -135,9 +129,9 @@ const SleepLogsView: React.FC = () => {
 			)}
 			buttonsDisabled={editModalVisible || deleteAlertVisible}
 			logData={[
-				{ type: "title", value: format(item.start_time, "MMM dd, yyyy") },
-				{ type: "item", label: "Start", value: format(item.start_time, "h:mm a") },
-				{ type: "item", label: "End", value: format(item.end_time, "h:mm a") },
+				{ type: "title", value: toMDY(item.start_time) },
+				{ type: "item", label: "Start", value: toTime(item.start_time) },
+				{ type: "item", label: "End", value: toTime(item.end_time) },
 				{ type: "item", label: "Duration", value: item.duration || "N/A" },
 				{ type: "note", value: item.note},
 			]}
@@ -146,7 +140,7 @@ const SleepLogsView: React.FC = () => {
 
 	return (
 		<View className="main-container">
-			<Text className="logs-heading">🛏️ Sleep Logs</Text>
+			<Text className="logs-heading"><Ionicons name='moon' size={18}/> Sleep Logs</Text>
 			{loading ? (
 				<ActivityIndicator size="large" color="#e11d48" />
 			) : error ? (
